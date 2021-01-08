@@ -1,5 +1,5 @@
 {
-  "name": "P2PNFT",
+  "name": "albt-contracts",
   "version": "1.0.0",
   "description": "Peer 2 Peer lending, investment and NFT",
   "main": "index.js",
@@ -13,15 +13,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Stichting-AllianceBlock-Foundation/P2PNFT.git"
+    "url": "git+https://github.com/Stichting-AllianceBlock-Foundation/EYSS-ALBT.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Stichting-AllianceBlock-Foundation/P2PNFT/issues"
+    "url": "https://github.com/Stichting-AllianceBlock-Foundation/EYSS-ALBT"
   },
-  "homepage": "https://github.com/Stichting-AllianceBlock-Foundation/P2PNFT#readme",
+  "homepage": "https://github.com/Stichting-AllianceBlock-Foundation/EYSS-ALBT#readme",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.1",
     "@nomiclabs/hardhat-etherscan": "^2.1.0",
