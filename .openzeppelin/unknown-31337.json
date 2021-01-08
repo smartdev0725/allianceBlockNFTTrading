@@ -1,0 +1,28 @@
+{
+  "manifestVersion": "3.1",
+  "impls": {
+    "4a6ec7e33d9f93ec6141b8b0e5b05fadcd97145985cb6a5423f68da21621022d": {
+      "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "txHash": "0x095c50f8ba1dc8ba09293933049f191f77d2bf42b62002578017627a7e66ec9d",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Protocol",
+            "label": "value",
+            "type": "t_uint256",
+            "src": "contracts/Protocol.sol:7"
+          }
+        ],
+        "types": {
+          "t_uint256": {
+            "label": "uint256"
+          }
+        }
+      }
+    }
+  },
+  "admin": {
+    "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "txHash": "0xa75f2c81e45bfb92e0e15049dd38f3881a4316715b41e0451783d58ddef5a83c"
+  }
+}

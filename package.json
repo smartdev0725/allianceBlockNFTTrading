@@ -1,0 +1,40 @@
+{
+  "name": "P2PNFT",
+  "version": "1.0.0",
+  "description": "Peer 2 Peer lending, investment and NFT",
+  "main": "index.js",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js",
+    "deploy-factory": "hardhat run scripts/uniswap/deploy-factory.js",
+    "deploy-pair": "hardhat run scripts/uniswap/deploy-pair.js",
+    "verify": "hardhat --network rinkeby etherscan-verify --license MIT"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Stichting-AllianceBlock-Foundation/P2PNFT.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Stichting-AllianceBlock-Foundation/P2PNFT/issues"
+  },
+  "homepage": "https://github.com/Stichting-AllianceBlock-Foundation/P2PNFT#readme",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.1",
+    "@nomiclabs/hardhat-etherscan": "^2.1.0",
+    "@nomiclabs/hardhat-truffle5": "^2.0.0",
+    "@nomiclabs/hardhat-web3": "^2.0.0",
+    "@openzeppelin/hardhat-upgrades": "^1.4.3",
+    "@openzeppelin/test-helpers": "^0.5.10",
+    "dotenv": "^8.2.0",
+    "ethers": "^5.0.24",
+    "hardhat": "^2.0.6"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.3.0",
+    "@openzeppelin/contracts-upgradeable": "^3.3.0"
+  }
+}
