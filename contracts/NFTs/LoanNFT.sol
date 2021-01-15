@@ -29,7 +29,7 @@ contract LoanNFT is ERC1155PresetMinterPauser {
     */
     constructor() public ERC1155PresetMinterPauser(""){
         _baseURI = "https://ipfs.io/ipfs/";
-        _contractURI = "";
+        _contractURI = "https://allianceblock.io/";
     }
 
     /**

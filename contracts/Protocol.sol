@@ -2,7 +2,10 @@
 pragma solidity 0.7.0;
 
 import "hardhat/console.sol";
- 
+
+/**
+ * @title Main Alliance Block Protocol
+ */
 contract Protocol {
     uint256 private value;
  
