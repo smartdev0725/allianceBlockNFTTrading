@@ -2,16 +2,18 @@
 pragma solidity 0.7.0;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/presets/ERC1155PresetMinterPauser.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/GSN/Context.sol";
 import "../utils/Strings.sol";
 
 /**
  * @title Alliance Block Loan NFTs
  * @notice NFTs that will be held by users
  */
-contract LoanNFT is ERC1155PresetMinterPauser {
+contract LoanNFT is Context, AccessControl, ERC1155Burnable {
 
     using Counters for Counters.Counter;
 
@@ -37,12 +39,19 @@ contract LoanNFT is ERC1155PresetMinterPauser {
     // ..and the non-fungible loan id in the lower 128
     uint256 constant LOAN_ID_MASK = uint128(~0);
 
+    // Access Roles
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+
     /**
     * @dev Initializes the contract by setting the base URI
     */
-    constructor() public ERC1155PresetMinterPauser(""){
+    constructor() public ERC1155(""){
         _baseURI = "ipfs://";
         _contractURI = "https://allianceblock.io/";
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _setupRole(MINTER_ROLE, _msgSender());
+        _setupRole(PAUSER_ROLE, _msgSender());
     }
     
     modifier onlyPauser(){
@@ -107,7 +116,7 @@ contract LoanNFT is ERC1155PresetMinterPauser {
     function mintGen0(address to, uint amount) public{
         require(hasRole(MINTER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have minter role to mint");
         uint tokenId = getTokenId(0, getCurrentLoanId());
-        mint(to, tokenId, amount, "");
+        _mint(to, tokenId, amount, "");
         _loanIdTracker.increment();
     }
 
@@ -126,11 +135,11 @@ contract LoanNFT is ERC1155PresetMinterPauser {
         burn(user, tokenId, amount);
 
         // Mint new generation tokens
-        mint(user, newTokenId, amount, "");
+        _mint(user, newTokenId, amount, "");
     }
     
     /**
-     * @dev Validates if a token can be transferred
+     * @dev Validates if the loanId from the tokenId can be transferred
      */
     function _beforeTokenTransfer(
         address operator,
@@ -142,7 +151,7 @@ contract LoanNFT is ERC1155PresetMinterPauser {
         internal override
     {
         for(uint i=0; i< ids.length; i++){
-            (uint generation, uint loanId) = formatTokenId(ids[i]);
+            (, uint loanId) = formatTokenId(ids[i]);
             require(!transfersPaused[loanId], "Transfers paused");
         }
     }
