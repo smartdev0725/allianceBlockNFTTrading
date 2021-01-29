@@ -1,6 +1,11 @@
 const LoanNFT = artifacts.require("LoanNFT");
 
-const { constants, expectRevert } = require("@openzeppelin/test-helpers");
+const {
+  expectEvent,
+  expectRevert,
+  constants,
+  BN,
+} = require("@openzeppelin/test-helpers");
 
 contract("LoanNFT", function () {
   let admin, alice, bob, minter, loanNFT;
@@ -107,6 +112,23 @@ contract("LoanNFT", function () {
 
       assert.equal(balances[0], 10);
       assert.equal(balances[1], 20);
+    });
+  });
+
+  describe("Loan Creation", function () {
+    it("only minter role should be able to mint gen0", async function () {
+      await expectRevert(
+        loanNFT.mintGen0(alice, 10, { from: random }),
+        "must have minter role to mint"
+      );
+      const tx = await loanNFT.mintGen0(alice, 10, { from: admin });
+
+      expectEvent(tx, "TransferSingle", {
+        operator: admin,
+        from: constants.ZERO_ADDRESS,
+        to: alice,
+        value: new BN(10),
+      });
     });
   });
 });
