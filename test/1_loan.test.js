@@ -6,6 +6,7 @@ const {
   constants,
   BN,
 } = require("@openzeppelin/test-helpers");
+const { assert } = require("hardhat");
 
 contract("LoanNFT", function () {
   let admin, alice, bob, minter, loanNFT;
@@ -75,13 +76,13 @@ contract("LoanNFT", function () {
     });
   });
 
-  describe("Minting", function () {
+  describe("Basic Minting", function () {
     it("only minter role should be able to mint a new NFT", async function () {
       await expectRevert(
-        loanNFT.mint(alice, 1, 10, "0x", { from: random }),
+        loanNFT.mintGen0(alice, 10, { from: random }),
         "must have minter role to mint"
       );
-      await loanNFT.mint(alice, 1, 10, "0x", { from: admin });
+      await loanNFT.mintGen0(alice, 10, { from: admin });
     });
 
     it("should get correct balance for alice", async function () {
@@ -102,7 +103,7 @@ contract("LoanNFT", function () {
     });
 
     it("new minter should be able to mint a new NFT", async function () {
-      await loanNFT.mint(bob, 2, 20, "0x", { from: minter });
+      await loanNFT.mintGen0(bob, 20, { from: minter });
       const balance = await loanNFT.balanceOf(bob, 2);
       assert.equal(balance, 20);
     });
@@ -115,7 +116,7 @@ contract("LoanNFT", function () {
     });
   });
 
-  describe("Loan Creation", function () {
+  describe("Loan Id and Generation", function () {
     it("only minter role should be able to mint gen0", async function () {
       await expectRevert(
         loanNFT.mintGen0(alice, 10, { from: random }),
@@ -127,8 +128,51 @@ contract("LoanNFT", function () {
         operator: admin,
         from: constants.ZERO_ADDRESS,
         to: alice,
+        id: new BN(3),
         value: new BN(10),
       });
+    });
+
+    it("should be able to increase loan generation", async function () {
+      await expectRevert(
+        loanNFT.increaseGeneration(3, alice, 10, { from: random }),
+        "caller is not owner nor approved"
+      );
+
+      const tx = await loanNFT.increaseGeneration(3, alice, 10, {
+        from: alice,
+      });
+
+      expectEvent(tx, "TransferSingle", {
+        operator: alice,
+        from: alice,
+        to: constants.ZERO_ADDRESS,
+        id: new BN(3),
+        value: new BN(10),
+      });
+
+      expectEvent(tx, "TransferSingle", {
+        operator: alice,
+        from: constants.ZERO_ADDRESS,
+        to: alice,
+        value: new BN(10),
+      });
+
+      const newTokenId = String(tx.logs[1].args.id);
+      const { generation, loanId } = await loanNFT.formatTokenId(newTokenId);
+
+      assert.equal(generation, 1);
+      assert.equal(loanId, 3);
+    });
+
+    it("should get correct balance for alice", async function () {
+      const balanceGen0 = await loanNFT.balanceOf(alice, 3);
+
+      const tokenId = await loanNFT.getTokenId(1, 3);
+      const balanceGen1 = await loanNFT.balanceOf(alice, tokenId);
+
+      assert.equal(balanceGen0, 0);
+      assert.equal(balanceGen1, 10);
     });
   });
 });

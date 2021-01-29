@@ -34,8 +34,6 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
 
     // Use a split bit implementation.
     // Store the generation in the upper 128 bits..
-    uint256 constant GENERATION_MASK = uint256(uint128(~0)) << 128;
-
     // ..and the non-fungible loan id in the lower 128
     uint256 constant LOAN_ID_MASK = uint128(~0);
 
@@ -92,7 +90,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
      * @dev Format tokenId into generation and index
      */
     function formatTokenId(uint tokenId) public pure returns(uint generation, uint loanId){
-        generation = tokenId & GENERATION_MASK;
+        generation = tokenId >> 128;
         loanId = tokenId & LOAN_ID_MASK;
     }
 
@@ -100,7 +98,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
      * @dev get tokenId from generation and loanId
      */
     function getTokenId(uint gen, uint loanId) public pure returns(uint tokenId){
-        return gen | loanId;
+        return (gen << 128) | loanId;
     }
 
     /**
@@ -115,9 +113,9 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
      */
     function mintGen0(address to, uint amount) public{
         require(hasRole(MINTER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have minter role to mint");
-        uint tokenId = getTokenId(0, getCurrentLoanId());
-        _mint(to, tokenId, amount, "");
         _loanIdTracker.increment();
+        uint tokenId = getTokenId(0, getCurrentLoanId());
+        _mint(to, tokenId, amount, "");        
     }
 
     /**
@@ -129,7 +127,8 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
         (uint generation, uint loanId) = formatTokenId(tokenId);
 
         // Increase generation, leave loanId same
-        uint newTokenId = getTokenId(generation++, loanId);
+        generation++;
+        uint newTokenId = getTokenId(generation, loanId);
 
         // Burn previous gen tokens
         burn(user, tokenId, amount);
