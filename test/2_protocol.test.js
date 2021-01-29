@@ -1,6 +1,6 @@
 const Protocol = artifacts.require("Protocol");
 
-describe("Protocol", function () {
+contract("Protocol", function () {
   let accounts, protocol;
 
   before(async function () {
