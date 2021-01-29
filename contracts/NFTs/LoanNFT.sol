@@ -24,7 +24,7 @@ contract LoanNFT is ERC1155PresetMinterPauser {
     // base url for each token metadata. Concatenates with ipfsHash for full path
     string private _baseURI;
 
-    // Mapping from token ID to paused condition
+    // Mapping from loan ID to paused condition
     mapping(uint => bool) transfersPaused;
 
     // Mapping from token ID to IPFS hash (token metadata)
@@ -44,6 +44,11 @@ contract LoanNFT is ERC1155PresetMinterPauser {
         _baseURI = "ipfs://";
         _contractURI = "https://allianceblock.io/";
     }
+    
+    modifier onlyPauser(){
+        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have pauser role");
+        _;
+    }
 
     /**
     * @dev token metadata
@@ -61,17 +66,16 @@ contract LoanNFT is ERC1155PresetMinterPauser {
 
     /**
      * @dev Owner can pause transfers for specific tokens
+     * @dev pauses all loan ids, no matter the generation
      */
-    function pauseTokenTransfer(uint tokenId) external{
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have pauser role");
-        transfersPaused[tokenId] = true;
+    function pauseTokenTransfer(uint loanId) external onlyPauser{        
+        transfersPaused[loanId] = true;
     }
 
     /**
      * @dev Owner can unpause transfers for specific tokens
      */
-    function unpauseTokenTransfer(uint tokenId) external{
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have pauser role");
+    function unpauseTokenTransfer(uint tokenId) external onlyPauser{
         transfersPaused[tokenId] = false;
     }
 
@@ -101,6 +105,7 @@ contract LoanNFT is ERC1155PresetMinterPauser {
      * @dev Mint generation 0 tokens
      */
     function mintGen0(address to, uint amount) public{
+        require(hasRole(MINTER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have minter role to mint");
         uint tokenId = getTokenId(0, getCurrentLoanId());
         mint(to, tokenId, amount, "");
         _loanIdTracker.increment();
@@ -137,7 +142,8 @@ contract LoanNFT is ERC1155PresetMinterPauser {
         internal override
     {
         for(uint i=0; i< ids.length; i++){
-            require(!transfersPaused[ids[i]], "Transfers paused");
+            (uint generation, uint loanId) = formatTokenId(ids[i]);
+            require(!transfersPaused[loanId], "Transfers paused");
         }
     }
 }
