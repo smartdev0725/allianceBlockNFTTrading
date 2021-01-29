@@ -143,6 +143,7 @@ contract("LoanNFT", function () {
         from: alice,
       });
 
+      // Tokens burned
       expectEvent(tx, "TransferSingle", {
         operator: alice,
         from: alice,
@@ -151,6 +152,7 @@ contract("LoanNFT", function () {
         value: new BN(10),
       });
 
+      // New Gen Tokens minted
       expectEvent(tx, "TransferSingle", {
         operator: alice,
         from: constants.ZERO_ADDRESS,
@@ -173,6 +175,49 @@ contract("LoanNFT", function () {
 
       assert.equal(balanceGen0, 0);
       assert.equal(balanceGen1, 10);
+    });
+  });
+
+  describe("Token Pausing", function () {
+    it("only pauser role should be able to pause token transfers", async function () {
+      await expectRevert(
+        loanNFT.pauseTokenTransfer(3, { from: random }),
+        "must have pauser role"
+      );
+      await loanNFT.pauseTokenTransfer(3, { from: admin });
+    });
+
+    it("should revert when transfering a paused token", async function () {
+      const tokenId = await loanNFT.getTokenId(1, 3);
+
+      await expectRevert(
+        loanNFT.safeTransferFrom(alice, bob, tokenId, 10, "0x", {
+          from: alice,
+        }),
+        "Transfers paused"
+      );
+    });
+
+    it("should revert when increasing token generation of paused token", async function () {
+      const tokenId = await loanNFT.getTokenId(1, 3);
+
+      await expectRevert(
+        loanNFT.increaseGeneration(tokenId, alice, 10, {
+          from: alice,
+        }),
+        "Transfers paused"
+      );
+    });
+
+    it("should revert when user tries to burn a paused token", async function () {
+      const tokenId = await loanNFT.getTokenId(1, 3);
+
+      await expectRevert(
+        loanNFT.burn(alice, tokenId, 10, {
+          from: alice,
+        }),
+        "Transfers paused"
+      );
     });
   });
 });

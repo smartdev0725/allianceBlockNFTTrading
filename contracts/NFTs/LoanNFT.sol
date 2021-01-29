@@ -114,7 +114,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
     function mintGen0(address to, uint amount) public{
         require(hasRole(MINTER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have minter role to mint");
         _loanIdTracker.increment();
-        uint tokenId = getTokenId(0, getCurrentLoanId());
+        uint tokenId =getCurrentLoanId();
         _mint(to, tokenId, amount, "");        
     }
 
