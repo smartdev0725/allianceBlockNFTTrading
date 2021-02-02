@@ -58,11 +58,11 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
     }
 
     /**
-    * @dev token metadata
-    */
-    function uri(uint tokenId) public view override returns(string memory){
-        return Strings.strConcat(_baseURI, ipfsHashes[tokenId]);
-    }
+    * @dev token metadata - TODO - FIX OVERRIDE PROBLEM
+    */ 
+    // function uri(uint tokenId) public view override returns(string memory){
+    //     return Strings.strConcat(_baseURI, ipfsHashes[tokenId]);
+    // }
 
     /**
     * @dev contract metadata

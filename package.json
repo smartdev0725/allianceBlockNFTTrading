@@ -6,6 +6,7 @@
   "scripts": {
     "test": "hardhat test",
     "compile": "hardhat compile",
+    "coverage": "yarn hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"./tests/**/*.ts\"",
     "deploy": "hardhat run scripts/deploy.js",
     "deploy-factory": "hardhat run scripts/uniswap/deploy-factory.js",
     "deploy-pair": "hardhat run scripts/uniswap/deploy-pair.js",
