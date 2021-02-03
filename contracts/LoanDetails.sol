@@ -112,6 +112,6 @@ contract LoanDetails is Storage {
         mainNFT.mint(address(this));
         loanNFT.mint(address(this), totalLoans, lendingAmountRequested_.div(baseAmountForEachPartition), "");
 
-        // TODO - pause trades for ERC1155s with the specific ID.
+        loanNFT.pauseTokenTransfer(loan.loanId); //Pause trades for ERC1155s with the specific loan ID.
     }
 }
