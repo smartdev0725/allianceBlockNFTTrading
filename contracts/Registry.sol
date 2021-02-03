@@ -30,6 +30,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     )
     public
     {
+        // TODO - Initialize escrow
         baseAmountForEachPartition = baseAmountForEachPartition_;
         governance = IGovernance(governanceAddress_);
         lendingToken = IERC20(lendingToken_);
@@ -67,6 +68,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
             loanStatus[loanId] = LoanLibrary.LoanStatus.FUNDING;
         }
 
+        // TODO - All funds transfered to escrow.
         IERC20(lendingToken).transferFrom(msg.sender, address(this), partitionsToPurchase.mul(baseAmountForEachPartition));
         loanNFT.safeTransferFrom(address(this), msg.sender, loanId, partitionsToPurchase, "");
 
@@ -124,6 +126,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     internal
     {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.REJECTED;
+        // TODO - Transfer to escrow
         IERC20(loanDetails[loanId_].collateralToken).transfer(loanBorrower[loanId_], loanDetails[loanId_].collateralAmount);
     }
 

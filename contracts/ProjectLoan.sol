@@ -93,6 +93,7 @@ contract ProjectLoan is LoanDetails {
             projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block.timestamp.add(
                 projectLoanPayments[loanId_].timeDiffBetweenDeliveryAndRepayment);
         } else {
+        // TODO - Transfer to escrow
             lendingToken.transfer(
                 loanBorrower[loanId_],
                 projectLoanPayments[loanId_].milestoneLendingAmount[projectLoanPayments[loanId_].milestonesDelivered]
@@ -136,6 +137,7 @@ contract ProjectLoan is LoanDetails {
         projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block.timestamp.add(
             projectLoanPayments[loanId_].milestoneDuration[0]);
 
+        // TODO - Transfer to escrow
         lendingToken.transfer(loanBorrower[loanId_], projectLoanPayments[loanId_].milestoneLendingAmount[0]);
     }
 

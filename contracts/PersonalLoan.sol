@@ -78,6 +78,7 @@ contract PersonalLoan is LoanDetails {
         personalLoanPayments[loanId_].batchDeadlineTimestamp = block.timestamp.add(
             personalLoanPayments[loanId_].timeIntervalBetweenBatches);
 
+        // TODO - Transfer to escrow
         lendingToken.transfer(loanBorrower[loanId_], loanDetails[loanId_].lendingAmount);
     }
 

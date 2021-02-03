@@ -24,6 +24,7 @@ contract Storage {
     IERC20 public lendingToken;
     IERC721Mint public mainNFT;
     IERC1155Mint public loanNFT;
+    // TODO - IEscrow public escrow
 
     uint256 public baseAmountForEachPartition;
     uint256 public minimumInterestPercentage;

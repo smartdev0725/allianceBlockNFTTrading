@@ -92,6 +92,7 @@ contract LoanDetails is Storage {
         require(lendingAmountRequested_.mod(baseAmountForEachPartition) == 0, "Requested Amount must be a multiplier of base amount");
         require(interestPercentage_ >= minimumInterestPercentage, "Interest percentage lower than limit");
 
+        // TODO - Transfer to escrow
         IERC20(collateralToken_).transferFrom(msg.sender, address(this), collateralAmount_);
 
         LoanLibrary.LoanDetails memory loan;
@@ -107,6 +108,7 @@ contract LoanDetails is Storage {
         loanStatus[totalLoans] = LoanLibrary.LoanStatus.REQUESTED;
         loanBorrower[totalLoans] = msg.sender;
 
+        // TODO - Give minting privilages to escrow and create a function that summarizes those (We don't want multiple external calls)
         mainNFT.mint(address(this));
         loanNFT.mint(address(this), totalLoans, lendingAmountRequested_.div(baseAmountForEachPartition), "");
 
