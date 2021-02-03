@@ -31,6 +31,7 @@ contract Governance is Ownable {
     mapping(uint256 => ApprovalRequest) public approvalRequests;
     uint256 public loanApprovalRequestDuration;
     uint256 public milestoneApprovalRequestDuration;
+    uint256 public amountStakedForDaoMembership;
 
     IRegistry public registry;
 
@@ -53,6 +54,12 @@ contract Governance is Ownable {
         _;
     }
 
+    modifier onlyEnoughStaked() {
+        require(staking.balanceOf(msg.sender) >= amountStakedForDaoMembership,
+            "Only enough staked to subscribe for Dao Membership");
+        _;
+    }
+
     modifier onlyAfterDeadlineAndNotApproved(uint256 requestId) {
         require(approvalRequests[requestId].deadlineTimestamp <= block.timestamp,
             "Only after deadline is reached");
@@ -67,7 +74,8 @@ contract Governance is Ownable {
         address[] memory daoDelegators,
         uint256 approvalsNeeded_,
         uint256 loanApprovalRequestDuration_,
-        uint256 milestoneApprovalRequestDuration_
+        uint256 milestoneApprovalRequestDuration_,
+        uint256 amountStakedForDaoMembership_
     )
     public
     {
@@ -78,6 +86,7 @@ contract Governance is Ownable {
         approvalsNeeded = approvalsNeeded_;
         loanApprovalRequestDuration = loanApprovalRequestDuration_;
         milestoneApprovalRequestDuration = milestoneApprovalRequestDuration_;
+        amountStakedForDaoMembership = amountStakedForDaoMembership_;
     }
 
     function initialize(
@@ -142,5 +151,21 @@ contract Governance is Ownable {
         } else {                
             registry.decideForLoan(approvalRequests[requestId].loanId, false);
         }        
+    }
+
+    function subscribeForDaoMembership()
+    external
+    onlyEnoughStaked()
+    {
+        isDaoMember[msg.sender] = true;
+        //Freeze funds.
+    }
+
+    function unsubscribeForDaoMembership()
+    external
+    {
+        require(isDaoMember[msg.sender], "Only Dao Member");
+        isDaoMember[msg.sender] = false;
+        //UnFreeze funds.
     }
 }
