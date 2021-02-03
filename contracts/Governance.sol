@@ -13,6 +13,7 @@ import "./interfaces/IRegistry.sol";
 contract Governance is Ownable {
     using SafeMath for uint256;
 
+    mapping(address => bool) public isDaoMember;
     mapping(address => bool) public isDaoDelegator;
     mapping(address => mapping(uint256 => bool)) public hasVotedForRequestId;
 
