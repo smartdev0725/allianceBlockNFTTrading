@@ -110,7 +110,7 @@ contract ProjectLoan is LoanDetails {
     internal
     {
         loanStatus[loanId_] == LoanLibrary.LoanStatus.STARTED;
-        if(projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp <= block.timestamp) {
+        if(projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp <= block.timestamp) {
             _challengeProjectLoan(loanId_);
         }
     }
