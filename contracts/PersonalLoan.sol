@@ -148,5 +148,7 @@ contract PersonalLoan is LoanDetails {
     {
         IERC20(lendingToken).transferFrom(msg.sender, address(this), amount);
         personalLoanPayments[loanId_].batchesPaid = personalLoanPayments[loanId_].batchesPaid.add(1);
+        personalLoanPayments[loanId_].batchStartingTimestamp = block.timestamp;
+        personalLoanPayments[loanId_].batchDeadlineTimestamp = block.timestamp + personalLoanPayments[loanId_].timeIntervalBetweenBatches;
     }
 }
