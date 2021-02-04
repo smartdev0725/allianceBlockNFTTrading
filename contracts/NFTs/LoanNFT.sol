@@ -93,8 +93,8 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
     /**
      * @dev Owner can unpause transfers for specific tokens
      */
-    function unpauseTokenTransfer(uint tokenId) external onlyPauser{
-        transfersPaused[tokenId] = false;
+    function unpauseTokenTransfer(uint loanId) external onlyPauser{
+        transfersPaused[loanId] = false;
         emit TransfersResumed(loanId);
     }
 
