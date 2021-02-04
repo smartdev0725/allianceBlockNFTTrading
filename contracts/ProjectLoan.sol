@@ -156,4 +156,41 @@ contract ProjectLoan is LoanDetails {
                 projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp.add(milestoneExtensionInterval);
         }
     }
+
+    function _isOnProjectPaymentsMilestonesTime(
+        uint256 loanId_
+    )
+        internal
+        returns (bool)
+    {
+        return (block.timestamp > projectLoanPayments[loanId_].currentMilestoneStartingTimestamp 
+        && block.timestamp < projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp);
+    }
+
+    function _executeProjectLoanPayment(
+        uint256 loanId_
+    )
+    internal
+    {
+        //TODO - timeDiffBetweenDeliveryAndRepayment <- potentially needs adding
+        if (_isOnProjectPaymentsMilestonesTime(loanId_)) {//check if payment is on current milestone time
+            _transferProjectLoanPayment(loanId_, projectLoanPayments[loanId_].milestoneLendingAmount[projectLoanPayments[loanId_].milestonesDelivered]);
+        } else {
+            _challengeProjectLoan(loanId_); //TODO confirm if loan needs challanging automatically on a check at payment step
+        }
+    }
+
+    function _transferProjectLoanPayment(
+        uint256 loanId_,
+        uint256 amount
+    )
+    internal
+    {
+        IERC20(lendingToken).transferFrom(msg.sender, address(this), amount);
+        projectLoanPayments[loanId_].milestonesDelivered =  projectLoanPayments[loanId_].milestonesDelivered.add(1);
+        projectLoanPayments[loanId_].currentMilestoneStartingTimestamp = block.timestamp;
+        projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block.timestamp.add(
+            projectLoanPayments[loanId_].milestoneDuration[projectLoanPayments[loanId_].milestonesDelivered]
+        );
+    }
 }
