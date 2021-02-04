@@ -17,6 +17,11 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
 
     using Counters for Counters.Counter;
 
+    // Events
+    event GenerationIncreased(uint indexed loanId, address indexed user, uint newGeneration);
+    event TransfersPaused(uint loanId);
+    event TransfersResumed(uint loanId);
+
     // Keep track of loan Ids
     Counters.Counter private _loanIdTracker;
 
@@ -53,7 +58,12 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
     }
     
     modifier onlyPauser(){
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have pauser role");
+        require(hasRole(PAUSER_ROLE, _msgSender()), "Must have pauser role");
+        _;
+    }
+
+    modifier onlyMinter(){
+        require(hasRole(MINTER_ROLE, _msgSender()), "Must have minter role to mint");
         _;
     }
 
@@ -77,6 +87,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
      */
     function pauseTokenTransfer(uint loanId) external onlyPauser{        
         transfersPaused[loanId] = true;
+        emit TransfersPaused(loanId);
     }
 
     /**
@@ -84,6 +95,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
      */
     function unpauseTokenTransfer(uint tokenId) external onlyPauser{
         transfersPaused[tokenId] = false;
+        emit TransfersResumed(loanId);
     }
 
     /**
@@ -111,8 +123,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
     /**
      * @dev Mint generation 0 tokens
      */
-    function mintGen0(address to, uint amount) public{
-        require(hasRole(MINTER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have minter role to mint");
+    function mintGen0(address to, uint amount) external onlyMinter{
         _loanIdTracker.increment();
         uint tokenId =getCurrentLoanId();
         _mint(to, tokenId, amount, "");        
@@ -123,7 +134,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
      * @dev token is burned, and new token is minted to user
      * @dev token owner should have approvedForAll before calling this function
      */
-    function increaseGeneration(uint tokenId, address user, uint amount) external{
+    function increaseGeneration(uint tokenId, address user, uint amount) external onlyMinter{
         (uint generation, uint loanId) = formatTokenId(tokenId);
 
         // Increase generation, leave loanId same
@@ -135,6 +146,8 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
 
         // Mint new generation tokens
         _mint(user, newTokenId, amount, "");
+
+        emit GenerationIncreased(loanId, user, generation);
     }
     
     /**
