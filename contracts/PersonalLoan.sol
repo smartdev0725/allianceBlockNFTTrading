@@ -147,5 +147,6 @@ contract PersonalLoan is LoanDetails {
     internal
     {
         IERC20(lendingToken).transferFrom(msg.sender, address(this), amount);
+        personalLoanPayments[loanId_].batchesPaid = personalLoanPayments[loanId_].batchesPaid.add(1);
     }
 }
