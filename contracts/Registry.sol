@@ -87,6 +87,11 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     onlyActiveLoan(loanId)
     {
         // TODO - EXECUTE PAYMENTS BY PROJECT OR PERSON (BORROWER)
+        if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) { 
+            _executePersonalLoanPayment(loanId);
+        } else if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PROJECT) {
+
+        }
     }
 
     function receivePayment(

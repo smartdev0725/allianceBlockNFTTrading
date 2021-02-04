@@ -99,4 +99,53 @@ contract PersonalLoan is LoanDetails {
                 );
         }
     }
+
+    function _isOnPersonalPaymentsBatchTime(
+        uint256 loanId_
+    )
+        internal
+        returns (bool)
+    {
+        return (block.timestamp > personalLoanPayments[loanId_].batchStartingTimestamp 
+        && block.timestamp < personalLoanPayments[loanId_].batchDeadlineTimestamp);
+    }
+
+    function _executePersonalLoanPayment(
+        uint256 loanId_
+    )
+    internal
+    {
+        if (_isOnPersonalPaymentsBatchTime(loanId_)) {//check if between the batch deadlines
+            if(personalLoanPayments[loanId_].repaymentBatchType == LoanLibrary.RepaymentBatchType.INTEREST_PLUS_NOMINAL) { //if interest + nominal
+                _transferPersonalLoanPayment(loanId_, personalLoanPayments[loanId_].amountEachBatch);
+            } else if (personalLoanPayments[loanId_].repaymentBatchType == LoanLibrary.RepaymentBatchType.ONLY_INTEREST) { //if interest only
+                _executePersonalLoanInterestOnlyPayment(loanId_);
+            }
+        } else {
+            _challengePersonalLoan(loanId_); //TODO confirm if loan needs challanging automatically on a check at payment step
+        }
+    }
+
+    function _executePersonalLoanInterestOnlyPayment(
+        uint256 loanId_
+    )
+    internal
+    {
+        uint256 amount = 0;
+        if (personalLoanPayments[loanId_].batchesPaid.add(1) == personalLoanPayments[loanId_].totalAmountOfBatches) { //if last batch
+            amount = personalLoanPayments[loanId_].amountEachBatch.add(loanDetails[loanId_].lendingAmount);
+        } else { //any other batch
+            amount = personalLoanPayments[loanId_].amountEachBatch;
+        }
+        _transferPersonalLoanPayment(loanId_, amount);
+    }
+
+    function _transferPersonalLoanPayment(
+        uint256 loanId_,
+        uint256 amount
+    )
+    internal
+    {
+        IERC20(lendingToken).transferFrom(msg.sender, address(this), amount);
+    }
 }
