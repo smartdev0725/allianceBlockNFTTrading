@@ -99,4 +99,52 @@ contract PersonalLoan is LoanDetails {
                 );
         }
     }
+
+    function _executePersonalLoanPayment(
+        uint256 loanId_
+    )
+    internal
+    onlyBetweenBatchTimeframe(loanId_)
+    onlyActiveLoan(loanId_)
+    {
+        //if interest + nominal
+        if(personalLoanPayments[loanId_].repaymentBatchType == LoanLibrary.RepaymentBatchType.INTEREST_PLUS_NOMINAL) {
+            _transferPersonalLoanPayment(loanId_, personalLoanPayments[loanId_].amountEachBatch);
+        } else { //if interest only
+            _executePersonalLoanInterestOnlyPayment(loanId_);
+        }
+    }
+
+    function _executePersonalLoanInterestOnlyPayment(
+        uint256 loanId_
+    )
+    internal
+    {
+        uint256 amount;
+        if (personalLoanPayments[loanId_].batchesPaid.add(1) == personalLoanPayments[loanId_].totalAmountOfBatches) { //if last batch
+            amount = personalLoanPayments[loanId_].amountEachBatch.add(loanDetails[loanId_].lendingAmount);
+        } else { //any other batch
+            amount = personalLoanPayments[loanId_].amountEachBatch;
+        }
+        _transferPersonalLoanPayment(loanId_, amount);
+    }
+
+    function _transferPersonalLoanPayment(
+        uint256 loanId_,
+        uint256 amount
+    )
+    internal
+    {
+        IERC20(lendingToken).transferFrom(msg.sender, address(this), amount);
+
+        personalLoanPayments[loanId_].batchesPaid = personalLoanPayments[loanId_].batchesPaid.add(1);
+
+        if(personalLoanPayments[loanId_].batchesPaid == personalLoanPayments[loanId_].totalAmountOfBatches) {
+            loanStatus[loanId_] = LoanLibrary.LoanStatus.SETTLED;
+        } else {
+            personalLoanPayments[loanId_].batchStartingTimestamp = personalLoanPayments[loanId_].batchDeadlineTimestamp;
+            personalLoanPayments[loanId_].batchDeadlineTimestamp = personalLoanPayments[loanId_].batchStartingTimestamp.add(
+                personalLoanPayments[loanId_].timeIntervalBetweenBatches);
+        }
+    }
 }

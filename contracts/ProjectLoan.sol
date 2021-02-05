@@ -61,7 +61,7 @@ contract ProjectLoan is LoanDetails {
     onlyBorrower(loanId)
     onlyActiveLoan(loanId)
     onlyProjectLoan(loanId)
-    onlyBeforeDeadlineReached(loanId)
+    onlyBetweenMilestoneTimeframe(loanId)
     {
         loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPROVAL;
         governance.requestApproval(totalLoans, true, projectLoanPayments[loanId].milestonesDelivered);
@@ -88,7 +88,7 @@ contract ProjectLoan is LoanDetails {
         projectLoanPayments[loanId_].milestonesDelivered = projectLoanPayments[loanId_].milestonesDelivered.add(1);
 
         if(projectLoanPayments[loanId_].milestonesDelivered == projectLoanPayments[loanId_].totalMilestones) {
-            loanStatus[loanId_] == LoanLibrary.LoanStatus.AWAITING_REPAYMENT;
+            loanStatus[loanId_] = LoanLibrary.LoanStatus.AWAITING_REPAYMENT;
             projectLoanPayments[loanId_].currentMilestoneStartingTimestamp = block.timestamp;
             projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block.timestamp.add(
                 projectLoanPayments[loanId_].timeDiffBetweenDeliveryAndRepayment);
@@ -110,7 +110,7 @@ contract ProjectLoan is LoanDetails {
     internal
     {
         loanStatus[loanId_] == LoanLibrary.LoanStatus.STARTED;
-        if(projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp <= block.timestamp) {
+        if(projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp <= block.timestamp) {
             _challengeProjectLoan(loanId_);
         }
     }
@@ -155,5 +155,15 @@ contract ProjectLoan is LoanDetails {
             projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp =
                 projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp.add(milestoneExtensionInterval);
         }
+    }
+
+    function _executeProjectLoanPayment(
+        uint256 loanId_
+    )
+    internal
+    onlyBetweenMilestoneTimeframe(loanId_)
+    onlyOnProjectRepayment(loanId_)
+    {        
+        IERC20(lendingToken).transferFrom(msg.sender, address(this), projectLoanPayments[loanId_].amountToBeRepaid);
     }
 }

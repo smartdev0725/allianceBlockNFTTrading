@@ -84,9 +84,12 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     )
     external
     onlyBorrower(loanId)
-    onlyActiveLoan(loanId)
     {
-        // TODO - EXECUTE PAYMENTS BY PROJECT OR PERSON (BORROWER)
+        if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) { 
+            _executePersonalLoanPayment(loanId);
+        } else {
+            _executeProjectLoanPayment(loanId);
+        }
     }
 
     function receivePayment(
@@ -117,7 +120,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     internal
     {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.APPROVED;
-        // TODO - unpause trades for ERC1155s with the specific ID.
+        loanNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
     }
 
     function _rejectLoan(

@@ -13,6 +13,7 @@ import "./interfaces/IRegistry.sol";
 contract Governance is Ownable {
     using SafeMath for uint256;
 
+    mapping(address => bool) public isDaoMember;
     mapping(address => bool) public isDaoDelegator;
     mapping(address => mapping(uint256 => bool)) public hasVotedForRequestId;
 
@@ -54,11 +55,11 @@ contract Governance is Ownable {
         _;
     }
 
-    modifier onlyEnoughStaked() {
-        require(staking.balanceOf(msg.sender) >= amountStakedForDaoMembership,
-            "Only enough staked to subscribe for Dao Membership");
-        _;
-    }
+    // modifier onlyEnoughStaked() {
+    //     require(staking.balanceOf(msg.sender) >= amountStakedForDaoMembership,
+    //         "Only enough staked to subscribe for Dao Membership");
+    //     _;
+    // }
 
     modifier onlyAfterDeadlineAndNotApproved(uint256 requestId) {
         require(approvalRequests[requestId].deadlineTimestamp <= block.timestamp,
@@ -155,7 +156,7 @@ contract Governance is Ownable {
 
     function subscribeForDaoMembership()
     external
-    onlyEnoughStaked()
+    //onlyEnoughStaked()
     {
         isDaoMember[msg.sender] = true;
         //Freeze funds.

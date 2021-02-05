@@ -35,14 +35,25 @@ contract LoanDetails is Storage {
         _;
     }
 
-    modifier onlyBeforeDeadlineReached(uint256 loanId) {
-        if(loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
-            require(personalLoanPayments[loanId].batchDeadlineTimestamp > block.timestamp,
-                "Only before batch deadline is reached");
-        } else {
-            require(projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp > block.timestamp,
-                "Only before milestone deadline is reached");
-        }
+    modifier onlyOnProjectRepayment(uint256 loanId) {
+        require(loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_REPAYMENT,
+            "Only on Repayment Status");
+        _;
+
+        loanStatus[loanId] = LoanLibrary.LoanStatus.SETTLED;
+    }
+
+    modifier onlyBetweenMilestoneTimeframe(uint256 loanId) {
+        require(projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp > block.timestamp &&
+            projectLoanPayments[loanId].currentMilestoneStartingTimestamp <= block.timestamp,
+            "Only between milestone's timeframe");
+        _;
+    }
+
+    modifier onlyBetweenBatchTimeframe(uint256 loanId) {
+        require(personalLoanPayments[loanId].batchDeadlineTimestamp > block.timestamp &&
+            personalLoanPayments[loanId].batchStartingTimestamp <= block.timestamp,
+            "Only between batch timeframe");
         _;
     }
 
@@ -110,8 +121,8 @@ contract LoanDetails is Storage {
 
         // TODO - Give minting privilages to escrow and create a function that summarizes those (We don't want multiple external calls)
         mainNFT.mint(address(this));
-        loanNFT.mint(address(this), totalLoans, lendingAmountRequested_.div(baseAmountForEachPartition), "");
+        loanNFT.mintGen0(address(this), lendingAmountRequested_.div(baseAmountForEachPartition));
 
-        // TODO - pause trades for ERC1155s with the specific ID.
+        loanNFT.pauseTokenTransfer(loan.loanId); //Pause trades for ERC1155s with the specific loan ID.
     }
 }
