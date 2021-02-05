@@ -88,7 +88,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     {
         if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) { 
             _executePersonalLoanPayment(loanId);
-        } else if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PROJECT) {
+        } else {
             _executeProjectLoanPayment(loanId);
         }
     }
