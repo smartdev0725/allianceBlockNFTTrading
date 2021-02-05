@@ -105,6 +105,7 @@ contract PersonalLoan is LoanDetails {
     )
     internal
     onlyBetweenBatchTimeframe(loanId_)
+    onlyActiveLoan(loanId_)
     {
         //if interest + nominal
         if(personalLoanPayments[loanId_].repaymentBatchType == LoanLibrary.RepaymentBatchType.INTEREST_PLUS_NOMINAL) {

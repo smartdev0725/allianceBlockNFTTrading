@@ -35,17 +35,25 @@ contract LoanDetails is Storage {
         _;
     }
 
+    modifier onlyOnProjectRepayment(uint256 loanId) {
+        require(loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_REPAYMENT;,
+            "Only on Repayment Status");
+        _;
+
+        loanStatus[loanId] = LoanLibrary.LoanStatus.SETTLED;
+    }
+
     modifier onlyBetweenMilestoneTimeframe(uint256 loanId) {
         require(projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp > block.timestamp &&
             projectLoanPayments[loanId].currentMilestoneStartingTimestamp <= block.timestamp,
-            "Only bwteeen milestone's timeframe");
+            "Only between milestone's timeframe");
         _;
     }
 
     modifier onlyBetweenBatchTimeframe(uint256 loanId) {
         require(personalLoanPayments[loanId].batchDeadlineTimestamp > block.timestamp &&
             personalLoanPayments[loanId].batchStartingTimestamp <= block.timestamp,
-            "Only bwteeen batch timeframe");
+            "Only between batch timeframe");
         _;
     }
 

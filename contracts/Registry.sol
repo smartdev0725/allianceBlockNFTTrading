@@ -84,7 +84,6 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     )
     external
     onlyBorrower(loanId)
-    onlyActiveLoan(loanId)
     {
         if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) { 
             _executePersonalLoanPayment(loanId);
