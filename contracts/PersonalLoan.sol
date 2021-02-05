@@ -100,29 +100,17 @@ contract PersonalLoan is LoanDetails {
         }
     }
 
-    function _isOnPersonalPaymentsBatchTime(
-        uint256 loanId_
-    )
-        internal
-        returns (bool)
-    {
-        return (block.timestamp > personalLoanPayments[loanId_].batchStartingTimestamp 
-        && block.timestamp < personalLoanPayments[loanId_].batchDeadlineTimestamp);
-    }
-
     function _executePersonalLoanPayment(
         uint256 loanId_
     )
     internal
+    onlyBetweenBatchTimeframe(loanId_)
     {
-        if (_isOnPersonalPaymentsBatchTime(loanId_)) {//check if between the batch deadlines
-            if(personalLoanPayments[loanId_].repaymentBatchType == LoanLibrary.RepaymentBatchType.INTEREST_PLUS_NOMINAL) { //if interest + nominal
-                _transferPersonalLoanPayment(loanId_, personalLoanPayments[loanId_].amountEachBatch);
-            } else if (personalLoanPayments[loanId_].repaymentBatchType == LoanLibrary.RepaymentBatchType.ONLY_INTEREST) { //if interest only
-                _executePersonalLoanInterestOnlyPayment(loanId_);
-            }
-        } else {
-            _challengePersonalLoan(loanId_); //TODO confirm if loan needs challanging automatically on a check at payment step
+        //if interest + nominal
+        if(personalLoanPayments[loanId_].repaymentBatchType == LoanLibrary.RepaymentBatchType.INTEREST_PLUS_NOMINAL) {
+            _transferPersonalLoanPayment(loanId_, personalLoanPayments[loanId_].amountEachBatch);
+        } else { //if interest only
+            _executePersonalLoanInterestOnlyPayment(loanId_);
         }
     }
 
@@ -148,7 +136,8 @@ contract PersonalLoan is LoanDetails {
     {
         IERC20(lendingToken).transferFrom(msg.sender, address(this), amount);
         personalLoanPayments[loanId_].batchesPaid = personalLoanPayments[loanId_].batchesPaid.add(1);
-        personalLoanPayments[loanId_].batchStartingTimestamp = block.timestamp;
-        personalLoanPayments[loanId_].batchDeadlineTimestamp = block.timestamp + personalLoanPayments[loanId_].timeIntervalBetweenBatches;
+        personalLoanPayments[loanId_].batchStartingTimestamp = personalLoanPayments[loanId_].batchDeadlineTimestamp;
+        personalLoanPayments[loanId_].batchDeadlineTimestamp = personalLoanPayments[loanId_].batchStartingTimestamp.add(
+            personalLoanPayments[loanId_].timeIntervalBetweenBatches);
     }
 }

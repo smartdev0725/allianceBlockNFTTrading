@@ -61,7 +61,7 @@ contract ProjectLoan is LoanDetails {
     onlyBorrower(loanId)
     onlyActiveLoan(loanId)
     onlyProjectLoan(loanId)
-    onlyBeforeDeadlineReached(loanId)
+    onlyBetweenMilestoneTimeframe(loanId)
     {
         loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPROVAL;
         governance.requestApproval(totalLoans, true, projectLoanPayments[loanId].milestonesDelivered);

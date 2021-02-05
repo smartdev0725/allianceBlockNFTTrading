@@ -35,14 +35,17 @@ contract LoanDetails is Storage {
         _;
     }
 
-    modifier onlyBeforeDeadlineReached(uint256 loanId) {
-        if(loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
-            require(personalLoanPayments[loanId].batchDeadlineTimestamp > block.timestamp,
-                "Only before batch deadline is reached");
-        } else {
-            require(projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp > block.timestamp,
-                "Only before milestone deadline is reached");
-        }
+    modifier onlyBetweenMilestoneTimeframe(uint256 loanId) {
+        require(projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp > block.timestamp &&
+            projectLoanPayments[loanId].currentMilestoneStartingTimestamp <= block.timestamp,
+            "Only bwteeen milestone's timeframe");
+        _;
+    }
+
+    modifier onlyBetweenBatchTimeframe(uint256 loanId) {
+        require(personalLoanPayments[loanId].batchDeadlineTimestamp > block.timestamp &&
+            personalLoanPayments[loanId].batchStartingTimestamp <= block.timestamp,
+            "Only bwteeen batch timeframe");
         _;
     }
 
