@@ -120,7 +120,7 @@ contract PersonalLoan is LoanDetails {
     )
     internal
     {
-        uint256 amount = 0;
+        uint256 amount;
         if (personalLoanPayments[loanId_].batchesPaid.add(1) == personalLoanPayments[loanId_].totalAmountOfBatches) { //if last batch
             amount = personalLoanPayments[loanId_].amountEachBatch.add(loanDetails[loanId_].lendingAmount);
         } else { //any other batch
