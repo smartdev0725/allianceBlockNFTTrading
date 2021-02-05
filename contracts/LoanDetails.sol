@@ -36,7 +36,7 @@ contract LoanDetails is Storage {
     }
 
     modifier onlyOnProjectRepayment(uint256 loanId) {
-        require(loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_REPAYMENT;,
+        require(loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_REPAYMENT,
             "Only on Repayment Status");
         _;
 

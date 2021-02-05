@@ -136,9 +136,15 @@ contract PersonalLoan is LoanDetails {
     internal
     {
         IERC20(lendingToken).transferFrom(msg.sender, address(this), amount);
+
         personalLoanPayments[loanId_].batchesPaid = personalLoanPayments[loanId_].batchesPaid.add(1);
-        personalLoanPayments[loanId_].batchStartingTimestamp = personalLoanPayments[loanId_].batchDeadlineTimestamp;
-        personalLoanPayments[loanId_].batchDeadlineTimestamp = personalLoanPayments[loanId_].batchStartingTimestamp.add(
-            personalLoanPayments[loanId_].timeIntervalBetweenBatches);
+
+        if(personalLoanPayments[loanId_].batchesPaid == personalLoanPayments[loanId_].totalAmountOfBatches) {
+            loanStatus[loanId_] = LoanLibrary.LoanStatus.SETTLED;
+        } else {
+            personalLoanPayments[loanId_].batchStartingTimestamp = personalLoanPayments[loanId_].batchDeadlineTimestamp;
+            personalLoanPayments[loanId_].batchDeadlineTimestamp = personalLoanPayments[loanId_].batchStartingTimestamp.add(
+                personalLoanPayments[loanId_].timeIntervalBetweenBatches);
+        }
     }
 }
