@@ -49,7 +49,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
     /**
     * @dev Initializes the contract by setting the base URI
     */
-    constructor() public ERC1155(""){
+    constructor() public ERC1155("") {
         _baseURI = "ipfs://";
         _contractURI = "https://allianceblock.io/";
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -67,17 +67,17 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
         _;
     }
 
-    /**
-    * @dev token metadata
-    */
-    function uri(uint tokenId) public view override returns(string memory){
-        return Strings.strConcat(_baseURI, ipfsHashes[tokenId]);
-    }
+    // /**
+    // * @dev token metadata
+    // */
+    // function uri(uint tokenId) public view override returns(string memory){
+    //     return Strings.strConcat(_baseURI, ipfsHashes[tokenId]);
+    // }
 
     /**
     * @dev contract metadata
     */
-    function contractURI() public view returns(string memory){
+    function contractURI() public view returns(string memory) {
         return _contractURI;
     }
 
@@ -85,7 +85,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
      * @dev Owner can pause transfers for specific tokens
      * @dev pauses all loan ids, no matter the generation
      */
-    function pauseTokenTransfer(uint loanId) external onlyPauser{        
+    function pauseTokenTransfer(uint loanId) external onlyPauser {        
         transfersPaused[loanId] = true;
         emit TransfersPaused(loanId);
     }
@@ -101,7 +101,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
     /**
      * @dev Format tokenId into generation and index
      */
-    function formatTokenId(uint tokenId) public pure returns(uint generation, uint loanId){
+    function formatTokenId(uint tokenId) public pure returns(uint generation, uint loanId) {
         generation = tokenId >> 128;
         loanId = tokenId & LOAN_ID_MASK;
     }
@@ -109,14 +109,14 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
     /**
      * @dev get tokenId from generation and loanId
      */
-    function getTokenId(uint gen, uint loanId) public pure returns(uint tokenId){
+    function getTokenId(uint gen, uint loanId) public pure returns(uint tokenId) {
         return (gen << 128) | loanId;
     }
 
     /**
      * @dev Format tokenId into generation and index
      */
-    function getCurrentLoanId() public view returns(uint loanId){
+    function getCurrentLoanId() public view returns(uint loanId) {
         return _loanIdTracker.current();
     }
 
@@ -125,7 +125,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
      */
     function mintGen0(address to, uint amount) external onlyMinter{
         _loanIdTracker.increment();
-        uint tokenId =getCurrentLoanId();
+        uint tokenId = getCurrentLoanId();
         _mint(to, tokenId, amount, "");        
     }
 
@@ -159,8 +159,10 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
         address to,
         uint256[] memory ids,
         uint256[] memory amounts,
-        bytes memory data) 
-        internal override
+        bytes memory data
+    ) 
+    internal
+    override
     {
         for(uint i=0; i< ids.length; i++){
             (, uint loanId) = formatTokenId(ids[i]);
