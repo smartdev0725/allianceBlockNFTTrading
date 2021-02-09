@@ -60,6 +60,15 @@ contract Escrow is EscrowDetails, Ownable {
         IERC20(collateralToken).transfer(borrower, amount);
     }
 
+    function changeRegistry(
+        address registryAddress_
+    )
+    external
+    onlyOwner()
+    {
+        registry = IRegistry(registryAddress_);
+    }
+
     // function receiveFunding(
     // 	uint256 loanId,
     //     uint256 amount
