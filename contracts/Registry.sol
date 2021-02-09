@@ -70,7 +70,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
 
         IERC20(lendingToken).transferFrom(msg.sender, address(escrow), partitionsToPurchase.mul(baseAmountForEachPartition));
         escrow.transferLoanNFT(loanId, partitionsToPurchase);
-        
+
         loanDetails[loanId].partitionsPurchased = loanDetails[loanId].partitionsPurchased.add(partitionsToPurchase);
 
         if(loanDetails[loanId].partitionsPurchased == loanDetails[loanId].totalPartitions) {
@@ -128,8 +128,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     internal
     {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.REJECTED;
-        // TODO - Transfer to escrow
-        IERC20(loanDetails[loanId_].collateralToken).transfer(loanBorrower[loanId_], loanDetails[loanId_].collateralAmount);
+        escrow.transferCollateralToken(loanDetails[loanId_].collateralToken, loanBorrower[loanId_], loanDetails[loanId_].collateralAmount);
     }
 
     function _startLoan(
