@@ -6,6 +6,7 @@ import "./libs/LoanLibrary.sol";
 import "./interfaces/IERC1155Mint.sol";
 import "./interfaces/IERC721Mint.sol";
 import "./interfaces/IGovernance.sol";
+import "./interfaces/IEscrow.sol";
 
 /**
  * @title AllianceBlock Storage contract
@@ -24,7 +25,7 @@ contract Storage {
     IERC20 public lendingToken;
     IERC721Mint public mainNFT;
     IERC1155Mint public loanNFT;
-    // TODO - IEscrow public escrow
+    IEscrow public escrow;
 
     uint256 public baseAmountForEachPartition;
     uint256 public minimumInterestPercentage;
