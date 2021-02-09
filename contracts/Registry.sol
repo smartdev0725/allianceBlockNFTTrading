@@ -18,6 +18,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
      */
     constructor(
         uint256 baseAmountForEachPartition_,
+        address escrowAddress,
         address governanceAddress_,
         address lendingToken_,
         uint256 minimumInterestPercentage_,
@@ -30,7 +31,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     )
     public
     {
-        // TODO - Initialize escrow
+        escrow = IEscrow(escrowAddress);
         baseAmountForEachPartition = baseAmountForEachPartition_;
         governance = IGovernance(governanceAddress_);
         lendingToken = IERC20(lendingToken_);
