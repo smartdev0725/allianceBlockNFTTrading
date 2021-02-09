@@ -13,9 +13,16 @@ import "./interfaces/IRegistry.sol";
 contract EscrowDetails {
 
     IRegistry public registry;
+    
+    mapping(uint256 => address) public loanBorrower;
 
     modifier onlyRegistry() {
         require(msg.sender == address(registry), "Only Registry");
+        _;
+    }
+
+    modifier onlyBorrower(uint256 loanId) {
+        require(msg.sender == loanBorrower[loanId], "Only Borrower of the loan");
         _;
     }
 }
