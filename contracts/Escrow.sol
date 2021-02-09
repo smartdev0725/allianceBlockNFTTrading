@@ -39,6 +39,16 @@ contract Escrow is EscrowDetails, Ownable {
         loanNFT.safeTransferFrom(address(this), msg.sender, loanId, partitionsToPurchase, "");
     }
 
+    function transferLendingToken(
+        address borrower,
+        uint256 amount
+    )
+    external
+    onlyRegistry()
+    {
+        lendingToken.transfer(borrower, amount);
+    }
+
     // function receiveFunding(
     // 	uint256 loanId,
     //     uint256 amount
