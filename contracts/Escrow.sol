@@ -16,28 +16,44 @@ contract Escrow is EscrowDetails, Ownable {
      * @dev Initializes the contract by setting the name, symbol, and base URI
      */
     constructor(
-        address registryAddress_
+        address registryAddress_,
+        address lendingToken_,
+        address mainNFT_,
+        address loanNFT_
     ) 
     public 
     {
         registry = IRegistry(registryAddress_);
+        lendingToken = IERC20(lendingToken_);
+        mainNFT = IERC721Mint(mainNFT_);
+        loanNFT = IERC1155Mint(loanNFT_);
     }
 
-    function receiveFunding(
-    	uint256 loanId,
-        uint256 amount
+    function transferLoanNFT(
+        uint256 loanId,
+        uint256 partitionsToPurchase
     )
     external
     onlyRegistry()
     {
-
+        loanNFT.safeTransferFrom(address(this), msg.sender, loanId, partitionsToPurchase, "");
     }
+
+    // function receiveFunding(
+    // 	uint256 loanId,
+    //     uint256 amount
+    // )
+    // external
+    // onlyRegistry()
+    // {
+
+    // }
 
     // function claimFunding(
     //     uint256 loanId
     // )
     // external
-    // onlyBorrower(msg.sender)
+    // onlyBorrower(loanId)
     // {
 
     // }

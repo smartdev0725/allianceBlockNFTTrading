@@ -68,10 +68,9 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
             loanStatus[loanId] = LoanLibrary.LoanStatus.FUNDING;
         }
 
-        // TODO - All funds transfered to escrow.
-        IERC20(lendingToken).transferFrom(msg.sender, address(this), partitionsToPurchase.mul(baseAmountForEachPartition));
-        loanNFT.safeTransferFrom(address(this), msg.sender, loanId, partitionsToPurchase, "");
-
+        IERC20(lendingToken).transferFrom(msg.sender, address(escrow), partitionsToPurchase.mul(baseAmountForEachPartition));
+        
+        escrow.transferLoanNFT(loanId, partitionsToPurchase);
         loanDetails[loanId].partitionsPurchased = loanDetails[loanId].partitionsPurchased.add(partitionsToPurchase);
 
         if(loanDetails[loanId].partitionsPurchased == loanDetails[loanId].totalPartitions) {

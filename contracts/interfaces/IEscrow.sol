@@ -7,4 +7,5 @@ pragma solidity >=0.6.0 <0.8.0;
  */
 interface IEscrow {
     function receiveFunding(uint256 loanId, uint256 amount) external;
+    function transferLoanNFT(uint256 loanId, uint256 partitionsToPurchase) external;
 }
