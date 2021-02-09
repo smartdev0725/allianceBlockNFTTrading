@@ -13,7 +13,7 @@ import "./EscrowDetails.sol";
 contract Escrow is EscrowDetails, Ownable {
 
     /**
-     * @dev Initializes the contract by setting the name, symbol, and base URI
+     * @dev Initializes the contract by setting the registry address, lending token address, main NFT address and the loan NFT address
      */
     constructor(
         address registryAddress_,
