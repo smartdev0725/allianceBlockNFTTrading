@@ -4,30 +4,34 @@ pragma solidity 0.7.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./libs/LoanLibrary.sol";
+import "./EscrowDetails.sol";
 
 /**
  * @title AllianceBlock Escrow contract
  * @notice Responsible for handling the funds in AllianceBlock's ecosystem.
  */
-contract Escrow is Ownable {
+contract Escrow is EscrowDetails, Ownable {
 
     /**
      * @dev Initializes the contract by setting the name, symbol, and base URI
      */
-    constructor() public {
+    constructor(
+        address registryAddress_
+    ) 
+    public 
+    {
+        registry = IRegistry(registryAddress_);
     }
 
-    // TODO - Transfer all funds to and from escrow.
+    function receiveFunding(
+    	uint256 loanId,
+        uint256 amount
+    )
+    external
+    onlyRegistry()
+    {
 
-    // function receiveFunding(
-    // 	uint256 loanId,
-    //     uint256 amount
-    // )
-    // external
-    // onlyRegistry()
-    // {
-
-    // }
+    }
 
     // function claimFunding(
     //     uint256 loanId
