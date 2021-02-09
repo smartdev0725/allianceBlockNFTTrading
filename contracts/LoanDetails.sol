@@ -119,8 +119,8 @@ contract LoanDetails is Storage {
         loanBorrower[totalLoans] = msg.sender;
 
         // TODO - Give minting privilages to escrow and create a function that summarizes those (We don't want multiple external calls)
-        mainNFT.mint(address(this));
-        loanNFT.mintGen0(address(this), lendingAmountRequested_.div(baseAmountForEachPartition));
+        mainNFT.mint(address(escrow));
+        loanNFT.mintGen0(address(escrow), lendingAmountRequested_.div(baseAmountForEachPartition));
 
         loanNFT.pauseTokenTransfer(loan.loanId); //Pause trades for ERC1155s with the specific loan ID.
     }
