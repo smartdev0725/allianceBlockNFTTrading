@@ -103,8 +103,7 @@ contract LoanDetails is Storage {
         require(lendingAmountRequested_.mod(baseAmountForEachPartition) == 0, "Requested Amount must be a multiplier of base amount");
         require(interestPercentage_ >= minimumInterestPercentage, "Interest percentage lower than limit");
 
-        // TODO - Transfer to escrow
-        IERC20(collateralToken_).transferFrom(msg.sender, address(this), collateralAmount_);
+        IERC20(collateralToken_).transferFrom(msg.sender, address(escrow), collateralAmount_);
 
         LoanLibrary.LoanDetails memory loan;
         loan.loanId = totalLoans;
