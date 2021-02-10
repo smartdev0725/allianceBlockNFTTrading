@@ -2,7 +2,6 @@
 pragma solidity 0.7.0;
 
 library LoanLibrary {
-
     enum RepaymentBatchType {
         ONLY_INTEREST, // The interest is repaid in each batch and at the last batch nominal is also repaid.
         INTEREST_PLUS_NOMINAL // In every batch part of nominal alongside interest is getting repaid.

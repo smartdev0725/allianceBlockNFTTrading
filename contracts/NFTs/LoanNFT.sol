@@ -2,20 +2,21 @@
 pragma solidity 0.7.0;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/token/ERC1155/ERC1155Burnable.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/GSN/Context.sol";
 import "../utils/Strings.sol";
+import "../libs/TokenFormat.sol";
 
 /**
  * @title Alliance Block Loan NFTs
  * @notice NFTs that will be held by users
  */
-contract LoanNFT is Context, AccessControl, ERC1155Burnable {
-
+contract LoanNFT is Context, AccessControl, ERC1155 {
     using Counters for Counters.Counter;
+    using TokenFormat for uint256;
 
     // Events
     event GenerationIncreased(uint indexed loanId, address indexed user, uint newGeneration);
@@ -36,11 +37,6 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
 
     // Mapping from token ID to IPFS hash (token metadata)
     mapping(uint => string) ipfsHashes;
-
-    // Use a split bit implementation.
-    // Store the generation in the upper 128 bits..
-    // ..and the non-fungible loan id in the lower 128
-    uint256 constant LOAN_ID_MASK = uint128(~0);
 
     // Access Roles
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -93,24 +89,9 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
     /**
      * @dev Owner can unpause transfers for specific tokens
      */
-    function unpauseTokenTransfer(uint loanId) external onlyPauser{
+    function unpauseTokenTransfer(uint loanId) external onlyPauser {
         transfersPaused[loanId] = false;
         emit TransfersResumed(loanId);
-    }
-
-    /**
-     * @dev Format tokenId into generation and index
-     */
-    function formatTokenId(uint tokenId) public pure returns(uint generation, uint loanId) {
-        generation = tokenId >> 128;
-        loanId = tokenId & LOAN_ID_MASK;
-    }
-
-    /**
-     * @dev get tokenId from generation and loanId
-     */
-    function getTokenId(uint gen, uint loanId) public pure returns(uint tokenId) {
-        return (gen << 128) | loanId;
     }
 
     /**
@@ -123,7 +104,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
     /**
      * @dev Mint generation 0 tokens
      */
-    function mintGen0(address to, uint amount) external onlyMinter{
+    function mintGen0(address to, uint amount) external onlyMinter {
         _loanIdTracker.increment();
         uint tokenId = getCurrentLoanId();
         _mint(to, tokenId, amount, "");        
@@ -134,7 +115,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
      * @dev token is burned, and new token is minted to user
      * @dev token owner should have approvedForAll before calling this function
      */
-    function increaseGeneration(uint tokenId, address user, uint amount) external onlyMinter{        
+    function increaseGeneration(uint tokenId, address user, uint amount) external onlyMinter {        
         _increaseGenerations(tokenId, user, amount, 1);
     }
 
@@ -143,21 +124,25 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
      * @dev token is burned, and new token is minted to user
      * @dev token owner should have approvedForAll before calling this function
      */
-    function increaseGenerations(uint tokenId, address user, uint amount, uint generationsToAdd) external onlyMinter{
+    function increaseGenerations(uint tokenId, address user, uint amount, uint generationsToAdd) external onlyMinter {
         _increaseGenerations(tokenId, user, amount, generationsToAdd);
     }
 
+    function burn(address account, uint256 id, uint256 amount) public onlyMinter {
+        _burn(account, id, amount);
+    }
+
     /**
-     * @notice increase generations of a token
+     * @notice increase multiple generations of a token
      * @dev token is burned, and new token is minted to user
      * @dev token owner should have approvedForAll before calling this function
      */
-    function _increaseGenerations(uint tokenId, address user, uint amount, uint generationsToAdd) internal{
-        (uint generation, uint loanId) = formatTokenId(tokenId);
+    function _increaseGenerations(uint tokenId, address user, uint amount, uint generationsToAdd) internal {
+        (uint generation, uint loanId) = tokenId.formatTokenId();
 
         // Increase generation, leave loanId same
         generation += generationsToAdd;
-        uint newTokenId = getTokenId(generation, loanId);
+        uint newTokenId = generation.getTokenId(loanId);
 
         // Burn previous gen tokens
         burn(user, tokenId, amount);
@@ -183,7 +168,7 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
     override
     {
         for(uint i=0; i< ids.length; i++){
-            (, uint loanId) = formatTokenId(ids[i]);
+            (, uint loanId) = ids[i].formatTokenId();
             require(!transfersPaused[loanId], "Transfers paused");
         }
     }

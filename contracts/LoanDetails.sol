@@ -43,6 +43,12 @@ contract LoanDetails is Storage {
         loanStatus[loanId] = LoanLibrary.LoanStatus.SETTLED;
     }
 
+    modifier onlySettledLoan(uint256 loanId) {
+        require(loanStatus[loanId] == LoanLibrary.LoanStatus.SETTLED,
+            "Only on Settled Status");
+        _;
+    }
+
     modifier onlyBetweenMilestoneTimeframe(uint256 loanId) {
         require(projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp > block.timestamp &&
             projectLoanPayments[loanId].currentMilestoneStartingTimestamp <= block.timestamp,
@@ -88,6 +94,12 @@ contract LoanDetails is Storage {
     modifier onlyWhenAwaitingMilestoneApproval(uint256 loanId) {
         require(loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPROVAL,
             "Only when loan is awaiting for milestone approval");
+        _;
+    }
+
+    modifier onlyEnoughERC1155Balance(uint256 loanId, uint256 amountOfTokens) {
+        require(loanNFT.balanceOf(msg.sender, loanId) >= amountOfTokens,
+            "Only when enough balance");
         _;
     }
 

@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./PersonalLoan.sol";
 import "./ProjectLoan.sol";
+import "./libs/TokenFormat.sol";
 
 /**
  * @title AllianceBlock Registry contract
@@ -13,6 +14,7 @@ import "./ProjectLoan.sol";
  */
 contract Registry is PersonalLoan, ProjectLoan, Ownable {
     using SafeMath for uint256;
+    using TokenFormat for uint256;
     /**
      * @dev Constructor of the contract.
      */
@@ -85,7 +87,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     external
     onlyBorrower(loanId)
     {
-        if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) { 
+        if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
             _executePersonalLoanPayment(loanId);
         } else {
             _executeProjectLoanPayment(loanId);
@@ -93,14 +95,19 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     }
 
     function receivePayment(
-        uint256 loanId,
-        bool isProjectTokens
+        uint256 tokenId,
+        uint256 amountOfTokens,
+        bool onProjectTokens
     )
     external
-    onlyBorrower(loanId)
-    onlyActiveLoan(loanId)
+    onlyEnoughERC1155Balance(tokenId, amountOfTokens)
     {
-        // TODO - RECEIVE PAYMENT (only for ERC1155 holders)
+        (uint256 loanId, uint256 generation) = tokenId.formatTokenId();
+        if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
+            _receivePersonalLoanPayment(loanId, generation, amountOfTokens);
+        } else {
+            _receiveProjectLoanPayment(loanId, amountOfTokens, onProjectTokens);
+        }
     }
 
     function challengeLoan(

@@ -161,7 +161,26 @@ contract ProjectLoan is LoanDetails {
     internal
     onlyBetweenMilestoneTimeframe(loanId_)
     onlyOnProjectRepayment(loanId_)
-    {        
-        IERC20(lendingToken).transferFrom(msg.sender, address(this), projectLoanPayments[loanId_].amountToBeRepaid);
+    {
+        IERC20(lendingToken).transferFrom(msg.sender, address(escrow), projectLoanPayments[loanId_].amountToBeRepaid);
+    }
+
+    function _receiveProjectLoanPayment(
+        uint256 loanId_,
+        uint256 amountOfTokens_,
+        bool onProjectTokens_
+    )
+    internal
+    onlySettledLoan(loanId_)
+    {
+        if(onProjectTokens_) {            
+            // TODO - execute payment on project tokens
+        } else {
+            uint256 amountToBePaid = projectLoanPayments[loanId_].amountToBeRepaid.mul(
+                amountOfTokens_).div(loanDetails[loanId_].totalPartitions);
+
+            loanNFT.burn(msg.sender, loanId_, amountOfTokens_);
+            escrow.transferLendingToken(msg.sender, amountToBePaid);
+        }
     }
 }
