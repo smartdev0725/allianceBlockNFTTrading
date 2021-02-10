@@ -134,20 +134,8 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
      * @dev token is burned, and new token is minted to user
      * @dev token owner should have approvedForAll before calling this function
      */
-    function increaseGeneration(uint tokenId, address user, uint amount) external onlyMinter{
-        (uint generation, uint loanId) = formatTokenId(tokenId);
-
-        // Increase generation, leave loanId same
-        generation++;
-        uint newTokenId = getTokenId(generation, loanId);
-
-        // Burn previous gen tokens
-        burn(user, tokenId, amount);
-
-        // Mint new generation tokens
-        _mint(user, newTokenId, amount, "");
-
-        emit GenerationIncreased(loanId, user, generation);
+    function increaseGeneration(uint tokenId, address user, uint amount) external onlyMinter{        
+        _increaseGenerations(tokenId, user, amount, 1);
     }
 
     /**
@@ -156,6 +144,15 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
      * @dev token owner should have approvedForAll before calling this function
      */
     function increaseGenerations(uint tokenId, address user, uint amount, uint generationsToAdd) external onlyMinter{
+        _increaseGenerations(tokenId, user, amount, generationsToAdd);
+    }
+
+    /**
+     * @notice increase generations of a token
+     * @dev token is burned, and new token is minted to user
+     * @dev token owner should have approvedForAll before calling this function
+     */
+    function _increaseGenerations(uint tokenId, address user, uint amount, uint generationsToAdd) internal{
         (uint generation, uint loanId) = formatTokenId(tokenId);
 
         // Increase generation, leave loanId same
