@@ -149,6 +149,27 @@ contract LoanNFT is Context, AccessControl, ERC1155Burnable {
 
         emit GenerationIncreased(loanId, user, generation);
     }
+
+    /**
+     * @notice increase generations of a token
+     * @dev token is burned, and new token is minted to user
+     * @dev token owner should have approvedForAll before calling this function
+     */
+    function increaseGenerations(uint tokenId, address user, uint amount, uint generationsToAdd) external onlyMinter{
+        (uint generation, uint loanId) = formatTokenId(tokenId);
+
+        // Increase generation, leave loanId same
+        generation += generationsToAdd;
+        uint newTokenId = getTokenId(generation, loanId);
+
+        // Burn previous gen tokens
+        burn(user, tokenId, amount);
+
+        // Mint new generation tokens
+        _mint(user, newTokenId, amount, "");
+
+        emit GenerationIncreased(loanId, user, generation);
+    }
     
     /**
      * @dev Validates if the loanId from the tokenId can be transferred
