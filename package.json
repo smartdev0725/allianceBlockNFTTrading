@@ -10,6 +10,10 @@
     "deploy": "hardhat run scripts/deploy.js",
     "deploy-factory": "hardhat run scripts/uniswap/deploy-factory.js",
     "deploy-pair": "hardhat run scripts/uniswap/deploy-pair.js",
+    "ganache": "yarn ganache-cli -e 1000000000000 -a 100 --networkId 999 -p 8545",
+    "lint": "yarn run lint:sol && yarn run lint:ts",
+    "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
+    "lint:ts": "eslint --config ./.eslintrc.yaml --ignore-path ./.eslintignore --ext .js,.ts .",
     "verify": "hardhat --network rinkeby etherscan-verify --license MIT"
   },
   "repository": {
@@ -30,12 +34,27 @@
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/hardhat-upgrades": "^1.4.3",
     "@openzeppelin/test-helpers": "^0.5.10",
+    "@typechain/truffle-v5": "^4.0.1",
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
+    "@types/mocha": "^7.0.2",
     "dotenv": "^8.2.0",
+    "eslint": "^7.11.0",
+    "eslint-config-prettier": "^6.12.0",
     "ethers": "^5.0.24",
-    "hardhat": "^2.0.6"
+    "hardhat": "^2.0.6",
+    "solhint": "^3.2.1",
+    "solhint-plugin-prettier": "^0.0.5",
+    "ts-generator": "^0.1.1",
+    "typechain": "^4.0.1",
+    "typescript": "^3.9.7"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^3.3.0",
-    "@openzeppelin/contracts-upgradeable": "^3.3.0"
+    "@openzeppelin/contracts-upgradeable": "^3.3.0",
+    "ganache-cli": "^6.12.2",
+    "hardhat-typechain": "^0.3.4",
+    "truffle": "^5.1.65",
+    "ts-node": "^9.1.1"
   }
 }
