@@ -4,8 +4,8 @@ pragma solidity 0.7.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./PersonalLoan.sol";
-import "./ProjectLoan.sol";
+import "./registry/PersonalLoan.sol";
+import "./registry/ProjectLoan.sol";
 import "./libs/TokenFormat.sol";
 
 /**
@@ -19,13 +19,13 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
      * @dev Constructor of the contract.
      */
     constructor(
-        uint256 baseAmountForEachPartition_,
         address escrowAddress,
         address governanceAddress_,
         address lendingToken_,
-        uint256 minimumInterestPercentage_,
         address mainNFT_,
         address loanNFT_,
+        uint256 baseAmountForEachPartition_,
+        uint256 minimumInterestPercentage_,
         uint256 maxMilestones_,
         uint256 milestoneExtensionInterval_,
         uint256 vestingBatches_,

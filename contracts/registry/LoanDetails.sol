@@ -124,15 +124,16 @@ contract LoanDetails is Storage {
         loan.lendingAmount = lendingAmountRequested_;
         loan.totalInterest = lendingAmountRequested_.mul(interestPercentage_).div(100);
         loan.extraInfo = extraInfo_;
+        loan.totalPartitions = lendingAmountRequested_.div(baseAmountForEachPartition);
 
         loanDetails[totalLoans] = loan;
 
         loanStatus[totalLoans] = LoanLibrary.LoanStatus.REQUESTED;
         loanBorrower[totalLoans] = msg.sender;
 
-        // TODO - Give minting privilages to escrow and create a function that summarizes those (We don't want multiple external calls)
-        mainNFT.mint(address(escrow));
-        loanNFT.mintGen0(address(escrow), lendingAmountRequested_.div(baseAmountForEachPartition));
+        // TODO - Mint Correctly And Burn on Settlement
+        // mainNFT.mint(address(escrow));
+        loanNFT.mintGen0(address(escrow), loan.totalPartitions);
 
         loanNFT.pauseTokenTransfer(loan.loanId); //Pause trades for ERC1155s with the specific loan ID.
     }

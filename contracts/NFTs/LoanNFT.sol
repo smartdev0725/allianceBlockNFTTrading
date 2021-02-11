@@ -33,10 +33,10 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
     string private _baseURI;
 
     // Mapping from loan ID to paused condition
-    mapping(uint => bool) transfersPaused;
+    mapping(uint => bool) public transfersPaused;
 
     // Mapping from token ID to IPFS hash (token metadata)
-    mapping(uint => string) ipfsHashes;
+    mapping(uint => string) public ipfsHashes;
 
     // Access Roles
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -105,9 +105,9 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
      * @dev Mint generation 0 tokens
      */
     function mintGen0(address to, uint amount) external onlyMinter {
-        _loanIdTracker.increment();
         uint tokenId = getCurrentLoanId();
-        _mint(to, tokenId, amount, "");        
+        _mint(to, tokenId, amount, ""); 
+        _loanIdTracker.increment();       
     }
 
     /**

@@ -4,7 +4,7 @@ pragma solidity 0.7.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./LoanDetails.sol";
-import "./libs/TokenFormat.sol";
+import "../libs/TokenFormat.sol";
 
 /**
  * @title AllianceBlock PersonalLoan contract

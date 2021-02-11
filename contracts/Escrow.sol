@@ -5,28 +5,37 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./libs/LoanLibrary.sol";
 import "./EscrowDetails.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155Holder.sol";
 
 /**
  * @title AllianceBlock Escrow contract
  * @notice Responsible for handling the funds in AllianceBlock's ecosystem.
  */
-contract Escrow is EscrowDetails, Ownable {
+contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
 
     /**
      * @dev Initializes the contract by setting the registry address, lending token address, main NFT address and the loan NFT address
      */
     constructor(
-        address registryAddress_,
         address lendingToken_,
         address mainNFT_,
         address loanNFT_
     ) 
     public 
     {
-        registry = IRegistry(registryAddress_);
         lendingToken = IERC20(lendingToken_);
         mainNFT = IERC721Mint(mainNFT_);
         loanNFT = IERC1155Mint(loanNFT_);
+    }
+
+    function initialize(
+        address registryAddress_
+    )
+    external
+    onlyOwner()
+    {
+        require(address(registry) == address(0), "Cannot initialize second time");
+        registry = IRegistry(registryAddress_);
     }
 
     function transferLoanNFT(

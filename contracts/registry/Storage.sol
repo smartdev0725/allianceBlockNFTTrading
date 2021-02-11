@@ -2,11 +2,11 @@
 pragma solidity 0.7.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./libs/LoanLibrary.sol";
-import "./interfaces/IERC1155Mint.sol";
-import "./interfaces/IERC721Mint.sol";
-import "./interfaces/IGovernance.sol";
-import "./interfaces/IEscrow.sol";
+import "../libs/LoanLibrary.sol";
+import "../interfaces/IERC1155Mint.sol";
+import "../interfaces/IERC721Mint.sol";
+import "../interfaces/IGovernance.sol";
+import "../interfaces/IEscrow.sol";
 
 /**
  * @title AllianceBlock Storage contract

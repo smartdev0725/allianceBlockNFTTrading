@@ -46,7 +46,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract RewardDistributionRecipient is Ownable {
-    address rewardDistribution;
+    address public rewardDistribution;
 
     modifier onlyRewardDistribution() {
         require(
@@ -95,7 +95,7 @@ contract LPTokenWrapper is RewardDistributionRecipient{
     }
 }
 
-contract Staker is LPTokenWrapper{
+contract Staking is LPTokenWrapper{
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     // Swap contract address

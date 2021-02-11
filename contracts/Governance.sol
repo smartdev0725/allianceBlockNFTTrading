@@ -91,12 +91,13 @@ contract Governance is Ownable {
     }
 
     function initialize(
-        address registry_
+        address registryAddress_
     )
     external
     onlyOwner()
     {
-        registry = IRegistry(registry_);
+        require(address(registry) == address(0), "Cannot initialize second time");
+        registry = IRegistry(registryAddress_);
     }
 
     function requestApproval(
@@ -141,8 +142,7 @@ contract Governance is Ownable {
     }
 
     function challengeRequest(
-        uint256 requestId,
-        bool decision
+        uint256 requestId
     )
     external
     onlyAfterDeadlineAndNotApproved(requestId)
