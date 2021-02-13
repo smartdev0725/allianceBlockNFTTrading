@@ -25,7 +25,7 @@ const LoanNFT = artifacts.require('LoanNFT');
 const MainNFT = artifacts.require('MainNFT');
 
 describe('Registry', function () {
-  beforeEach(async function () {
+  before(async function () {
     const accounts = await web3.eth.getAccounts();
 
     this.owner = accounts[0];
