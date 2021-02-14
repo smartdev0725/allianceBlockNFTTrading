@@ -49,7 +49,7 @@ export default async function suite() {
       await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[1] });
     });
 
-    it('when funding a loan purchasing exactly enough partitions', async function () {
+    it('when funding a loan', async function () {
       const initBorrowerLendingBalance = new BN(await this.lendingToken.balanceOf(this.borrower));
       let initEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
       let initEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));

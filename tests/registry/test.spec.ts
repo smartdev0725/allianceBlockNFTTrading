@@ -1,6 +1,8 @@
 import checkPersonalLoanRequests from './checkPersonalLoanRequests';
 import checkLoanApproval from './checkLoanApproval';
 import checkFundLoan from './checkFundLoan';
+import checkLoanRepayment from './checkLoanRepayment';
+
 import {
   DAO_LOAN_APPROVAL,
   DAO_MILESTONE_APPROVAL,
@@ -86,19 +88,21 @@ describe('Registry', function () {
     await this.loanNft.grantRole(web3.utils.keccak256('PAUSER_ROLE'), this.registry.address, { from: this.owner });
 
     // Transfer tokens.
-    const amountToTransfer = (new BN(toWei('100000'))).toString();
-    const balance = await this.collateralToken.balanceOf(this.owner);
-    await this.collateralToken.mint(this.borrower, amountToTransfer, { from: this.owner });
+    const amountToTransfer = (new BN(toWei('1000000'))).toString();
 
     for(let i = 0; i < this.lenders.length; i++) {
       await this.lendingToken.mint(this.lenders[i], amountToTransfer, { from: this.owner });
       await this.lendingToken.approve(this.registry.address, amountToTransfer, { from: this.lenders[i] });
     }
 
+    await this.lendingToken.mint(this.borrower, amountToTransfer, { from: this.owner });
+    await this.lendingToken.approve(this.registry.address, amountToTransfer, { from: this.borrower });
+    await this.collateralToken.mint(this.borrower, amountToTransfer, { from: this.owner });
     await this.collateralToken.approve(this.registry.address, amountToTransfer, { from: this.borrower });
   });
 
   describe('When checking personal loan requests', checkPersonalLoanRequests.bind(this));
   describe('When checking personal loan approval requests', checkLoanApproval.bind(this));
   describe('When checking personal loan funding', checkFundLoan.bind(this));
+  describe('When checking personal loan repayment', checkLoanRepayment.bind(this));
 });
