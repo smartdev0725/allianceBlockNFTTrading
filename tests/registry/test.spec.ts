@@ -1,4 +1,5 @@
 import checkPersonalLoanRequests from './checkPersonalLoanRequests';
+import checkLoanApproval from './checkLoanApproval';
 import {
   DAO_LOAN_APPROVAL,
   DAO_MILESTONE_APPROVAL,
@@ -97,4 +98,5 @@ describe('Registry', function () {
   });
 
   describe('When checking personal loan requests', checkPersonalLoanRequests.bind(this));
+  describe('When checking approval requests', checkLoanApproval.bind(this));
 });

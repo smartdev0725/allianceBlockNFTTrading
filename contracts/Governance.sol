@@ -138,6 +138,8 @@ contract Governance is Ownable {
             } else {                
                 registry.decideForLoan(approvalRequests[requestId].loanId, true);
             }
+
+            approvalRequests[requestId].isApproved = true;
         }
     }
 
