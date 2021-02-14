@@ -65,6 +65,7 @@ export default async function suite() {
       expect(loanDetails.startingDate).to.be.bignumber.equal(new BN(0));
       expect(loanDetails.collateralToken).to.be.equal(this.collateralToken.address);
       expect(loanDetails.collateralAmount).to.be.bignumber.equal(amountCollateralized);
+      expect(loanDetails.lendingAmount).to.be.bignumber.equal(amountRequested);
       expect(loanDetails.totalPartitions).to.be.bignumber.equal(totalPartitions);
       expect(loanDetails.totalInterest).to.be.bignumber.equal(totalInterest);
       expect(loanDetails.extraInfo).to.be.equal(ipfsHash);
@@ -142,6 +143,7 @@ export default async function suite() {
       expect(loanDetails.startingDate).to.be.bignumber.equal(new BN(0));
       expect(loanDetails.collateralToken).to.be.equal(this.collateralToken.address);
       expect(loanDetails.collateralAmount).to.be.bignumber.equal(amountCollateralized);
+      expect(loanDetails.lendingAmount).to.be.bignumber.equal(amountRequested);
       expect(loanDetails.totalPartitions).to.be.bignumber.equal(totalPartitions);
       expect(loanDetails.totalInterest).to.be.bignumber.equal(totalInterest);
       expect(loanDetails.extraInfo).to.be.equal(ipfsHash);

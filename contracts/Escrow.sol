@@ -40,12 +40,13 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
 
     function transferLoanNFT(
         uint256 loanId,
-        uint256 partitionsToPurchase
+        uint256 partitionsToPurchase,
+        address receiver
     )
     external
     onlyRegistry()
     {
-        loanNFT.safeTransferFrom(address(this), msg.sender, loanId, partitionsToPurchase, "");
+        loanNFT.safeTransferFrom(address(this), receiver, loanId, partitionsToPurchase, "");
     }
 
     function transferLendingToken(

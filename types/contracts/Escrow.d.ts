@@ -216,21 +216,25 @@ export interface EscrowInstance extends Truffle.ContractInstance {
     (
       loanId: number | BN | string,
       partitionsToPurchase: number | BN | string,
+      receiver: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
       loanId: number | BN | string,
       partitionsToPurchase: number | BN | string,
+      receiver: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
       loanId: number | BN | string,
       partitionsToPurchase: number | BN | string,
+      receiver: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
       loanId: number | BN | string,
       partitionsToPurchase: number | BN | string,
+      receiver: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
@@ -445,21 +449,25 @@ export interface EscrowInstance extends Truffle.ContractInstance {
       (
         loanId: number | BN | string,
         partitionsToPurchase: number | BN | string,
+        receiver: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
         loanId: number | BN | string,
         partitionsToPurchase: number | BN | string,
+        receiver: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
         loanId: number | BN | string,
         partitionsToPurchase: number | BN | string,
+        receiver: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
         loanId: number | BN | string,
         partitionsToPurchase: number | BN | string,
+        receiver: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };

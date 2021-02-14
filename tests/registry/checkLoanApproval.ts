@@ -9,16 +9,10 @@ export default async function suite() {
   describe('Succeeds', async () => {
     let loanId: BN;
     let approvalRequest: BN;
-    let initBorrowerCollateralBalance: BN;
-    let initEscrowCollateralBalance: BN;
-    let initEscrowLoanNftBalance: BN;
 
     beforeEach(async function () {
       loanId = new BN(await this.registry.totalLoans());
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
-      initBorrowerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.borrower));
-      initEscrowCollateralBalance = new BN(await this.collateralToken.balanceOf(this.escrow.address));
-      initEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
 
       const amountRequested = new BN(toWei('10000'));
       const amountCollateralized = new BN(toWei('20000'));

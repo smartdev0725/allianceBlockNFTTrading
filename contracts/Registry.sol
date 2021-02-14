@@ -72,7 +72,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         }
 
         IERC20(lendingToken).transferFrom(msg.sender, address(escrow), partitionsToPurchase.mul(baseAmountForEachPartition));
-        escrow.transferLoanNFT(loanId, partitionsToPurchase);
+        escrow.transferLoanNFT(loanId, partitionsToPurchase, msg.sender);
 
         loanDetails[loanId].partitionsPurchased = loanDetails[loanId].partitionsPurchased.add(partitionsToPurchase);
 
