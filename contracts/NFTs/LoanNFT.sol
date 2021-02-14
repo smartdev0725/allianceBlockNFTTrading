@@ -2,15 +2,29 @@
 pragma solidity 0.7.0;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/presets/ERC1155PresetMinterPauser.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/GSN/Context.sol";
 import "../utils/Strings.sol";
+import "../libs/TokenFormat.sol";
 
 /**
  * @title Alliance Block Loan NFTs
  * @notice NFTs that will be held by users
  */
-contract LoanNFT is ERC1155PresetMinterPauser {
+contract LoanNFT is Context, AccessControl, ERC1155 {
+    using Counters for Counters.Counter;
+    using TokenFormat for uint256;
+
+    // Events
+    event GenerationIncreased(uint indexed loanId, address indexed user, uint newGeneration);
+    event TransfersPaused(uint loanId);
+    event TransfersResumed(uint loanId);
+
+    // Keep track of loan Ids
+    Counters.Counter private _loanIdTracker;
 
     // contract URI for marketplaces
     string private _contractURI;
@@ -18,52 +32,129 @@ contract LoanNFT is ERC1155PresetMinterPauser {
     // base url for each token metadata. Concatenates with ipfsHash for full path
     string private _baseURI;
 
-    // Mapping from token ID to paused condition
-    mapping(uint => bool) transfersPaused;
+    // Mapping from loan ID to paused condition
+    mapping(uint => bool) public transfersPaused;
 
     // Mapping from token ID to IPFS hash (token metadata)
-    mapping(uint => string) ipfsHashes;
+    mapping(uint => string) public ipfsHashes;
+
+    // Access Roles
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /**
     * @dev Initializes the contract by setting the base URI
     */
-    constructor() public ERC1155PresetMinterPauser(""){
-        _baseURI = "https://ipfs.io/ipfs/";
+    constructor() public ERC1155("") {
+        _baseURI = "ipfs://";
         _contractURI = "https://allianceblock.io/";
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _setupRole(MINTER_ROLE, _msgSender());
+        _setupRole(PAUSER_ROLE, _msgSender());
+    }
+    
+    modifier onlyPauser(){
+        require(hasRole(PAUSER_ROLE, _msgSender()), "Must have pauser role");
+        _;
     }
 
-    /**
-    * @dev token metadata
-    */
-    function uri(uint tokenId) public view override returns(string memory){
-        return Strings.strConcat(_baseURI, ipfsHashes[tokenId]);
+    modifier onlyMinter(){
+        require(hasRole(MINTER_ROLE, _msgSender()), "Must have minter role to mint");
+        _;
     }
+
+    // /**
+    // * @dev token metadata
+    // */
+    // function uri(uint tokenId) public view override returns(string memory){
+    //     return Strings.strConcat(_baseURI, ipfsHashes[tokenId]);
+    // }
 
     /**
     * @dev contract metadata
     */
-    function contractURI() public view returns(string memory){
+    function contractURI() public view returns(string memory) {
         return _contractURI;
     }
 
     /**
      * @dev Owner can pause transfers for specific tokens
+     * @dev pauses all loan ids, no matter the generation
      */
-    function pauseTokenTransfer(uint tokenId) external{
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have pauser role");
-        transfersPaused[tokenId] = true;
+    function pauseTokenTransfer(uint loanId) external onlyPauser {        
+        transfersPaused[loanId] = true;
+        emit TransfersPaused(loanId);
     }
 
     /**
      * @dev Owner can unpause transfers for specific tokens
      */
-    function unpauseTokenTransfer(uint tokenId) external{
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have pauser role");
-        transfersPaused[tokenId] = false;
+    function unpauseTokenTransfer(uint loanId) external onlyPauser {
+        transfersPaused[loanId] = false;
+        emit TransfersResumed(loanId);
+    }
+
+    /**
+     * @dev Format tokenId into generation and index
+     */
+    function getCurrentLoanId() public view returns(uint loanId) {
+        return _loanIdTracker.current();
+    }
+
+    /**
+     * @dev Mint generation 0 tokens
+     */
+    function mintGen0(address to, uint amount) external onlyMinter {
+        uint tokenId = getCurrentLoanId();
+        _mint(to, tokenId, amount, ""); 
+        _loanIdTracker.increment();       
+    }
+
+    /**
+     * @notice increase generation of a token
+     * @dev token is burned, and new token is minted to user
+     * @dev token owner should have approvedForAll before calling this function
+     */
+    function increaseGeneration(uint tokenId, address user, uint amount) external onlyMinter {        
+        _increaseGenerations(tokenId, user, amount, 1);
+    }
+
+    /**
+     * @notice increase generations of a token
+     * @dev token is burned, and new token is minted to user
+     * @dev token owner should have approvedForAll before calling this function
+     */
+    function increaseGenerations(uint tokenId, address user, uint amount, uint generationsToAdd) external onlyMinter {
+        _increaseGenerations(tokenId, user, amount, generationsToAdd);
+    }
+
+    function burn(address account, uint256 id, uint256 amount) public onlyMinter {
+        _burn(account, id, amount);
+    }
+
+    /**
+     * @notice increase multiple generations of a token
+     * @dev token is burned, and new token is minted to user
+     * @dev token owner should have approvedForAll before calling this function
+     */
+    function _increaseGenerations(uint tokenId, address user, uint amount, uint generationsToAdd) internal {
+        (uint generation, uint loanId) = tokenId.formatTokenId();
+
+        // Increase generation, leave loanId same
+        generation += generationsToAdd;
+        uint newTokenId = generation.getTokenId(loanId);
+
+        // Burn previous gen tokens
+        burn(user, tokenId, amount);
+
+        // Mint new generation tokens
+        _mint(user, newTokenId, amount, "");
+
+        emit GenerationIncreased(loanId, user, generation);
     }
     
     /**
-     * @dev Validates if a token can be transferred
+     * @dev Validates if the loanId from the tokenId can be transferred
      */
     function _beforeTokenTransfer(
         address operator,
@@ -71,11 +162,14 @@ contract LoanNFT is ERC1155PresetMinterPauser {
         address to,
         uint256[] memory ids,
         uint256[] memory amounts,
-        bytes memory data) 
-        internal override
+        bytes memory data
+    ) 
+    internal
+    override
     {
         for(uint i=0; i< ids.length; i++){
-            require(!transfersPaused[ids[i]], "Transfers paused");
+            (, uint loanId) = ids[i].formatTokenId();
+            require(!transfersPaused[loanId], "Transfers paused");
         }
     }
 }
