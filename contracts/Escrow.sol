@@ -78,41 +78,4 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
     {
         registry = IRegistry(registryAddress_);
     }
-
-    // function receiveFunding(
-    // 	uint256 loanId,
-    //     uint256 amount
-    // )
-    // external
-    // onlyRegistry()
-    // {
-
-    // }
-
-    // function claimFunding(
-    //     uint256 loanId
-    // )
-    // external
-    // onlyBorrower(loanId)
-    // {
-
-    // }
-
-    // function receivePayment(
-    //     uint256 loanId
-    // )
-    // external
-    // onlyRegistry()
-    // {
-
-    // }
-
-    // function withdrawPayment(
-    //     uint256 loanId
-    // )
-    // external
-    // onlyERC1155Holder(msg.sender)
-    // {
-
-    // }
 }
