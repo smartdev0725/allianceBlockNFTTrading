@@ -20,6 +20,9 @@ const config: HardhatUserConfig = {
       //   blockNumber: 11589707,
       // },
     },
+    ganache:{
+      url:"http://localhost:8545",
+    },
     rinkeby: {
       url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
       accounts: [process.env.RINKEBY_PRIVKEY],
