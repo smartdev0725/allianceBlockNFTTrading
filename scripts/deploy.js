@@ -74,8 +74,21 @@ async function main() {
   // Add roles.
   await this.loanNft.grantRole(web3.utils.keccak256('MINTER_ROLE'), this.registry.address, { from: this.owner });
   await this.loanNft.grantRole(web3.utils.keccak256('PAUSER_ROLE'), this.registry.address, { from: this.owner });
+  
+  // Transfer tokens.
+  const amountToTransfer = (new BN(toWei('1000000'))).toString();
 
-  // Deployment
+  for(let i = 0; i < this.lenders.length; i++) {
+    await this.lendingToken.mint(this.lenders[i], amountToTransfer, { from: this.owner });
+    await this.lendingToken.approve(this.registry.address, amountToTransfer, { from: this.lenders[i] });
+  }
+
+  await this.lendingToken.mint(this.borrower, amountToTransfer, { from: this.owner });
+  await this.lendingToken.approve(this.registry.address, amountToTransfer, { from: this.borrower });
+  await this.collateralToken.mint(this.borrower, amountToTransfer, { from: this.owner });
+  await this.collateralToken.approve(this.registry.address, amountToTransfer, { from: this.borrower });
+  
+  // Deployment Addresses
   console.log("\nDEPLOYMENTS\n")
   console.log("\tALBT:", this.albt.address);
   console.log("\tLoan NFT:", this.loanNft.address);
