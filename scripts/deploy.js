@@ -91,11 +91,13 @@ async function main() {
   // Deployment Addresses
   console.log("\nDEPLOYMENTS\n")
   console.log("\tALBT:", this.albt.address);
+  console.log("\tCollateral:", this.collateralToken.address);
   console.log("\tLoan NFT:", this.loanNft.address);
+  console.log("\tMain NFT:", this.mainNft.address);
   console.log("\tGovernance:", this.governance.address);
   console.log("\tEscrow:", this.escrow.address);
   console.log("\tStaking:", this.staking.address);
-  console.log("\tRegistry", this.registry.address);
+  console.log("\tRegistry\n", this.registry.address);
 }
 
 main()
