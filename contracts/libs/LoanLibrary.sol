@@ -34,7 +34,7 @@ library LoanLibrary {
         uint256 lendingAmount; // The amount of tokens that was lended to the borrower.
         uint256 totalPartitions; // The total partitions or ERC1155 tokens, in which loan is splitted.
         uint256 totalInterest; // The amount of interest to be paid.
-        bytes32 extraInfo; // The ipfs hash, where all extra info about the loan are stored.
+        string extraInfo; // The ipfs hash, where all extra info about the loan are stored.
         uint256 partitionsPurchased; // The total partitions or ERC1155 tokens that have already been purchased.
     }
 
