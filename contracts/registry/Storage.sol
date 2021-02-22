@@ -33,4 +33,14 @@ contract Storage {
     uint256 public milestoneExtensionInterval; // If milestone is rejected, this time interval is provided for the project to deliver.
     uint256 public vestingBatches; // The amount of vesting batches when a lender decides to get project tokens.
     uint256 public vestingTimeInterval; // The time interval between vesting batches when a lender decides to get project tokens.
+
+    function getLoanStatus(
+        uint256 loanId
+    )
+    external
+    returns (LoanLibrary.LoanStatus)
+    {
+        return loanStatus[loanId];
+    }
+
 }

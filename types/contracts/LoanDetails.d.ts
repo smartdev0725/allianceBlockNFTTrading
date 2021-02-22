@@ -19,6 +19,25 @@ export interface LoanDetailsInstance extends Truffle.ContractInstance {
 
   escrow(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
+  getLoanStatus: {
+    (
+      loanId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      loanId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<BN>;
+    sendTransaction(
+      loanId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      loanId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
   governance(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   lendingToken(txDetails?: Truffle.TransactionDetails): Promise<string>;
@@ -85,6 +104,25 @@ export interface LoanDetailsInstance extends Truffle.ContractInstance {
     ): Promise<BN>;
 
     escrow(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    getLoanStatus: {
+      (
+        loanId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        loanId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<BN>;
+      sendTransaction(
+        loanId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        loanId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
 
     governance(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
