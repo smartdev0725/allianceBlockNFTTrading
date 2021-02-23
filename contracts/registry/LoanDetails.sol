@@ -108,7 +108,7 @@ contract LoanDetails is Storage {
         address collateralToken_,
         uint256 collateralAmount_,
         uint256 interestPercentage_,
-        bytes32 extraInfo_
+        string memory extraInfo_
     )
     internal
     {

@@ -21,7 +21,7 @@ contract PersonalLoan is LoanDetails {
         uint256 totalAmountOfBatches,
         uint256 interestPercentage,
         uint256 batchTimeInterval,
-        bytes32 extraInfo,
+        string memory extraInfo,
         LoanLibrary.RepaymentBatchType repaymentBatchType
     )
     external

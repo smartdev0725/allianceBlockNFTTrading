@@ -20,7 +20,7 @@ contract ProjectLoan is LoanDetails {
         uint256 totalMilestones,
         uint256[] calldata milestoneDurations,
         uint256 timeDiffBetweenDeliveryAndRepayment,
-        bytes32 extraInfo
+        string memory extraInfo
     )
     external
     onlyAcceptedNumberOfMilestones(totalMilestones)
