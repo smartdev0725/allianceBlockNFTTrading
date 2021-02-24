@@ -2,7 +2,7 @@ node_modules/
 build/
 artifacts/
 cache/
-types/
+types/contracts/
 package-lock.json
 .env
 .vscode
