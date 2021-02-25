@@ -5,6 +5,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 
 import "@nomiclabs/hardhat-truffle5";
+import "hardhat-gas-reporter";
 import "hardhat-typechain";
 
 if (!process.env.RINKEBY_PRIVKEY) throw new Error("RINKEBY_PRIVKEY missing from .env file");
@@ -46,6 +47,12 @@ const config: HardhatUserConfig = {
         runs: 200,
       },
     },
+  },
+  gasReporter: {
+    currency: "USD",
+    gasPrice: 120,
+    enabled: true,
+    coinmarketcap: process.env.CMC_API_KEY,
   },
   typechain: {
     outDir: "types/contracts",
