@@ -15,6 +15,17 @@ import "./libs/TokenFormat.sol";
 contract Registry is PersonalLoan, ProjectLoan, Ownable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
+
+    // Events
+    event LoanDecisionMade(uint indexed loanId, bool decision);
+    event LoanPartitionsPurchased(uint indexed loanId, uint256 partitionsToPurchase);
+    event LoanStarted(uint indexed loanId);
+    event LoanApproved(uint indexed loanId);
+    event LoanRejected(uint indexed loanId);
+    event LoanChallanged(uint indexed loanId);
+    event PaymentReceived(uint indexed loanId, uint256 amountOfTokens, uint256 generation);
+    event PaymentExecuted(uint indexed loanId);
+
     /**
      * @dev Constructor of the contract.
      */
@@ -55,6 +66,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     {
         if(decision) _approveLoan(loanId);
         else _rejectLoan(loanId);
+        emit LoanDecisionMade(loanId, decision);
     }
 
     function fundLoan(
@@ -76,6 +88,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
 
         loanDetails[loanId].partitionsPurchased = loanDetails[loanId].partitionsPurchased.add(partitionsToPurchase);
 
+        emit LoanPartitionsPurchased(loanId, partitionsToPurchase);
         if(loanDetails[loanId].partitionsPurchased == loanDetails[loanId].totalPartitions) {
             _startLoan(loanId);
         }
@@ -92,6 +105,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         } else {
             _executeProjectLoanPayment(loanId);
         }
+        emit PaymentExecuted(loanId);
     }
 
     function receivePayment(
@@ -108,6 +122,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         } else {
             _receiveProjectLoanPayment(loanId, amountOfTokens, onProjectTokens);
         }
+        emit PaymentReceived(loanId, amountOfTokens, generation);
     }
 
     function challengeLoan(
@@ -119,6 +134,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     {
         if(loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) _challengePersonalLoan(loanId);
         else _challengeProjectLoan(loanId);
+        emit LoanChallanged(loanId);
     }
 
     function _approveLoan(
@@ -128,6 +144,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.APPROVED;
         loanNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
+        emit LoanApproved(loanId_);
     }
 
     function _rejectLoan(
@@ -137,6 +154,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.REJECTED;
         escrow.transferCollateralToken(loanDetails[loanId_].collateralToken, loanBorrower[loanId_], loanDetails[loanId_].collateralAmount);
+        emit LoanRejected(loanId_);
     }
 
     function _startLoan(
@@ -148,6 +166,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         loanDetails[loanId_].startingDate = block.timestamp;
 
         if(loanDetails[loanId_].loanType == LoanLibrary.LoanType.PERSONAL) _startPersonalLoan(loanId_);
-        else _startProjectLoan(loanId_);        
+        else _startProjectLoan(loanId_);
+        emit LoanStarted(loanId_);
     }
 }
