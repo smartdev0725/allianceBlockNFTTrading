@@ -61,7 +61,6 @@ describe('Registry', function () {
     );
 
     this.staking = await Staking.new(
-      this.albt.address,
       this.albt.address
     );
 
