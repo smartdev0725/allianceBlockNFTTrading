@@ -56,6 +56,7 @@ export default async function suite() {
 
       const loanStatus = await this.registry.loanStatus(loanId);
       const loanDetails = await this.registry.loanDetails(loanId);
+      const loanPayments = await this.registry.projectLoanPayments(loanId);
 
       // Correct Status.
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.REQUESTED);
@@ -71,6 +72,16 @@ export default async function suite() {
       expect(loanDetails.totalInterest).to.be.bignumber.equal(totalInterest);
       expect(loanDetails.extraInfo).to.be.equal(ipfsHash);
       expect(loanDetails.partitionsPurchased).to.be.bignumber.equal(new BN(0));
+
+      // Correct Payments.
+      expect(loanPayments.totalMilestones).to.be.bignumber.equal(totalMilestones);
+      expect(loanPayments.milestonesDelivered).to.be.bignumber.equal(new BN(0));
+      expect(loanPayments.milestonesExtended).to.be.bignumber.equal(new BN(0));
+      expect(loanPayments.timeDiffBetweenDeliveryAndRepayment).to.be.bignumber.equal(timeDiffBetweenDeliveryAndRepayment);
+      expect(loanPayments.currentMilestoneStartingTimestamp).to.be.bignumber.equal(new BN(0));
+      expect(loanPayments.currentMilestoneDeadlineTimestamp).to.be.bignumber.equal(new BN(0));
+      expect(loanPayments.amountToBeRepaid).to.be.bignumber.equal(totalAmountRequested.add(totalInterest));
+      expect(loanPayments.discountPerMillion).to.be.bignumber.equal(new BN(0));
     });
   });
 }
