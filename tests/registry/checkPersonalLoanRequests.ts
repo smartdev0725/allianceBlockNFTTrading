@@ -105,7 +105,7 @@ export default async function suite() {
       const totalAmountOfBatches = new BN(2);
       const interestPercentage = new BN(20);
       const batchTimeInterval = new BN(20 * ONE_DAY);
-      const ipfsHash = web3.utils.keccak256('0x01'); // Dummy hash for testing.
+      const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
 
       const tx = await this.registry.requestPersonalLoan(
         amountRequested.toString(),
