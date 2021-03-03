@@ -183,4 +183,18 @@ contract ProjectLoan is LoanDetails {
             escrow.transferLendingToken(msg.sender, amountToBePaid);
         }
     }
+
+    // GETTERS
+    function getMilestonesInfo(
+        uint256 loanId_,
+        uint256 milestone_
+    )
+    public
+    view
+    returns(uint amount, uint timestamp)
+    {
+        amount = projectLoanPayments[loanId_].milestoneLendingAmount[milestone_];
+        timestamp = projectLoanPayments[loanId_].milestoneDuration[milestone_];
+    }
+
 }

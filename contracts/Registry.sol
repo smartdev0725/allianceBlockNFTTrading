@@ -42,7 +42,6 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         uint256 vestingBatches_,
         uint256 vestingTimeInterval_
     )
-    public
     {
         escrow = IEscrow(escrowAddress);
         baseAmountForEachPartition = baseAmountForEachPartition_;
