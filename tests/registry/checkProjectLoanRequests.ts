@@ -16,8 +16,8 @@ export default async function suite() {
     beforeEach(async function () {
       loanId = new BN(await this.registry.totalLoans());
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
-      initBorrowerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.borrower));
-      initEscrowCollateralBalance = new BN(await this.collateralToken.balanceOf(this.escrow.address));
+      initBorrowerCollateralBalance = new BN(await this.projectToken.balanceOf(this.projectOwner));
+      initEscrowCollateralBalance = new BN(await this.projectToken.balanceOf(this.escrow.address));
       initEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
     });
 
@@ -54,9 +54,16 @@ export default async function suite() {
       const totalPartitions = totalAmountRequested.div(new BN(toWei(BASE_AMOUNT.toString())));
       const totalInterest = totalAmountRequested.mul(interestPercentage).div(new BN(100));
 
+      const newBorrowerCollateralBalance = new BN(await this.projectToken.balanceOf(this.projectOwner));
+      const newEscrowCollateralBalance = new BN(await this.projectToken.balanceOf(this.escrow.address));
+      const newEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
+
+      const isPaused = await this.loanNft.transfersPaused(loanId);
+
       const loanStatus = await this.registry.loanStatus(loanId);
       const loanDetails = await this.registry.loanDetails(loanId);
       const loanPayments = await this.registry.projectLoanPayments(loanId);
+      const daoApprovalRequest = await this.governance.approvalRequests(approvalRequest);
 
       // Correct Status.
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.REQUESTED);
@@ -82,6 +89,28 @@ export default async function suite() {
       expect(loanPayments.currentMilestoneDeadlineTimestamp).to.be.bignumber.equal(new BN(0));
       expect(loanPayments.amountToBeRepaid).to.be.bignumber.equal(totalAmountRequested.add(totalInterest));
       expect(loanPayments.discountPerMillion).to.be.bignumber.equal(new BN(0));
+      for (const i in milestoneDurations) {
+        const {amount, timestamp} = await this.registry.getMilestonesInfo(loanId, i);
+        expect(amount).to.be.bignumber.equal(amountRequestedPerMilestone[i]);
+        expect(timestamp).to.be.bignumber.equal(milestoneDurations[i]);
+      }
+
+      // Correct Balances.
+      expect(initBorrowerCollateralBalance.sub(newBorrowerCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
+      expect(newEscrowCollateralBalance.sub(initEscrowCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
+      expect(newEscrowLoanNftBalance.sub(initEscrowLoanNftBalance)).to.be.bignumber.equal(totalPartitions);
+
+      // Correct Nft Behavior.
+      expect(isPaused).to.be.equal(true);
+
+      // Correct Dao Request.
+      expect(daoApprovalRequest.loanId).to.be.bignumber.equal(loanId);
+      expect(daoApprovalRequest.isMilestone).to.be.equal(false);
+      expect(daoApprovalRequest.milestoneNumber).to.be.bignumber.equal(new BN(0));
+      expect(daoApprovalRequest.deadlineTimestamp).to.be.bignumber.equal(
+        (await getTransactionTimestamp(tx.tx)).add(new BN(DAO_LOAN_APPROVAL)));
+      expect(daoApprovalRequest.approvalsProvided).to.be.bignumber.equal(new BN(0));
+      expect(daoApprovalRequest.isApproved).to.be.equal(false);
     });
   });
 }
