@@ -1,7 +1,7 @@
 import BN from 'bn.js';
 import { toWei } from 'web3-utils';
 import { expect } from 'chai';
-import { RepaymentBatchType, LoanType, LoanStatus } from '../../helpers/registryEnums';
+import { LoanType, LoanStatus } from '../../helpers/registryEnums';
 import { ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL } from "../../helpers/constants";
 import { getTransactionTimestamp, getCurrentTimestamp } from "../../helpers/time";
 
