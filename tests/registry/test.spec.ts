@@ -1,11 +1,11 @@
 // Personal
-import checkPersonalLoanRequests from './checkPersonalLoanRequests';
-import checkLoanApproval from './checkLoanApproval';
-import checkFundLoan from './checkFundLoan';
-import checkLoanRepayment from './checkLoanRepayment';
+import checkPersonalLoanRequests from './personal/checkPersonalLoanRequests';
+import checkLoanApproval from './personal/checkLoanApproval';
+import checkFundLoan from './personal/checkFundLoan';
+import checkLoanRepayment from './personal/checkLoanRepayment';
 
 // Project
-import checkProjectLoanRequests from './checkProjectLoanRequests';
+import checkProjectLoanRequests from './project/checkProjectLoanRequests';
 
 
 import {
