@@ -42,7 +42,7 @@ export default async function suite() {
       );
     });
 
-    it('when approving a loan', async function () {
+    it('when approving a project loan', async function () {
       await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[0] });
 
       let daoApprovalRequest = await this.governance.approvalRequests(approvalRequest);

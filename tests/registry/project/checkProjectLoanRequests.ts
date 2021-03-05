@@ -21,14 +21,13 @@ export default async function suite() {
       initEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
     });
 
-    it('when requesting an interest only personal loan', async function () {
+    it('when requesting an project loan', async function () {
       const amountCollateralized = new BN(toWei('100000'));
       const interestPercentage = new BN(20);
       const totalMilestones = new BN(3);
       const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
       const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
 
-      // let milestoneDurations:BN[] = [];
       let milestoneDurations = new Array<BN>(totalMilestones);
       let amountRequestedPerMilestone = new Array<BN>(totalMilestones);
       const currentTime = await getCurrentTimestamp();

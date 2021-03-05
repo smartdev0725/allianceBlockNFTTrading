@@ -7,6 +7,7 @@ import checkLoanRepayment from './personal/checkLoanRepayment';
 // Project
 import checkProjectLoanRequests from './project/checkProjectLoanRequests';
 import checkProjectLoanApproval from './project/checkLoanApproval';
+import checkProjectFundLoan from './project/checkLoanApproval';
 
 import {
   DAO_LOAN_APPROVAL,
@@ -118,4 +119,5 @@ describe('Registry', function () {
 
   describe('When checking project loan requests', checkProjectLoanRequests.bind(this));  
   describe('When checking project loan approval requests', checkProjectLoanApproval.bind(this));
+  describe('When checking project loan funding', checkProjectFundLoan.bind(this));
 });
