@@ -136,7 +136,7 @@ export default async function suite() {
 
       loanStatus = await this.registry.loanStatus(loanId);
       loanDetails = await this.registry.loanDetails(loanId);
-      const loanPayments = await this.registry.personalLoanPayments(loanId);
+      const loanPayments = await this.registry.projectLoanPayments(loanId);
 
       // Correct Balances.
       expect(newEscrowLendingBalance).to.be.bignumber.equal(startingEscrowLendingBalance);
