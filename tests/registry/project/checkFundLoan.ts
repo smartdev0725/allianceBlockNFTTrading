@@ -125,7 +125,7 @@ export default async function suite() {
 
       const tx = await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[2] });
 
-      const newBorrowerLendingBalance = new BN(await this.lendingToken.balanceOf(this.borrower));
+      const newBorrowerLendingBalance = new BN(await this.lendingToken.balanceOf(this.projectOwner));
 
       newEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
       newEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
