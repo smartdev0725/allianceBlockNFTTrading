@@ -38,6 +38,7 @@ contract Storage {
         uint256 loanId
     )
     external
+    view
     returns (LoanLibrary.LoanStatus)
     {
         return loanStatus[loanId];

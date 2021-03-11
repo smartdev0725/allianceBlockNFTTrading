@@ -78,7 +78,6 @@ contract Governance is Ownable {
         uint256 milestoneApprovalRequestDuration_,
         uint256 amountStakedForDaoMembership_
     )
-    public
     {
         for(uint256 i = 0; i < daoDelegators.length; i++) {
             isDaoDelegator[daoDelegators[i]] = true;
