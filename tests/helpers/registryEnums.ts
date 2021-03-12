@@ -19,4 +19,5 @@ export enum LoanStatus {
   DEFAULT = '7',
   LIQUIDATED = '8',
   REJECTED = '9',
+  AWAITING_MILESTONE_APPLICATION = '10',
 }
