@@ -34,8 +34,11 @@ contract tokenWrapper is RewardDistributionRecipient {
     // ALBT token
     IERC20 public albt;
 
+    address public governance;
+
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
+    mapping(address => bool) public freezed;
 
     function totalSupply() public view returns (uint256) {
         return _totalSupply;
@@ -76,8 +79,8 @@ contract Staking is tokenWrapper {
     event Withdrawn(address indexed user, uint256 amount);
     event RewardPaid(address indexed user, uint256 reward);
 
-    constructor(IERC20 _albt) public {
-        albt = _albt;
+    constructor(IERC20 albt_) public {
+        albt = albt_;
     }
 
     modifier updateReward(address account) {
@@ -124,6 +127,7 @@ contract Staking is tokenWrapper {
     }
 
     function withdraw(uint256 amount) public override updateReward(msg.sender) {
+        require(!freezed[msg.sender], "Funds are frozen - Unfreeze first to withdraw");
         require(amount > 0, "Cannot withdraw 0");
         super.withdraw(amount);
         emit Withdrawn(msg.sender, amount);
@@ -158,5 +162,15 @@ contract Staking is tokenWrapper {
         lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp.add(DURATION);
         emit RewardAdded(reward);
+    }
+
+    function freeze(address staker) external {
+        require(msg.sender == governance, "Only Governance");
+        freezed[staker] = true;
+    }
+
+    function unfreeze(address staker) external {
+        require(msg.sender == governance, "Only Governance");
+        freezed[staker] = false;
     }
 }
