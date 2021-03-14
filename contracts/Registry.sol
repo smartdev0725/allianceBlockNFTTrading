@@ -56,6 +56,11 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         vestingTimeInterval = vestingTimeInterval_;
     }
 
+    /**
+     * @dev This function is called by governance to approve or reject a loan request.
+     * @param loanId The id of the loan.
+     * @param decision The decision of the governance. [true -> approved] [false -> rejected]
+     */
     function decideForLoan(
         uint256 loanId,
         bool decision
@@ -68,6 +73,11 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         emit LoanDecisionMade(loanId, decision);
     }
 
+    /**
+     * @dev This function is called by the lenders to fund a loan.
+     * @param loanId The id of the loan.
+     * @param partitionsToPurchase The amount of ERC1155 tokens (which represent partitions of the loan) to be purchased.
+     */
     function fundLoan(
         uint256 loanId,
         uint256 partitionsToPurchase
@@ -93,6 +103,10 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         }
     }
 
+    /**
+     * @dev This function is called by the borrower to return part of or whole owed amount for a loan (depending on agreement).
+     * @param loanId The id of the loan.
+     */
     function executePayment(
         uint256 loanId
     )
@@ -107,6 +121,12 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         emit PaymentExecuted(loanId);
     }
 
+    /**
+     * @dev This function is called by ERC1155 holders to receive a payment (after borrower has repaid part of loan).
+     * @param tokenId The token id of the ERC1155 tokens, which is eligible for the payment.
+     * @param amountOfTokens The amount of tokens to receive payment for.
+     * @param onProjectTokens Only used in project loans. [true -> repayment in collateral token] [false -> repayment in lending token]
+     */
     function receivePayment(
         uint256 tokenId,
         uint256 amountOfTokens,
@@ -124,6 +144,11 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         emit PaymentReceived(loanId, amountOfTokens, generation);
     }
 
+    /**
+     * @dev Through this function any address can challenge a loan in case of rules breaking by the borrower.
+            If challenging succeeds it can end up to either small penalty or whole collateral loss.
+     * @param loanId The id of the loan.
+     */
     function challengeLoan(
         uint256 loanId
     )
