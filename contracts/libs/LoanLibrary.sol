@@ -17,12 +17,14 @@ library LoanLibrary {
         APPROVED, // Status when loan has been approved from governors.
         FUNDING, // Status when loan has started getting funded, but not fully funded yet.
         STARTED, // Status when loan has been fully funded.
-        AWAITING_MILESTONE_APPROVAL, // Status when loan is waiting for DAO to approve a finished milestone.
+        AWAITING_MILESTONE_APPROVAL, // Status when loan is waiting for DAO to approve a finished milestone.        
         AWAITING_REPAYMENT, // Status when milestones have all been delivered and waiting for repayment from the project.
         SETTLED, // Status when loan has been fully repaid by the borrower.
         DEFAULT, // Status when borrower has not been able to repay the loan.
         LIQUIDATED, // Status when collateral's value was not enough, so loan got liquidated.
-        REJECTED // Status when loan has been rejected by governors.
+        REJECTED, // Status when loan has been rejected by governors.
+        // TEMPORAL: waiting for status order and to not break tests
+        AWAITING_MILESTONE_APPLICATION // Status when loan is waiting for milestone application by the project.
     }
 
     struct LoanDetails {

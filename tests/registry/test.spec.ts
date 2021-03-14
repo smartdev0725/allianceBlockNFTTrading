@@ -1,7 +1,15 @@
-import checkPersonalLoanRequests from './checkPersonalLoanRequests';
-import checkLoanApproval from './checkLoanApproval';
-import checkFundLoan from './checkFundLoan';
-import checkLoanRepayment from './checkLoanRepayment';
+// Personal
+import checkPersonalLoanRequests from './personal/checkPersonalLoanRequests';
+import checkLoanApproval from './personal/checkLoanApproval';
+import checkFundLoan from './personal/checkFundLoan';
+import checkLoanRepayment from './personal/checkLoanRepayment';
+
+// Project
+import checkProjectLoanRequests from './project/checkProjectLoanRequests';
+import checkProjectLoanApproval from './project/checkLoanApproval';
+import checkProjectFundLoan from './project/checkLoanApproval';
+import checkProjectMilestoneApplication from './project/checkProjectMilestoneApplication';
+import checkProjectMilestoneApproval from './project/checkProjectMilestoneApproval';
 
 import {
   DAO_LOAN_APPROVAL,
@@ -24,6 +32,7 @@ const Governance = artifacts.require('Governance');
 const Staking = artifacts.require('Staking');
 const LendingToken = artifacts.require('LendingToken');
 const CollateralToken = artifacts.require('CollateralToken');
+const ProjectToken = artifacts.require('ProjectToken');
 const ALBT = artifacts.require('ALBT');
 const LoanNFT = artifacts.require('LoanNFT');
 const MainNFT = artifacts.require('MainNFT');
@@ -36,11 +45,13 @@ describe('Registry', function () {
     this.borrower = accounts[1];
     this.lenders = [accounts[2], accounts[3], accounts[4]];
     this.delegators = [accounts[5], accounts[6], accounts[7]];
+    this.projectOwner = accounts[8];
 
     // Deploy contracts.
     this.albt = await ALBT.new();
     this.lendingToken = await LendingToken.new();
     this.collateralToken = await CollateralToken.new();
+    this.projectToken = await ProjectToken.new();
     this.loanNft = await LoanNFT.new();
     this.mainNft = await MainNFT.new();
 
@@ -98,10 +109,20 @@ describe('Registry', function () {
     await this.lendingToken.approve(this.registry.address, amountToTransfer, { from: this.borrower });
     await this.collateralToken.mint(this.borrower, amountToTransfer, { from: this.owner });
     await this.collateralToken.approve(this.registry.address, amountToTransfer, { from: this.borrower });
+    await this.projectToken.mint(this.projectOwner, amountToTransfer, { from: this.owner });
+    await this.projectToken.approve(this.registry.address, amountToTransfer, { from: this.projectOwner });
   });
 
   describe('When checking personal loan requests', checkPersonalLoanRequests.bind(this));
   describe('When checking personal loan approval requests', checkLoanApproval.bind(this));
   describe('When checking personal loan funding', checkFundLoan.bind(this));
   describe('When checking personal loan repayment', checkLoanRepayment.bind(this));
+
+  describe('When checking project loan requests', checkProjectLoanRequests.bind(this));  
+  describe('When checking project loan approval requests', checkProjectLoanApproval.bind(this));
+  describe('When checking project loan funding', checkProjectFundLoan.bind(this));
+  describe('When checking project milestone application', checkProjectMilestoneApplication.bind(this));
+  describe('When checking project milestone approval', checkProjectMilestoneApproval.bind(this));
+
+  
 });

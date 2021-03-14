@@ -1,9 +1,9 @@
 import BN from 'bn.js';
 import { toWei } from 'web3-utils';
 import { expect } from 'chai';
-import { RepaymentBatchType, LoanType, LoanStatus } from '../helpers/registryEnums';
-import { ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL } from "../helpers/constants";
-import { getTransactionTimestamp } from "../helpers/time";
+import { LoanStatus } from '../../helpers/registryEnums';
+import { ONE_DAY  } from "../../helpers/constants";
+import { getCurrentTimestamp } from "../../helpers/time";
 
 export default async function suite() {
   describe('Succeeds', async () => {
@@ -14,27 +14,35 @@ export default async function suite() {
       loanId = new BN(await this.registry.totalLoans());
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
 
-      const amountRequested = new BN(toWei('10000'));
-      const amountCollateralized = new BN(toWei('20000'));
-      const totalAmountOfBatches = new BN(2);
+      const amountCollateralized = new BN(toWei('100000'));
       const interestPercentage = new BN(20);
-      const batchTimeInterval = new BN(20 * ONE_DAY);
-      const ipfsHash = web3.utils.keccak256('0x01'); // Dummy hash for testing.
+      const totalMilestones = new BN(3);
+      const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
+      const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ";
 
-      await this.registry.requestPersonalLoan(
-        amountRequested.toString(),
-        this.collateralToken.address,
+      let milestoneDurations = new Array<BN>(totalMilestones);
+      let amountRequestedPerMilestone = new Array<BN>(totalMilestones);
+      const currentTime = await getCurrentTimestamp();
+
+      for (let i = 0; i < Number(totalMilestones); i++) {
+        milestoneDurations[i] = currentTime.add(new BN((i+1) * ONE_DAY))
+        amountRequestedPerMilestone[i] = new BN(toWei('10000'));  
+      }
+
+      const tx = await this.registry.requestProjectLoan(
+        amountRequestedPerMilestone,
+        this.projectToken.address,
         amountCollateralized.toString(),
-        totalAmountOfBatches,
         interestPercentage,
-        batchTimeInterval,
+        totalMilestones,
+        milestoneDurations,
+        timeDiffBetweenDeliveryAndRepayment,
         ipfsHash,
-        RepaymentBatchType.ONLY_INTEREST,
-        { from: this.borrower }
+        { from: this.projectOwner }
       );
     });
 
-    it('when approving a loan', async function () {
+    it('when approving a project loan', async function () {
       await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[0] });
 
       let daoApprovalRequest = await this.governance.approvalRequests(approvalRequest);

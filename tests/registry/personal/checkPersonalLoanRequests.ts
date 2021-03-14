@@ -1,9 +1,9 @@
 import BN from 'bn.js';
 import { toWei } from 'web3-utils';
 import { expect } from 'chai';
-import { RepaymentBatchType, LoanType, LoanStatus } from '../helpers/registryEnums';
-import { ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL } from "../helpers/constants";
-import { getTransactionTimestamp } from "../helpers/time";
+import { RepaymentBatchType, LoanType, LoanStatus } from '../../helpers/registryEnums';
+import { ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL } from "../../helpers/constants";
+import { getTransactionTimestamp } from "../../helpers/time";
 
 export default async function suite() {
   describe('Succeeds', async () => {
@@ -105,7 +105,7 @@ export default async function suite() {
       const totalAmountOfBatches = new BN(2);
       const interestPercentage = new BN(20);
       const batchTimeInterval = new BN(20 * ONE_DAY);
-      const ipfsHash = web3.utils.keccak256('0x01'); // Dummy hash for testing.
+      const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
 
       const tx = await this.registry.requestPersonalLoan(
         amountRequested.toString(),

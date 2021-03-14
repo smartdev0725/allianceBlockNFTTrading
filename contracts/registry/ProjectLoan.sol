@@ -63,8 +63,10 @@ contract ProjectLoan is LoanDetails {
     onlyProjectLoan(loanId)
     onlyBetweenMilestoneTimeframe(loanId)
     {
-        loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPROVAL;
-        governance.requestApproval(totalLoans, true, projectLoanPayments[loanId].milestonesDelivered);
+        console.log("start", projectLoanPayments[loanId].currentMilestoneStartingTimestamp);
+        console.log("end", projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp);
+        loanStatus[loanId] = LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPROVAL;
+        governance.requestApproval(loanId, true, projectLoanPayments[loanId].milestonesDelivered);
     }
 
     function decideForMilestone(
@@ -93,6 +95,7 @@ contract ProjectLoan is LoanDetails {
             projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block.timestamp.add(
                 projectLoanPayments[loanId_].timeDiffBetweenDeliveryAndRepayment);
         } else {
+            loanStatus[loanId_] = LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPLICATION;
             escrow.transferLendingToken(
                 loanBorrower[loanId_],
                 projectLoanPayments[loanId_].milestoneLendingAmount[projectLoanPayments[loanId_].milestonesDelivered]
@@ -183,4 +186,18 @@ contract ProjectLoan is LoanDetails {
             escrow.transferLendingToken(msg.sender, amountToBePaid);
         }
     }
+
+    // GETTERS
+    function getMilestonesInfo(
+        uint256 loanId_,
+        uint256 milestone_
+    )
+    public
+    view
+    returns(uint amount, uint timestamp)
+    {
+        amount = projectLoanPayments[loanId_].milestoneLendingAmount[milestone_];
+        timestamp = projectLoanPayments[loanId_].milestoneDuration[milestone_];
+    }
+
 }

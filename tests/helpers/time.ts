@@ -16,4 +16,9 @@ export async function increaseTime(timeInterval: BN) {
 	await time.increase(timeInterval);
 }
 
+export async function getCurrentTimestamp(){
+  const now = await time.latest();
+  return now;
+}
+
 

@@ -1,9 +1,9 @@
 import BN from 'bn.js';
 import { toWei } from 'web3-utils';
 import { expect } from 'chai';
-import { RepaymentBatchType, LoanType, LoanStatus } from '../helpers/registryEnums';
-import { ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL } from "../helpers/constants";
-import { getTransactionTimestamp } from "../helpers/time";
+import { RepaymentBatchType, LoanType, LoanStatus } from '../../helpers/registryEnums';
+import { ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL } from "../../helpers/constants";
+import { getTransactionTimestamp, getCurrentTimestamp } from "../../helpers/time";
 
 export default async function suite() {
   describe('Succeeds', async () => {
@@ -26,31 +26,39 @@ export default async function suite() {
       smallPartitionAmountToPurchase = smallPartition.mul(new BN(toWei(BASE_AMOUNT.toString())));
       startingEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
 
-      const amountRequested = totalPartitions.mul(new BN(toWei(BASE_AMOUNT.toString())));
-      const amountCollateralized = new BN(toWei('20000'));
-      const totalAmountOfBatches = new BN(2);
+      const amountCollateralized = new BN(toWei('100000'));
       const interestPercentage = new BN(20);
-      batchTimeInterval = new BN(20 * ONE_DAY);
-      const ipfsHash = web3.utils.keccak256('0x01'); // Dummy hash for testing.
+      const totalMilestones = new BN(3);
+      const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
+      const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
 
-      await this.registry.requestPersonalLoan(
-        amountRequested.toString(),
-        this.collateralToken.address,
+      let milestoneDurations = new Array<BN>(totalMilestones);
+      let amountRequestedPerMilestone = new Array<BN>(totalMilestones);
+      const currentTime = await getCurrentTimestamp();
+
+      for (let i = 0; i < Number(totalMilestones); i++) {
+        milestoneDurations[i] = currentTime.add(new BN((i+1) * ONE_DAY))
+        amountRequestedPerMilestone[i] = new BN(toWei('10000'));  
+      }
+
+      await this.registry.requestProjectLoan(
+        amountRequestedPerMilestone,
+        this.projectToken.address,
         amountCollateralized.toString(),
-        totalAmountOfBatches,
         interestPercentage,
-        batchTimeInterval,
+        totalMilestones,
+        milestoneDurations,
+        timeDiffBetweenDeliveryAndRepayment,
         ipfsHash,
-        RepaymentBatchType.ONLY_INTEREST,
-        { from: this.borrower }
+        { from: this.projectOwner }
       );
 
       await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[0] });
       await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[1] });
     });
 
-    it('when funding a loan', async function () {
-      const initBorrowerLendingBalance = new BN(await this.lendingToken.balanceOf(this.borrower));
+    it('when funding a project loan', async function () {
+      const initBorrowerLendingBalance = new BN(await this.lendingToken.balanceOf(this.projectOwner));
       let initEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
       let initEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
       let initLenderLendingBalance = new BN(await this.lendingToken.balanceOf(this.lenders[0]));
@@ -117,7 +125,7 @@ export default async function suite() {
 
       const tx = await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[2] });
 
-      const newBorrowerLendingBalance = new BN(await this.lendingToken.balanceOf(this.borrower));
+      const newBorrowerLendingBalance = new BN(await this.lendingToken.balanceOf(this.projectOwner));
 
       newEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
       newEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
@@ -128,7 +136,7 @@ export default async function suite() {
 
       loanStatus = await this.registry.loanStatus(loanId);
       loanDetails = await this.registry.loanDetails(loanId);
-      const loanPayments = await this.registry.personalLoanPayments(loanId);
+      const loanPayments = await this.registry.projectLoanPayments(loanId);
 
       // Correct Balances.
       expect(newEscrowLendingBalance).to.be.bignumber.equal(startingEscrowLendingBalance);
