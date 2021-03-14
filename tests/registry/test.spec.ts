@@ -90,7 +90,7 @@ describe('Registry', function () {
     );
 
     // Initialize contracts.
-    await this.governance.initialize(this.registry.address);
+    await this.governance.initialize(this.registry.address, this.staking.address);
     await this.escrow.initialize(this.registry.address);
 
     // Add roles.
