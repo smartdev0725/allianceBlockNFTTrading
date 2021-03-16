@@ -10,8 +10,20 @@ import "./LoanDetails.sol";
  * @notice Functionality for Project Loan.
  */
 contract ProjectLoan is LoanDetails {
-    using SafeMath for uint256;    
+    using SafeMath for uint256; 
 
+    /**
+     * @dev This function is used for potential borrowing project to request a loan.
+     * @param amountRequestedPerMilestone The lending amounts project is looking to get for each milestone.
+     * @param collateralToken The token that will be used by the proect as collateral.
+     * @param collateralAmount The amount of tokens that will be used by the project as collateral.
+     * @param interestPercentage The interest percentage that will be obtained after whole repayment.
+     * @param totalMilestones The total amount of Milestones project is requesting funds for.
+     * @param milestoneDurations The duration of each Milestone.
+     * @param timeDiffBetweenDeliveryAndRepayment The time interval between the last milestone delivery by the project and
+     *                                            the repayment of the loan by the project.
+     * @param extraInfo The ipfs hash where more specific details for loan request are stored.
+     */
     function requestProjectLoan(
         uint256[] calldata amountRequestedPerMilestone,
         address collateralToken,
@@ -54,6 +66,10 @@ contract ProjectLoan is LoanDetails {
         totalLoans = totalLoans.add(1);
     }
 
+    /**
+     * @dev This function is used by the project to apply a milestone for a specific loan.
+     * @param loanId The id of the loan.
+     */
     function applyMilestone(
         uint256 loanId
     )
@@ -67,6 +83,11 @@ contract ProjectLoan is LoanDetails {
         governance.requestApproval(loanId, true, projectLoanPayments[loanId].milestonesDelivered);
     }
 
+    /**
+     * @dev This function is called by governance to approve or reject an applied milestone's request.
+     * @param loanId The id of the loan.
+     * @param decision The decision of the governance. [true -> approved] [false -> rejected]
+     */
     function decideForMilestone(
         uint256 loanId,
         bool decision
@@ -201,5 +222,4 @@ contract ProjectLoan is LoanDetails {
         amount = projectLoanPayments[loanId_].milestoneLendingAmount[milestone_];
         timestamp = projectLoanPayments[loanId_].milestoneDuration[milestone_];
     }
-
 }

@@ -14,7 +14,10 @@ import "@openzeppelin/contracts/token/ERC1155/ERC1155Holder.sol";
 contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
 
     /**
-     * @dev Initializes the contract by setting the registry address, lending token address, main NFT address and the loan NFT address
+     * @dev Constructor of the contract.
+     * @param lendingToken_ The token that lenders will be able to lend.
+     * @param mainNFT_ The ERC721 token contract which will represent the whole loans.
+     * @param loanNFT_ The ERC1155 token contract which will represent the lending amounts.
      */
     constructor(
         address lendingToken_,
@@ -28,6 +31,10 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
         loanNFT = IERC1155Mint(loanNFT_);
     }
 
+    /**
+     * @dev Initializes the contract.
+     * @param registryAddress_ The registry address.
+     */
     function initialize(
         address registryAddress_
     )
@@ -38,9 +45,15 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
         registry = IRegistry(registryAddress_);
     }
 
+    /**
+     * @dev This function is used to send the ERC1155 tokens from escrow to the lenders.
+     * @param loanId The id of the loan.
+     * @param partitionsPurchased The amount of ERC1155 tokens that should be sent back to the lender.
+     * @param receiver Lender's address.
+     */
     function transferLoanNFT(
         uint256 loanId,
-        uint256 partitionsToPurchase,
+        uint256 partitionsPurchased,
         address receiver
     )
     external
@@ -49,6 +62,11 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
         loanNFT.safeTransferFrom(address(this), receiver, loanId, partitionsToPurchase, "");
     }
 
+    /**
+     * @dev This function is used to send the lended amount to the borrower.
+     * @param borrower Borrower's address.
+     * @param amount The amount of lending tokens to be sent to borrower.
+     */
     function transferLendingToken(
         address borrower,
         uint256 amount
@@ -59,6 +77,12 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
         lendingToken.transfer(borrower, amount);
     }
 
+    /**
+     * @dev This function is used to send the collateral amount to the borrower.
+     * @param collateralToken The collateral token's contract address.
+     * @param borrower Borrower's address.
+     * @param amount The amount of collateral tokens to be sent to borrower.
+     */
     function transferCollateralToken(
         address collateralToken,
         address borrower,
@@ -70,49 +94,16 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
         IERC20(collateralToken).transfer(borrower, amount);
     }
 
+    /**
+     * @dev This function is used to change the registry address in case of an upgrade.
+     * @param registryAddress The address of the upgraded Registry contract.
+     */
     function changeRegistry(
-        address registryAddress_
+        address registryAddress
     )
     external
     onlyOwner()
     {
-        registry = IRegistry(registryAddress_);
+        registry = IRegistry(registryAddress);
     }
-
-    // function receiveFunding(
-    // 	uint256 loanId,
-    //     uint256 amount
-    // )
-    // external
-    // onlyRegistry()
-    // {
-
-    // }
-
-    // function claimFunding(
-    //     uint256 loanId
-    // )
-    // external
-    // onlyBorrower(loanId)
-    // {
-
-    // }
-
-    // function receivePayment(
-    //     uint256 loanId
-    // )
-    // external
-    // onlyRegistry()
-    // {
-
-    // }
-
-    // function withdrawPayment(
-    //     uint256 loanId
-    // )
-    // external
-    // onlyERC1155Holder(msg.sender)
-    // {
-
-    // }
 }

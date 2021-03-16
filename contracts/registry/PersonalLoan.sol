@@ -14,6 +14,19 @@ contract PersonalLoan is LoanDetails {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 
+    /**
+     * @dev This function is used for potential borrowers to request a personal loan.
+     * @param amountRequested The lending amount borrower is looking to get.
+     * @param collateralToken The token that will be used by the borrower as collateral.
+     * @param collateralAmount The amount of tokens that will be used by the borrower as collateral.
+     * @param totalAmountOfBatches The amount of batches in which loan will be repaid.
+     * @param interestPercentage The interest percentage that will be obtained after whole repayment.
+     * @param batchTimeInterval The time interval between repayment batches.
+     * @param extraInfo The ipfs hash where more specific details for loan request are stored.
+     * @param repaymentBatchType The way the repayment in each batch will happen. [ONLY_INTEREST or INTEREST_PLUS_NOMINAL]
+     *        ONLY_INTEREST means that in every batch part of the interest will be repaid and whole nominal in the last batch.
+     *        INTEREST_PLUS_NOMINAL means that in every batch part of the interest and nominal will be repaid.
+     */
     function requestPersonalLoan(
         uint256 amountRequested,
         address collateralToken,

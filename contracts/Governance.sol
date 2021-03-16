@@ -5,6 +5,7 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IRegistry.sol";
+import "./interfaces/IStaking.sol";
 
 /**
  * @title AllianceBlock Governance contract
@@ -35,6 +36,7 @@ contract Governance is Ownable {
     uint256 public amountStakedForDaoMembership;
 
     IRegistry public registry;
+    IStaking public staking;
 
     modifier onlyRegistry() {
         require(msg.sender == address(registry), "Only Registry contract");
@@ -55,16 +57,16 @@ contract Governance is Ownable {
         _;
     }
 
-    // modifier onlyEnoughStaked() {
-    //     require(staking.balanceOf(msg.sender) >= amountStakedForDaoMembership,
-    //         "Only enough staked to subscribe for Dao Membership");
-    //     _;
-    // }
+    modifier onlyEnoughStaked() {
+        require(staking.balanceOf(msg.sender) >= amountStakedForDaoMembership,
+            "Only enough staked to subscribe for Dao Membership");
+        _;
+    }
 
     modifier onlyAfterDeadlineAndNotApproved(uint256 requestId) {
         require(approvalRequests[requestId].deadlineTimestamp <= block.timestamp,
             "Only after deadline is reached");
-        require(!approvalRequests[requestId].isApproved, "Only after deadline is reached");
+        require(!approvalRequests[requestId].isApproved, "Only if not already approved");
         _;
     }
 
@@ -90,13 +92,15 @@ contract Governance is Ownable {
     }
 
     function initialize(
-        address registryAddress_
+        address registryAddress_,
+        address stakingAddress_
     )
     external
     onlyOwner()
     {
         require(address(registry) == address(0), "Cannot initialize second time");
         registry = IRegistry(registryAddress_);
+        staking = IStaking(stakingAddress_);
     }
 
     function requestApproval(
@@ -157,10 +161,10 @@ contract Governance is Ownable {
 
     function subscribeForDaoMembership()
     external
-    //onlyEnoughStaked()
+    onlyEnoughStaked()
     {
         isDaoMember[msg.sender] = true;
-        //Freeze funds.
+        staking.freeze(msg.sender);
     }
 
     function unsubscribeForDaoMembership()
@@ -168,6 +172,6 @@ contract Governance is Ownable {
     {
         require(isDaoMember[msg.sender], "Only Dao Member");
         isDaoMember[msg.sender] = false;
-        //UnFreeze funds.
+        staking.unfreeze(msg.sender);
     }
 }
