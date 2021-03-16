@@ -13,7 +13,7 @@ contract MainNFT is ERC721 {
     /**
      * @dev Initializes the contract by setting the name, symbol, and base URI
      */
-    constructor() public ERC721("Alliance Block Custody NFT", "bNFT"){
+    constructor() ERC721("Alliance Block Custody NFT", "bNFT"){
         _setBaseURI("");
     }
 }

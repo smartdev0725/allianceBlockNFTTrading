@@ -131,7 +131,7 @@ contract Governance is Ownable {
         if(decision)
             approvalRequests[requestId].approvalsProvided = approvalRequests[requestId].approvalsProvided.add(1);
 
-        if(approvalRequests[requestId].approvalsProvided == approvalsNeeded) {
+        if(approvalRequests[requestId].approvalsProvided >= approvalsNeeded) {
             if(approvalRequests[requestId].isMilestone) {
                 registry.decideForMilestone(approvalRequests[requestId].loanId, true);
             } else {                

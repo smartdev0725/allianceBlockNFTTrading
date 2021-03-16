@@ -63,8 +63,6 @@ contract ProjectLoan is LoanDetails {
     onlyProjectLoan(loanId)
     onlyBetweenMilestoneTimeframe(loanId)
     {
-        console.log("start", projectLoanPayments[loanId].currentMilestoneStartingTimestamp);
-        console.log("end", projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp);
         loanStatus[loanId] = LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPROVAL;
         governance.requestApproval(loanId, true, projectLoanPayments[loanId].milestonesDelivered);
     }
@@ -87,13 +85,17 @@ contract ProjectLoan is LoanDetails {
     )
     internal
     {
+        console.log(block.timestamp);
         projectLoanPayments[loanId_].milestonesDelivered = projectLoanPayments[loanId_].milestonesDelivered.add(1);
 
+        // Milestones completed
         if(projectLoanPayments[loanId_].milestonesDelivered == projectLoanPayments[loanId_].totalMilestones) {
             loanStatus[loanId_] = LoanLibrary.LoanStatus.AWAITING_REPAYMENT;
             projectLoanPayments[loanId_].currentMilestoneStartingTimestamp = block.timestamp;
             projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block.timestamp.add(
                 projectLoanPayments[loanId_].timeDiffBetweenDeliveryAndRepayment);
+
+        // Milestones missing
         } else {
             loanStatus[loanId_] = LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPLICATION;
             escrow.transferLendingToken(

@@ -66,10 +66,13 @@ export default async function suite() {
 
       const loanPayments = await this.registry.projectLoanPayments(loanId);
       const daoApprovalRequest = await this.governance.approvalRequests(approvalRequest);
+      const isPaused = await this.loanNft.transfersPaused(loanId);
       loanStatus = await this.registry.loanStatus(loanId);
-
+      
+      // Correct Status
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.AWAITING_MILESTONE_APPROVAL);
 
+      // Correct Dao Request.
       expect(daoApprovalRequest.isMilestone).to.be.true;
       expect(daoApprovalRequest.loanId).to.be.bignumber.equal(loanId);
       expect(daoApprovalRequest.approvalsProvided).to.be.bignumber.equal(new BN(0));
@@ -77,8 +80,12 @@ export default async function suite() {
       expect(daoApprovalRequest.deadlineTimestamp).to.be.bignumber.equal(new BN(currentTime).add(new BN(DAO_MILESTONE_APPROVAL)));
       expect(daoApprovalRequest.isApproved).to.be.equal(false);
 
+      // Correct Payments.
       expect(loanPayments.milestonesDelivered).to.be.bignumber.equal(new BN(0));
       expect(loanPayments.milestonesExtended).to.be.bignumber.equal(new BN(0));
+
+      // Correct Nft Behavior.
+      expect(isPaused).to.be.equal(false);
     });
   });
 }
