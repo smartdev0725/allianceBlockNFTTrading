@@ -17,7 +17,7 @@ contract Governance is Ownable {
     //events
     event RequestChallenged(uint indexed requestId, address indexed user);
     event VotedForRequest(uint indexed requestId, bool indexed decision, address indexed user);
-    event RequestApproved(uint indexed loanId, bool indexed isMilestone, uint milestoneNumber,  address indexed user);
+    event ApprovalRequested(uint indexed loanId, bool indexed isMilestone, uint milestoneNumber,  address indexed user);
     event InitGovernance(address indexed registryAddress_, address indexed stakingAddress_, address indexed user);
 
     mapping(address => bool) public isDaoMember;
@@ -130,7 +130,7 @@ contract Governance is Ownable {
         }
 
         totalApprovalRequests = totalApprovalRequests.add(1);
-        emit RequestApproved(loanId, isMilestone, milestoneNumber, msg.sender);
+        emit ApprovalRequested(loanId, isMilestone, milestoneNumber, msg.sender);
     }
 
     function voteForRequest(
