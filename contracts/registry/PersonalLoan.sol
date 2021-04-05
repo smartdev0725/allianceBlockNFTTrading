@@ -14,6 +14,9 @@ contract PersonalLoan is LoanDetails {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 
+    // Events
+    event PersonalLoanRequested(uint indexed loanId, address indexed user, uint256 amount);
+
     /**
      * @dev This function is used for potential borrowers to request a personal loan.
      * @param amountRequested The lending amount borrower is looking to get.
@@ -59,6 +62,8 @@ contract PersonalLoan is LoanDetails {
 
         governance.requestApproval(totalLoans, false, 0);
 
+        emit PersonalLoanRequested(totalLoans, msg.sender, amountRequested);
+
         totalLoans = totalLoans.add(1);
     }
 
@@ -88,7 +93,7 @@ contract PersonalLoan is LoanDetails {
         uint256 loanId_
     )
     internal
-    {        
+    {
         personalLoanPayments[loanId_].batchStartingTimestamp = block.timestamp;
         personalLoanPayments[loanId_].batchDeadlineTimestamp = block.timestamp.add(
             personalLoanPayments[loanId_].timeIntervalBetweenBatches);
@@ -108,9 +113,9 @@ contract PersonalLoan is LoanDetails {
             // TODO - SPECIFY DEFAULT
         } else {
             personalLoanPayments[loanId_].batchDeadlineTimestamp =
-                personalLoanPayments[loanId_].batchDeadlineTimestamp.add(
-                    personalLoanPayments[loanId_].timeIntervalBetweenBatches
-                );
+            personalLoanPayments[loanId_].batchDeadlineTimestamp.add(
+                personalLoanPayments[loanId_].timeIntervalBetweenBatches
+            );
         }
     }
 
@@ -187,7 +192,7 @@ contract PersonalLoan is LoanDetails {
         } else {
             loanNFT.increaseGenerations(generation_.getTokenId(loanId_), msg.sender, amountOfTokens_, batchesToBePaid);
         }
-        
+
         escrow.transferLendingToken(msg.sender, amountToBePaid);
     }
 }
