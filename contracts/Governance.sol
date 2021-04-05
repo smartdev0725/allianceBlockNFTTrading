@@ -14,6 +14,12 @@ import "./interfaces/IStaking.sol";
 contract Governance is Ownable {
     using SafeMath for uint256;
 
+    //events
+    event RequestChallenged(uint indexed requestId, address indexed user);
+    event VotedForRequest(uint indexed requestId, bool indexed decision, address indexed user);
+    event RequestApproved(uint indexed loanId, bool indexed isMilestone, uint milestoneNumber,  address indexed user);
+    event InitGovernance(address indexed registryAddress_, address indexed stakingAddress_, address indexed user);
+
     mapping(address => bool) public isDaoMember;
     mapping(address => bool) public isDaoDelegator;
     mapping(address => mapping(uint256 => bool)) public hasVotedForRequestId;
@@ -101,6 +107,8 @@ contract Governance is Ownable {
         require(address(registry) == address(0), "Cannot initialize second time");
         registry = IRegistry(registryAddress_);
         staking = IStaking(stakingAddress_);
+
+        emit InitGovernance(registryAddress_, stakingAddress_, msg.sender);
     }
 
     function requestApproval(
@@ -117,11 +125,12 @@ contract Governance is Ownable {
         if(isMilestone) {
             approvalRequests[totalApprovalRequests].milestoneNumber = milestoneNumber;
             approvalRequests[totalApprovalRequests].deadlineTimestamp = block.timestamp.add(milestoneApprovalRequestDuration);
-        } else {            
+        } else {
             approvalRequests[totalApprovalRequests].deadlineTimestamp = block.timestamp.add(loanApprovalRequestDuration);
         }
 
         totalApprovalRequests = totalApprovalRequests.add(1);
+        emit RequestApproved(loanId, isMilestone, milestoneNumber, msg.sender);
     }
 
     function voteForRequest(
@@ -138,12 +147,13 @@ contract Governance is Ownable {
         if(approvalRequests[requestId].approvalsProvided >= approvalsNeeded) {
             if(approvalRequests[requestId].isMilestone) {
                 registry.decideForMilestone(approvalRequests[requestId].loanId, true);
-            } else {                
+            } else {
                 registry.decideForLoan(approvalRequests[requestId].loanId, true);
             }
 
             approvalRequests[requestId].isApproved = true;
         }
+        emit VotedForRequest(requestId, decision, msg.sender);
     }
 
     function challengeRequest(
@@ -154,9 +164,10 @@ contract Governance is Ownable {
     {
         if(approvalRequests[requestId].isMilestone) {
             registry.decideForMilestone(approvalRequests[requestId].loanId, false);
-        } else {                
+        } else {
             registry.decideForLoan(approvalRequests[requestId].loanId, false);
-        }        
+        }
+        emit RequestChallenged(requestId,msg.sender);
     }
 
     function subscribeForDaoMembership()
