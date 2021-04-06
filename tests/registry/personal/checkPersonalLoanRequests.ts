@@ -4,6 +4,7 @@ import { expect } from 'chai';
 import { RepaymentBatchType, LoanType, LoanStatus } from '../../helpers/registryEnums';
 import { ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL } from "../../helpers/constants";
 import { getTransactionTimestamp } from "../../helpers/time";
+import { expectEvent } from "@openzeppelin/test-helpers";
 
 export default async function suite() {
   describe('Succeeds', async () => {
@@ -58,6 +59,9 @@ export default async function suite() {
 
       // Correct Status.
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.REQUESTED);
+
+      // Correct Event.
+      expectEvent(tx.receipt, 'PersonalLoanRequested', { loanId , user: this.borrower, amount: amountRequested.toString() });
 
       // Correct Details.
       expect(loanDetails.loanId).to.be.bignumber.equal(loanId);
@@ -137,7 +141,10 @@ export default async function suite() {
       // Correct Status.
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.REQUESTED);
 
-      // Correct Details.
+      // Correct Event.
+      expectEvent(tx.receipt, 'PersonalLoanRequested', { loanId , user: this.borrower, amount: amountRequested.toString() });
+
+        // Correct Details.
       expect(loanDetails.loanId).to.be.bignumber.equal(loanId);
       expect(loanDetails.loanType).to.be.bignumber.equal(LoanType.PERSONAL);
       expect(loanDetails.startingDate).to.be.bignumber.equal(new BN(0));
