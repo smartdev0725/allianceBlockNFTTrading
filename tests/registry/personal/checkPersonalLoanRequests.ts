@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { RepaymentBatchType, LoanType, LoanStatus } from '../../helpers/registryEnums';
 import { ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL } from "../../helpers/constants";
 import { getTransactionTimestamp } from "../../helpers/time";
-import { expectEvent } from "@openzeppelin/test-helpers";
+const { expectEvent } = require("@openzeppelin/test-helpers");
 
 export default async function suite() {
   describe('Succeeds', async () => {

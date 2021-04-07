@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import {  LoanStatus } from '../../helpers/registryEnums';
 import { ONE_DAY, BASE_AMOUNT, DAO_MILESTONE_APPROVAL } from "../../helpers/constants";
 import { getCurrentTimestamp } from "../../helpers/time";
-import { expectEvent } from "@openzeppelin/test-helpers";
+const { expectEvent } = require("@openzeppelin/test-helpers");
 
 export default async function suite() {
   describe('Succeeds', async () => {
