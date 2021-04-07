@@ -68,6 +68,8 @@ export default async function suite() {
       }`, async function () {
         let initBorrowerLendingBalance = new BN(await this.lendingToken.balanceOf(this.borrower));
         let initEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
+        const initCollateralBalance = new BN(await this.collateralToken.balanceOf(this.borrower));
+        const loanDetails = await this.registry.loanDetails(loanId);
 
         await this.registry.executePayment(loanId, { from: this.borrower });
 
@@ -102,6 +104,8 @@ export default async function suite() {
           amountEachBatch.add(lendingAmount) :
           amountEachBatch;
 
+        const newCollateralBalance = new BN(await this.collateralToken.balanceOf(this.borrower));
+
         // Correct Status.
         expect(loanStatus).to.be.bignumber.equal(LoanStatus.SETTLED);
 
@@ -111,6 +115,9 @@ export default async function suite() {
 
         // Correct Payments.
         expect(loanPayments.batchesPaid).to.be.bignumber.equal(new BN(2));
+
+        // Correct Collateral amount
+        expect(newCollateralBalance.sub(initCollateralBalance)).to.be.bignumber.equal(loanDetails.collateralAmount);
       });
     });
   }
