@@ -1,12 +1,12 @@
-const Registry = artifacts.require('Registry');
-const Escrow = artifacts.require('Escrow');
-const Governance = artifacts.require('Governance');
-const Staking = artifacts.require('Staking');
-const LendingToken = artifacts.require('LendingToken');
-const CollateralToken = artifacts.require('CollateralToken');
-const ALBT = artifacts.require('ALBT');
-const LoanNFT = artifacts.require('LoanNFT');
-const MainNFT = artifacts.require('MainNFT');
+const Registry = artifacts.require("Registry");
+const Escrow = artifacts.require("Escrow");
+const Governance = artifacts.require("Governance");
+const Staking = artifacts.require("Staking");
+const LendingToken = artifacts.require("LendingToken");
+const CollateralToken = artifacts.require("CollateralToken");
+const ALBT = artifacts.require("ALBT");
+const LoanNFT = artifacts.require("LoanNFT");
+const MainNFT = artifacts.require("MainNFT");
 
 const {
   DAO_LOAN_APPROVAL,
@@ -17,11 +17,11 @@ const {
   MINIMUM_INTEREST_PERCENTAGE,
   MAX_MILESTONES,
   MILESTONE_EXTENSION,
-  AMOUNT_FOR_DAO_MEMBERSHIP
+  AMOUNT_FOR_DAO_MEMBERSHIP,
 } = require("../tests/helpers/constants");
 
 const BN = require("bn.js");
-const { toWei } = require('web3-utils');
+const { toWei } = require("web3-utils");
 
 async function main() {
   const accounts = await web3.eth.getAccounts();
@@ -49,10 +49,7 @@ async function main() {
     this.mainNft.address,
     this.loanNft.address
   );
-  this.staking = await Staking.new(
-    this.albt.address,
-    this.albt.address
-  );
+  this.staking = await Staking.new(this.albt.address);
   this.registry = await Registry.new(
     this.escrow.address,
     this.governance.address,
@@ -68,28 +65,48 @@ async function main() {
   );
 
   // Initialize contracts.
-  await this.governance.initialize(this.registry.address);
+  await this.governance.initialize(this.registry.address, this.staking.address);
   await this.escrow.initialize(this.registry.address);
 
   // Add roles.
-  await this.loanNft.grantRole(web3.utils.keccak256('MINTER_ROLE'), this.registry.address, { from: this.owner });
-  await this.loanNft.grantRole(web3.utils.keccak256('PAUSER_ROLE'), this.registry.address, { from: this.owner });
-  
-  // Transfer tokens.
-  const amountToTransfer = (new BN(toWei('1000000'))).toString();
+  await this.loanNft.grantRole(
+    web3.utils.keccak256("MINTER_ROLE"),
+    this.registry.address,
+    { from: this.owner }
+  );
+  await this.loanNft.grantRole(
+    web3.utils.keccak256("PAUSER_ROLE"),
+    this.registry.address,
+    { from: this.owner }
+  );
 
-  for(let i = 0; i < this.lenders.length; i++) {
-    await this.lendingToken.mint(this.lenders[i], amountToTransfer, { from: this.owner });
-    await this.lendingToken.approve(this.registry.address, amountToTransfer, { from: this.lenders[i] });
+  // Transfer tokens.
+  const amountToTransfer = new BN(toWei("1000000")).toString();
+
+  for (let i = 0; i < this.lenders.length; i++) {
+    await this.lendingToken.mint(this.lenders[i], amountToTransfer, {
+      from: this.owner,
+    });
+    await this.lendingToken.approve(this.registry.address, amountToTransfer, {
+      from: this.lenders[i],
+    });
   }
 
-  await this.lendingToken.mint(this.borrower, amountToTransfer, { from: this.owner });
-  await this.lendingToken.approve(this.registry.address, amountToTransfer, { from: this.borrower });
-  await this.collateralToken.mint(this.borrower, amountToTransfer, { from: this.owner });
-  await this.collateralToken.approve(this.registry.address, amountToTransfer, { from: this.borrower });
-  
+  await this.lendingToken.mint(this.borrower, amountToTransfer, {
+    from: this.owner,
+  });
+  await this.lendingToken.approve(this.registry.address, amountToTransfer, {
+    from: this.borrower,
+  });
+  await this.collateralToken.mint(this.borrower, amountToTransfer, {
+    from: this.owner,
+  });
+  await this.collateralToken.approve(this.registry.address, amountToTransfer, {
+    from: this.borrower,
+  });
+
   // Deployment Addresses
-  console.log("\nDEPLOYMENTS\n")
+  console.log("\nDEPLOYMENTS\n");
   console.log("\tALBT:", this.albt.address);
   console.log("\tCollateral:", this.collateralToken.address);
   console.log("\tLending:", this.lendingToken.address);
@@ -99,7 +116,7 @@ async function main() {
   console.log("\tEscrow:", this.escrow.address);
   console.log("\tStaking:", this.staking.address);
   console.log("\tRegistry", this.registry.address);
-  console.log("\n")
+  console.log("\n");
 }
 
 main()
