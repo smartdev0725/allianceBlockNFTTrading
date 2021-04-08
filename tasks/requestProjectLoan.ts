@@ -59,6 +59,6 @@ export async function requestProjectLoanToFund(taskArgs: unknown, env: HardhatRu
 
     const loanStatus = await registryContract.loanStatus(loanId);
     if (loanStatus == LoanStatus.APPROVED) {
-        console.log("Requested and approved loan with ID", loanId);
+        console.log("Requested and approved loan with ID", loanId.toNumber());
     }
 }
