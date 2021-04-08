@@ -17,13 +17,22 @@ import { LoanStatus } from "./tests/helpers/registryEnums";
 if (!process.env.RINKEBY_PRIVKEY) throw new Error("RINKEBY_PRIVKEY missing from .env file");
 if (!process.env.MAINNET_PRIVKEY) throw new Error("MAINNET_PRIVKEY missing from .env file");
 
-task("requestProjectLoanToFund", "Requests a project loan ready to get funded using a registry contract", async (taskArgs: { registry: string, collateral: string, governance: string }, env) => {
+task("requestProjectLoanToFund", "Requests a project loan ready to get funded using a registry contract", async (taskArgs, env) => {
   const Registry = env.artifacts.require("Registry");
-  const CollateralToken = env.artifacts.require('CollateralToken');
-  const Governance = env.artifacts.require('Governance');
-  const registryContract = await Registry.at(taskArgs.registry);
-  const collateralTokenContract = await CollateralToken.at(taskArgs.collateral);
-  const governanceContract = await Governance.at(taskArgs.governance);
+  const CollateralToken = env.artifacts.require("CollateralToken");
+  const Governance = env.artifacts.require("Governance");
+
+  if (!process.env.REGISTRY_ADDRESS) throw new Error("REGISTRY_ADDRESS missing from .env file");
+  if (!process.env.COLLATERAL_TOKEN_ADDRESS) throw new Error("COLLATERAL_TOKEN_ADDRESS missing from .env file");
+  if (!process.env.GOVERNANCE_ADDRESS) throw new Error("GOVERNANCE_ADDRESS missing from .env file");
+  if (!process.env.LOAN_REQUEST_TOTAL_MILESTONES) throw new Error("LOAN_REQUEST_TOTAL_MILESTONES missing from .env file");
+  if (!process.env.LOAN_REQUEST_AMOUNT_PER_MILESTONE) throw new Error("LOAN_REQUEST_AMOUNT_PER_MILESTONE missing from .env file");
+  if (!process.env.LOAN_REQUEST_DAYS_PER_MILESTONE) throw new Error("LOAN_REQUEST_DAYS_PER_MILESTONE missing from .env file");
+  //if (!process.env.LOAN_REQUEST_IPFS_HASH) throw new Error("LOAN_REQUEST_IPFS_HASH missing from .env file");
+
+  const registryContract = await Registry.at(process.env.REGISTRY_ADDRESS);
+  const collateralTokenContract = await CollateralToken.at(process.env.COLLATERAL_TOKEN_ADDRESS);
+  const governanceContract = await Governance.at(process.env.GOVERNANCE_ADDRESS);
 
   const accounts = await env.web3.eth.getAccounts();
   const borrower1 = accounts[1];
@@ -31,18 +40,18 @@ task("requestProjectLoanToFund", "Requests a project loan ready to get funded us
 
   const loanId = new BN(await registryContract.totalLoans());
   const approvalRequest = new BN(await governanceContract.totalApprovalRequests());
-  const totalMilestones = new BN(3);
+  const totalMilestones = new BN(process.env.LOAN_REQUEST_TOTAL_MILESTONES);
   let milestoneDurations = new Array<BN>(totalMilestones);
   let amountRequestedPerMilestone = new Array<BN>(totalMilestones);
   const currentTime = await getCurrentTimestamp();
-  const amountCollateralized = new BN(toWei('100000'));
+  const amountCollateralized = new BN(toWei("100000"));
   const interestPercentage = new BN(20);
   const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
-  const ipfsHash = ""
+  const ipfsHash = process.env.LOAN_REQUEST_IPFS_HASH;
 
   for (let i = 0; i < Number(totalMilestones); i++) {
-    milestoneDurations[i] = currentTime.add(new BN((i + 1) * ONE_DAY))
-    amountRequestedPerMilestone[i] = new BN(toWei('10000'));
+    milestoneDurations[i] = currentTime.add(new BN(parseInt(process.env.LOAN_REQUEST_DAYS_PER_MILESTONE) * ONE_DAY))
+    amountRequestedPerMilestone[i] = new BN(toWei(process.env.LOAN_REQUEST_AMOUNT_PER_MILESTONE));
   }
 
   await registryContract.requestProjectLoan(
@@ -64,7 +73,7 @@ task("requestProjectLoanToFund", "Requests a project loan ready to get funded us
   if (loanStatus == LoanStatus.APPROVED) {
     console.log("Requested and approved loan with ID", loanId);
   }
-}).addParam("registry", "The Registry contract's address").addParam("collateral", "The collateral token contract's address").addParam("governance", "The governance contract's address");
+});
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
