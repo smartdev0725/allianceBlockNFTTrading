@@ -4,6 +4,7 @@ import { expect } from 'chai';
 import {  LoanStatus } from '../../helpers/registryEnums';
 import { ONE_DAY, BASE_AMOUNT, DAO_MILESTONE_APPROVAL } from "../../helpers/constants";
 import { getCurrentTimestamp } from "../../helpers/time";
+const { expectEvent } = require("@openzeppelin/test-helpers");
 
 export default async function suite() {
   describe('Succeeds', async () => {
@@ -60,7 +61,7 @@ export default async function suite() {
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.STARTED);
       
       // Milestone Application By Project Owner
-      await this.registry.applyMilestone(loanId, { from: this.projectOwner });
+      const tx = await this.registry.applyMilestone(loanId, { from: this.projectOwner });
       
       const currentTime = await getCurrentTimestamp();
 
@@ -71,6 +72,9 @@ export default async function suite() {
       
       // Correct Status
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.AWAITING_MILESTONE_APPROVAL);
+
+      // Correct Event.
+      expectEvent(tx.receipt, 'ProjectLoanMilestoneApprovalRequested', { loanId , milestoneNumber: new BN(0).toString() });
 
       // Correct Dao Request.
       expect(daoApprovalRequest.isMilestone).to.be.true;
