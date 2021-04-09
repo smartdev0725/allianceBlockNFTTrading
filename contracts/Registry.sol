@@ -22,7 +22,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     event LoanStarted(uint indexed loanId, LoanLibrary.LoanType indexed loanType);
     event LoanApproved(uint indexed loanId, LoanLibrary.LoanType indexed loanType);
     event LoanRejected(uint indexed loanId, LoanLibrary.LoanType indexed loanType);
-    event LoanChallanged(uint indexed loanId, LoanLibrary.LoanType indexed loanType, address user);
+    event LoanChallenged(uint indexed loanId, LoanLibrary.LoanType indexed loanType, address user);
     event PaymentReceived(uint indexed loanId, uint256 amountOfTokens, uint256 indexed generation, bool indexed onProjectTokens, address user);
     event PaymentExecuted(uint indexed loanId, LoanLibrary.LoanType indexed loanType, address indexed borrower);
 
@@ -158,7 +158,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     {
         if(loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) _challengePersonalLoan(loanId);
         else _challengeProjectLoan(loanId);
-        emit LoanChallanged(loanId, loanDetails[loanId].loanType, msg.sender);
+        emit LoanChallenged(loanId, loanDetails[loanId].loanType, msg.sender);
     }
 
     function _approveLoan(

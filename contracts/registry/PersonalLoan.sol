@@ -161,6 +161,7 @@ contract PersonalLoan is LoanDetails {
 
         if(personalLoanPayments[loanId_].batchesPaid == personalLoanPayments[loanId_].totalAmountOfBatches) {
             loanStatus[loanId_] = LoanLibrary.LoanStatus.SETTLED;
+            escrow.transferCollateralToken(loanDetails[loanId_].collateralToken, loanBorrower[loanId_], loanDetails[loanId_].collateralAmount);
         } else {
             personalLoanPayments[loanId_].batchStartingTimestamp = personalLoanPayments[loanId_].batchDeadlineTimestamp;
             personalLoanPayments[loanId_].batchDeadlineTimestamp = personalLoanPayments[loanId_].batchStartingTimestamp.add(
