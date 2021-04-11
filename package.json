@@ -11,7 +11,7 @@
     "deploy-g": "hardhat run scripts/deploy.js --network ganache",
     "deploy-factory": "hardhat run scripts/uniswap/deploy-factory.js",
     "deploy-pair": "hardhat run scripts/uniswap/deploy-pair.js",
-    "request-loan-g": "hardhat requestProjectLoanToFund --network ganache",
+    "request-loan-g": "hardhat run scripts/requestProjectLoan.js --network ganache",
     "ganache": "yarn ganache-cli -e 1000000000000 -a 100 --networkId 999 -p 8545 -d",
     "lint": "yarn run lint:sol && yarn run lint:ts",
     "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
