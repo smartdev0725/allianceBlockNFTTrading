@@ -17,7 +17,7 @@ library LoanLibrary {
         APPROVED, // Status when loan has been approved from governors.
         FUNDING, // Status when loan has started getting funded, but not fully funded yet.
         STARTED, // Status when loan has been fully funded.
-        AWAITING_MILESTONE_APPROVAL, // Status when loan is waiting for DAO to approve a finished milestone.        
+        AWAITING_MILESTONE_APPROVAL, // Status when loan is waiting for DAO to approve a finished milestone.
         AWAITING_REPAYMENT, // Status when milestones have all been delivered and waiting for repayment from the project.
         SETTLED, // Status when loan has been fully repaid by the borrower.
         DEFAULT, // Status when borrower has not been able to repay the loan.
@@ -62,5 +62,7 @@ library LoanLibrary {
         uint256 currentMilestoneDeadlineTimestamp; // Timestamp that milestone/repayment should be delivered.
         uint256 amountToBeRepaid; // The total amount of lending tokens to be repaid.
         uint256 discountPerMillion; // The discount / 1M if lenders decide to get paid by the project tokens.
+        address projectToken; // The project's own token that can be used to pay back lenders.
+        uint256 projectTokenAmount; // The amount of project tokens locked to repay lenders.
     }
 }

@@ -13,9 +13,16 @@ contract ProjectLoan is LoanDetails {
     using SafeMath for uint256;
 
     // Events
-    event ProjectLoanRequested(uint indexed loanId, address indexed user, uint256 amount);
-    event ProjectLoanMilestoneApprovalRequested(uint indexed loanId, uint256 milestoneNumber);
-    event ProjectLoanMilestoneDecided(uint indexed loanId, bool decision);
+    event ProjectLoanRequested(
+        uint256 indexed loanId,
+        address indexed user,
+        uint256 amount
+    );
+    event ProjectLoanMilestoneApprovalRequested(
+        uint256 indexed loanId,
+        uint256 milestoneNumber
+    );
+    event ProjectLoanMilestoneDecided(uint256 indexed loanId, bool decision);
 
     /**
      * @dev This function is used for potential borrowing project to request a loan.
@@ -37,18 +44,22 @@ contract ProjectLoan is LoanDetails {
         uint256 totalMilestones,
         uint256[] calldata milestoneDurations,
         uint256 timeDiffBetweenDeliveryAndRepayment,
-        string memory extraInfo
-    )
-    external
-    onlyAcceptedNumberOfMilestones(totalMilestones)
-    {
+        string memory extraInfo,
+        address projectToken
+    ) external onlyAcceptedNumberOfMilestones(totalMilestones) {
         uint256 totalAmountRequested;
 
-        for(uint256 i = 0; i < totalMilestones; i++) {
-            projectLoanPayments[totalLoans].milestoneLendingAmount[i] = amountRequestedPerMilestone[i];
-            projectLoanPayments[totalLoans].milestoneDuration[i] = milestoneDurations[i];
+        for (uint256 i = 0; i < totalMilestones; i++) {
+            projectLoanPayments[totalLoans].milestoneLendingAmount[
+                i
+            ] = amountRequestedPerMilestone[i];
+            projectLoanPayments[totalLoans].milestoneDuration[
+                i
+            ] = milestoneDurations[i];
 
-            totalAmountRequested = totalAmountRequested.add(amountRequestedPerMilestone[i]);
+            totalAmountRequested = totalAmountRequested.add(
+                amountRequestedPerMilestone[i]
+            );
         }
 
         _storeLoanDetails(
@@ -61,7 +72,8 @@ contract ProjectLoan is LoanDetails {
 
         _storeProjectLoanPayments(
             totalMilestones,
-            timeDiffBetweenDeliveryAndRepayment
+            timeDiffBetweenDeliveryAndRepayment,
+            projectToken
         );
 
         loanDetails[totalLoans].loanType = LoanLibrary.LoanType.PROJECT;
@@ -77,20 +89,24 @@ contract ProjectLoan is LoanDetails {
      * @dev This function is used by the project to apply a milestone for a specific loan.
      * @param loanId The id of the loan.
      */
-    function applyMilestone(
-        uint256 loanId
-    )
-    external    
-    onlyBorrower(loanId)
-    onlyActiveLoan(loanId)
-    onlyProjectLoan(loanId)
-    onlyBetweenMilestoneTimeframe(loanId)
+    function applyMilestone(uint256 loanId)
+        external
+        onlyBorrower(loanId)
+        onlyActiveLoan(loanId)
+        onlyProjectLoan(loanId)
+        onlyBetweenMilestoneTimeframe(loanId)
     {
         loanStatus[loanId] = LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPROVAL;
-        governance.requestApproval(loanId, true, projectLoanPayments[loanId].milestonesDelivered);
+        governance.requestApproval(
+            loanId,
+            true,
+            projectLoanPayments[loanId].milestonesDelivered
+        );
 
-        emit ProjectLoanMilestoneApprovalRequested(loanId, projectLoanPayments[loanId].milestonesDelivered);
-
+        emit ProjectLoanMilestoneApprovalRequested(
+            loanId,
+            projectLoanPayments[loanId].milestonesDelivered
+        );
     }
 
     /**
@@ -98,123 +114,145 @@ contract ProjectLoan is LoanDetails {
      * @param loanId The id of the loan.
      * @param decision The decision of the governance. [true -> approved] [false -> rejected]
      */
-    function decideForMilestone(
-        uint256 loanId,
-        bool decision
-    )
-    external
-    onlyGovernance()
-    onlyWhenAwaitingMilestoneApproval(loanId)
-    onlyProjectLoan(loanId)
+    function decideForMilestone(uint256 loanId, bool decision)
+        external
+        onlyGovernance()
+        onlyWhenAwaitingMilestoneApproval(loanId)
+        onlyProjectLoan(loanId)
     {
-        if(decision) _approveMilestone(loanId);
+        if (decision) _approveMilestone(loanId);
         else _rejectMilestone(loanId);
 
         emit ProjectLoanMilestoneDecided(loanId, decision);
     }
 
-    function _approveMilestone(
-        uint256 loanId_
-    )
-    internal
-    {
-        projectLoanPayments[loanId_].milestonesDelivered = projectLoanPayments[loanId_].milestonesDelivered.add(1);
+    function _approveMilestone(uint256 loanId_) internal {
+        projectLoanPayments[loanId_].milestonesDelivered = projectLoanPayments[
+            loanId_
+        ]
+            .milestonesDelivered
+            .add(1);
 
         // Milestones completed
-        if(projectLoanPayments[loanId_].milestonesDelivered == projectLoanPayments[loanId_].totalMilestones) {
+        if (
+            projectLoanPayments[loanId_].milestonesDelivered ==
+            projectLoanPayments[loanId_].totalMilestones
+        ) {
             loanStatus[loanId_] = LoanLibrary.LoanStatus.AWAITING_REPAYMENT;
-            projectLoanPayments[loanId_].currentMilestoneStartingTimestamp = block.timestamp;
-            projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block.timestamp.add(
-                projectLoanPayments[loanId_].timeDiffBetweenDeliveryAndRepayment);
+            projectLoanPayments[loanId_]
+                .currentMilestoneStartingTimestamp = block.timestamp;
+            projectLoanPayments[loanId_]
+                .currentMilestoneDeadlineTimestamp = block.timestamp.add(
+                projectLoanPayments[loanId_].timeDiffBetweenDeliveryAndRepayment
+            );
 
-        // Milestones missing
+            // Milestones missing
         } else {
-            loanStatus[loanId_] = LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPLICATION;
+            loanStatus[loanId_] = LoanLibrary
+                .LoanStatus
+                .AWAITING_MILESTONE_APPLICATION;
             escrow.transferLendingToken(
                 loanBorrower[loanId_],
-                projectLoanPayments[loanId_].milestoneLendingAmount[projectLoanPayments[loanId_].milestonesDelivered]
+                projectLoanPayments[loanId_].milestoneLendingAmount[
+                    projectLoanPayments[loanId_].milestonesDelivered
+                ]
             );
-            projectLoanPayments[loanId_].currentMilestoneStartingTimestamp = block.timestamp;
-            projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block.timestamp.add(
-                projectLoanPayments[loanId_].milestoneDuration[projectLoanPayments[loanId_].milestonesDelivered]);
+            projectLoanPayments[loanId_]
+                .currentMilestoneStartingTimestamp = block.timestamp;
+            projectLoanPayments[loanId_]
+                .currentMilestoneDeadlineTimestamp = block.timestamp.add(
+                projectLoanPayments[loanId_].milestoneDuration[
+                    projectLoanPayments[loanId_].milestonesDelivered
+                ]
+            );
         }
     }
 
-    function _rejectMilestone(
-        uint256 loanId_
-    )
-    internal
-    {
+    function _rejectMilestone(uint256 loanId_) internal {
         loanStatus[loanId_] == LoanLibrary.LoanStatus.STARTED;
-        if(projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp <= block.timestamp) {
+        if (
+            projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp <=
+            block.timestamp
+        ) {
             _challengeProjectLoan(loanId_);
         }
     }
 
     function _storeProjectLoanPayments(
         uint256 totalMilestones_,
-        uint256 timeDiffBetweenDeliveryAndRepayment_
-    )
-    internal
-    {        
-        projectLoanPayments[totalLoans].amountToBeRepaid = loanDetails[totalLoans].totalInterest.add(
-            loanDetails[totalLoans].lendingAmount);
+        uint256 timeDiffBetweenDeliveryAndRepayment_,
+        address projectToken_
+    ) internal {
+        projectLoanPayments[totalLoans].amountToBeRepaid = loanDetails[
+            totalLoans
+        ]
+            .totalInterest
+            .add(loanDetails[totalLoans].lendingAmount);
 
         projectLoanPayments[totalLoans].totalMilestones = totalMilestones_;
-        projectLoanPayments[totalLoans].timeDiffBetweenDeliveryAndRepayment = timeDiffBetweenDeliveryAndRepayment_;
+        projectLoanPayments[totalLoans]
+            .timeDiffBetweenDeliveryAndRepayment = timeDiffBetweenDeliveryAndRepayment_;
+        projectLoanPayments[totalLoans].projectToken = projectToken_;
     }
 
-    function _startProjectLoan(
-        uint256 loanId_
-    )
-    internal
-    {        
-        projectLoanPayments[loanId_].currentMilestoneStartingTimestamp = block.timestamp;
-        projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block.timestamp.add(
-            projectLoanPayments[loanId_].milestoneDuration[0]);
+    function _startProjectLoan(uint256 loanId_) internal {
+        projectLoanPayments[loanId_].currentMilestoneStartingTimestamp = block
+            .timestamp;
+        projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block
+            .timestamp
+            .add(projectLoanPayments[loanId_].milestoneDuration[0]);
 
-        escrow.transferLendingToken(loanBorrower[loanId_], projectLoanPayments[loanId_].milestoneLendingAmount[0]);
+        escrow.transferLendingToken(
+            loanBorrower[loanId_],
+            projectLoanPayments[loanId_].milestoneLendingAmount[0]
+        );
     }
 
-    function _challengeProjectLoan(
-        uint256 loanId_
-    )
-    internal
-    {
-        projectLoanPayments[loanId_].milestonesExtended = projectLoanPayments[loanId_].milestonesExtended.add(1);
+    function _challengeProjectLoan(uint256 loanId_) internal {
+        projectLoanPayments[loanId_].milestonesExtended = projectLoanPayments[
+            loanId_
+        ]
+            .milestonesExtended
+            .add(1);
 
-        if(projectLoanPayments[loanId_].milestonesExtended > 1) {
+        if (projectLoanPayments[loanId_].milestonesExtended > 1) {
             loanStatus[loanId_] == LoanLibrary.LoanStatus.DEFAULT;
             // TODO - SPECIFY DEFAULT
         } else {
-            projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp =
-                projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp.add(milestoneExtensionInterval);
+            projectLoanPayments[loanId_]
+                .currentMilestoneDeadlineTimestamp = projectLoanPayments[
+                loanId_
+            ]
+                .currentMilestoneDeadlineTimestamp
+                .add(milestoneExtensionInterval);
         }
     }
 
-    function _executeProjectLoanPayment(
-        uint256 loanId_
-    )
-    internal
-    onlyBetweenMilestoneTimeframe(loanId_)
-    onlyOnProjectRepayment(loanId_)
+    function _executeProjectLoanPayment(uint256 loanId_)
+        internal
+        onlyBetweenMilestoneTimeframe(loanId_)
+        onlyOnProjectRepayment(loanId_)
     {
-        IERC20(lendingToken).transferFrom(msg.sender, address(escrow), projectLoanPayments[loanId_].amountToBeRepaid);
+        IERC20(lendingToken).transferFrom(
+            msg.sender,
+            address(escrow),
+            projectLoanPayments[loanId_].amountToBeRepaid
+        );
     }
 
     function _receiveProjectLoanPayment(
         uint256 loanId_,
         uint256 amountOfTokens_,
         bool onProjectTokens_
-    )
-    internal
-    onlySettledLoan(loanId_)
-    {
-        if(onProjectTokens_) {            
+    ) internal onlySettledLoan(loanId_) {
+        if (onProjectTokens_) {
             // TODO - execute payment on project tokens
         } else {
-            uint256 amountToBePaid = projectLoanPayments[loanId_].amountToBeRepaid.mul(
-                amountOfTokens_).div(loanDetails[loanId_].totalPartitions);
+            uint256 amountToBePaid =
+                projectLoanPayments[loanId_]
+                    .amountToBeRepaid
+                    .mul(amountOfTokens_)
+                    .div(loanDetails[loanId_].totalPartitions);
 
             loanNFT.burn(msg.sender, loanId_, amountOfTokens_);
             escrow.transferLendingToken(msg.sender, amountToBePaid);
@@ -222,15 +260,14 @@ contract ProjectLoan is LoanDetails {
     }
 
     // GETTERS
-    function getMilestonesInfo(
-        uint256 loanId_,
-        uint256 milestone_
-    )
-    public
-    view
-    returns(uint amount, uint timestamp)
+    function getMilestonesInfo(uint256 loanId_, uint256 milestone_)
+        public
+        view
+        returns (uint256 amount, uint256 timestamp)
     {
-        amount = projectLoanPayments[loanId_].milestoneLendingAmount[milestone_];
+        amount = projectLoanPayments[loanId_].milestoneLendingAmount[
+            milestone_
+        ];
         timestamp = projectLoanPayments[loanId_].milestoneDuration[milestone_];
     }
 }
