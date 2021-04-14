@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.0;
+pragma experimental ABIEncoderV2;
+
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -192,5 +194,24 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         if(loanDetails[loanId_].loanType == LoanLibrary.LoanType.PERSONAL) _startPersonalLoan(loanId_);
         else _startProjectLoan(loanId_);
         emit LoanStarted(loanId_, loanDetails[loanId_].loanType);
+    }
+
+    /**
+     * @dev This helper function provides a single point for querying the Loan metadata
+     * @param loanId The id of the loan.
+     */
+    function getLoanMetadata(uint loanId) public returns(
+            LoanLibrary.LoanDetails memory, // the loanDetails
+            LoanLibrary.LoanStatus, // the loanStatus
+            address, // the loanBorrower,
+            LoanLibrary.RepaymentBatchType // the repaymentBatchType
+    )
+    {
+        return(
+            loanDetails[loanId],
+            loanStatus[loanId],
+            loanBorrower[loanId],
+            personalLoanPayments[loanId].repaymentBatchType
+        );
     }
 }
