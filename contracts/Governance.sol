@@ -185,4 +185,13 @@ contract Governance is Ownable {
         isDaoMember[msg.sender] = false;
         staking.unfreeze(msg.sender);
     }
+
+    /**
+    * @dev Helper function for querying DAO Membership
+    * @param account The address to check
+    * @return (isDaoMember?, isDaoDelegator?)
+    */
+    function checkDaoAddress(address account) public view returns(bool, bool){
+        return (isDaoMember[account],isDaoDelegator[account]);
+    }
 }
