@@ -298,7 +298,7 @@ contract ProjectLoan is LoanDetails {
                     .mul(amountOfTokens_)
                     .div(loanDetails[loanId_].totalPartitions);
             // Calculate amount of project tokens that can be claimed based on the discounted price
-            // TODO: discounted price can be different per milestone
+            // TODO: Check with Rachid if discounted price can be different per milestone?
             amountOfProjectTokens = amountOfProjectTokens.add(
                 amountToReceive.div(
                     projectLoanPayments[loanId_].discountedProjectTokenPrice
@@ -320,8 +320,9 @@ contract ProjectLoan is LoanDetails {
             loanNFT.burn(msg.sender, loanId_, amountOfTokens_);
         }
 
+        // TODO: How should be determined how much goes off of the amount to be repaid?
         // TODO: add to escrow functions
-        escrow.transferProjectTokens(
+        escrow.transferProjectToken(
             projectLoanPayments[loanId_].projectToken,
             msg.sender,
             amountOfProjectTokens
