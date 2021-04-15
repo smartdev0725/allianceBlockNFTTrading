@@ -63,6 +63,6 @@ library LoanLibrary {
         uint256 amountToBeRepaid; // The total amount of lending tokens to be repaid.
         uint256 discountPerMillion; // The discount / 1M if lenders decide to get paid by the project tokens.
         address projectToken; // The project's own token that can be used to pay back lenders.
-        uint256 projectTokenAmount; // The amount of project tokens locked to repay lenders.
+        uint256 discountedPrice; // The price the project token will be valued at to repay the loan.
     }
 }

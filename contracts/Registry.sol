@@ -157,7 +157,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     /**
      * @dev This function is called by ERC1155 holders to receive a payment (after borrower has repaid part of loan).
      * @param tokenId The token id of the ERC1155 tokens, which is eligible for the payment.
-     * @param amountOfTokens The amount of tokens to receive payment for.
+     * @param amountOfTokens The amount of NFT tokens to receive payment for.
      * @param onProjectTokens Only used in project loans. [true -> repayment in project token] [false -> repayment in lending token]
      */
     function receivePayment(
@@ -169,7 +169,12 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
             _receivePersonalLoanPayment(loanId, generation, amountOfTokens);
         } else {
-            _receiveProjectLoanPayment(loanId, amountOfTokens, onProjectTokens);
+            _receiveProjectLoanPayment(
+                loanId,
+                generation,
+                amountOfTokens,
+                onProjectTokens
+            );
         }
         emit PaymentReceived(
             loanId,

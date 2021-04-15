@@ -35,6 +35,8 @@ contract ProjectLoan is LoanDetails {
      * @param timeDiffBetweenDeliveryAndRepayment The time interval between the last milestone delivery by the project and
      *                                            the repayment of the loan by the project.
      * @param extraInfo The ipfs hash where more specific details for loan request are stored.
+     * @param projectToken The address of the project's own token it can repay the loan with after every milestone.
+     * @param discountedProjectTokenPrice The price the project token will be valued at to repay the loan.
      */
     function requestProjectLoan(
         uint256[] calldata amountRequestedPerMilestone,
@@ -45,7 +47,8 @@ contract ProjectLoan is LoanDetails {
         uint256[] calldata milestoneDurations,
         uint256 timeDiffBetweenDeliveryAndRepayment,
         string memory extraInfo,
-        address projectToken
+        address projectToken,
+        uint256 discountedProjectTokenPrice
     ) external onlyAcceptedNumberOfMilestones(totalMilestones) {
         uint256 totalAmountRequested;
 
@@ -73,7 +76,8 @@ contract ProjectLoan is LoanDetails {
         _storeProjectLoanPayments(
             totalMilestones,
             timeDiffBetweenDeliveryAndRepayment,
-            projectToken
+            projectToken,
+            discountedProjectTokenPrice
         );
 
         loanDetails[totalLoans].loanType = LoanLibrary.LoanType.PROJECT;
@@ -181,7 +185,8 @@ contract ProjectLoan is LoanDetails {
     function _storeProjectLoanPayments(
         uint256 totalMilestones_,
         uint256 timeDiffBetweenDeliveryAndRepayment_,
-        address projectToken_
+        address projectToken_,
+        uint256 discountedProjectTokenPrice_
     ) internal {
         projectLoanPayments[totalLoans].amountToBeRepaid = loanDetails[
             totalLoans
@@ -193,6 +198,8 @@ contract ProjectLoan is LoanDetails {
         projectLoanPayments[totalLoans]
             .timeDiffBetweenDeliveryAndRepayment = timeDiffBetweenDeliveryAndRepayment_;
         projectLoanPayments[totalLoans].projectToken = projectToken_;
+        projectLoanPayments[totalLoans]
+            .discountedProjectTokenPrice = discountedProjectTokenPrice_;
     }
 
     function _startProjectLoan(uint256 loanId_) internal {
@@ -242,21 +249,83 @@ contract ProjectLoan is LoanDetails {
 
     function _receiveProjectLoanPayment(
         uint256 loanId_,
+        uint256 generation_,
         uint256 amountOfTokens_,
         bool onProjectTokens_
-    ) internal onlySettledLoan(loanId_) {
+    ) internal {
         if (onProjectTokens_) {
-            // TODO - execute payment on project tokens
+            _receiveProjectTokenPayment(loanId_, generation_, amountOfTokens_);
         } else {
-            uint256 amountToBePaid =
-                projectLoanPayments[loanId_]
-                    .amountToBeRepaid
+            _receiveLendingTokenPayment(loanId_, generation_, amountOfTokens_);
+        }
+    }
+
+    function _receiveLendingTokenPayment(
+        uint256 loanId_,
+        uint256 generation_,
+        uint256 amountOfTokens_
+    ) internal onlySettledLoan(loanId_) {
+        require(
+            !(generation_ > 0),
+            "This NFT was already used to claim project tokens."
+        );
+
+        uint256 amountToReceive =
+            projectLoanPayments[loanId_]
+                .amountToBeRepaid
+                .mul(amountOfTokens_)
+                .div(loanDetails[loanId_].totalPartitions);
+
+        loanNFT.burn(msg.sender, loanId_, amountOfTokens_);
+        escrow.transferLendingToken(msg.sender, amountToReceive);
+    }
+
+    function _receiveProjectTokenPayment(
+        uint256 loanId_,
+        uint256 generation_,
+        uint256 amountOfTokens_
+    ) internal {
+        uint256 milestonesToBePaid =
+            projectLoanPayments[loanId_].milestonesDelivered.sub(generation_);
+        require(milestonesToBePaid <= 0, "Not eligible for payment");
+
+        // Calculate the amount of project tokens to receive
+        uint256 amountOfProjectTokens;
+        for (uint256 i = 0; i < milestonesToBePaid; i++) {
+            // Calculate the amount to receive based on the amount lended for the milestone and the amount of NFT's
+            uint256 amountToReceive =
+                projectLoanPayments[loanId_].milestoneLendingAmount[i]
                     .mul(amountOfTokens_)
                     .div(loanDetails[loanId_].totalPartitions);
-
-            loanNFT.burn(msg.sender, loanId_, amountOfTokens_);
-            escrow.transferLendingToken(msg.sender, amountToBePaid);
+            // Calculate amount of project tokens that can be claimed based on the discounted price
+            // TODO: discounted price can be different per milestone
+            amountOfProjectTokens = amountOfProjectTokens.add(
+                amountToReceive.div(
+                    projectLoanPayments[loanId_].discountedProjectTokenPrice
+                )
+            );
         }
+        // Burn the NFT's used to receive the payment
+        if (
+            projectLoanPayments[loanId_].milestonesDelivered <
+            projectLoanPayments[loanId_].totalMilestones
+        ) {
+            loanNFT.increaseGenerations(
+                generation_.getTokenId(loanId_),
+                msg.sender,
+                amountOfTokens_,
+                milestonesToBePaid
+            );
+        } else {
+            loanNFT.burn(msg.sender, loanId_, amountOfTokens_);
+        }
+
+        // TODO: add to escrow functions
+        escrow.transferProjectTokens(
+            projectLoanPayments[loanId_].projectToken,
+            msg.sender,
+            amountOfProjectTokens
+        );
     }
 
     // GETTERS
