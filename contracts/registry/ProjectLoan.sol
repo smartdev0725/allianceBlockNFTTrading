@@ -35,8 +35,7 @@ contract ProjectLoan is LoanDetails {
      * @param timeDiffBetweenDeliveryAndRepayment The time interval between the last milestone delivery by the project and
      *                                            the repayment of the loan by the project.
      * @param extraInfo The ipfs hash where more specific details for loan request are stored.
-     * @param projectToken The address of the project's own token it can repay the loan with after every milestone.
-     * @param discountedProjectTokenPrice The price the project token will be valued at to repay the loan.
+     * @param projectTokenPrice The price the project token will be valued at to repay the loan.
      */
     function requestProjectLoan(
         uint256[] calldata amountRequestedPerMilestone,
@@ -47,8 +46,7 @@ contract ProjectLoan is LoanDetails {
         uint256[] calldata milestoneDurations,
         uint256 timeDiffBetweenDeliveryAndRepayment,
         string memory extraInfo,
-        address projectToken,
-        uint256 discountedProjectTokenPrice
+        uint256 projectTokenPrice
     ) external onlyAcceptedNumberOfMilestones(totalMilestones) {
         uint256 totalAmountRequested;
 
@@ -76,8 +74,7 @@ contract ProjectLoan is LoanDetails {
         _storeProjectLoanPayments(
             totalMilestones,
             timeDiffBetweenDeliveryAndRepayment,
-            projectToken,
-            discountedProjectTokenPrice
+            projectTokenPrice
         );
 
         loanDetails[totalLoans].loanType = LoanLibrary.LoanType.PROJECT;
@@ -185,8 +182,7 @@ contract ProjectLoan is LoanDetails {
     function _storeProjectLoanPayments(
         uint256 totalMilestones_,
         uint256 timeDiffBetweenDeliveryAndRepayment_,
-        address projectToken_,
-        uint256 discountedProjectTokenPrice_
+        uint256 projectTokenPrice_
     ) internal {
         projectLoanPayments[totalLoans].amountToBeRepaid = loanDetails[
             totalLoans
@@ -198,8 +194,7 @@ contract ProjectLoan is LoanDetails {
         projectLoanPayments[totalLoans]
             .timeDiffBetweenDeliveryAndRepayment = timeDiffBetweenDeliveryAndRepayment_;
         projectLoanPayments[totalLoans].projectToken = projectToken_;
-        projectLoanPayments[totalLoans]
-            .discountedProjectTokenPrice = discountedProjectTokenPrice_;
+        projectLoanPayments[totalLoans].projectTokenPrice = projectTokenPrice_;
     }
 
     function _startProjectLoan(uint256 loanId_) internal {
@@ -297,11 +292,11 @@ contract ProjectLoan is LoanDetails {
                 projectLoanPayments[loanId_].milestoneLendingAmount[i]
                     .mul(amountOfTokens_)
                     .div(loanDetails[loanId_].totalPartitions);
-            // Calculate amount of project tokens that can be claimed based on the discounted price
-            // TODO: Check with Rachid if discounted price can be different per milestone?
+            // Calculate amount of project tokens that can be claimed based on the (discounted) token price
+            // TODO: Check with Rachid if (discounted) price can be different per milestone?
             amountOfProjectTokens = amountOfProjectTokens.add(
                 amountToReceive.div(
-                    projectLoanPayments[loanId_].discountedProjectTokenPrice
+                    projectLoanPayments[loanId_].projectTokenPrice
                 )
             );
         }
@@ -322,7 +317,7 @@ contract ProjectLoan is LoanDetails {
 
         // TODO: How should be determined how much goes off of the amount to be repaid?
         // TODO: add to escrow functions
-        escrow.transferProjectToken(
+        escrow.transferCollateralToken(
             projectLoanPayments[loanId_].projectToken,
             msg.sender,
             amountOfProjectTokens
