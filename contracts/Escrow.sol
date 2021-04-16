@@ -75,29 +75,15 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
     /**
      * @dev This function is used to send the collateral amount to the borrower.
      * @param collateralToken The collateral token's contract address.
-     * @param borrower Borrower's address.
+     * @param recipient The address to transfer the collateral tokens to.
      * @param amount The amount of collateral tokens to be sent to borrower.
      */
     function transferCollateralToken(
         address collateralToken,
-        address borrower,
-        uint256 amount
-    ) external onlyRegistry() {
-        IERC20(collateralToken).transfer(borrower, amount);
-    }
-
-    /**
-     * @dev transferProjectToken is a function to send project tokens owned by the escrow to a recipient.
-     * @param projectToken The address of the ERC20 project token.
-     * @param recipient The address to transfer the project tokens to.
-     * @param amount The amount of project tokens to transfer.
-     */
-    function transferProjectToken(
-        address projectToken,
         address recipient,
         uint256 amount
     ) external onlyRegistry() {
-        IERC20(projectToken).transfer(recipient, amount);
+        IERC20(collateralToken).transfer(recipient, amount);
     }
 
     /**
