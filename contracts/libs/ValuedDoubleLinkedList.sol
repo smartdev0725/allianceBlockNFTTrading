@@ -22,54 +22,6 @@ library ValuedDoubleLinkedList {
         return self.size;
     }
 
-    function addNodeIncrement(
-        LinkedList storage self,
-        uint256 value,
-        uint256 id
-    ) internal {
-        Node memory node = self.nodes[self.head];
-
-        //If empty
-        if (self.head == 0) {
-            self.head = id;
-            self.tail = id;
-            self.nodes[id] = Node(0, 0, value);
-        }
-        //If head
-        else if (value < node.value) {
-            self.nodes[self.head].previous = id;
-            self.nodes[id] = Node(self.head, 0, value);
-            self.head = id;
-        }
-        else {
-            //If middle
-            if(self.size > 1) {
-                for (uint256 i = 1; i < self.size; i++) {
-                    node = self.nodes[node.next];
-                    if (value < node.value) {
-                        uint256 currentId = self.nodes[node.next].previous;
-                        self.nodes[node.next].previous = id;
-                        self.nodes[id] = Node(
-                            currentId,
-                            self.nodes[currentId].next,
-                            value
-                        );
-                        self.nodes[currentId].next = id;
-                        break;
-                    }
-                }
-            }
-            //If tail
-            if (self.nodes[id].value != value) {
-                self.nodes[id] = Node(0, self.tail, value);
-                self.nodes[self.tail].next = id;
-                self.tail = id;
-            }
-        }
-
-        self.size += 1;
-    }
-
     function addNodeDecrement(
         LinkedList storage self,
         uint256 value,
@@ -91,7 +43,7 @@ library ValuedDoubleLinkedList {
         }
         else {
             //If middle
-            if(self.size > 1) {
+            if (self.size > 1) {
                 for (uint256 i = 1; i < self.size; i++) {
                     node = self.nodes[node.next];
                     if (value > node.value) {
@@ -119,7 +71,7 @@ library ValuedDoubleLinkedList {
     }
 
     function removeNode(LinkedList storage self, uint256 id) internal {
-        if(self.size == 1) {
+        if (self.size == 1) {
             self.head = 0;
             self.tail = 0;
         }
@@ -139,18 +91,15 @@ library ValuedDoubleLinkedList {
         self.size -= 1;
     }
 
-    function popHead(LinkedList storage self) internal returns(uint256 head) {
-        head = self.head;
+    function getPositionForId(LinkedList storage self, uint256 id) internal view returns(uint256) {
+        uint256 positionCounter;
+        uint256 id;
 
-        if(self.size == 1) {
-            self.head = 0;
-            self.tail = 0;
+        while(true) {
+            positionCounter += 1;
+            if (id == self.head) break;
+
+            id = self.nodes[id].previous;
         }
-        else {
-            self.head = self.nodes[self.head].next;
-            self.nodes[self.head].previous = 0;
-        }      
-
-        self.size -= 1;
     }
 }

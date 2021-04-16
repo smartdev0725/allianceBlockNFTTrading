@@ -2,6 +2,7 @@
 pragma solidity 0.7.0;
 
 import "hardhat/console.sol";
+import "./governance/SuperGovernance.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IRegistry.sol";
@@ -11,96 +12,30 @@ import "./interfaces/IStaking.sol";
  * @title AllianceBlock Governance contract
  * @notice Responsible for govern AllianceBlock's ecosystem
  */
-contract Governance is Ownable {
+contract Governance is SuperGovernance {
     using SafeMath for uint256;
 
-    mapping(address => bool) public isDaoMember;
-    mapping(address => bool) public isDaoDelegator;
-    mapping(address => mapping(uint256 => bool)) public hasVotedForRequestId;
-
-    uint256 public totalApprovalRequests;
-    uint256 public approvalsNeeded; // The number of approvals needed for a request to pass (TESTING: 2)
-
-    struct ApprovalRequest {
-        uint256 loanId; // The loan id for which approcal is requested.
-        bool isMilestone; // true if approval reuested is connected to a milestone and false if not.
-        uint256 milestoneNumber; // The milestone number if is Milestone based request.
-        uint256 deadlineTimestamp; // The deadline timestamp to approve this request.
-        uint256 approvalsProvided; // The number of approvals that this request has gathered.
-        bool isApproved; // True if request is approved, false if not.
-    }
-
-    mapping(uint256 => ApprovalRequest) public approvalRequests;
-    uint256 public loanApprovalRequestDuration;
-    uint256 public milestoneApprovalRequestDuration;
-    uint256 public amountStakedForDaoMembership;
-
-    IRegistry public registry;
-    IStaking public staking;
-
-    modifier onlyRegistry() {
-        require(msg.sender == address(registry), "Only Registry contract");
-        _;
-    }
-
-    modifier onlyDaoDelegatorNotVoted(uint256 requestId) {
-        require(isDaoDelegator[msg.sender], "Only Dao Delegator");
-        require(!hasVotedForRequestId[msg.sender][requestId], "Only if not voted yet");
-        _;
-
-        hasVotedForRequestId[msg.sender][requestId] = true;
-    }
-
-    modifier onlyBeforeDeadline(uint256 requestId) {
-        require(approvalRequests[requestId].deadlineTimestamp > block.timestamp,
-            "Only before deadline is reached");
-        _;
-    }
-
-    modifier onlyEnoughStaked() {
-        require(staking.balanceOf(msg.sender) >= amountStakedForDaoMembership,
-            "Only enough staked to subscribe for Dao Membership");
-        _;
-    }
-
-    modifier onlyAfterDeadlineAndNotApproved(uint256 requestId) {
-        require(approvalRequests[requestId].deadlineTimestamp <= block.timestamp,
-            "Only after deadline is reached");
-        require(!approvalRequests[requestId].isApproved, "Only if not already approved");
-        _;
-    }
-
     /**
-     * @dev Initializes the contract by setting basic 
+     * @dev Constructor of the contract.
+     * @param lendingToken_ The token that lenders will be able to lend.
+     * @param mainNFT_ The ERC721 token contract which will represent the whole loans.
+     * @param loanNFT_ The ERC1155 token contract which will represent the lending amounts.
      */
     constructor(
-        address[] memory daoDelegators,
-        uint256 approvalsNeeded_,
+        address superDelegator_,
         uint256 loanApprovalRequestDuration_,
         uint256 milestoneApprovalRequestDuration_,
-        uint256 amountStakedForDaoMembership_
+        uint256 amountStakedForDaoMemberSubscription_,
+        uint256 amountStakedForDelegatorSubscription_
     )
+    public
     {
-        for(uint256 i = 0; i < daoDelegators.length; i++) {
-            isDaoDelegator[daoDelegators[i]] = true;
-        }
+        superDelegator = superDelegator_;
 
-        approvalsNeeded = approvalsNeeded_;
         loanApprovalRequestDuration = loanApprovalRequestDuration_;
         milestoneApprovalRequestDuration = milestoneApprovalRequestDuration_;
         amountStakedForDaoMembership = amountStakedForDaoMembership_;
-    }
-
-    function initialize(
-        address registryAddress_,
-        address stakingAddress_
-    )
-    external
-    onlyOwner()
-    {
-        require(address(registry) == address(0), "Cannot initialize second time");
-        registry = IRegistry(registryAddress_);
-        staking = IStaking(stakingAddress_);
+        amountStakedForDelegatorSubscription = amountStakedForDelegatorSubscription_;
     }
 
     function requestApproval(
@@ -161,17 +96,105 @@ contract Governance is Ownable {
 
     function subscribeForDaoMembership()
     external
-    onlyEnoughStaked()
     {
-        isDaoMember[msg.sender] = true;
-        staking.freeze(msg.sender);
+        require(openedDaoMembershipSubscriptions, "Subscriptions for Dao Membership are not open yet");
+
+        staking.provideStakingForDaoMembership(msg.sender);
+        subscribedForDaoMembership[msg.sender] = true;
+
+        if(addressToId[msg.sender] == 0) {
+            totalIds = totalIds.add(1);
+            addressToId[msg.sender] = totalIds;
+            idToAddress[totalIds] = msg.sender;
+        }
     }
 
-    function unsubscribeForDaoMembership()
+    // TODO - Add unsubscribe
+
+    function voteForDaoMember(address daoSubscriberToVoteFor)
     external
     {
-        require(isDaoMember[msg.sender], "Only Dao Member");
-        isDaoMember[msg.sender] = false;
-        staking.unfreeze(msg.sender);
+        require(staking.balance(msg.sender) > 0, "Only stakers can vote");
+        require(subscribedForDaoMembership[daoSubscriberToVoteFor], "Can only vote for active dao membership subscriber");
+        require(!hasVotedForDaoMemberPerEpoch[msg.sender][currentEpoch], "Cannot vote again");
+        // TODO - require voting to be active
+
+        hasVotedForDaoMemberPerEpoch[msg.sender][currentEpoch] = true;
+
+        uint256 votesForSubscriber = daoMembersListForUpcomingEpoch.nodes[addressToId[daoSubscriberToVoteFor]].value;
+
+        if(votesForSubscriber != 0) {
+            daoMembersListForUpcomingEpoch.removeNode(addressToId[daoSubscriberToVoteFor]);
+        }
+
+        daoMembersListForUpcomingEpoch.addNodeDecrement(votesForSubscriber.add(1), addressToId[daoSubscriberToVoteFor]);
+    }
+    // TODO - Add three states and functions to change between them (VOTING - CLAIM_MEMBERSHIP - LATE_MEMBERSHIP_CLAIMING)
+
+    function claimDaoMembership()
+    external
+    {
+        // TODO - require claiming to be active
+        require(daoMembersListForUpcomingEpoch.getPositionForId(addressToId[msg.sender]) <=
+            amountOfEpochDaoMembersNeededPerEpoch[currentEpoch.add(1)], "Not eligible to become dao member");
+
+        daoMembersListForUpcomingEpoch.removeNode(addressToId[msg.sender]);
+        amountOfEpochDaoMembersNeededPerEpoch[currentEpoch.add(1)] = amountOfEpochDaoMembersNeededPerEpoch[currentEpoch.add(1)].sub(1);
+    }
+
+    function subscribeForDaoDelegator()
+    external
+    {
+        require(openedDaoDelegatorsSubscriptions, "Subscriptions for Dao Delegators are not open yet");
+
+        staking.provideStakingForDaoDelegator(msg.sender);
+        subscribedForDaoDelegator[msg.sender] = true;
+    }
+
+    // TODO - Add unsubscribe
+
+    function voteForDaoDelegator(bytes32 votingHash)
+    external
+    {
+        require(isEpochDaoMember[msg.sender][currentEpoch], "Only dao members can vote");
+        require(!hasVotedForDaoDelegatorPerEpoch[msg.sender][currentEpoch], "Cannot vote again");
+        // TODO - require voting to be active
+
+        hasVotedForDaoDelegatorPerEpoch[msg.sender][currentEpoch] = true;
+
+        votingHashOfDaoMembersPerEpoch[msg.sender][currentEpoch] = votingHash;
+    }
+
+    function approveVoteForDaoDelegator(string password, address daoDelegatorToVoteFor)
+    external
+    {
+        require(votingHashOfDaoMembersPerEpoch[msg.sender][currentEpoch] ==
+            keccak256(abi.encodePacked(password, daoDelegatorToVoteFor)), "Wrong approval password or delegator");
+        require(subscribedForDaoDelegator[daoDelegatorToVoteFor], "Can only vote for active dao delegator subscriber");
+        require(!hasApprovedForDaoDelegatorPerEpoch[msg.sender][currentEpoch], "Cannot approve vote again");
+        // TODO - require voting approval to be active
+
+        hasApprovedForDaoDelegatorPerEpoch[msg.sender][currentEpoch] = true;
+
+        uint256 votesForSubscriber = daoDelegatorsListForUpcomingEpoch.nodes[addressToId[daoDelegatorToVoteFor]].value;
+
+        if(votesForSubscriber != 0) {
+            daoDelegatorsListForUpcomingEpoch.removeNode(addressToId[daoDelegatorToVoteFor]);
+        }
+
+        daoDelegatorsListForUpcomingEpoch.addNodeDecrement(votesForSubscriber.add(1), addressToId[daoDelegatorToVoteFor]);
+    }
+
+    function isDaoAssociated(address account, uint256 epoch)
+    external
+    view
+    returns(bool, bool, uint256, uint256)
+    {
+        return (
+            isEpochDaoMember[account][epoch],
+            isEpochDaoDelegator[account][epoch],
+            amountOfEpochDaoMembers[epoch],
+            amountOfEpochDaoDelegators[epoch]
+        );
     }
 }
