@@ -283,6 +283,11 @@ contract ProjectLoan is LoanDetails {
         uint256 milestonesToBePaid =
             projectLoanPayments[loanId_].milestonesDelivered.sub(generation_);
         require(milestonesToBePaid <= 0, "Not eligible for payment");
+        require(
+            loanStatus[loanId] != LoanLibrary.LoanStatus.SETTLED ||
+                generation_ > 0,
+            "The loan is already settled so payment has been done in lending token, project tokens can not be claimed anymore with NFT of generation 0"
+        );
 
         // Calculate the amount of project tokens to receive
         uint256 amountOfProjectTokens;
@@ -315,8 +320,7 @@ contract ProjectLoan is LoanDetails {
             loanNFT.burn(msg.sender, loanId_, amountOfTokens_);
         }
 
-        // TODO: How should be determined how much goes off of the amount to be repaid?
-        // TODO: add to escrow functions
+        // TODO: How should be determined how much goes off of the amount to be repaid? (the 3 lending amounts at once?)
         escrow.transferCollateralToken(
             projectLoanPayments[loanId_].projectToken,
             msg.sender,
