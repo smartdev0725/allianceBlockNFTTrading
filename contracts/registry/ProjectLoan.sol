@@ -35,7 +35,6 @@ contract ProjectLoan is LoanDetails {
      * @param timeDiffBetweenDeliveryAndRepayment The time interval between the last milestone delivery by the project and
      *                                            the repayment of the loan by the project.
      * @param extraInfo The ipfs hash where more specific details for loan request are stored.
-     * @param projectTokenPrice The price the project token will be valued at to repay the loan.
      */
     function requestProjectLoan(
         uint256[] calldata amountRequestedPerMilestone,
@@ -45,8 +44,7 @@ contract ProjectLoan is LoanDetails {
         uint256 totalMilestones,
         uint256[] calldata milestoneDurations,
         uint256 timeDiffBetweenDeliveryAndRepayment,
-        string memory extraInfo,
-        uint256 projectTokenPrice
+        string memory extraInfo
     ) external onlyAcceptedNumberOfMilestones(totalMilestones) {
         uint256 totalAmountRequested;
 
@@ -73,8 +71,7 @@ contract ProjectLoan is LoanDetails {
 
         _storeProjectLoanPayments(
             totalMilestones,
-            timeDiffBetweenDeliveryAndRepayment,
-            projectTokenPrice
+            timeDiffBetweenDeliveryAndRepayment
         );
 
         loanDetails[totalLoans].loanType = LoanLibrary.LoanType.PROJECT;
@@ -181,8 +178,7 @@ contract ProjectLoan is LoanDetails {
 
     function _storeProjectLoanPayments(
         uint256 totalMilestones_,
-        uint256 timeDiffBetweenDeliveryAndRepayment_,
-        uint256 projectTokenPrice_
+        uint256 timeDiffBetweenDeliveryAndRepayment_
     ) internal {
         projectLoanPayments[totalLoans].amountToBeRepaid = loanDetails[
             totalLoans
@@ -193,8 +189,6 @@ contract ProjectLoan is LoanDetails {
         projectLoanPayments[totalLoans].totalMilestones = totalMilestones_;
         projectLoanPayments[totalLoans]
             .timeDiffBetweenDeliveryAndRepayment = timeDiffBetweenDeliveryAndRepayment_;
-        projectLoanPayments[totalLoans].projectToken = projectToken_;
-        projectLoanPayments[totalLoans].projectTokenPrice = projectTokenPrice_;
     }
 
     function _startProjectLoan(uint256 loanId_) internal {
@@ -284,27 +278,38 @@ contract ProjectLoan is LoanDetails {
             projectLoanPayments[loanId_].milestonesDelivered.sub(generation_);
         require(milestonesToBePaid <= 0, "Not eligible for payment");
         require(
-            loanStatus[loanId] != LoanLibrary.LoanStatus.SETTLED ||
+            loanStatus[loanId_] != LoanLibrary.LoanStatus.SETTLED ||
                 generation_ > 0,
             "The loan is already settled so payment has been done in lending token, project tokens can not be claimed anymore with NFT of generation 0"
         );
 
         // Calculate the amount of project tokens to receive
-        uint256 amountOfProjectTokens;
+        uint256 totalMilestoneLendingAmounts;
         for (uint256 i = 0; i < milestonesToBePaid; i++) {
             // Calculate the amount to receive based on the amount lended for the milestone and the amount of NFT's
-            uint256 amountToReceive =
-                projectLoanPayments[loanId_].milestoneLendingAmount[i]
-                    .mul(amountOfTokens_)
-                    .div(loanDetails[loanId_].totalPartitions);
-            // Calculate amount of project tokens that can be claimed based on the (discounted) token price
-            // TODO: Check with Rachid if (discounted) price can be different per milestone?
-            amountOfProjectTokens = amountOfProjectTokens.add(
-                amountToReceive.div(
-                    projectLoanPayments[loanId_].projectTokenPrice
+            uint256 totalMilestoneLendingAmounts =
+                totalMilestoneLendingAmounts.add(
+                    projectLoanPayments[loanId_].milestoneLendingAmount[i]
+                );
+        }
+        uint256 amountToReceive =
+            paymentAmountToAmountForNFTHolder(
+                loanId_,
+                totalMilestoneLendingAmounts,
+                amountOfTokens
+            );
+        // TODO: Get the real price from a price oracle (Mock the price oracle and test repayment with different token prices)
+        uint256 projectTokenPrice = 1;
+        // Calculate amount of project tokens based on the actual listed price and the discount
+        uint256 amountOfProjectTokens =
+            amountToReceive.div(
+                projectTokenPrice.sub(
+                    projectTokenPrice
+                        .mul(projectLoanPayments[loanId_].discountPerMillion)
+                        .div(1000000)
                 )
             );
-        }
+
         // Burn the NFT's used to receive the payment
         if (
             projectLoanPayments[loanId_].milestonesDelivered <
@@ -322,9 +327,19 @@ contract ProjectLoan is LoanDetails {
 
         // TODO: How should be determined how much goes off of the amount to be repaid? (the 3 lending amounts at once?)
         escrow.transferCollateralToken(
-            projectLoanPayments[loanId_].projectToken,
+            projectLoanPayments[loanId_].collateralToken,
             msg.sender,
             amountOfProjectTokens
+        );
+    }
+
+    function paymentAmountToAmountForNFTHolder(
+        uint256 loanId_,
+        uint256 paymentAmount,
+        uint256 amountOfLoanNFT
+    ) internal pure returns (uint256 amount) {
+        amount = paymentAmount.mul(amountOfLoanNFT).div(
+            loanDetails[loanId_].totalPartitions
         );
     }
 

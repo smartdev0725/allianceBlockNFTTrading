@@ -62,6 +62,5 @@ library LoanLibrary {
         uint256 currentMilestoneDeadlineTimestamp; // Timestamp that milestone/repayment should be delivered.
         uint256 amountToBeRepaid; // The total amount of lending tokens to be repaid.
         uint256 discountPerMillion; // The discount / 1M if lenders decide to get paid by the project tokens.
-        uint256 projectTokenPrice; // The price the project token will be valued at to repay the loan.
     }
 }
