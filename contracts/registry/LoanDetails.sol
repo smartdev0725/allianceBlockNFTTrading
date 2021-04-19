@@ -18,88 +18,125 @@ contract LoanDetails is Storage {
     }
 
     modifier onlyBorrower(uint256 loanId) {
-        require(msg.sender == loanBorrower[loanId], "Only Borrower of the loan");
+        require(
+            msg.sender == loanBorrower[loanId],
+            "Only Borrower of the loan"
+        );
         _;
     }
 
     modifier onlyActivelyFundedLoan(uint256 loanId) {
-        require(loanStatus[loanId] == LoanLibrary.LoanStatus.APPROVED ||
-            loanStatus[loanId] == LoanLibrary.LoanStatus.FUNDING,
-            "Only when loan is actively getting funded");
+        require(
+            loanStatus[loanId] == LoanLibrary.LoanStatus.APPROVED ||
+                loanStatus[loanId] == LoanLibrary.LoanStatus.FUNDING,
+            "Only when loan is actively getting funded"
+        );
         _;
     }
 
     modifier onlyActiveLoan(uint256 loanId) {
-        require(loanStatus[loanId] == LoanLibrary.LoanStatus.STARTED,
-            "Only when loan is active");
+        require(
+            loanStatus[loanId] == LoanLibrary.LoanStatus.STARTED,
+            "Only when loan is active"
+        );
         _;
     }
 
     modifier onlyOnProjectRepayment(uint256 loanId) {
-        require(loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_REPAYMENT,
-            "Only on Repayment Status");
+        require(
+            loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_REPAYMENT,
+            "Only on Repayment Status"
+        );
         _;
 
         loanStatus[loanId] = LoanLibrary.LoanStatus.SETTLED;
     }
 
     modifier onlySettledLoan(uint256 loanId) {
-        require(loanStatus[loanId] == LoanLibrary.LoanStatus.SETTLED,
-            "Only on Settled Status");
+        require(
+            loanStatus[loanId] == LoanLibrary.LoanStatus.SETTLED,
+            "Only on Settled Status"
+        );
         _;
     }
 
     modifier onlyBetweenMilestoneTimeframe(uint256 loanId) {
-        require(projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp > block.timestamp &&
-            projectLoanPayments[loanId].currentMilestoneStartingTimestamp <= block.timestamp,
-            "Only between milestone's timeframe");
+        require(
+            projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp >
+                block.timestamp &&
+                projectLoanPayments[loanId].currentMilestoneStartingTimestamp <=
+                block.timestamp,
+            "Only between milestone's timeframe"
+        );
         _;
     }
 
     modifier onlyBetweenBatchTimeframe(uint256 loanId) {
-        require(personalLoanPayments[loanId].batchDeadlineTimestamp > block.timestamp &&
-            personalLoanPayments[loanId].batchStartingTimestamp <= block.timestamp,
-            "Only between batch timeframe");
+        require(
+            personalLoanPayments[loanId].batchDeadlineTimestamp >
+                block.timestamp &&
+                personalLoanPayments[loanId].batchStartingTimestamp <=
+                block.timestamp,
+            "Only between batch timeframe"
+        );
         _;
     }
 
     modifier onlyAfterDeadlineReached(uint256 loanId) {
-        if(loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
-            require(personalLoanPayments[loanId].batchDeadlineTimestamp <= block.timestamp,
-                "Only after batch deadline is reached");
+        if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
+            require(
+                personalLoanPayments[loanId].batchDeadlineTimestamp <=
+                    block.timestamp,
+                "Only after batch deadline is reached"
+            );
         } else {
-            require(projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp <= block.timestamp,
-                "Only after milestone deadline is reached");
+            require(
+                projectLoanPayments[loanId].currentMilestoneDeadlineTimestamp <=
+                    block.timestamp,
+                "Only after milestone deadline is reached"
+            );
         }
         _;
     }
 
     modifier onlyPersonalLoan(uint256 loanId) {
-        require(loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL,
-            "Only when loan is personal");
+        require(
+            loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL,
+            "Only when loan is personal"
+        );
         _;
     }
 
     modifier onlyProjectLoan(uint256 loanId) {
-        require(loanDetails[loanId].loanType == LoanLibrary.LoanType.PROJECT,
-            "Only when loan is for project");
+        require(
+            loanDetails[loanId].loanType == LoanLibrary.LoanType.PROJECT,
+            "Only when loan is for project"
+        );
         _;
     }
 
     modifier onlyAcceptedNumberOfMilestones(uint256 totalMilestones) {
-        require(totalMilestones <= maxMilestones, "Only accepted number of milestones");
+        require(
+            totalMilestones <= maxMilestones,
+            "Only accepted number of milestones"
+        );
         _;
     }
 
     modifier onlyWhenAwaitingMilestoneApproval(uint256 loanId) {
-        require(loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPROVAL,
-            "Only when loan is awaiting for milestone approval");
+        require(
+            loanStatus[loanId] ==
+                LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPROVAL,
+            "Only when loan is awaiting for milestone approval"
+        );
         _;
     }
 
     modifier onlyEnoughERC1155Balance(uint256 loanId, uint256 amountOfTokens) {
-        require(loanNFT.balanceOf(msg.sender, loanId) >= amountOfTokens,
-            "Only when enough balance");
+        require(
+            loanNFT.balanceOf(msg.sender, loanId) >= amountOfTokens,
+            "Only when enough balance"
+        );
         _;
     }
 
@@ -109,22 +146,35 @@ contract LoanDetails is Storage {
         uint256 collateralAmount_,
         uint256 interestPercentage_,
         string memory extraInfo_
-    )
-    internal
-    {
-        require(lendingAmountRequested_.mod(baseAmountForEachPartition) == 0, "Requested Amount must be a multiplier of base amount");
-        require(interestPercentage_ >= minimumInterestPercentage, "Interest percentage lower than limit");
+    ) internal {
+        require(
+            lendingAmountRequested_.mod(baseAmountForEachPartition) == 0,
+            "Requested Amount must be a multiplier of base amount"
+        );
+        require(
+            interestPercentage_ >= minimumInterestPercentage,
+            "Interest percentage lower than limit"
+        );
 
-        IERC20(collateralToken_).transferFrom(msg.sender, address(escrow), collateralAmount_);
+        IERC20(collateralToken_).transferFrom(
+            msg.sender,
+            address(escrow),
+            collateralAmount_
+        );
 
         LoanLibrary.LoanDetails memory loan;
         loan.loanId = totalLoans;
         loan.collateralToken = collateralToken_;
         loan.collateralAmount = collateralAmount_;
         loan.lendingAmount = lendingAmountRequested_;
-        loan.totalInterest = lendingAmountRequested_.mul(interestPercentage_).div(100);
+        loan.interestPercentage = interestPercentage_;
+        loan.totalInterest = lendingAmountRequested_
+            .mul(interestPercentage_)
+            .div(100);
         loan.extraInfo = extraInfo_;
-        loan.totalPartitions = lendingAmountRequested_.div(baseAmountForEachPartition);
+        loan.totalPartitions = lendingAmountRequested_.div(
+            baseAmountForEachPartition
+        );
 
         loanDetails[totalLoans] = loan;
 

@@ -36,6 +36,7 @@ library LoanLibrary {
         uint256 lendingAmount; // The amount of tokens that was lended to the borrower.
         uint256 totalPartitions; // The total partitions or ERC1155 tokens, in which loan is splitted.
         uint256 totalInterest; // The amount of interest to be paid.
+        uint256 interestPercentage; // The interest percentage to pay back over the amount in lending tokens.
         string extraInfo; // The ipfs hash, where all extra info about the loan are stored.
         uint256 partitionsPurchased; // The total partitions or ERC1155 tokens that have already been purchased.
     }
@@ -60,7 +61,6 @@ library LoanLibrary {
         uint256 timeDiffBetweenDeliveryAndRepayment; // The time interval that will pass between last milestone delivery and repayment.
         uint256 currentMilestoneStartingTimestamp; // Timestamp that milestone/repayment started.
         uint256 currentMilestoneDeadlineTimestamp; // Timestamp that milestone/repayment should be delivered.
-        uint256 amountToBeRepaid; // The total amount of lending tokens to be repaid.
         uint256 discountPerMillion; // The discount / 1M if lenders decide to get paid by the project tokens.
         uint256 partitionsPaidInProjectTokens; // The number of partitions lenders used to claim project tokens.
     }

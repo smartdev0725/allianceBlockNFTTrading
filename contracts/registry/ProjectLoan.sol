@@ -182,12 +182,6 @@ contract ProjectLoan is LoanDetails {
         uint256 totalMilestones_,
         uint256 timeDiffBetweenDeliveryAndRepayment_
     ) internal {
-        projectLoanPayments[totalLoans].amountToBeRepaid = loanDetails[
-            totalLoans
-        ]
-            .totalInterest
-            .add(loanDetails[totalLoans].lendingAmount);
-
         projectLoanPayments[totalLoans].totalMilestones = totalMilestones_;
         projectLoanPayments[totalLoans]
             .timeDiffBetweenDeliveryAndRepayment = timeDiffBetweenDeliveryAndRepayment_;
@@ -234,7 +228,7 @@ contract ProjectLoan is LoanDetails {
         IERC20(lendingToken).transferFrom(
             msg.sender,
             address(escrow),
-            projectLoanPayments[loanId_].amountToBeRepaid
+            getAmountToBeRepaid(loanId_)
         );
     }
 
@@ -262,10 +256,11 @@ contract ProjectLoan is LoanDetails {
         );
 
         uint256 amountToReceive =
-            projectLoanPayments[loanId_]
-                .amountToBeRepaid
-                .mul(amountOfTokens_)
-                .div(loanDetails[loanId_].totalPartitions);
+            getAmountToBeRepaid(loanId_).mul(amountOfTokens_).div(
+                loanDetails[loanId_].totalPartitions.sub(
+                    projectLoanPayments[loanId_].partitionsPaidInProjectTokens
+                )
+            );
 
         loanNFT.burn(msg.sender, loanId_, amountOfTokens_);
         escrow.transferLendingToken(msg.sender, amountToReceive);
@@ -359,5 +354,53 @@ contract ProjectLoan is LoanDetails {
             milestone_
         ];
         timestamp = projectLoanPayments[loanId_].milestoneDuration[milestone_];
+    }
+
+    /**
+     * @dev getAmountToBeRepaid is a function to obtain the amount that should be paid to settle the loan
+     * taking into account the amount paid back with project tokens and the interest percentage.
+     * @param loanId_ The id of the loan to get the amount to be repaid from.
+     * @return amount The total amount to be paid in lending tokens to settle the loan.
+     */
+    function getAmountToBeRepaid(uint256 loanId_)
+        public
+        view
+        returns (uint256 amount)
+    {
+        // Substract the partitions already paid in project tokens from the lending amount to pay back
+        uint256 lendingTokenAmount =
+            loanDetails[loanId_].lendingAmount.sub(
+                projectLoanPayments[loanId_].partitionsPaidInProjectTokens *
+                    baseAmountForEachPartition
+            );
+        // Calculate the interest only over what is left to pay in the lending token
+        uint256 interest =
+            lendingTokenAmount.mul(loanDetails[loanId_].interestPercentage).div(
+                100
+            );
+        amount = lendingTokenAmount.add(interest);
+    }
+
+    /**
+     * @dev getTotalInterest is a function to obtain the total amount of interest to pay back
+     * taking into account the interest free amount paid back with project tokens and the interest percentage set for the loan.
+     * @param loanId_ The id of the loan to get the interest percentage from.
+     * @return totalInterest The total amount of interest to be paid to settle the loan.
+     */
+    function getTotalInterest(uint256 loanId_)
+        public
+        view
+        returns (uint256 totalInterest)
+    {
+        // Substract the partitions already paid in project tokens from the lending amount to pay back
+        uint256 lendingTokenAmount =
+            loanDetails[loanId_].lendingAmount.sub(
+                projectLoanPayments[loanId_].partitionsPaidInProjectTokens *
+                    baseAmountForEachPartition
+            );
+        // Calculate the interest only over what is left to pay in the lending token
+        totalInterest = lendingTokenAmount
+            .mul(loanDetails[loanId_].interestPercentage)
+            .div(100);
     }
 }
