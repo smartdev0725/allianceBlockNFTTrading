@@ -16,7 +16,7 @@ contract Governance is Ownable {
 
     //events
     event RequestChallenged(uint indexed requestId, address indexed user);
-    event VotedForRequest(uint indexed requestId, bool indexed decision, address indexed user);
+    event VotedForRequest(uint indexed loanId, uint indexed requestId, bool decision, address indexed user);
     event ApprovalRequested(uint indexed loanId, bool indexed isMilestone, uint milestoneNumber,  address indexed user);
     event InitGovernance(address indexed registryAddress_, address indexed stakingAddress_, address indexed user);
 
@@ -153,7 +153,7 @@ contract Governance is Ownable {
 
             approvalRequests[requestId].isApproved = true;
         }
-        emit VotedForRequest(requestId, decision, msg.sender);
+        emit VotedForRequest(approvalRequests[requestId].loanId, requestId, decision, msg.sender);
     }
 
     function challengeRequest(
