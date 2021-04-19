@@ -19,7 +19,6 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     using TokenFormat for uint256;
 
     // Events
-    event LoanDecisionMade(uint indexed loanId, bool decision, LoanLibrary.LoanType indexed loanType);
     event LoanPartitionsPurchased(uint indexed loanId, uint256 partitionsToPurchase, address lender);
     event LoanStarted(uint indexed loanId, LoanLibrary.LoanType indexed loanType);
     event LoanApproved(uint indexed loanId, LoanLibrary.LoanType indexed loanType);
@@ -72,7 +71,6 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     {
         if(decision) _approveLoan(loanId);
         else _rejectLoan(loanId);
-        emit LoanDecisionMade(loanId, decision, loanDetails[loanId].loanType);
     }
 
     /**
