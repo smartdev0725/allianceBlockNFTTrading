@@ -1,16 +1,13 @@
 require("dotenv").config();
 
-import { HardhatUserConfig, task } from "hardhat/config";
+import { HardhatUserConfig } from "hardhat/config";
 
 import "@nomiclabs/hardhat-truffle5";
 import "hardhat-gas-reporter";
 import "hardhat-typechain";
-import { requestProjectLoanToFund } from "./tasks/requestProjectLoan"
 
 if (!process.env.RINKEBY_PRIVKEY) throw new Error("RINKEBY_PRIVKEY missing from .env file");
 if (!process.env.MAINNET_PRIVKEY) throw new Error("MAINNET_PRIVKEY missing from .env file");
-
-task("requestProjectLoanToFund", "Requests a project loan ready to get funded", requestProjectLoanToFund);
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
