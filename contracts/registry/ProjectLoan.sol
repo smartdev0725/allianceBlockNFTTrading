@@ -4,6 +4,7 @@ pragma solidity 0.7.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./LoanDetails.sol";
+import "../libs/TokenFormat.sol";
 
 /**
  * @title AllianceBlock ProjectLoan contract
@@ -11,6 +12,7 @@ import "./LoanDetails.sol";
  */
 contract ProjectLoan is LoanDetails {
     using SafeMath for uint256;
+    using TokenFormat for uint256;
 
     // Events
     event ProjectLoanRequested(
@@ -293,14 +295,15 @@ contract ProjectLoan is LoanDetails {
                 );
         }
         uint256 amountToReceive =
-            paymentAmountToAmountForNFTHolder(
-                loanId_,
+            _paymentAmountToAmountForNFTHolder(
+                loanDetails[loanId_].totalPartitions,
                 totalMilestoneLendingAmounts,
-                amountOfTokens
+                amountOfTokens_
             );
         // TODO: Get the real price from a price oracle (Mock the price oracle and test repayment with different token prices)
         uint256 projectTokenPrice = 1;
         // Calculate amount of project tokens based on the actual listed price and the discount
+        // TODO: Should the discount really be expressed in discount per million? Why not percentage?
         uint256 amountOfProjectTokens =
             amountToReceive.div(
                 projectTokenPrice.sub(
@@ -325,22 +328,25 @@ contract ProjectLoan is LoanDetails {
             loanNFT.burn(msg.sender, loanId_, amountOfTokens_);
         }
 
-        // TODO: How should be determined how much goes off of the amount to be repaid? (the 3 lending amounts at once?)
         escrow.transferCollateralToken(
-            projectLoanPayments[loanId_].collateralToken,
+            loanDetails[loanId_].collateralToken,
             msg.sender,
             amountOfProjectTokens
         );
+
+        // Store the number of partitions used to reduce them from the amount of lending tokens to pay to settle the loan
+        projectLoanPayments[loanId_]
+            .partitionsPaidInProjectTokens = projectLoanPayments[loanId_]
+            .partitionsPaidInProjectTokens
+            .add(amountOfTokens_);
     }
 
-    function paymentAmountToAmountForNFTHolder(
-        uint256 loanId_,
+    function _paymentAmountToAmountForNFTHolder(
+        uint256 totalPartitions,
         uint256 paymentAmount,
         uint256 amountOfLoanNFT
     ) internal pure returns (uint256 amount) {
-        amount = paymentAmount.mul(amountOfLoanNFT).div(
-            loanDetails[loanId_].totalPartitions
-        );
+        amount = paymentAmount.mul(amountOfLoanNFT).div(totalPartitions);
     }
 
     // GETTERS
