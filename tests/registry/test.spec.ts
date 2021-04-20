@@ -10,6 +10,7 @@ import checkProjectLoanApproval from './project/checkLoanApproval';
 import checkProjectFundLoan from './project/checkLoanApproval';
 import checkProjectMilestoneApplication from './project/checkProjectMilestoneApplication';
 import checkProjectMilestoneApproval from './project/checkProjectMilestoneApproval';
+import checkProjectTokenRepayment from './project/checkProjectTokenRepayment';
 
 import {
   DAO_LOAN_APPROVAL,
@@ -100,7 +101,7 @@ describe('Registry', function () {
     // Transfer tokens.
     const amountToTransfer = (new BN(toWei('1000000'))).toString();
 
-    for(let i = 0; i < this.lenders.length; i++) {
+    for (let i = 0; i < this.lenders.length; i++) {
       await this.lendingToken.mint(this.lenders[i], amountToTransfer, { from: this.owner });
       await this.lendingToken.approve(this.registry.address, amountToTransfer, { from: this.lenders[i] });
     }
@@ -118,11 +119,12 @@ describe('Registry', function () {
   describe('When checking personal loan funding', checkFundLoan.bind(this));
   describe('When checking personal loan repayment', checkLoanRepayment.bind(this));
 
-  describe('When checking project loan requests', checkProjectLoanRequests.bind(this));  
+  describe('When checking project loan requests', checkProjectLoanRequests.bind(this));
   describe('When checking project loan approval requests', checkProjectLoanApproval.bind(this));
   describe('When checking project loan funding', checkProjectFundLoan.bind(this));
   describe('When checking project milestone application', checkProjectMilestoneApplication.bind(this));
   describe('When checking project milestone approval', checkProjectMilestoneApproval.bind(this));
+  describe('When checking project repayment in project tokens', checkProjectTokenRepayment.bind(this));
 
-  
+
 });

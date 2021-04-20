@@ -2,7 +2,6 @@
 pragma solidity 0.7.0;
 pragma experimental ABIEncoderV2;
 
-
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -167,7 +166,8 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         uint256 amountOfTokens,
         bool onProjectTokens
     ) external onlyEnoughERC1155Balance(tokenId, amountOfTokens) {
-        (uint256 loanId, uint256 generation) = tokenId.formatTokenId();
+        (uint256 generation, uint256 loanId) = tokenId.formatTokenId();
+
         if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
             _receivePersonalLoanPayment(loanId, generation, amountOfTokens);
         } else {
@@ -233,14 +233,16 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
      * @dev This helper function provides a single point for querying the Loan metadata
      * @param loanId The id of the loan.
      */
-    function getLoanMetadata(uint loanId) public returns(
+    function getLoanMetadata(uint256 loanId)
+        public
+        returns (
             LoanLibrary.LoanDetails memory, // the loanDetails
             LoanLibrary.LoanStatus, // the loanStatus
             address, // the loanBorrower,
             LoanLibrary.RepaymentBatchType // the repaymentBatchType
-    )
+        )
     {
-        return(
+        return (
             loanDetails[loanId],
             loanStatus[loanId],
             loanBorrower[loanId],
