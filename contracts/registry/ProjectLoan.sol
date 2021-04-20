@@ -273,7 +273,7 @@ contract ProjectLoan is LoanDetails {
     ) internal {
         uint256 milestonesToBePaid =
             projectLoanPayments[loanId_].milestonesDelivered.sub(generation_);
-        require(milestonesToBePaid <= 0, "Not eligible for payment");
+        require(milestonesToBePaid > 0, "Not eligible for payment");
         require(
             loanStatus[loanId_] != LoanLibrary.LoanStatus.SETTLED ||
                 generation_ > 0,

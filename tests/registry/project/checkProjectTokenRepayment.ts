@@ -63,7 +63,6 @@ export default async function suite() {
             let generation = new BN(0);
             const amountOnProjectTokens = bigPartition.div(new BN(2));
 
-            console.log("loanId in tests", loanId);
             const tx = await this.registry.receivePayment(loanId, amountOnProjectTokens, true, { from: this.lenders[0] });
 
             // Correct Event.
