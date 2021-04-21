@@ -328,10 +328,12 @@ contract ProjectLoan is LoanDetails {
         );
 
         // Store the number of partitions used to reduce them from the amount of lending tokens to pay to settle the loan
-        projectLoanPayments[loanId_]
-            .partitionsPaidInProjectTokens = projectLoanPayments[loanId_]
-            .partitionsPaidInProjectTokens
-            .add(amountOfTokens_);
+        if (generation_ == 0) {
+            projectLoanPayments[loanId_]
+                .partitionsPaidInProjectTokens = projectLoanPayments[loanId_]
+                .partitionsPaidInProjectTokens
+                .add(amountOfTokens_);
+        }
     }
 
     function _paymentAmountToAmountForNFTHolder(
