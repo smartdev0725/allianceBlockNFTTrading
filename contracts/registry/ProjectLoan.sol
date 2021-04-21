@@ -15,7 +15,7 @@ contract ProjectLoan is LoanDetails {
     // Events
     event ProjectLoanRequested(uint indexed loanId, address indexed user, uint256 amount);
     event ProjectLoanMilestoneApprovalRequested(uint indexed loanId, uint256 milestoneNumber);
-    event ProjectLoanMilestoneDecided(uint indexed loanId);
+    event ProjectLoanMilestoneDecided(uint indexed loanId, bool decision);
 
     /**
      * @dev This function is used for potential borrowing project to request a loan.
@@ -110,7 +110,7 @@ contract ProjectLoan is LoanDetails {
         if(decision) _approveMilestone(loanId);
         else _rejectMilestone(loanId);
 
-        emit ProjectLoanMilestoneDecided(loanId);
+        emit ProjectLoanMilestoneDecided(loanId,decision);
     }
 
     function _approveMilestone(
