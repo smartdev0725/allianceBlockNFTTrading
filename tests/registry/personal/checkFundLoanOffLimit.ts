@@ -6,7 +6,7 @@ const { time, expectRevert } = require("@openzeppelin/test-helpers");
 
 export default async function suite() {
   describe("Succeeds", async () => {
-    it("when funding a loan off the limit should revert", async function() {
+    it("when funding a personal loan off the limit should revert", async function() {
       // Given
       const loanId = new BN(await this.registry.totalLoans());
       const approvalRequest = new BN(

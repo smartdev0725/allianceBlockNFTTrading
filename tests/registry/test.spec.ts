@@ -3,7 +3,8 @@ import checkPersonalLoanRequests from "./personal/checkPersonalLoanRequests";
 import checkLoanApproval from "./personal/checkLoanApproval";
 import checkFundLoan from "./personal/checkFundLoan";
 import checkLoanRepayment from "./personal/checkLoanRepayment";
-import checkFundLoanOffLimit from "./personal/checkFundLoanOffLimit";
+import checkPersonalFundLoanOffLimit from "./personal/checkFundLoanOffLimit";
+import checkProjectFundLoanOffLimit from "./project/checkFundLoanOffLimit";
 
 // Project
 import checkProjectLoanRequests from "./project/checkProjectLoanRequests";
@@ -178,7 +179,11 @@ describe("Registry", function() {
     checkProjectMilestoneApproval.bind(this)
   );
   describe(
+    "When checking personal loan funding off limit",
+    checkPersonalFundLoanOffLimit.bind(this)
+  );
+  describe(
     "When checking project loan funding off limit",
-    checkFundLoanOffLimit.bind(this)
+    checkProjectFundLoanOffLimit.bind(this)
   );
 });
