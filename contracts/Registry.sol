@@ -200,7 +200,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
      * @dev This helper function provides a single point for querying the Loan metadata
      * @param loanId The id of the loan.
      */
-    function getLoanMetadata(uint loanId) public returns(
+    function getLoanMetadata(uint loanId) public view returns(
             LoanLibrary.LoanDetails memory, // the loanDetails
             LoanLibrary.LoanStatus, // the loanStatus
             address, // the loanBorrower,
