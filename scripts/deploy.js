@@ -18,6 +18,7 @@ const {
   MAX_MILESTONES,
   MILESTONE_EXTENSION,
   AMOUNT_FOR_DAO_MEMBERSHIP,
+  FUNDING_TIME_INTERVAL
 } = require("../tests/helpers/constants");
 
 const BN = require("bn.js");
@@ -61,7 +62,8 @@ async function main() {
     MAX_MILESTONES,
     MILESTONE_EXTENSION,
     VESTING_BATCHES,
-    VESTING_TIME_INTERVAL
+    VESTING_TIME_INTERVAL,
+    FUNDING_TIME_INTERVAL
   );
 
   // Initialize contracts.
@@ -85,24 +87,24 @@ async function main() {
 
   for (let i = 0; i < this.lenders.length; i++) {
     await this.lendingToken.mint(this.lenders[i], amountToTransfer, {
-      from: this.owner,
+      from: this.owner
     });
     await this.lendingToken.approve(this.registry.address, amountToTransfer, {
-      from: this.lenders[i],
+      from: this.lenders[i]
     });
   }
 
   await this.lendingToken.mint(this.borrower, amountToTransfer, {
-    from: this.owner,
+    from: this.owner
   });
   await this.lendingToken.approve(this.registry.address, amountToTransfer, {
-    from: this.borrower,
+    from: this.borrower
   });
   await this.collateralToken.mint(this.borrower, amountToTransfer, {
-    from: this.owner,
+    from: this.owner
   });
   await this.collateralToken.approve(this.registry.address, amountToTransfer, {
-    from: this.borrower,
+    from: this.borrower
   });
 
   // Deployment Addresses
@@ -121,7 +123,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((error) => {
+  .catch(error => {
     console.error(error);
     process.exit(1);
   });
