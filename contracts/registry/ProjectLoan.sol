@@ -200,6 +200,8 @@ contract ProjectLoan is LoanDetails {
     onlyOnProjectRepayment(loanId_)
     {
         IERC20(lendingToken).transferFrom(msg.sender, address(escrow), projectLoanPayments[loanId_].amountToBeRepaid);
+        loanStatus[loanId_] = LoanLibrary.LoanStatus.SETTLED;
+        escrow.transferCollateralToken(loanDetails[loanId_].collateralToken, loanBorrower[loanId_], loanDetails[loanId_].collateralAmount);
     }
 
     function _receiveProjectLoanPayment(
