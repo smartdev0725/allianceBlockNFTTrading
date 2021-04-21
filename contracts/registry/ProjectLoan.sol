@@ -284,10 +284,9 @@ contract ProjectLoan is LoanDetails {
         uint256 totalMilestoneLendingAmounts;
         for (uint256 i = 0; i < milestonesToBePaid; i++) {
             // Calculate the amount to receive based on the amount lended for the milestone and the amount of NFT's
-            uint256 totalMilestoneLendingAmounts =
-                totalMilestoneLendingAmounts.add(
-                    projectLoanPayments[loanId_].milestoneLendingAmount[i]
-                );
+            totalMilestoneLendingAmounts = totalMilestoneLendingAmounts.add(
+                projectLoanPayments[loanId_].milestoneLendingAmount[i]
+            );
         }
         uint256 amountToReceive =
             _paymentAmountToAmountForNFTHolder(
@@ -307,7 +306,6 @@ contract ProjectLoan is LoanDetails {
                         .div(1000000)
                 )
             );
-
         // Burn the NFT's used to receive the payment
         if (
             projectLoanPayments[loanId_].milestonesDelivered <
