@@ -167,7 +167,6 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         bool onProjectTokens
     ) external onlyEnoughERC1155Balance(tokenId, amountOfTokens) {
         (uint256 generation, uint256 loanId) = tokenId.formatTokenId();
-
         if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
             _receivePersonalLoanPayment(loanId, generation, amountOfTokens);
         } else {

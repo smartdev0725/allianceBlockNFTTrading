@@ -19,9 +19,13 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
     using TokenFormat for uint256;
 
     // Events
-    event GenerationIncreased(uint indexed loanId, address indexed user, uint newGeneration);
-    event TransfersPaused(uint loanId);
-    event TransfersResumed(uint loanId);
+    event GenerationIncreased(
+        uint256 indexed loanId,
+        address indexed user,
+        uint256 newGeneration
+    );
+    event TransfersPaused(uint256 loanId);
+    event TransfersResumed(uint256 loanId);
 
     // Keep track of loan Ids
     Counters.Counter private _loanIdTracker;
@@ -33,18 +37,18 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
     string private _baseURI;
 
     // Mapping from loan ID to paused condition
-    mapping(uint => bool) public transfersPaused;
+    mapping(uint256 => bool) public transfersPaused;
 
     // Mapping from token ID to IPFS hash (token metadata)
-    mapping(uint => string) public ipfsHashes;
+    mapping(uint256 => string) public ipfsHashes;
 
     // Access Roles
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /**
-    * @dev Initializes the contract by setting the base URI
-    */
+     * @dev Initializes the contract by setting the base URI
+     */
     constructor() public ERC1155("") {
         _baseURI = "ipfs://";
         _contractURI = "https://allianceblock.io/";
@@ -52,14 +56,17 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
         _setupRole(MINTER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
     }
-    
-    modifier onlyPauser(){
+
+    modifier onlyPauser() {
         require(hasRole(PAUSER_ROLE, _msgSender()), "Must have pauser role");
         _;
     }
 
-    modifier onlyMinter(){
-        require(hasRole(MINTER_ROLE, _msgSender()), "Must have minter role to mint");
+    modifier onlyMinter() {
+        require(
+            hasRole(MINTER_ROLE, _msgSender()),
+            "Must have minter role to mint"
+        );
         _;
     }
 
@@ -71,9 +78,9 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
     // }
 
     /**
-    * @dev contract metadata
-    */
-    function contractURI() public view returns(string memory) {
+     * @dev contract metadata
+     */
+    function contractURI() public view returns (string memory) {
         return _contractURI;
     }
 
@@ -81,7 +88,7 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
      * @dev Owner can pause transfers for specific tokens
      * @dev pauses all loan ids, no matter the generation
      */
-    function pauseTokenTransfer(uint loanId) external onlyPauser {        
+    function pauseTokenTransfer(uint256 loanId) external onlyPauser {
         transfersPaused[loanId] = true;
         emit TransfersPaused(loanId);
     }
@@ -89,7 +96,7 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
     /**
      * @dev Owner can unpause transfers for specific tokens
      */
-    function unpauseTokenTransfer(uint loanId) external onlyPauser {
+    function unpauseTokenTransfer(uint256 loanId) external onlyPauser {
         transfersPaused[loanId] = false;
         emit TransfersResumed(loanId);
     }
@@ -97,17 +104,17 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
     /**
      * @dev Format tokenId into generation and index
      */
-    function getCurrentLoanId() public view returns(uint loanId) {
+    function getCurrentLoanId() public view returns (uint256 loanId) {
         return _loanIdTracker.current();
     }
 
     /**
      * @dev Mint generation 0 tokens
      */
-    function mintGen0(address to, uint amount) external onlyMinter {
-        uint tokenId = getCurrentLoanId();
-        _mint(to, tokenId, amount, ""); 
-        _loanIdTracker.increment();       
+    function mintGen0(address to, uint256 amount) external onlyMinter {
+        uint256 tokenId = getCurrentLoanId();
+        _mint(to, tokenId, amount, "");
+        _loanIdTracker.increment();
     }
 
     /**
@@ -115,7 +122,11 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
      * @dev token is burned, and new token is minted to user
      * @dev token owner should have approvedForAll before calling this function
      */
-    function increaseGeneration(uint tokenId, address user, uint amount) external onlyMinter {        
+    function increaseGeneration(
+        uint256 tokenId,
+        address user,
+        uint256 amount
+    ) external onlyMinter {
         _increaseGenerations(tokenId, user, amount, 1);
     }
 
@@ -124,11 +135,20 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
      * @dev token is burned, and new token is minted to user
      * @dev token owner should have approvedForAll before calling this function
      */
-    function increaseGenerations(uint tokenId, address user, uint amount, uint generationsToAdd) external onlyMinter {
+    function increaseGenerations(
+        uint256 tokenId,
+        address user,
+        uint256 amount,
+        uint256 generationsToAdd
+    ) external onlyMinter {
         _increaseGenerations(tokenId, user, amount, generationsToAdd);
     }
 
-    function burn(address account, uint256 id, uint256 amount) public onlyMinter {
+    function burn(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) public onlyMinter {
         _burn(account, id, amount);
     }
 
@@ -137,12 +157,17 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
      * @dev token is burned, and new token is minted to user
      * @dev token owner should have approvedForAll before calling this function
      */
-    function _increaseGenerations(uint tokenId, address user, uint amount, uint generationsToAdd) internal {
-        (uint generation, uint loanId) = tokenId.formatTokenId();
+    function _increaseGenerations(
+        uint256 tokenId,
+        address user,
+        uint256 amount,
+        uint256 generationsToAdd
+    ) internal {
+        (uint256 generation, uint256 loanId) = tokenId.formatTokenId();
 
         // Increase generation, leave loanId same
         generation += generationsToAdd;
-        uint newTokenId = generation.getTokenId(loanId);
+        uint256 newTokenId = generation.getTokenId(loanId);
 
         // Burn previous gen tokens
         burn(user, tokenId, amount);
@@ -152,7 +177,7 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
 
         emit GenerationIncreased(loanId, user, generation);
     }
-    
+
     /**
      * @dev Validates if the loanId from the tokenId can be transferred
      */
@@ -163,12 +188,9 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) 
-    internal
-    override
-    {
-        for(uint i=0; i< ids.length; i++){
-            (, uint loanId) = ids[i].formatTokenId();
+    ) internal override {
+        for (uint256 i = 0; i < ids.length; i++) {
+            (, uint256 loanId) = ids[i].formatTokenId();
             require(!transfersPaused[loanId], "Transfers paused");
         }
     }

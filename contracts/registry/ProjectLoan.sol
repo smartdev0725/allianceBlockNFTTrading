@@ -298,7 +298,7 @@ contract ProjectLoan is LoanDetails {
         // TODO: Get the real price from a price oracle (Mock the price oracle and test repayment with different token prices)
         uint256 projectTokenPrice = 1;
         // Calculate amount of project tokens based on the actual listed price and the discount
-        // TODO: Should the discount really be expressed in discount per million? Why not percentage?
+        // TODO: Discount should be set somewhere, at request loan? Should the discount really be expressed in discount per million? Why not percentage?
         uint256 amountOfProjectTokens =
             amountToReceive.div(
                 projectTokenPrice.sub(

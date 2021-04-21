@@ -60,13 +60,26 @@ export default async function suite() {
         });
         it("when receiving payments in project tokens", async function () {
             // Lender 0 uses half of its tokens to get the project tokens for the first milestone
+            const projectTokenPrice = new BN(1);
             let generation = new BN(0);
+            let tokenId = loanId;
+
             const amountOnProjectTokens = bigPartition.div(new BN(2));
 
-            const tx = await this.registry.receivePayment(loanId, amountOnProjectTokens, true, { from: this.lenders[0] });
+            const tx1 = await this.registry.receivePayment(tokenId, amountOnProjectTokens, true, { from: this.lenders[0] });
 
             // Correct Event.
-            expectEvent(tx.receipt, 'PaymentReceived', { loanId, amountOfTokens: amountOnProjectTokens, generation, onProjectTokens: true, user: this.lenders[0] });
+            expectEvent(tx1.receipt, 'PaymentReceived', { loanId, amountOfTokens: amountOnProjectTokens, generation, onProjectTokens: true, user: this.lenders[0] });
+
+            //generation = generation.add(new BN(1));
+            //tokenId = new BN((generation.toNumber() << 128) | loanId.toNumber());
+
+            //console.log("generation 2 in tests", generation.toNumber());
+            //console.log("tokenId 2 in tests", tokenId.toNumber());
+
+            //const tx2 = await this.registry.receivePayment(tokenId, amountOnProjectTokens, true, { from: this.lenders[0] });
+            //// Correct Event.
+            //expectEvent(tx2.receipt, 'PaymentReceived', { loanId, amountOfTokens: amountOnProjectTokens, generation, onProjectTokens: true, user: this.lenders[0] });
 
         });
     });
