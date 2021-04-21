@@ -1,12 +1,8 @@
-import { ethers } from "hardhat";
-import { solidity } from "ethereum-waffle";
 import BN from "bn.js";
 import { toWei } from "web3-utils";
 import { RepaymentBatchType } from "../../helpers/registryEnums";
 import { ONE_DAY, BASE_AMOUNT } from "../../helpers/constants";
-import chai, { expect } from "chai";
-
-chai.use(solidity);
+const { time, expectRevert } = require("@openzeppelin/test-helpers");
 
 export default async function suite() {
   describe("Succeeds", async () => {
@@ -47,15 +43,15 @@ export default async function suite() {
       });
 
       // When
-      await ethers.provider.send("evm_increaseTime", [30 * 24 * 60 * 60]); // One Month
-      await ethers.provider.send("evm_mine", []); // mine the next block
+      time.increase(30 * 24 * 60 * 60); // One Month
 
       // Then
-      await expect(
+      await expectRevert(
         this.registry.fundLoan(loanId, smallPartition, {
           from: this.lenders[0]
-        })
-      ).to.revertedWith("Only between funding timeframe");
+        }),
+        "Only between funding timeframe"
+      );
     });
   });
 }
