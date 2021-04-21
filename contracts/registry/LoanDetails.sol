@@ -103,6 +103,13 @@ contract LoanDetails is Storage {
         _;
     }
 
+    modifier onlyBetweenFundingTimeframe(uint256 loanId) {
+        require(loanDetails[loanId].approvalDate.add(fundingTimeInterval) > block.timestamp &&
+        loanDetails[loanId].approvalDate <= block.timestamp,
+            "Only between funding timeframe");
+        _;
+    }
+
     function _storeLoanDetails(
         uint256 lendingAmountRequested_,
         address collateralToken_,
