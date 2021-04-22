@@ -44,8 +44,6 @@ contract LoanDetails is Storage {
         require(loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_REPAYMENT,
             "Only on Repayment Status");
         _;
-
-        loanStatus[loanId] = LoanLibrary.LoanStatus.SETTLED;
     }
 
     modifier onlySettledLoan(uint256 loanId) {
