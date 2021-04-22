@@ -26,6 +26,11 @@ contract LoanDetails is Storage {
         require(loanStatus[loanId] == LoanLibrary.LoanStatus.APPROVED ||
             loanStatus[loanId] == LoanLibrary.LoanStatus.FUNDING,
             "Only when loan is actively getting funded");
+        require(
+            loanDetails[loanId].approvalDate.add(fundingTimeInterval) >
+            block.timestamp,
+            "Only between funding timeframe"
+        );
         _;
     }
 
@@ -100,13 +105,6 @@ contract LoanDetails is Storage {
     modifier onlyEnoughERC1155Balance(uint256 loanId, uint256 amountOfTokens) {
         require(loanNFT.balanceOf(msg.sender, loanId) >= amountOfTokens,
             "Only when enough balance");
-        _;
-    }
-
-    modifier onlyBetweenFundingTimeframe(uint256 loanId) {
-        require(loanDetails[loanId].approvalDate.add(fundingTimeInterval) > block.timestamp &&
-        loanDetails[loanId].approvalDate <= block.timestamp,
-            "Only between funding timeframe");
         _;
     }
 

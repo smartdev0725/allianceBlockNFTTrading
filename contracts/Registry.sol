@@ -88,7 +88,6 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     )
     external
     onlyActivelyFundedLoan(loanId)
-    onlyBetweenFundingTimeframe(loanId)
     {
         require(partitionsToPurchase <= loanDetails[loanId].totalPartitions.sub(loanDetails[loanId].partitionsPurchased),
             "Not enough partitions left for purchase");
