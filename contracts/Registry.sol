@@ -41,7 +41,8 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         uint256 maxMilestones_,
         uint256 milestoneExtensionInterval_,
         uint256 vestingBatches_,
-        uint256 vestingTimeInterval_
+        uint256 vestingTimeInterval_,
+        uint256 fundingTimeInterval_
     )
     {
         escrow = IEscrow(escrowAddress);
@@ -55,6 +56,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         milestoneExtensionInterval = milestoneExtensionInterval_;
         vestingBatches = vestingBatches_;
         vestingTimeInterval = vestingTimeInterval_;
+        fundingTimeInterval = fundingTimeInterval_;
     }
 
     /**
@@ -167,6 +169,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     internal
     {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.APPROVED;
+        loanDetails[loanId_].approvalDate = block.timestamp;
         loanNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
         emit LoanApproved(loanId_, loanDetails[loanId_].loanType);
     }

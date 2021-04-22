@@ -26,6 +26,11 @@ contract LoanDetails is Storage {
         require(loanStatus[loanId] == LoanLibrary.LoanStatus.APPROVED ||
             loanStatus[loanId] == LoanLibrary.LoanStatus.FUNDING,
             "Only when loan is actively getting funded");
+        require(
+            loanDetails[loanId].approvalDate.add(fundingTimeInterval) >
+            block.timestamp,
+            "Only between funding timeframe"
+        );
         _;
     }
 
