@@ -110,7 +110,7 @@ contract ProjectLoan is LoanDetails {
         if(decision) _approveMilestone(loanId);
         else _rejectMilestone(loanId);
 
-        emit ProjectLoanMilestoneDecided(loanId, decision);
+        emit ProjectLoanMilestoneDecided(loanId,decision);
     }
 
     function _approveMilestone(
