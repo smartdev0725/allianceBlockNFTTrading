@@ -31,6 +31,11 @@ contract LoanDetails is Storage {
                 loanStatus[loanId] == LoanLibrary.LoanStatus.FUNDING,
             "Only when loan is actively getting funded"
         );
+        require(
+            loanDetails[loanId].approvalDate.add(fundingTimeInterval) >
+                block.timestamp,
+            "Only between funding timeframe"
+        );
         _;
     }
 
@@ -48,8 +53,6 @@ contract LoanDetails is Storage {
             "Only on Repayment Status"
         );
         _;
-
-        loanStatus[loanId] = LoanLibrary.LoanStatus.SETTLED;
     }
 
     modifier onlySettledLoan(uint256 loanId) {

@@ -30,6 +30,7 @@ library LoanLibrary {
     struct LoanDetails {
         uint256 loanId; // The Id of the loan.
         LoanType loanType; // The type of the loan (personal or project).
+        uint256 approvalDate; // The timestamp in which loan was approved.
         uint256 startingDate; // The timestamp in which loan was funded.
         address collateralToken; // The address of the token that was put as collateral for the loan.
         uint256 collateralAmount; // The amount of collateral tokens locked as colateral.

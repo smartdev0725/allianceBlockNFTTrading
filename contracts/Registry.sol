@@ -18,11 +18,6 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     using TokenFormat for uint256;
 
     // Events
-    event LoanDecisionMade(
-        uint256 indexed loanId,
-        bool decision,
-        LoanLibrary.LoanType indexed loanType
-    );
     event LoanPartitionsPurchased(
         uint256 indexed loanId,
         uint256 partitionsToPurchase,
@@ -72,7 +67,8 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         uint256 maxMilestones_,
         uint256 milestoneExtensionInterval_,
         uint256 vestingBatches_,
-        uint256 vestingTimeInterval_
+        uint256 vestingTimeInterval_,
+        uint256 fundingTimeInterval_
     ) {
         escrow = IEscrow(escrowAddress);
         baseAmountForEachPartition = baseAmountForEachPartition_;
@@ -85,6 +81,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         milestoneExtensionInterval = milestoneExtensionInterval_;
         vestingBatches = vestingBatches_;
         vestingTimeInterval = vestingTimeInterval_;
+        fundingTimeInterval = fundingTimeInterval_;
     }
 
     /**
@@ -98,7 +95,6 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     {
         if (decision) _approveLoan(loanId);
         else _rejectLoan(loanId);
-        emit LoanDecisionMade(loanId, decision, loanDetails[loanId].loanType);
     }
 
     /**
@@ -204,6 +200,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
 
     function _approveLoan(uint256 loanId_) internal {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.APPROVED;
+        loanDetails[loanId_].approvalDate = block.timestamp;
         loanNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
         emit LoanApproved(loanId_, loanDetails[loanId_].loanType);
     }
@@ -234,6 +231,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
      */
     function getLoanMetadata(uint256 loanId)
         public
+        view
         returns (
             LoanLibrary.LoanDetails memory, // the loanDetails
             LoanLibrary.LoanStatus, // the loanStatus

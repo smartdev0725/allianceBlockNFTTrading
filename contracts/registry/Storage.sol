@@ -44,4 +44,6 @@ contract Storage {
     uint256 public vestingBatches;
     // The time interval between vesting batches when a lender decides to get project tokens.
     uint256 public vestingTimeInterval;
+    // The time interval for adding funds
+    uint256 public fundingTimeInterval;
 }

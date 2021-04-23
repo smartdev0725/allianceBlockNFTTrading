@@ -236,6 +236,12 @@ contract ProjectLoan is LoanDetails {
             address(escrow),
             getAmountToBeRepaid(loanId_)
         );
+        loanStatus[loanId_] = LoanLibrary.LoanStatus.SETTLED;
+        escrow.transferCollateralToken(
+            loanDetails[loanId_].collateralToken,
+            loanBorrower[loanId_],
+            loanDetails[loanId_].collateralAmount
+        );
     }
 
     function _receiveProjectLoanPayment(
