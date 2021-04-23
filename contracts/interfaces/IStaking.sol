@@ -10,4 +10,5 @@ interface IStaking {
 	function provideStakingForDaoDelegator(address staker) external;
 	function provideRewards(uint256 amountForDaoMembers, uint256 amountForDaoDelegators, uint256 epoch) external;
 	function unstakeDao(address staker, bool isDaoMember) external;
+	function getAmountsToStake() external view returns (uint256, uint256, uint256);
 }

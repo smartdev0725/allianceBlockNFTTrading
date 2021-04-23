@@ -96,4 +96,10 @@ contract DaoStaking is StakingTypesAndStorage {
     function getBalance(address staker_) external view returns (uint256) {
         return balance[staker_];
     }
+
+    function getAmountsToStake() external view returns (uint256 stakerAmount, uint256 daoMemberAmount, uint256 daoDelegatorAmount) {
+        stakerAmount = stakingTypeAmounts[uint256(StakingType.STAKER)];
+        daoMemberAmount = stakingTypeAmounts[uint256(StakingType.DAO_MEMBER)];
+        daoDelegatorAmount = stakingTypeAmounts[uint256(StakingType.DAO_DELEGATOR)];
+    }
 }

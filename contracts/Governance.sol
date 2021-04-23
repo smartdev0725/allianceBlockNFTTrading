@@ -93,25 +93,18 @@ contract Governance is DaoSubscriptions {
     }
 
     /**
-    * @dev Helper function for querying DAO Membership
-    * @param account The address to check
-    * @return (isDaoMember?, isDaoDelegator?)
-    */
-    function checkDaoAddress(address account) public view returns(bool, bool){
-        return (isDaoMember[account],isDaoDelegator[account]);
-    }
-
-    /**
     * @dev Helper function for querying Governance variables
     * @return internal Governance uint variables
     */
-    function getDaoData() public view returns(uint256,uint256,uint256,uint256,uint256){
+    function getDaoData() public view returns (uint256, uint256, uint256, uint256, uint256){
+        (, uint256 amountToStakeForDaoMember, ) = staking.getAmountsToStake();
+
         return (
             totalApprovalRequests,
-            approvalsNeeded,
-            loanApprovalRequestDuration,
-            milestoneApprovalRequestDuration,
-            amountStakedForDaoMembership
+            updatableVariables[keccak256(abi.encode("approvalsNeededForRegistryRequest"))],
+            updatableVariables[keccak256(abi.encode("loanApprovalRequestDuration"))],
+            updatableVariables[keccak256(abi.encode("milestoneApprovalRequestDuration"))],
+            amountToStakeForDaoMember
         );
     }
 }
