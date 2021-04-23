@@ -8,3 +8,4 @@ export const MAX_MILESTONES = 4; // max milestones : 4
 export const MILESTONE_EXTENSION = 15 * 24 * 60 * 60; // Half month
 export const ONE_DAY = 24 * 60 * 60; // ONE DAY
 export const AMOUNT_FOR_DAO_MEMBERSHIP = 10000; // 10000 tokens
+export const FUNDING_TIME_INTERVAL = 15 * 24 * 60 * 60; // Half month

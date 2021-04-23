@@ -10,7 +10,12 @@ import "./LoanDetails.sol";
  * @notice Functionality for Project Loan.
  */
 contract ProjectLoan is LoanDetails {
-    using SafeMath for uint256; 
+    using SafeMath for uint256;
+
+    // Events
+    event ProjectLoanRequested(uint indexed loanId, address indexed user, uint256 amount);
+    event ProjectLoanMilestoneApprovalRequested(uint indexed loanId, uint256 milestoneNumber);
+    event ProjectLoanMilestoneDecided(uint indexed loanId, bool decision);
 
     /**
      * @dev This function is used for potential borrowing project to request a loan.
@@ -63,6 +68,8 @@ contract ProjectLoan is LoanDetails {
 
         governance.requestApproval(totalLoans, false, 0);
 
+        emit ProjectLoanRequested(totalLoans, msg.sender, totalAmountRequested);
+
         totalLoans = totalLoans.add(1);
     }
 
@@ -81,6 +88,9 @@ contract ProjectLoan is LoanDetails {
     {
         loanStatus[loanId] = LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPROVAL;
         governance.requestApproval(loanId, true, projectLoanPayments[loanId].milestonesDelivered);
+
+        emit ProjectLoanMilestoneApprovalRequested(loanId, projectLoanPayments[loanId].milestonesDelivered);
+
     }
 
     /**
@@ -99,6 +109,8 @@ contract ProjectLoan is LoanDetails {
     {
         if(decision) _approveMilestone(loanId);
         else _rejectMilestone(loanId);
+
+        emit ProjectLoanMilestoneDecided(loanId,decision);
     }
 
     function _approveMilestone(
@@ -108,11 +120,14 @@ contract ProjectLoan is LoanDetails {
     {
         projectLoanPayments[loanId_].milestonesDelivered = projectLoanPayments[loanId_].milestonesDelivered.add(1);
 
+        // Milestones completed
         if(projectLoanPayments[loanId_].milestonesDelivered == projectLoanPayments[loanId_].totalMilestones) {
             loanStatus[loanId_] = LoanLibrary.LoanStatus.AWAITING_REPAYMENT;
             projectLoanPayments[loanId_].currentMilestoneStartingTimestamp = block.timestamp;
             projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block.timestamp.add(
                 projectLoanPayments[loanId_].timeDiffBetweenDeliveryAndRepayment);
+
+        // Milestones missing
         } else {
             loanStatus[loanId_] = LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPLICATION;
             escrow.transferLendingToken(
@@ -185,6 +200,8 @@ contract ProjectLoan is LoanDetails {
     onlyOnProjectRepayment(loanId_)
     {
         IERC20(lendingToken).transferFrom(msg.sender, address(escrow), projectLoanPayments[loanId_].amountToBeRepaid);
+        loanStatus[loanId_] = LoanLibrary.LoanStatus.SETTLED;
+        escrow.transferCollateralToken(loanDetails[loanId_].collateralToken, loanBorrower[loanId_], loanDetails[loanId_].collateralAmount);
     }
 
     function _receiveProjectLoanPayment(

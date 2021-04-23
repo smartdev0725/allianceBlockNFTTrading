@@ -1,8 +1,6 @@
-import { resolve } from "path";
 require("dotenv").config();
 
 import { HardhatUserConfig } from "hardhat/config";
-import { NetworkUserConfig } from "hardhat/types";
 
 import "@nomiclabs/hardhat-truffle5";
 import "hardhat-gas-reporter";
@@ -10,7 +8,6 @@ import "hardhat-typechain";
 
 if (!process.env.RINKEBY_PRIVKEY) throw new Error("RINKEBY_PRIVKEY missing from .env file");
 if (!process.env.MAINNET_PRIVKEY) throw new Error("MAINNET_PRIVKEY missing from .env file");
-
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
@@ -21,8 +18,8 @@ const config: HardhatUserConfig = {
       //   blockNumber: 11589707,
       // },
     },
-    ganache:{
-      url:"http://localhost:8545",
+    ganache: {
+      url: "http://localhost:8545",
     },
     rinkeby: {
       url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,

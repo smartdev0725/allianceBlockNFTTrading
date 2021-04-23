@@ -73,6 +73,7 @@ contract Governance is DaoSubscriptions {
         }
 
         totalApprovalRequests = totalApprovalRequests.add(1);
+        emit ApprovalRequested(loanId, isMilestone, milestoneNumber, msg.sender);
     }
 
     function voteForRequest(
@@ -89,5 +90,28 @@ contract Governance is DaoSubscriptions {
         }
 
         remainingDelegatorIdsToVotePerRequest[requestId].removeNode(addressToId[msg.sender]);
+    }
+
+    /**
+    * @dev Helper function for querying DAO Membership
+    * @param account The address to check
+    * @return (isDaoMember?, isDaoDelegator?)
+    */
+    function checkDaoAddress(address account) public view returns(bool, bool){
+        return (isDaoMember[account],isDaoDelegator[account]);
+    }
+
+    /**
+    * @dev Helper function for querying Governance variables
+    * @return internal Governance uint variables
+    */
+    function getDaoData() public view returns(uint256,uint256,uint256,uint256,uint256){
+        return (
+            totalApprovalRequests,
+            approvalsNeeded,
+            loanApprovalRequestDuration,
+            milestoneApprovalRequestDuration,
+            amountStakedForDaoMembership
+        );
     }
 }

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.0;
+pragma experimental ABIEncoderV2;
+
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -17,14 +19,13 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     using TokenFormat for uint256;
 
     // Events
-    event LoanDecisionMade(uint indexed loanId, bool decision);
-    event LoanPartitionsPurchased(uint indexed loanId, uint256 partitionsToPurchase);
-    event LoanStarted(uint indexed loanId);
-    event LoanApproved(uint indexed loanId);
-    event LoanRejected(uint indexed loanId);
-    event LoanChallanged(uint indexed loanId);
-    event PaymentReceived(uint indexed loanId, uint256 amountOfTokens, uint256 generation);
-    event PaymentExecuted(uint indexed loanId);
+    event LoanPartitionsPurchased(uint indexed loanId, uint256 partitionsToPurchase, address lender);
+    event LoanStarted(uint indexed loanId, LoanLibrary.LoanType indexed loanType);
+    event LoanApproved(uint indexed loanId, LoanLibrary.LoanType indexed loanType);
+    event LoanRejected(uint indexed loanId, LoanLibrary.LoanType indexed loanType);
+    event LoanChallenged(uint indexed loanId, LoanLibrary.LoanType indexed loanType, address user);
+    event PaymentReceived(uint indexed loanId, uint256 amountOfTokens, uint256 indexed generation, bool indexed onProjectTokens, address user);
+    event PaymentExecuted(uint indexed loanId, LoanLibrary.LoanType indexed loanType, address indexed borrower);
 
     /**
      * @dev Constructor of the contract.
@@ -40,7 +41,8 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         uint256 maxMilestones_,
         uint256 milestoneExtensionInterval_,
         uint256 vestingBatches_,
-        uint256 vestingTimeInterval_
+        uint256 vestingTimeInterval_,
+        uint256 fundingTimeInterval_
     )
     {
         escrow = IEscrow(escrowAddress);
@@ -54,6 +56,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         milestoneExtensionInterval = milestoneExtensionInterval_;
         vestingBatches = vestingBatches_;
         vestingTimeInterval = vestingTimeInterval_;
+        fundingTimeInterval = fundingTimeInterval_;
     }
 
     /**
@@ -70,7 +73,6 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     {
         if(decision) _approveLoan(loanId);
         else _rejectLoan(loanId);
-        emit LoanDecisionMade(loanId, decision);
     }
 
     /**
@@ -97,7 +99,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
 
         loanDetails[loanId].partitionsPurchased = loanDetails[loanId].partitionsPurchased.add(partitionsToPurchase);
 
-        emit LoanPartitionsPurchased(loanId, partitionsToPurchase);
+        emit LoanPartitionsPurchased(loanId, partitionsToPurchase, msg.sender);
         if(loanDetails[loanId].partitionsPurchased == loanDetails[loanId].totalPartitions) {
             _startLoan(loanId);
         }
@@ -118,7 +120,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         } else {
             _executeProjectLoanPayment(loanId);
         }
-        emit PaymentExecuted(loanId);
+        emit PaymentExecuted(loanId, loanDetails[loanId].loanType, msg.sender);
     }
 
     /**
@@ -141,7 +143,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         } else {
             _receiveProjectLoanPayment(loanId, amountOfTokens, onProjectTokens);
         }
-        emit PaymentReceived(loanId, amountOfTokens, generation);
+        emit PaymentReceived(loanId, amountOfTokens, generation, onProjectTokens, msg.sender);
     }
 
     /**
@@ -158,7 +160,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     {
         if(loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) _challengePersonalLoan(loanId);
         else _challengeProjectLoan(loanId);
-        emit LoanChallanged(loanId);
+        emit LoanChallenged(loanId, loanDetails[loanId].loanType, msg.sender);
     }
 
     function _approveLoan(
@@ -167,8 +169,9 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     internal
     {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.APPROVED;
+        loanDetails[loanId_].approvalDate = block.timestamp;
         loanNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
-        emit LoanApproved(loanId_);
+        emit LoanApproved(loanId_, loanDetails[loanId_].loanType);
     }
 
     function _rejectLoan(
@@ -178,7 +181,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.REJECTED;
         escrow.transferCollateralToken(loanDetails[loanId_].collateralToken, loanBorrower[loanId_], loanDetails[loanId_].collateralAmount);
-        emit LoanRejected(loanId_);
+        emit LoanRejected(loanId_, loanDetails[loanId_].loanType);
     }
 
     function _startLoan(
@@ -191,6 +194,25 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
 
         if(loanDetails[loanId_].loanType == LoanLibrary.LoanType.PERSONAL) _startPersonalLoan(loanId_);
         else _startProjectLoan(loanId_);
-        emit LoanStarted(loanId_);
+        emit LoanStarted(loanId_, loanDetails[loanId_].loanType);
+    }
+
+    /**
+     * @dev This helper function provides a single point for querying the Loan metadata
+     * @param loanId The id of the loan.
+     */
+    function getLoanMetadata(uint loanId) public view returns(
+            LoanLibrary.LoanDetails memory, // the loanDetails
+            LoanLibrary.LoanStatus, // the loanStatus
+            address, // the loanBorrower,
+            LoanLibrary.RepaymentBatchType // the repaymentBatchType
+    )
+    {
+        return(
+            loanDetails[loanId],
+            loanStatus[loanId],
+            loanBorrower[loanId],
+            personalLoanPayments[loanId].repaymentBatchType
+        );
     }
 }

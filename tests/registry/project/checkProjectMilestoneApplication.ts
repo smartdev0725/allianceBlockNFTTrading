@@ -4,6 +4,7 @@ import { expect } from 'chai';
 import {  LoanStatus } from '../../helpers/registryEnums';
 import { ONE_DAY, BASE_AMOUNT, DAO_MILESTONE_APPROVAL } from "../../helpers/constants";
 import { getCurrentTimestamp } from "../../helpers/time";
+const { expectEvent } = require("@openzeppelin/test-helpers");
 
 export default async function suite() {
   describe('Succeeds', async () => {
@@ -60,16 +61,22 @@ export default async function suite() {
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.STARTED);
       
       // Milestone Application By Project Owner
-      await this.registry.applyMilestone(loanId, { from: this.projectOwner });
+      const tx = await this.registry.applyMilestone(loanId, { from: this.projectOwner });
       
       const currentTime = await getCurrentTimestamp();
 
       const loanPayments = await this.registry.projectLoanPayments(loanId);
       const daoApprovalRequest = await this.governance.approvalRequests(approvalRequest);
+      const isPaused = await this.loanNft.transfersPaused(loanId);
       loanStatus = await this.registry.loanStatus(loanId);
-
+      
+      // Correct Status
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.AWAITING_MILESTONE_APPROVAL);
 
+      // Correct Event.
+      expectEvent(tx.receipt, 'ProjectLoanMilestoneApprovalRequested', { loanId , milestoneNumber: new BN(0).toString() });
+
+      // Correct Dao Request.
       expect(daoApprovalRequest.isMilestone).to.be.true;
       expect(daoApprovalRequest.loanId).to.be.bignumber.equal(loanId);
       expect(daoApprovalRequest.approvalsProvided).to.be.bignumber.equal(new BN(0));
@@ -77,8 +84,12 @@ export default async function suite() {
       expect(daoApprovalRequest.deadlineTimestamp).to.be.bignumber.equal(new BN(currentTime).add(new BN(DAO_MILESTONE_APPROVAL)));
       expect(daoApprovalRequest.isApproved).to.be.equal(false);
 
+      // Correct Payments.
       expect(loanPayments.milestonesDelivered).to.be.bignumber.equal(new BN(0));
       expect(loanPayments.milestonesExtended).to.be.bignumber.equal(new BN(0));
+
+      // Correct Nft Behavior.
+      expect(isPaused).to.be.equal(false);
     });
   });
 }
