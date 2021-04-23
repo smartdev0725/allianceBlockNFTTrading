@@ -32,6 +32,7 @@ contract ProjectLoan is LoanDetails {
      * @param collateralToken The token that will be used by the proect as collateral.
      * @param collateralAmount The amount of tokens that will be used by the project as collateral.
      * @param interestPercentage The interest percentage that will be obtained after whole repayment.
+     * @param discountPerMillion The discount given on the token price when funders claim repayment in project tokens.
      * @param totalMilestones The total amount of Milestones project is requesting funds for.
      * @param milestoneDurations The duration of each Milestone.
      * @param timeDiffBetweenDeliveryAndRepayment The time interval between the last milestone delivery by the project and
@@ -43,6 +44,7 @@ contract ProjectLoan is LoanDetails {
         address collateralToken,
         uint256 collateralAmount,
         uint256 interestPercentage,
+        uint256 discountPerMillion,
         uint256 totalMilestones,
         uint256[] calldata milestoneDurations,
         uint256 timeDiffBetweenDeliveryAndRepayment,
@@ -72,6 +74,7 @@ contract ProjectLoan is LoanDetails {
         );
 
         _storeProjectLoanPayments(
+            discountPerMillion,
             totalMilestones,
             timeDiffBetweenDeliveryAndRepayment
         );
@@ -179,9 +182,12 @@ contract ProjectLoan is LoanDetails {
     }
 
     function _storeProjectLoanPayments(
+        uint256 discountPerMillion_,
         uint256 totalMilestones_,
         uint256 timeDiffBetweenDeliveryAndRepayment_
     ) internal {
+        projectLoanPayments[totalLoans]
+            .discountPerMillion = discountPerMillion_;
         projectLoanPayments[totalLoans].totalMilestones = totalMilestones_;
         projectLoanPayments[totalLoans]
             .timeDiffBetweenDeliveryAndRepayment = timeDiffBetweenDeliveryAndRepayment_;
@@ -295,7 +301,7 @@ contract ProjectLoan is LoanDetails {
                 amountOfTokens_
             );
         // TODO: Get the real price from a price oracle (Mock the price oracle and test repayment with different token prices)
-        uint256 projectTokenPrice = 1;
+        uint256 projectTokenPrice = getProjectTokenPrice(loanId_);
         // Calculate amount of project tokens based on the actual listed price and the discount
         // TODO: Discount should be set somewhere, at request loan? Should the discount really be expressed in discount per million? Why not percentage?
         uint256 amountOfProjectTokens =
@@ -359,23 +365,23 @@ contract ProjectLoan is LoanDetails {
     /**
      * @dev getAmountToBeRepaid is a function to obtain the amount that should be paid to settle the loan
      * taking into account the amount paid back with project tokens and the interest percentage.
-     * @param loanId_ The id of the loan to get the amount to be repaid from.
+     * @param loanId The id of the loan to get the amount to be repaid from.
      * @return amount The total amount to be paid in lending tokens to settle the loan.
      */
-    function getAmountToBeRepaid(uint256 loanId_)
+    function getAmountToBeRepaid(uint256 loanId)
         public
         view
         returns (uint256 amount)
     {
         // Substract the partitions already paid in project tokens from the lending amount to pay back
         uint256 lendingTokenAmount =
-            loanDetails[loanId_].lendingAmount.sub(
-                projectLoanPayments[loanId_].partitionsPaidInProjectTokens *
+            loanDetails[loanId].lendingAmount.sub(
+                projectLoanPayments[loanId].partitionsPaidInProjectTokens *
                     baseAmountForEachPartition
             );
         // Calculate the interest only over what is left to pay in the lending token
         uint256 interest =
-            lendingTokenAmount.mul(loanDetails[loanId_].interestPercentage).div(
+            lendingTokenAmount.mul(loanDetails[loanId].interestPercentage).div(
                 100
             );
         amount = lendingTokenAmount.add(interest);
@@ -384,23 +390,80 @@ contract ProjectLoan is LoanDetails {
     /**
      * @dev getTotalInterest is a function to obtain the total amount of interest to pay back
      * taking into account the interest free amount paid back with project tokens and the interest percentage set for the loan.
-     * @param loanId_ The id of the loan to get the interest percentage from.
+     * @param loanId The id of the loan to get the interest percentage from.
      * @return totalInterest The total amount of interest to be paid to settle the loan.
      */
-    function getTotalInterest(uint256 loanId_)
+    function getTotalInterest(uint256 loanId)
         public
         view
         returns (uint256 totalInterest)
     {
         // Substract the partitions already paid in project tokens from the lending amount to pay back
         uint256 lendingTokenAmount =
-            loanDetails[loanId_].lendingAmount.sub(
-                projectLoanPayments[loanId_].partitionsPaidInProjectTokens *
+            loanDetails[loanId].lendingAmount.sub(
+                projectLoanPayments[loanId].partitionsPaidInProjectTokens *
                     baseAmountForEachPartition
             );
         // Calculate the interest only over what is left to pay in the lending token
         totalInterest = lendingTokenAmount
-            .mul(loanDetails[loanId_].interestPercentage)
+            .mul(loanDetails[loanId].interestPercentage)
             .div(100);
+    }
+
+    function getTotalLoanNFTBalance(uint256 loanId)
+        public
+        view
+        returns (uint256 balance)
+    {
+        for (
+            uint256 i = 0;
+            i < projectLoanPayments[loanId].totalMilestones;
+            i++
+        ) {
+            balance = balance.add(getLoanNFTBalanceOfGeneration(loanId, i));
+        }
+    }
+
+    function getLoanNFTBalanceOfGeneration(uint256 loanId, uint256 generation)
+        public
+        view
+        returns (uint256 balance)
+    {
+        balance = loanNFT.balanceOf(msg.sender, generation.getTokenId(loanId));
+    }
+
+    function getProjectTokenPrice(uint256 loanId)
+        public
+        view
+        returns (uint256 price)
+    {
+        price = 1;
+    }
+
+    function getDiscountedProjectTokenPrice(uint256 loanId)
+        public
+        view
+        returns (uint256 price)
+    {
+        uint256 marketPrice = getProjectTokenPrice(loanId);
+        price = marketPrice.sub(
+            marketPrice.mul(projectLoanPayments[loanId].discountPerMillion).div(
+                1000000
+            )
+        );
+    }
+
+    function getAvailableLoanNFTForConversion(uint256 loanId)
+        public
+        view
+        returns (uint256 balance)
+    {
+        for (
+            uint256 i = 0;
+            i < projectLoanPayments[loanId].milestonesDelivered;
+            i++
+        ) {
+            balance = balance.add(getLoanNFTBalanceOfGeneration(loanId, i));
+        }
     }
 }

@@ -2,7 +2,7 @@ import BN from 'bn.js';
 import { toWei } from 'web3-utils';
 import { expect } from 'chai';
 import { LoanStatus } from '../../helpers/registryEnums';
-import { ONE_DAY  } from "../../helpers/constants";
+import { ONE_DAY } from "../../helpers/constants";
 import { getCurrentTimestamp } from "../../helpers/time";
 
 export default async function suite() {
@@ -16,6 +16,7 @@ export default async function suite() {
 
       const amountCollateralized = new BN(toWei('100000'));
       const interestPercentage = new BN(20);
+      const discountPerMillion = new BN(400000);
       const totalMilestones = new BN(3);
       const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
       const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ";
@@ -25,8 +26,8 @@ export default async function suite() {
       const currentTime = await getCurrentTimestamp();
 
       for (let i = 0; i < Number(totalMilestones); i++) {
-        milestoneDurations[i] = currentTime.add(new BN((i+1) * ONE_DAY))
-        amountRequestedPerMilestone[i] = new BN(toWei('10000'));  
+        milestoneDurations[i] = currentTime.add(new BN((i + 1) * ONE_DAY))
+        amountRequestedPerMilestone[i] = new BN(toWei('10000'));
       }
 
       const tx = await this.registry.requestProjectLoan(
@@ -34,6 +35,7 @@ export default async function suite() {
         this.projectToken.address,
         amountCollateralized.toString(),
         interestPercentage,
+        discountPerMillion,
         totalMilestones,
         milestoneDurations,
         timeDiffBetweenDeliveryAndRepayment,

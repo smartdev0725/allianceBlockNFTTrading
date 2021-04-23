@@ -25,6 +25,7 @@ export default async function suite() {
     it('when requesting an project loan', async function () {
       const amountCollateralized = new BN(toWei('100000'));
       const interestPercentage = new BN(20);
+      const discountPerMillion = new BN(300000)
       const totalMilestones = new BN(3);
       const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
       const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
@@ -43,6 +44,7 @@ export default async function suite() {
         this.projectToken.address,
         amountCollateralized.toString(),
         interestPercentage,
+        discountPerMillion,
         totalMilestones,
         milestoneDurations,
         timeDiffBetweenDeliveryAndRepayment,
@@ -92,7 +94,7 @@ export default async function suite() {
       expect(loanPayments.currentMilestoneDeadlineTimestamp).to.be.bignumber.equal(new BN(0));
       //expect(loanPayments.amountToBeRepaid).to.be.bignumber.equal(totalAmountRequested.add(totalInterest));
       expect(await this.registry.getAmountToBeRepaid(loanId)).to.be.bignumber.equal(totalAmountRequested.add(totalInterest));
-      expect(loanPayments.discountPerMillion).to.be.bignumber.equal(new BN(0));
+      expect(loanPayments.discountPerMillion).to.be.bignumber.equal(new BN(300000));
       for (const i in milestoneDurations) {
         const { amount, timestamp } = await this.registry.getMilestonesInfo(loanId, i);
         expect(amount).to.be.bignumber.equal(amountRequestedPerMilestone[i]);
