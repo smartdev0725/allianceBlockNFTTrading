@@ -2,6 +2,7 @@
 pragma solidity 0.7.0;
 
 import "../interfaces/IGovernanceStaking.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title AllianceBlock StakingStorage contract
@@ -26,7 +27,7 @@ contract StakingTypesAndStorage {
 
     mapping(uint256 => uint256) public rewardsPerEpochForDaoMembers;
     mapping(uint256 => uint256) public rewardsPerEpochForDaoDelegators;
-    mapping(uint256 => bool) public hasWithdrawn;
+    mapping(address => bool) public hasWithdrawn;
 
     // ALBT token
     IERC20 public albt;

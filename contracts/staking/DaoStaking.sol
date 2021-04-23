@@ -27,11 +27,23 @@ contract DaoStaking is StakingTypesAndStorage {
         _stake(staker, amount);
     }
 
-    function provideRewards(uint256 amountForDaoMembers, uint256 amountForDaoDelegators) external onlyGovernance() {
-        rewardsPerEpochForDaoMembers[currentEpoch] = amountForDaoMembers;
-        rewardsPerEpochForDaoDelegators[currentEpoch] = amountForDaoDelegators;
+    function unstakeDao(address staker, bool isDaoMember) external onlyGovernance() {
+        if (isDaoMember) _unstakeDaoMember(staker);
+        else _unstakeDaoDelegator(staker);
+    }
 
-        currentEpoch = currentEpoch.add(1);
+    function provideRewards(
+        uint256 amountForDaoMembers,
+        uint256 amountForDaoDelegators,
+        uint256 epoch
+    )
+    external
+    onlyGovernance()
+    {
+        rewardsPerEpochForDaoMembers[epoch] = amountForDaoMembers;
+        rewardsPerEpochForDaoDelegators[epoch] = amountForDaoDelegators;
+
+        currentEpoch = epoch.add(1);
     }
 
     function withdrawRewardsForDaoEpoch(uint256 epoch) external {
@@ -55,6 +67,20 @@ contract DaoStaking is StakingTypesAndStorage {
         _withdraw(msg.sender, amountToWithdraw);
     }
 
+    function _unstakeDaoMember(address staker_) internal {
+        uint256 amount = stakingTypeAmounts[uint256(StakingType.DAO_MEMBER)].sub(
+            stakingTypeAmounts[uint256(StakingType.STAKER)]);
+
+        _withdraw(staker_, amount);
+    }
+
+    function _unstakeDaoDelegator(address staker_) internal {
+        uint256 amount = stakingTypeAmounts[uint256(StakingType.DAO_DELEGATOR)].sub(
+            stakingTypeAmounts[uint256(StakingType.DAO_MEMBER)]);
+
+        _withdraw(staker_, amount);
+    }
+
     function _withdraw(address staker_, uint256 amount_) internal {
         totalSupply = totalSupply.sub(amount_);
         balance[staker_] = balance[staker_].sub(amount_);
@@ -65,5 +91,9 @@ contract DaoStaking is StakingTypesAndStorage {
         albt.transferFrom(staker_, address(this), amount_);
         totalSupply = totalSupply.add(amount_);
         balance[staker_] = balance[staker_].add(amount_);
+    }
+
+    function getBalance(address staker_) external view returns (uint256) {
+        return balance[staker_];
     }
 }

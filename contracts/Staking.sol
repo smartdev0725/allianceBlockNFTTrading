@@ -4,9 +4,11 @@ import "@openzeppelin/contracts/math/Math.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "./staking/DaoStaking.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
-contract Staking is DaoStaking {
+contract Staking is DaoStaking, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -60,10 +62,9 @@ contract Staking is DaoStaking {
                 .add(rewards[account]);
     }
 
-    // stake visibility is public as overriding tokenWrapper's stake() function
     function stake() public updateReward(msg.sender) {
         require(balance[msg.sender] == 0, "Cannot stake again");
-        amount = stakingTypeAmounts[uint256(StakingTypes.STAKER)];
+        uint256 amount = stakingTypeAmounts[uint256(StakingType.STAKER)];
 
         _stake(msg.sender, amount);
         emit Staked(msg.sender, amount);
