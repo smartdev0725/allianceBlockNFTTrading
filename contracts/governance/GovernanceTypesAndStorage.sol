@@ -40,6 +40,11 @@ contract GovernanceTypesAndStorage {
         uint256 epochSubmitted; // The epoch that the request was submitted.
     }
 
+    // EVENTS
+    event VotedForRequest(uint indexed loanId, uint indexed requestId, bool decision, address indexed user);
+    event ApprovalRequested(uint indexed loanId, bool indexed isMilestone, uint milestoneNumber, address indexed user);
+    event InitGovernance(address indexed registryAddress_, address indexed stakingAddress_, address indexed user);
+
     VotingStatusMembers public votingStatusForDaoMembers;
     VotingStatusDelegators public votingStatusForDaoDelegators;
 

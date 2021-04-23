@@ -22,6 +22,8 @@ contract SuperGovernance is Ownable, DaoCronjob {
         require(address(registry) == address(0), "Cannot initialize second time");
         registry = IRegistry(registryAddress_);
         staking = IStaking(stakingAddress_);
+
+        emit InitGovernance(registryAddress_, stakingAddress_, msg.sender);
     }
 
     function superVoteForRequest(
@@ -44,6 +46,8 @@ contract SuperGovernance is Ownable, DaoCronjob {
             approvalRequests[requestId].approvalsProvided = approvalRequests[requestId].approvalsProvided.add(1);
             approvalRequests[requestId].isApproved = true;
         }
+
+        emit VotedForRequest(approvalRequests[requestId].loanId, requestId, decision, msg.sender);
     }
 
     function openDaoMembershipSubscriptions()

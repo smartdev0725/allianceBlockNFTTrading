@@ -72,8 +72,14 @@ contract Governance is DaoSubscriptions {
             epochDaoDelegators[currentEpoch].cloneList(remainingDelegatorIdsToVotePerRequest[totalApprovalRequests]);
         }
 
+        emit ApprovalRequested(
+            approvalRequests[totalApprovalRequests].loanId,
+            approvalRequests[totalApprovalRequests].isMilestone,
+            approvalRequests[totalApprovalRequests].milestoneNumber,
+            msg.sender
+        );
+
         totalApprovalRequests = totalApprovalRequests.add(1);
-        emit ApprovalRequested(loanId, isMilestone, milestoneNumber, msg.sender);
     }
 
     function voteForRequest(
@@ -90,6 +96,8 @@ contract Governance is DaoSubscriptions {
         }
 
         remainingDelegatorIdsToVotePerRequest[requestId].removeNode(addressToId[msg.sender]);
+
+        emit VotedForRequest(approvalRequests[requestId].loanId, requestId, decision, msg.sender);
     }
 
     /**
