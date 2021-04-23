@@ -287,31 +287,13 @@ contract ProjectLoan is LoanDetails {
         );
 
         // Calculate the amount of project tokens to receive
-        uint256 totalMilestoneLendingAmounts;
-        for (uint256 i = 0; i < milestonesToBePaid; i++) {
-            // Calculate the amount to receive based on the amount lended for the milestone and the amount of NFT's
-            totalMilestoneLendingAmounts = totalMilestoneLendingAmounts.add(
-                projectLoanPayments[loanId_].milestoneLendingAmount[i]
-            );
-        }
-        uint256 amountToReceive =
-            _paymentAmountToAmountForNFTHolder(
-                loanDetails[loanId_].totalPartitions,
-                totalMilestoneLendingAmounts,
+        uint256 amountOfProjectTokens =
+            getAmountOfProjectTokensToReceive(
+                loanId_,
+                generation_,
                 amountOfTokens_
             );
-        // TODO: Get the real price from a price oracle (Mock the price oracle and test repayment with different token prices)
-        uint256 projectTokenPrice = getProjectTokenPrice(loanId_);
-        // Calculate amount of project tokens based on the actual listed price and the discount
-        // TODO: Discount should be set somewhere, at request loan? Should the discount really be expressed in discount per million? Why not percentage?
-        uint256 amountOfProjectTokens =
-            amountToReceive.div(
-                projectTokenPrice.sub(
-                    projectTokenPrice
-                        .mul(projectLoanPayments[loanId_].discountPerMillion)
-                        .div(1000000)
-                )
-            );
+
         // Burn the NFT's used to receive the payment
         if (
             projectLoanPayments[loanId_].milestonesDelivered <
@@ -465,5 +447,40 @@ contract ProjectLoan is LoanDetails {
         ) {
             balance = balance.add(getLoanNFTBalanceOfGeneration(loanId, i));
         }
+    }
+
+    function getAmountOfProjectTokensToReceive(
+        uint256 loanId,
+        uint256 generationLoanNFT,
+        uint256 amountLoanNFT
+    ) public view returns (uint256 amount) {
+        uint256 milestonesToBePaid =
+            projectLoanPayments[loanId].milestonesDelivered.sub(
+                generationLoanNFT
+            );
+        // Calculate the amount of project tokens to receive
+        uint256 totalMilestoneLendingAmounts;
+        for (uint256 i = 0; i < milestonesToBePaid; i++) {
+            // Calculate the amount to receive based on the amount lended for the milestone and the amount of NFT's
+            totalMilestoneLendingAmounts = totalMilestoneLendingAmounts.add(
+                projectLoanPayments[loanId].milestoneLendingAmount[i]
+            );
+        }
+        uint256 amountToReceive =
+            _paymentAmountToAmountForNFTHolder(
+                loanDetails[loanId].totalPartitions,
+                totalMilestoneLendingAmounts,
+                amountLoanNFT
+            );
+        // TODO: Get the real price from a price oracle (Mock the price oracle and test repayment with different token prices)
+        uint256 projectTokenPrice = getProjectTokenPrice(loanId);
+        // Calculate amount of project tokens based on the actual listed price and the discount
+        amount = amountToReceive.div(
+            projectTokenPrice.sub(
+                projectTokenPrice
+                    .mul(projectLoanPayments[loanId].discountPerMillion)
+                    .div(1000000)
+            )
+        );
     }
 }
