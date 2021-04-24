@@ -40,7 +40,7 @@ async function main() {
   const currentTime = await getCurrentTimestamp();
   const amountCollateralized = new BN(toWei("100000"));
   const interestPercentage = new BN(20);
-  const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
+  const paymentTimeInterval = new BN(3600);
   const ipfsHash = process.env.LOAN_REQUEST_IPFS_HASH;
   let milestoneDurations = [];
   let amountRequestedPerMilestone = [];
@@ -63,7 +63,7 @@ async function main() {
     interestPercentage,
     totalMilestones,
     milestoneDurations,
-    timeDiffBetweenDeliveryAndRepayment,
+    paymentTimeInterval,
     ipfsHash,
     { from: borrower }
   );
