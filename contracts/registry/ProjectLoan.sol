@@ -123,7 +123,7 @@ contract ProjectLoan is LoanDetails {
         // Milestones completed
         if(projectLoanPayments[loanId_].milestonesDelivered == projectLoanPayments[loanId_].totalMilestones) {
             loanStatus[loanId_] = LoanLibrary.LoanStatus.AWAITING_REPAYMENT;
-            loanDetails[loanId_].approvalDate = block.timestamp;
+            projectLoanPayments[loanId_].awaitingForRepaymentDate = block.timestamp;
         // Milestones missing
         } else {
             loanStatus[loanId_] = LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPLICATION;
