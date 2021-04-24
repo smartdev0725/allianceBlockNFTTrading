@@ -56,9 +56,10 @@ library LoanLibrary {
         uint256 totalMilestones;
         mapping(uint256 => uint256) milestoneLendingAmount;
         mapping(uint256 => uint256) milestoneDuration;
+        uint256 awaitingForRepaymentDate; // The timestamp in which loan state changed to awaitingForRepayment.
+        uint256 paymentTimeInterval; // The time interval that will pass between last milestone delivery and repayment.
         uint256 milestonesDelivered; // The amount of milestones that have been delivered by the project.
         uint256 milestonesExtended; // The times that project has taken an extension for milestone delivery.
-        uint256 timeDiffBetweenDeliveryAndRepayment; // The time interval that will pass between last milestone delivery and repayment.
         uint256 currentMilestoneStartingTimestamp; // Timestamp that milestone/repayment started.
         uint256 currentMilestoneDeadlineTimestamp; // Timestamp that milestone/repayment should be delivered.
         uint256 amountToBeRepaid; // The total amount of lending tokens to be repaid.
