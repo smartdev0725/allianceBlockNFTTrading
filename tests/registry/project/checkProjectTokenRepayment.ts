@@ -98,6 +98,8 @@ export default async function suite() {
 
             // Correct Event.
             expectEvent(tx1.receipt, 'PaymentReceived', { loanId, amountOfTokens: halfAmountOfNFTsOfLender, generation, onProjectTokens: true, user: this.lenders[0] });
+            expectEvent(tx1.receipt, 'ProjectTokenPaymentReceived', { loanId, user: this.lenders[0], amountOfProjectTokens: expectedProjectTokenAmount });
+
 
             //generation = generation.add(new BN(1));
             //tokenId = new BN((generation.toNumber() << 128) | loanId.toNumber());

@@ -25,6 +25,11 @@ contract ProjectLoan is LoanDetails {
         uint256 milestoneNumber
     );
     event ProjectLoanMilestoneDecided(uint256 indexed loanId, bool decision);
+    event ProjectTokenPaymentReceived(
+        uint256 indexed loanId,
+        address indexed user,
+        uint256 amountOfProjectTokens
+    );
 
     /**
      * @dev This function is used for potential borrowing project to request a loan.
@@ -328,6 +333,12 @@ contract ProjectLoan is LoanDetails {
                 .partitionsPaidInProjectTokens
                 .add(amountOfTokens_);
         }
+
+        emit ProjectTokenPaymentReceived(
+            loanId_,
+            msg.sender,
+            amountOfProjectTokens
+        );
     }
 
     function _paymentAmountToAmountForNFTHolder(
