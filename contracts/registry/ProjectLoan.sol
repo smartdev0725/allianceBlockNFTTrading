@@ -28,7 +28,8 @@ contract ProjectLoan is LoanDetails {
     event ProjectTokenPaymentReceived(
         uint256 indexed loanId,
         address indexed user,
-        uint256 amountOfProjectTokens
+        uint256 amountOfProjectTokens,
+        uint256 discountedPrice
     );
 
     /**
@@ -256,7 +257,7 @@ contract ProjectLoan is LoanDetails {
         bool onProjectTokens_
     ) internal {
         if (onProjectTokens_) {
-            _receiveProjectTokenPayment(loanId_, generation_, amountOfTokens_);
+            _receiveProjectTokenPayment(loanId_, amountOfTokens_);
         } else {
             _receiveLendingTokenPayment(loanId_, generation_, amountOfTokens_);
         }
@@ -285,59 +286,74 @@ contract ProjectLoan is LoanDetails {
 
     function _receiveProjectTokenPayment(
         uint256 loanId_,
-        uint256 generation_,
-        uint256 amountOfTokens_
+        uint256 amountLoanNFT_
     ) internal {
-        uint256 milestonesToBePaid =
-            projectLoanPayments[loanId_].milestonesDelivered.sub(generation_);
-        require(milestonesToBePaid > 0, "Not eligible for payment");
         require(
-            loanStatus[loanId_] != LoanLibrary.LoanStatus.SETTLED ||
-                generation_ > 0,
-            "The loan is already settled so payment has been done in lending token, project tokens can not be claimed anymore with NFT of generation 0"
+            getAvailableLoanNFTForConversion(loanId_) >= amountLoanNFT_,
+            "No loan NFT available for conversion to project tokens"
         );
 
-        // Calculate the amount of project tokens to receive
-        uint256 amountOfProjectTokens =
-            getAmountOfProjectTokensToReceive(
-                loanId_,
-                generation_,
-                amountOfTokens_
+        // Calculate the amount to receive in project tokens based on the milestone lending amounts and the NFTs the funder holds
+        uint256 amountToReceiveInProjectTokens;
+        for (
+            uint256 i =
+                loanStatus[loanId_] != LoanLibrary.LoanStatus.SETTLED ? 0 : 1; // Project tokens of the first generation (0) can not be converted anymore once a loan is settled because they were paid back in the settlement already
+            i < projectLoanPayments[loanId_].milestonesDelivered;
+            i++
+        ) {
+            uint256 loanNFTBalance = getLoanNFTBalanceOfGeneration(loanId_, i);
+            uint256 loanNFTToConvert =
+                loanNFTBalance > amountLoanNFT_
+                    ? amountLoanNFT_
+                    : loanNFTBalance;
+            amountToReceiveInProjectTokens = amountToReceiveInProjectTokens.add(
+                _paymentAmountToAmountForNFTHolder(
+                    loanDetails[loanId_].totalPartitions,
+                    projectLoanPayments[loanId_].milestoneLendingAmount[i],
+                    loanNFTToConvert
+                )
             );
 
-        // Burn the NFT's used to receive the payment
-        if (
-            projectLoanPayments[loanId_].milestonesDelivered <
-            projectLoanPayments[loanId_].totalMilestones
-        ) {
-            loanNFT.increaseGenerations(
-                generation_.getTokenId(loanId_),
-                msg.sender,
-                amountOfTokens_,
-                milestonesToBePaid
-            );
-        } else {
-            loanNFT.burn(msg.sender, loanId_, amountOfTokens_);
+            // Increment the generation of the NFT's used to receive the payment or burn them if the last milestone repayment is claimed
+            if (i < (projectLoanPayments[loanId_].totalMilestones - 1)) {
+                loanNFT.increaseGenerations(
+                    i.getTokenId(loanId_),
+                    msg.sender,
+                    loanNFTToConvert,
+                    1
+                );
+            } else {
+                loanNFT.burn(msg.sender, loanId_, loanNFTToConvert);
+            }
+
+            // Store the number of partitions used to reduce them from the amount of lending tokens to pay to settle the loan
+            if (i == 0) {
+                projectLoanPayments[loanId_]
+                    .partitionsPaidInProjectTokens = projectLoanPayments[
+                    loanId_
+                ]
+                    .partitionsPaidInProjectTokens
+                    .add(loanNFTToConvert);
+            }
         }
 
+        // Calculate amount of project tokens based on the actual listed price and the discount
+        // TODO: Get the real price from a price oracle (Mock the price oracle and test repayment with different token prices)
+        uint256 discountedPrice = getDiscountedProjectTokenPrice(loanId_);
+        uint256 amount = amountToReceiveInProjectTokens.div(discountedPrice);
+
+        // Transfer the project tokens to the funder
         escrow.transferCollateralToken(
             loanDetails[loanId_].collateralToken,
             msg.sender,
-            amountOfProjectTokens
+            amount
         );
-
-        // Store the number of partitions used to reduce them from the amount of lending tokens to pay to settle the loan
-        if (generation_ == 0) {
-            projectLoanPayments[loanId_]
-                .partitionsPaidInProjectTokens = projectLoanPayments[loanId_]
-                .partitionsPaidInProjectTokens
-                .add(amountOfTokens_);
-        }
 
         emit ProjectTokenPaymentReceived(
             loanId_,
             msg.sender,
-            amountOfProjectTokens
+            amount,
+            discountedPrice
         );
     }
 
@@ -436,6 +452,7 @@ contract ProjectLoan is LoanDetails {
         view
         returns (uint256 price)
     {
+        // TODO: Get the real price from a price oracle (Mock the price oracle and test repayment with different token prices)
         price = 1;
     }
 
@@ -447,7 +464,7 @@ contract ProjectLoan is LoanDetails {
         uint256 marketPrice = getProjectTokenPrice(loanId);
         price = marketPrice.sub(
             marketPrice.mul(projectLoanPayments[loanId].discountPerMillion).div(
-                1000000
+                10**6
             )
         );
     }
@@ -458,7 +475,8 @@ contract ProjectLoan is LoanDetails {
         returns (uint256 balance)
     {
         for (
-            uint256 i = 0;
+            uint256 i =
+                loanStatus[loanId] != LoanLibrary.LoanStatus.SETTLED ? 0 : 1; // Project tokens of the first generation (0) can not be converted anymore once a loan is settled because they were paid back in the settlement already
             i < projectLoanPayments[loanId].milestonesDelivered;
             i++
         ) {
@@ -468,36 +486,34 @@ contract ProjectLoan is LoanDetails {
 
     function getAmountOfProjectTokensToReceive(
         uint256 loanId,
-        uint256 generationLoanNFT,
         uint256 amountLoanNFT
     ) public view returns (uint256 amount) {
-        uint256 milestonesToBePaid =
-            projectLoanPayments[loanId].milestonesDelivered.sub(
-                generationLoanNFT
-            );
-        // Calculate the amount of project tokens to receive
-        uint256 totalMilestoneLendingAmounts;
-        for (uint256 i = 0; i < milestonesToBePaid; i++) {
-            // Calculate the amount to receive based on the amount lended for the milestone and the amount of NFT's
-            totalMilestoneLendingAmounts = totalMilestoneLendingAmounts.add(
-                projectLoanPayments[loanId].milestoneLendingAmount[i]
+        uint256 amountToReceiveInProjectTokens;
+        uint256 balanceOfPreviousGeneration; // To simulate the incrementing of generations without really incrementing.
+        for (
+            uint256 i =
+                loanStatus[loanId] != LoanLibrary.LoanStatus.SETTLED ? 0 : 1; // Project tokens of the first generation (0) can not be converted anymore once a loan is settled because they were paid back in the settlement already
+            i < projectLoanPayments[loanId].milestonesDelivered;
+            i++
+        ) {
+            uint256 loanNFTBalance =
+                getLoanNFTBalanceOfGeneration(loanId, i) +
+                    balanceOfPreviousGeneration; // Add the balance of the previous generation because the previous generation will be incremented if converted to project tokens.
+            balanceOfPreviousGeneration = loanNFTBalance;
+            uint256 loanNFTToConvert =
+                loanNFTBalance > amountLoanNFT ? amountLoanNFT : loanNFTBalance;
+            amountToReceiveInProjectTokens = amountToReceiveInProjectTokens.add(
+                _paymentAmountToAmountForNFTHolder(
+                    loanDetails[loanId].totalPartitions,
+                    projectLoanPayments[loanId].milestoneLendingAmount[i],
+                    loanNFTToConvert
+                )
             );
         }
-        uint256 amountToReceive =
-            _paymentAmountToAmountForNFTHolder(
-                loanDetails[loanId].totalPartitions,
-                totalMilestoneLendingAmounts,
-                amountLoanNFT
-            );
-        // TODO: Get the real price from a price oracle (Mock the price oracle and test repayment with different token prices)
-        uint256 projectTokenPrice = getProjectTokenPrice(loanId);
+
         // Calculate amount of project tokens based on the actual listed price and the discount
-        amount = amountToReceive.div(
-            projectTokenPrice.sub(
-                projectTokenPrice
-                    .mul(projectLoanPayments[loanId].discountPerMillion)
-                    .div(1000000)
-            )
+        amount = amountToReceiveInProjectTokens.div(
+            getDiscountedProjectTokenPrice(loanId)
         );
     }
 }
