@@ -25,8 +25,8 @@ contract ProjectLoan is LoanDetails {
      * @param interestPercentage The interest percentage that will be obtained after whole repayment.
      * @param totalMilestones The total amount of Milestones project is requesting funds for.
      * @param milestoneDurations The duration of each Milestone.
-     * @param timeDiffBetweenDeliveryAndRepayment The time interval between the last milestone delivery by the project and
-     *                                            the repayment of the loan by the project.
+     * @param paymentTimeInterval The time interval between the last milestone delivery by the project and
+     * the repayment of the loan by the project.
      * @param extraInfo The ipfs hash where more specific details for loan request are stored.
      */
     function requestProjectLoan(
@@ -36,7 +36,7 @@ contract ProjectLoan is LoanDetails {
         uint256 interestPercentage,
         uint256 totalMilestones,
         uint256[] calldata milestoneDurations,
-        uint256 timeDiffBetweenDeliveryAndRepayment,
+        uint256 paymentTimeInterval,
         string memory extraInfo
     )
     external
@@ -61,7 +61,7 @@ contract ProjectLoan is LoanDetails {
 
         _storeProjectLoanPayments(
             totalMilestones,
-            timeDiffBetweenDeliveryAndRepayment
+            paymentTimeInterval
         );
 
         loanDetails[totalLoans].loanType = LoanLibrary.LoanType.PROJECT;
@@ -123,10 +123,7 @@ contract ProjectLoan is LoanDetails {
         // Milestones completed
         if(projectLoanPayments[loanId_].milestonesDelivered == projectLoanPayments[loanId_].totalMilestones) {
             loanStatus[loanId_] = LoanLibrary.LoanStatus.AWAITING_REPAYMENT;
-            projectLoanPayments[loanId_].currentMilestoneStartingTimestamp = block.timestamp;
-            projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block.timestamp.add(
-                projectLoanPayments[loanId_].timeDiffBetweenDeliveryAndRepayment);
-
+            projectLoanPayments[loanId_].awaitingForRepaymentDate = block.timestamp;
         // Milestones missing
         } else {
             loanStatus[loanId_] = LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPLICATION;
@@ -153,7 +150,7 @@ contract ProjectLoan is LoanDetails {
 
     function _storeProjectLoanPayments(
         uint256 totalMilestones_,
-        uint256 timeDiffBetweenDeliveryAndRepayment_
+        uint256 paymentTimeInterval_
     )
     internal
     {        
@@ -161,7 +158,7 @@ contract ProjectLoan is LoanDetails {
             loanDetails[totalLoans].lendingAmount);
 
         projectLoanPayments[totalLoans].totalMilestones = totalMilestones_;
-        projectLoanPayments[totalLoans].timeDiffBetweenDeliveryAndRepayment = timeDiffBetweenDeliveryAndRepayment_;
+        projectLoanPayments[totalLoans].paymentTimeInterval = paymentTimeInterval_;
     }
 
     function _startProjectLoan(
@@ -196,7 +193,6 @@ contract ProjectLoan is LoanDetails {
         uint256 loanId_
     )
     internal
-    onlyBetweenMilestoneTimeframe(loanId_)
     onlyOnProjectRepayment(loanId_)
     {
         IERC20(lendingToken).transferFrom(msg.sender, address(escrow), projectLoanPayments[loanId_].amountToBeRepaid);
