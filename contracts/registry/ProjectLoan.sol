@@ -56,9 +56,20 @@ contract ProjectLoan is LoanDetails {
         uint256 timeDiffBetweenDeliveryAndRepayment,
         string memory extraInfo
     ) external onlyAcceptedNumberOfMilestones(totalMilestones) {
-        uint256 totalAmountRequested;
+        require(
+            (amountRequestedPerMilestone.length == totalMilestones) &&
+                (milestoneDurations.length == totalMilestones),
+            "Total milestones requested should coincide with requested amounts and durations"
+        );
 
+        uint256 totalAmountRequested;
         for (uint256 i = 0; i < totalMilestones; i++) {
+            require(
+                amountRequestedPerMilestone[i].mod(
+                    baseAmountForEachPartition
+                ) == 0,
+                "Requested milestone amounts must be multipliers of base amount"
+            );
             projectLoanPayments[totalLoans].milestoneLendingAmount[
                 i
             ] = amountRequestedPerMilestone[i];
@@ -474,14 +485,29 @@ contract ProjectLoan is LoanDetails {
         view
         returns (uint256 balance)
     {
+        // If the loan is already settled, the borrower already paid everything back and also got its collateral back already
+        //if (loanStatus[loanId] == LoanLibrary.LoanStatus.SETTLED) {
+        //    return 0;
+        //}
+
+        //uint256 totalBalance;
+        //uint256 milestonesAmount;
         for (
-            uint256 i =
-                loanStatus[loanId] != LoanLibrary.LoanStatus.SETTLED ? 0 : 1; // Project tokens of the first generation (0) can not be converted anymore once a loan is settled because they were paid back in the settlement already
+            uint256 i = 0;
+            //uint256 i =
+            //    loanStatus[loanId] != LoanLibrary.LoanStatus.SETTLED ? 0 : 1; // Project tokens of the first generation (0) can not be converted anymore once a loan is settled because they were paid back in the settlement already
             i < projectLoanPayments[loanId].milestonesDelivered;
             i++
         ) {
             balance = balance.add(getLoanNFTBalanceOfGeneration(loanId, i));
+            // totalBalance = getLoanNFTBalanceOfGeneration(loanId, 0);
+            // milestonesAmount = milestonesAmount.add(
+            //     projectLoanPayments[loanId].milestoneLendingAmount[i]
+            // );
         }
+        //balance = totalBalance.mul(milestonesAmount).div(
+        //    loanDetails[loanId].lendingAmount
+        //);
     }
 
     function getAmountOfProjectTokensToReceive(

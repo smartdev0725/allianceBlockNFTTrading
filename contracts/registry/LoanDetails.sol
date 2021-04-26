@@ -151,10 +151,6 @@ contract LoanDetails is Storage {
         string memory extraInfo_
     ) internal {
         require(
-            lendingAmountRequested_.mod(baseAmountForEachPartition) == 0,
-            "Requested Amount must be a multiplier of base amount"
-        );
-        require(
             interestPercentage_ >= minimumInterestPercentage,
             "Interest percentage lower than limit"
         );
