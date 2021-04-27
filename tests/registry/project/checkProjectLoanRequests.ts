@@ -27,6 +27,7 @@ export default async function suite() {
       const interestPercentage = new BN(20);
       const discountPerMillion = new BN(300000);
       const totalMilestones = new BN(3);
+      const tokenId = totalMilestones.sub(new BN(1)).ishln(128).or(loanId); // Project tokens are minted with the generation at totalMilestons - 1 so they can initially only be used after all milestones were delivered.
       const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
       const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
 
@@ -58,7 +59,7 @@ export default async function suite() {
 
       const newBorrowerCollateralBalance = new BN(await this.projectToken.balanceOf(this.projectOwner));
       const newEscrowCollateralBalance = new BN(await this.projectToken.balanceOf(this.escrow.address));
-      const newEscrowLoanNftBalance = new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
+      const newEscrowLoanNftBalance = new BN(await this.loanNft.balanceOf(this.escrow.address, tokenId));
 
       const isPaused = await this.loanNft.transfersPaused(loanId);
 

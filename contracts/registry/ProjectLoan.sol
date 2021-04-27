@@ -105,9 +105,10 @@ contract ProjectLoan is LoanDetails {
 
         // TODO - Mint Correctly And Burn on Settlement
         // mainNFT.mint(address(escrow));
-        loanNFT.mintGen0(
+        loanNFT.mintOfGen(
             address(escrow),
-            loanDetails[totalLoans].totalPartitions
+            loanDetails[totalLoans].totalPartitions,
+            totalMilestones.sub(1)
         );
 
         loanNFT.pauseTokenTransfer(totalLoans); //Pause trades for ERC1155s with the specific loan ID.
@@ -262,7 +263,31 @@ contract ProjectLoan is LoanDetails {
         uint256 partitionsFunded_,
         address funder_
     ) internal {
-        escrow.transferLoanNFT(loanId_, partitionsFunded_, funder_);
+        uint256 tokenGeneration =
+            projectLoanPayments[loanId_].totalMilestones.sub(1);
+        uint256 tokenId = tokenGeneration.getTokenId(loanId_);
+        escrow.transferLoanNFT(tokenId, partitionsFunded_, funder_);
+
+        // Decrease the generation of a percentage of the tokens so they can already be converted in project tokens after every milestone instead of only being repaid at the end of the loan.
+        for (
+            uint256 i = 0;
+            i < projectLoanPayments[loanId_].totalMilestones.sub(1);
+            i++
+        ) {
+            uint256 partitionsToConvertAtMilestone =
+                partitionsFunded_.mul(
+                    projectLoanPayments[loanId_].milestoneLendingAmount[i].div(
+                        loanDetails[loanId_].lendingAmount
+                    )
+                );
+
+            loanNFT.decreaseGenerations(
+                tokenId,
+                funder_,
+                partitionsToConvertAtMilestone,
+                tokenGeneration.sub(i)
+            );
+        }
     }
 
     function _executeProjectLoanPayment(uint256 loanId_)
@@ -508,28 +533,17 @@ contract ProjectLoan is LoanDetails {
         returns (uint256 balance)
     {
         // If the loan is already settled, the borrower already paid everything back and also got its collateral back already
-        //if (loanStatus[loanId] == LoanLibrary.LoanStatus.SETTLED) {
-        //    return 0;
-        //}
+        if (loanStatus[loanId] == LoanLibrary.LoanStatus.SETTLED) {
+            return 0;
+        }
 
-        //uint256 totalBalance;
-        //uint256 milestonesAmount;
         for (
             uint256 i = 0;
-            //uint256 i =
-            //    loanStatus[loanId] != LoanLibrary.LoanStatus.SETTLED ? 0 : 1; // Project tokens of the first generation (0) can not be converted anymore once a loan is settled because they were paid back in the settlement already
             i < projectLoanPayments[loanId].milestonesDelivered;
             i++
         ) {
             balance = balance.add(getLoanNFTBalanceOfGeneration(loanId, i));
-            // totalBalance = getLoanNFTBalanceOfGeneration(loanId, 0);
-            // milestonesAmount = milestonesAmount.add(
-            //     projectLoanPayments[loanId].milestoneLendingAmount[i]
-            // );
         }
-        //balance = totalBalance.mul(milestonesAmount).div(
-        //    loanDetails[loanId].lendingAmount
-        //);
     }
 
     function getAmountOfProjectTokensToReceive(
