@@ -1,4 +1,6 @@
 # Smart Contracts
+![Contract hierarchy](img/contractPlot.png)
+
 ### Governance
 Responsible for handling the current delegators as well as voting functionality.
 
