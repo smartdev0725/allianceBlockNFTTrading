@@ -144,7 +144,7 @@ contract LoanDetails is Storage {
     }
 
     function _storeLoanDetails(
-        uint256 loanType_,
+        LoanLibrary.LoanType loanType_,
         uint256 lendingAmountRequested_,
         address collateralToken_,
         uint256 collateralAmount_,

@@ -110,7 +110,7 @@ contract ProjectLoan is LoanDetails {
             loanDetails[totalLoans].totalPartitions
         );
 
-        loanNFT.pauseTokenTransfer(totallLoans); //Pause trades for ERC1155s with the specific loan ID.
+        loanNFT.pauseTokenTransfer(totalLoans); //Pause trades for ERC1155s with the specific loan ID.
 
         governance.requestApproval(totalLoans, false, 0);
 
