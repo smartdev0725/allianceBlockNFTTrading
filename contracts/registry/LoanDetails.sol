@@ -144,6 +144,7 @@ contract LoanDetails is Storage {
     }
 
     function _storeLoanDetails(
+        uint256 loanType_,
         uint256 lendingAmountRequested_,
         address collateralToken_,
         uint256 collateralAmount_,
@@ -155,14 +156,9 @@ contract LoanDetails is Storage {
             "Interest percentage lower than limit"
         );
 
-        IERC20(collateralToken_).transferFrom(
-            msg.sender,
-            address(escrow),
-            collateralAmount_
-        );
-
         LoanLibrary.LoanDetails memory loan;
         loan.loanId = totalLoans;
+        loan.loanType = loanType_;
         loan.collateralToken = collateralToken_;
         loan.collateralAmount = collateralAmount_;
         loan.lendingAmount = lendingAmountRequested_;
@@ -179,11 +175,5 @@ contract LoanDetails is Storage {
 
         loanStatus[totalLoans] = LoanLibrary.LoanStatus.REQUESTED;
         loanBorrower[totalLoans] = msg.sender;
-
-        // TODO - Mint Correctly And Burn on Settlement
-        // mainNFT.mint(address(escrow));
-        loanNFT.mintGen0(address(escrow), loan.totalPartitions);
-
-        loanNFT.pauseTokenTransfer(loan.loanId); //Pause trades for ERC1155s with the specific loan ID.
     }
 }

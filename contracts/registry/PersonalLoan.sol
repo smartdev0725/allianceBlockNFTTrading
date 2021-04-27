@@ -51,6 +51,7 @@ contract PersonalLoan is LoanDetails {
         );
 
         _storeLoanDetails(
+            LoanLibrary.LoanType.PERSONAL,
             amountRequested,
             collateralToken,
             collateralAmount,
@@ -64,7 +65,20 @@ contract PersonalLoan is LoanDetails {
             repaymentBatchType
         );
 
-        loanDetails[totalLoans].loanType = LoanLibrary.LoanType.PERSONAL;
+        IERC20(collateralToken).transferFrom(
+            msg.sender,
+            address(escrow),
+            collateralAmount
+        );
+
+        // TODO - Mint Correctly And Burn on Settlement
+        // mainNFT.mint(address(escrow));
+        loanNFT.mintGen0(
+            address(escrow),
+            loanDetails[totalLoans].totalPartitions
+        );
+
+        loanNFT.pauseTokenTransfer(totallLoans); //Pause trades for ERC1155s with the specific loan ID.
 
         governance.requestApproval(totalLoans, false, 0);
 

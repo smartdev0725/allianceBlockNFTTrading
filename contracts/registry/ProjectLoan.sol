@@ -83,6 +83,7 @@ contract ProjectLoan is LoanDetails {
         }
 
         _storeLoanDetails(
+            LoanLibrary.LoanType.PROJECT,
             totalAmountRequested,
             collateralToken,
             collateralAmount,
@@ -96,7 +97,20 @@ contract ProjectLoan is LoanDetails {
             timeDiffBetweenDeliveryAndRepayment
         );
 
-        loanDetails[totalLoans].loanType = LoanLibrary.LoanType.PROJECT;
+        IERC20(collateralToken).transferFrom(
+            msg.sender,
+            address(escrow),
+            collateralAmount
+        );
+
+        // TODO - Mint Correctly And Burn on Settlement
+        // mainNFT.mint(address(escrow));
+        loanNFT.mintGen0(
+            address(escrow),
+            loanDetails[totalLoans].totalPartitions
+        );
+
+        loanNFT.pauseTokenTransfer(totallLoans); //Pause trades for ERC1155s with the specific loan ID.
 
         governance.requestApproval(totalLoans, false, 0);
 
