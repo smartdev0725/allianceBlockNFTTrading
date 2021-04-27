@@ -24,6 +24,11 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
         address indexed user,
         uint256 newGeneration
     );
+    event GenerationDecreased(
+        uint256 indexed loanId,
+        address indexed user,
+        uint256 newGeneration
+    );
     event TransfersPaused(uint256 loanId);
     event TransfersResumed(uint256 loanId);
 
@@ -118,6 +123,33 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
     }
 
     /**
+     * @dev Mint tokens of a specific generation directly
+     */
+    function mintOfGen(
+        address to,
+        uint256 amount,
+        uint256 generation
+    ) external onlyMinter {
+        uint256 tokenId = generation.getTokenId(getCurrentLoanId());
+        _mint(to, tokenId, amount, "");
+        _loanIdTracker.increment();
+    }
+
+    /**
+     * @notice decrease generations of a token
+     * @dev token is burned, and new token is minted to user
+     * @dev token owner should have approvedForAll before calling this function
+     */
+    function decreaseGenerations(
+        uint256 tokenId,
+        address user,
+        uint256 amount,
+        uint256 generationsToDecrease
+    ) external onlyMinter {
+        _decreaseGenerations(tokenId, user, amount, generationsToDecrease);
+    }
+
+    /**
      * @notice increase generation of a token
      * @dev token is burned, and new token is minted to user
      * @dev token owner should have approvedForAll before calling this function
@@ -176,6 +208,34 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
         _mint(user, newTokenId, amount, "");
 
         emit GenerationIncreased(loanId, user, generation);
+    }
+
+    /**
+     * @notice decrease multiple generations of a token
+     * @dev token is burned, and new token is minted to user
+     * @dev token owner should have approvedForAll before calling this function
+     */
+    function _decreaseGenerations(
+        uint256 tokenId,
+        address user,
+        uint256 amount,
+        uint256 generationsToDecrease
+    ) internal {
+        (uint256 generation, uint256 loanId) = tokenId.formatTokenId();
+
+        require(generation >= generationsToDecrease, "Invalid token ID");
+
+        // Decrease generation, leave loanId same
+        generation -= generationsToDecrease;
+        uint256 newTokenId = generation.getTokenId(loanId);
+
+        // Burn previous gen tokens
+        burn(user, tokenId, amount);
+
+        // Mint new generation tokens
+        _mint(user, newTokenId, amount, "");
+
+        emit GenerationDecreased(loanId, user, generation);
     }
 
     /**

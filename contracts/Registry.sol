@@ -123,7 +123,16 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
             address(escrow),
             partitionsToPurchase.mul(baseAmountForEachPartition)
         );
-        escrow.transferLoanNFT(loanId, partitionsToPurchase, msg.sender);
+
+        if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
+            escrow.transferLoanNFT(loanId, partitionsToPurchase, msg.sender);
+        } else {
+            _transferLoanNFTToProjectFunder(
+                loanId,
+                partitionsToPurchase,
+                msg.sender
+            );
+        }
 
         loanDetails[loanId].partitionsPurchased = loanDetails[loanId]
             .partitionsPurchased

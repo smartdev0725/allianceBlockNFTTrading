@@ -243,6 +243,14 @@ contract ProjectLoan is LoanDetails {
         }
     }
 
+    function _transferLoanNFTToProjectFunder(
+        uint256 loanId_,
+        uint256 partitionsFunded_,
+        address funder_
+    ) internal {
+        escrow.transferLoanNFT(loanId_, partitionsFunded_, funder_);
+    }
+
     function _executeProjectLoanPayment(uint256 loanId_)
         internal
         onlyBetweenMilestoneTimeframe(loanId_)
