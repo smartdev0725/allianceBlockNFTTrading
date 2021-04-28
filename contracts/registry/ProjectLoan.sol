@@ -267,7 +267,6 @@ contract ProjectLoan is LoanDetails {
             projectLoanPayments[loanId_].totalMilestones.sub(1);
         uint256 tokenId = tokenGeneration.getTokenId(loanId_);
         escrow.transferLoanNFT(tokenId, partitionsFunded_, funder_);
-
         // Decrease the generation of a percentage of the tokens so they can already be converted in project tokens after every milestone instead of only being repaid at the end of the loan.
         for (
             uint256 i = 0;
@@ -275,11 +274,9 @@ contract ProjectLoan is LoanDetails {
             i++
         ) {
             uint256 partitionsToConvertAtMilestone =
-                partitionsFunded_.mul(
-                    projectLoanPayments[loanId_].milestoneLendingAmount[i].div(
-                        loanDetails[loanId_].lendingAmount
-                    )
-                );
+                partitionsFunded_
+                    .mul(projectLoanPayments[loanId_].milestoneLendingAmount[i])
+                    .div(loanDetails[loanId_].lendingAmount);
 
             loanNFT.decreaseGenerations(
                 tokenId,

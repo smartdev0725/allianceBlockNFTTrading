@@ -41,7 +41,9 @@ contract LoanDetails is Storage {
 
     modifier onlyActiveLoan(uint256 loanId) {
         require(
-            loanStatus[loanId] == LoanLibrary.LoanStatus.STARTED,
+            loanStatus[loanId] == LoanLibrary.LoanStatus.STARTED ||
+                loanStatus[loanId] ==
+                LoanLibrary.LoanStatus.AWAITING_MILESTONE_APPLICATION,
             "Only when loan is active"
         );
         _;
