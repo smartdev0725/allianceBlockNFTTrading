@@ -547,30 +547,9 @@ contract ProjectLoan is LoanDetails {
         uint256 loanId,
         uint256 amountLoanNFT
     ) public view returns (uint256 amount) {
-        uint256 amountToReceiveInProjectTokens;
-        uint256 balanceOfPreviousGeneration; // To simulate the incrementing of generations without really incrementing.
-        for (
-            uint256 i =
-                loanStatus[loanId] != LoanLibrary.LoanStatus.SETTLED ? 0 : 1; // Project tokens of the first generation (0) can not be converted anymore once a loan is settled because they were paid back in the settlement already
-            i < projectLoanPayments[loanId].milestonesDelivered;
-            i++
-        ) {
-            uint256 loanNFTBalance =
-                getLoanNFTBalanceOfGeneration(loanId, i) +
-                    balanceOfPreviousGeneration; // Add the balance of the previous generation because the previous generation will be incremented if converted to project tokens.
-            balanceOfPreviousGeneration = loanNFTBalance;
-            uint256 loanNFTToConvert =
-                loanNFTBalance > amountLoanNFT ? amountLoanNFT : loanNFTBalance;
-            amountToReceiveInProjectTokens = amountToReceiveInProjectTokens.add(
-                _paymentAmountToAmountForNFTHolder(
-                    loanDetails[loanId].totalPartitions,
-                    projectLoanPayments[loanId].milestoneLendingAmount[i],
-                    loanNFTToConvert
-                )
-            );
-        }
-
-        // Calculate amount of project tokens based on the actual listed price and the discount
+        uint256 amountToReceiveInProjectTokens =
+            amountLoanNFT.mul(baseAmountForEachPartition);
+        // Calculate amount of project tokens based on the discounted price
         amount = amountToReceiveInProjectTokens.div(
             getDiscountedProjectTokenPrice(loanId)
         );
