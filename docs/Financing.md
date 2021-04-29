@@ -58,29 +58,3 @@ The financial flow follows this chart:
 34. Part of the tokens deposited by the project in the smart contract and investment funds will be subjected to the liquidity mining program. The profit generated from the yield farming will go to the Investors to generate additional profit. 
 35. Smart contract automatically redistributes funds. Investors receive principal repayment and interest rates or project tokens at discount, part of the interest or project tokens is redistributed to the AllianceBlock network stakers and DAO.
 36. Once the investment is fully repaid, the NFT Investment Token is burned. 
-
-## Funding NFT Token minting process
-
-1. Once a funding application is accepted, the DAO delegators triggers a smart contract that sends the notification to the investors. 
-2. DAO triggers creation of the escrow where funds are being stored and redistributed across the ecosystem. 
-3. Investors provide funding in any supported token  calculated per investment unit. Investors are obliged to send the accurate amount of the ALBT tokens that will reflect the respective amount of Investment Units. 
-4. Calculation of the investment contribution into Investment Units is a technical requirement for further  creation of a number of NFTs that will allow the investor to sell the part of the investment. 
-5. If the soft cap is not reached funds are sent back to the investors. When a soft/hard cap is reached, a smart contract initiates a token minting process. 
-6. Smart contract divides the investment amount into multiple NFTs where each is representing equal investment contribution. NFT Investment Tokens are respectively divided between all funding investors. 
-7. Each of the investors receives a corresponding NFT amount representing part of the investment. NFT investment token contains funding economics on which base repayment and funding process will be conducted.  
-8. NFT Investment Token will keep only funding economic data, other information on the project required for DAO to vote and to trigger funding events will be stored in IPFS.  
-
-## Life cycle of a Funding NFT
-
-![NFT-flowchart](img/fundingNFT.png)
-
-1. Investors are informed on the token sale details containing information on how much ALBT token is required per one Investment Unit.
-2. Investment is calculated into Investment Units in order to have further flexibility in trading parts of the investments. 
-3. Investors are sending to the escrow the pre-calculated amount of ALBT  reflecting the accurate number of the investment units.
-4. Funds are exchanged into stablecoins and locked in the escrow. 
-5. Escrow smart contract triggers the NFT mint process.
-6. Smart contract creates a respective number of ERC1155 tokens, each representing a part of the investment..
-7. NFT Investment Tokens are distributed according to the investor. Each investor receives the NFT amount equal to the number of the Investment Units.
-8. NFTs hold rights to receive repayment plus interest rates or project tokens at discounted price. NFTs can be traded, wrapped and leveraged across different blockchains and DeFi applications.
-
-![NFT-lifeCycle](img/nftLifeCycle.png)
