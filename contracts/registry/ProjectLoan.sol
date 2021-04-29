@@ -323,11 +323,11 @@ contract ProjectLoan is LoanDetails {
         uint256 generation_,
         uint256 amountOfTokens_
     ) internal onlySettledLoan(loanId_) {
+        uint256 tokenId = generation_.getTokenId(loanId_);
         require(
-            !(generation_ > 0),
-            "This NFT was already used to claim project tokens."
+            loanNFT.balanceOf(msg.sender, tokenId) >= amountOfTokens_,
+            "Insufficient Loan NFT Balance"
         );
-
         uint256 amountToReceive =
             getAmountToBeRepaid(loanId_).mul(amountOfTokens_).div(
                 loanDetails[loanId_].totalPartitions.sub(
@@ -335,7 +335,7 @@ contract ProjectLoan is LoanDetails {
                 )
             );
 
-        loanNFT.burn(msg.sender, loanId_, amountOfTokens_);
+        loanNFT.burn(msg.sender, tokenId, amountOfTokens_);
         escrow.transferLendingToken(msg.sender, amountToReceive);
     }
 
@@ -348,60 +348,20 @@ contract ProjectLoan is LoanDetails {
             "No loan NFT available for conversion to project tokens"
         );
 
-        // Calculate the amount to receive in project tokens based on the milestone lending amounts and the NFTs the funder holds
-        uint256 amountToReceiveInProjectTokens;
-        for (
-            uint256 i =
-                loanStatus[loanId_] != LoanLibrary.LoanStatus.SETTLED ? 0 : 1; // Project tokens of the first generation (0) can not be converted anymore once a loan is settled because they were paid back in the settlement already
-            i < projectLoanPayments[loanId_].milestonesDelivered;
-            i++
-        ) {
-            uint256 loanNFTBalance = getLoanNFTBalanceOfGeneration(loanId_, i);
-            uint256 loanNFTToConvert =
-                loanNFTBalance > amountLoanNFT_
-                    ? amountLoanNFT_
-                    : loanNFTBalance;
-            amountToReceiveInProjectTokens = amountToReceiveInProjectTokens.add(
-                _paymentAmountToAmountForNFTHolder(
-                    loanDetails[loanId_].totalPartitions,
-                    projectLoanPayments[loanId_].milestoneLendingAmount[i],
-                    loanNFTToConvert
-                )
-            );
+        // Keep track of the partitions paid in project tokens to reduce them from the settlement amount after milestone delivery
+        projectLoanPayments[loanId_]
+            .partitionsPaidInProjectTokens = projectLoanPayments[loanId_]
+            .partitionsPaidInProjectTokens
+            .add(amountLoanNFT_);
 
-            // Increment the generation of the NFT's used to receive the payment or burn them if the last milestone repayment is claimed
-            if (i < (projectLoanPayments[loanId_].totalMilestones - 1)) {
-                loanNFT.increaseGenerations(
-                    i.getTokenId(loanId_),
-                    msg.sender,
-                    loanNFTToConvert,
-                    1
-                );
-            } else {
-                loanNFT.burn(msg.sender, loanId_, loanNFTToConvert);
-            }
-
-            // Store the number of partitions used to reduce them from the amount of lending tokens to pay to settle the loan
-            if (i == 0) {
-                projectLoanPayments[loanId_]
-                    .partitionsPaidInProjectTokens = projectLoanPayments[
-                    loanId_
-                ]
-                    .partitionsPaidInProjectTokens
-                    .add(loanNFTToConvert);
-            }
-        }
-
-        // Calculate amount of project tokens based on the actual listed price and the discount
-        // TODO: Get the real price from a price oracle (Mock the price oracle and test repayment with different token prices)
-        uint256 discountedPrice = getDiscountedProjectTokenPrice(loanId_);
-        uint256 amount = amountToReceiveInProjectTokens.div(discountedPrice);
+        // Burn the loan NFT used to claim the project tokens
+        _burnLoanNFTAmountOverGenerations(loanId_, amountLoanNFT_);
 
         // Transfer the project tokens to the funder
         escrow.transferCollateralToken(
             loanDetails[loanId_].collateralToken,
             msg.sender,
-            amount
+            getAmountOfProjectTokensToReceive(loanId_, amountLoanNFT_)
         );
 
         emit ProjectTokenPaymentReceived(
@@ -412,12 +372,26 @@ contract ProjectLoan is LoanDetails {
         );
     }
 
-    function _paymentAmountToAmountForNFTHolder(
-        uint256 totalPartitions,
-        uint256 paymentAmount,
-        uint256 amountOfLoanNFT
-    ) internal pure returns (uint256 amount) {
-        amount = paymentAmount.mul(amountOfLoanNFT).div(totalPartitions);
+    function _burnLoanNFTAmountOverGenerations(loanId_, amountLoanNFT_)
+        internal
+    {
+        uint256 totalLoanNFTToBurn = amountLoanNFT_;
+        for (
+            uint256 i = 0;
+            i < projectLoanPayments[loanId_].milestonesDelivered &&
+                totalLoanNFTToBurn > 0;
+            i++
+        ) {
+            uint256 loanNFTBalance = getLoanNFTBalanceOfGeneration(loanId_, i);
+            uint256 loanNFTToBurn =
+                loanNFTBalance > totalLoanNFTToBurn
+                    ? totalLoanNFTToBurn
+                    : loanNFTBalance;
+
+            loanNFT.burn(msg.sender, i.getTokenId(loanId_), loanNFTToBurn);
+
+            totalLoanNFTToBurn = totalLoanNFTToBurn.sub(loanNFTToBurn);
+        }
     }
 
     // GETTERS
@@ -446,8 +420,9 @@ contract ProjectLoan is LoanDetails {
         // Substract the partitions already paid in project tokens from the lending amount to pay back
         uint256 lendingTokenAmount =
             loanDetails[loanId].lendingAmount.sub(
-                projectLoanPayments[loanId].partitionsPaidInProjectTokens *
+                projectLoanPayments[loanId].partitionsPaidInProjectTokens.mul(
                     baseAmountForEachPartition
+                )
             );
         // Calculate the interest only over what is left to pay in the lending token
         uint256 interest =
@@ -471,8 +446,9 @@ contract ProjectLoan is LoanDetails {
         // Substract the partitions already paid in project tokens from the lending amount to pay back
         uint256 lendingTokenAmount =
             loanDetails[loanId].lendingAmount.sub(
-                projectLoanPayments[loanId].partitionsPaidInProjectTokens *
+                projectLoanPayments[loanId].partitionsPaidInProjectTokens.mul(
                     baseAmountForEachPartition
+                )
             );
         // Calculate the interest only over what is left to pay in the lending token
         totalInterest = lendingTokenAmount
