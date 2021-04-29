@@ -1,3 +1,32 @@
+# Glossary
+
+## Funder:
+EXPLANATION HERE
+
+## Borrower:
+EXPLANATION HERE
+
+## Personal Loan
+EXPLANATION HERE
+
+## Collateral
+EXPLANATION HERE
+
+## Escrow
+[**Escrow Subsystem**](Escrow.md) or **Escrow**, is responsible for handling the funds in the protocol's ecosystem.
+
+## ERC-1155 tokens
+EXPLANATION HERE
+
+## Milestone
+EXPLANATION HERE
+
+## Storage
+[**Storage Subsystem**](Storage.md) or **Storage** is responsible for holding all the information. It stores the variables for every investment, loan and project as well as the active roles for the [Governance](DAO.md).
+
+---
+
+
 ### Collateral token
 The collateral token is the token a borrower should deposit as a guarantee for the lenders in case the loan is not repaid on time or when other agreements are not fulfilled. Any ERC20 token can be used as collateral. In the transaction(s) for requesting a loan (function requestPersonalLoan in PersonalLoan.sol or function requestProjectLoan in ProjectLoan.sol), the borrower itself can choose the ERC20 token and the amount to use as collateral. The contract will then transfer the specified amount of the token to the escrow contract.
 When the loan is rejected by the governance, the collateral token will be sent back to the borrower (function decideForLoan in Registry.sol)
