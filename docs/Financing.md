@@ -73,3 +73,14 @@ The financial flow follows this chart:
 ## Life cycle of a Funding NFT
 
 ![NFT-flowchart](img/fundingNFT.png)
+
+1. Investors are informed on the token sale details containing information on how much ALBT token is required per one Investment Unit.
+2. Investment is calculated into Investment Units in order to have further flexibility in trading parts of the investments. 
+3. Investors are sending to the escrow the pre-calculated amount of ALBT  reflecting the accurate number of the investment units.
+4. Funds are exchanged into stablecoins and locked in the escrow. 
+5. Escrow smart contract triggers the NFT mint process.
+6. Smart contract creates a respective number of ERC1155 tokens, each representing a part of the investment..
+7. NFT Investment Tokens are distributed according to the investor. Each investor receives the NFT amount equal to the number of the Investment Units.
+8. NFTs hold rights to receive repayment plus interest rates or project tokens at discounted price. NFTs can be traded, wrapped and leveraged across different blockchains and DeFi applications.
+
+![NFT-lifeCycle](img/nftLifeCycle.png)
