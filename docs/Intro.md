@@ -1,4 +1,18 @@
 # P2PLINFT
+The Protocol aims to provide a decentralized infrastructure allowing  blockchain-based projects to receive funding from the platform users as well as p2p lenders integrated with AllianceBlock. Users providing funding ([Funders](Glossary.md)) for a project receive NTFs that represent investments which can be exchanged for the tokens at discount or can be repaid with accrued interest at pre-agreed conditions.
+
+
+Read more about the [Project Financing](Financing.md) process.
+
+
+
+
+
+
+
+
+----
+
 First the different token contracts and interfaces that are implemented and/or used are described to understand the tokenomics. Tokens are used as collateral, to give out and pay back loans, to represent ownership of a lender and to stake to take part in the protocol’s governance.
 Then the contracts that orchestrate the interactions between these different tokens and between different actors will be presented as well to understand the complete flow and know all available (external) transactions.
 
