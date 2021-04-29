@@ -200,6 +200,10 @@ contract ProjectLoan is LoanDetails {
                     projectLoanPayments[loanId_].milestonesDelivered
                 ]
             );
+            // TODO: get real price from DEX or Oracle
+            projectLoanPayments[loanId_].milestoneProjectTokenPrice[
+                projectLoanPayments[loanId_].milestonesDelivered
+            ] = _getMockedPriceForMilestone(0);
         }
     }
 
@@ -231,11 +235,22 @@ contract ProjectLoan is LoanDetails {
         projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block
             .timestamp
             .add(projectLoanPayments[loanId_].milestoneDuration[0]);
+        // TODO: get real price from DEX or Oracle
+        projectLoanPayments[loanId_].milestoneProjectTokenPrice[
+            0
+        ] = _getMockedPriceForMilestone(0);
 
         escrow.transferLendingToken(
             loanBorrower[loanId_],
             projectLoanPayments[loanId_].milestoneLendingAmount[0]
         );
+    }
+
+    function _getMockedPriceForMilestone(uint256 milestone)
+        internal
+        returns (uint256 price)
+    {
+        price = milestone.add(1);
     }
 
     function _challengeProjectLoan(uint256 loanId_) internal {
@@ -348,6 +363,9 @@ contract ProjectLoan is LoanDetails {
             "No loan NFT available for conversion to project tokens"
         );
 
+        uint256 amount =
+            getAmountOfProjectTokensToReceive(loanId_, amountLoanNFT_);
+
         // Keep track of the partitions paid in project tokens to reduce them from the settlement amount after milestone delivery
         projectLoanPayments[loanId_]
             .partitionsPaidInProjectTokens = projectLoanPayments[loanId_]
@@ -361,20 +379,21 @@ contract ProjectLoan is LoanDetails {
         escrow.transferCollateralToken(
             loanDetails[loanId_].collateralToken,
             msg.sender,
-            getAmountOfProjectTokensToReceive(loanId_, amountLoanNFT_)
+            amount
         );
 
         emit ProjectTokenPaymentReceived(
             loanId_,
             msg.sender,
             amount,
-            discountedPrice
+            getDiscountedProjectTokenPrice(loanId_)
         );
     }
 
-    function _burnLoanNFTAmountOverGenerations(loanId_, amountLoanNFT_)
-        internal
-    {
+    function _burnLoanNFTAmountOverGenerations(
+        uint256 loanId_,
+        uint256 amountLoanNFT_
+    ) internal {
         uint256 totalLoanNFTToBurn = amountLoanNFT_;
         for (
             uint256 i = 0;
@@ -483,8 +502,14 @@ contract ProjectLoan is LoanDetails {
         view
         returns (uint256 price)
     {
-        // TODO: Get the real price from a price oracle (Mock the price oracle and test repayment with different token prices)
-        price = 1;
+        // The price tokens can be reclaimed for after a milestone delivery
+        uint256 milestonePriceWasSet =
+            projectLoanPayments[loanId].milestonesDelivered
+                ? projectLoanPayments[loanId].milestonesDelivered.sub(1)
+                : 0;
+        price = projectLoanPayments[loanId].milestoneProjectTokenPrice[
+            milestonePriceWasSet
+        ];
     }
 
     function getDiscountedProjectTokenPrice(uint256 loanId)

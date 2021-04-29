@@ -63,6 +63,7 @@ library LoanLibrary {
         uint256 currentMilestoneStartingTimestamp; // Timestamp that milestone/repayment started.
         uint256 currentMilestoneDeadlineTimestamp; // Timestamp that milestone/repayment should be delivered.
         uint256 discountPerMillion; // The discount / 1M if lenders decide to get paid by the project tokens.
+        mapping(uint256 => uint256) milestoneProjectTokenPrice; // The price the project tokens can be claimed for after delivery of the milestone.
         uint256 partitionsPaidInProjectTokens; // The number of partitions lenders used to claim project tokens.
     }
 }
