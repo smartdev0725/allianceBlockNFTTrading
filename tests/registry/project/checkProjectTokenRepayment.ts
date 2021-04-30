@@ -83,14 +83,14 @@ export default async function suite() {
 
             const balanceLenderBefore = await this.projectToken.balanceOf(this.lenders[0]);
             const balanceEscrowBefore = await this.projectToken.balanceOf(this.escrow.address);
-            const balanceNFTLenderBefore = await this.registry.balanceOfTotalLoanNFT(loanId, this.lenders[0]);
+            const balanceNFTLenderBefore = await this.registry.balanceOfAllLoanNFTGenerations(loanId, this.lenders[0]);
 
             // Test getter first
             const getterProjectTokenAmount = await this.registry.getAmountOfProjectTokensToReceive(loanId, convertibleAmountLender0, { from: this.lenders[0] });
             // Request to receive project tokens as repayment for all of the convertible NFT
             const tx1 = await this.registry.receivePayment(loanId, convertibleAmountLender0, true, { from: this.lenders[0] });
 
-            const balanceNFTLenderAfter = await this.registry.balanceOfTotalLoanNFT(loanId, this.lenders[0]);
+            const balanceNFTLenderAfter = await this.registry.balanceOfAllLoanNFTGenerations(loanId, this.lenders[0]);
             const balanceLenderAfter = await this.projectToken.balanceOf(this.lenders[0]);
             const balanceEscrowAfter = await this.projectToken.balanceOf(this.escrow.address);
             const loanPayments = await this.registry.projectLoanPayments(loanId);
@@ -139,14 +139,14 @@ export default async function suite() {
 
             const balanceLenderBefore = await this.projectToken.balanceOf(this.lenders[0]);
             const balanceEscrowBefore = await this.projectToken.balanceOf(this.escrow.address);
-            const balanceNFTLenderBefore = await this.registry.balanceOfTotalLoanNFT(loanId, this.lenders[0]);
+            const balanceNFTLenderBefore = await this.registry.balanceOfAllLoanNFTGenerations(loanId, this.lenders[0]);
 
             // Test getter first
             const getterProjectTokenAmount = await this.registry.getAmountOfProjectTokensToReceive(loanId, convertibleAmountLender0, { from: this.lenders[0] });
             // Request to receive project tokens as repayment
             const tx1 = await this.registry.receivePayment(loanId, convertibleAmountLender0, true, { from: this.lenders[0] });
 
-            const balanceNFTLenderAfter = await this.registry.balanceOfTotalLoanNFT(loanId, this.lenders[0]);
+            const balanceNFTLenderAfter = await this.registry.balanceOfAllLoanNFTGenerations(loanId, this.lenders[0]);
             const balanceLenderAfter = await this.projectToken.balanceOf(this.lenders[0]);
             const balanceEscrowAfter = await this.projectToken.balanceOf(this.escrow.address);
             const loanPayments = await this.registry.projectLoanPayments(loanId);

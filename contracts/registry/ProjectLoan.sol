@@ -471,7 +471,7 @@ contract ProjectLoan is LoanDetails {
             .div(100);
     }
 
-    function balanceOfTotalLoanNFT(uint256 loanId, address funder)
+    function balanceOfAllLoanNFTGenerations(uint256 loanId, address funder)
         public
         view
         returns (uint256 balance)
