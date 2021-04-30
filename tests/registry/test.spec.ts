@@ -113,7 +113,7 @@ describe("Registry", function () {
     );
 
     // Transfer tokens.
-    const amountToTransfer = new BN(toWei("1000000")).toString();
+    const amountToTransfer = new BN(toWei("10000000")).toString();
 
     for (let i = 0; i < this.lenders.length; i++) {
       await this.lendingToken.mint(this.lenders[i], amountToTransfer, {
@@ -194,6 +194,6 @@ describe("Registry", function () {
   );
   describe(
     "When checking project loan repayment",
-      checkProjectMilestoneRepayment.bind(this)
+    checkProjectMilestoneRepayment.bind(this)
   );
 });

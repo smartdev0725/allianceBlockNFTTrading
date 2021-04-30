@@ -367,12 +367,8 @@ contract ProjectLoan is LoanDetails {
             .partitionsPaidInProjectTokens
             .add(amountLoanNFT_);
 
-        console.log("here");
-
         // Burn the loan NFT used to claim the project tokens
         _burnLoanNFTAmountOverGenerations(loanId_, amountLoanNFT_);
-
-        console.log("not here");
 
         // Transfer the project tokens to the funder
         escrow.transferCollateralToken(

@@ -23,7 +23,7 @@ export default async function suite() {
 
             const amountCollateralized = new BN(toWei('100000'));
             const discountPerMillion = new BN(400000);
-            const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
+            const paymentTimeInterval = new BN(20 * ONE_DAY);
             const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
 
             const currentTime = await getCurrentTimestamp();
@@ -41,7 +41,7 @@ export default async function suite() {
                 discountPerMillion,
                 totalMilestones,
                 milestoneDurations,
-                timeDiffBetweenDeliveryAndRepayment,
+                paymentTimeInterval,
                 ipfsHash,
                 { from: this.projectOwner }
             );
