@@ -19,7 +19,7 @@ export default async function suite() {
       const interestPercentage = new BN(20);
       const discountPerMillion = new BN(300000);
       const totalMilestones = new BN(3);
-      const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
+      const paymentTimeInterval = new BN(3600);
       const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ";
 
       let milestoneDurations = new Array<BN>(totalMilestones);
@@ -39,7 +39,7 @@ export default async function suite() {
         discountPerMillion,
         totalMilestones,
         milestoneDurations,
-        timeDiffBetweenDeliveryAndRepayment,
+        paymentTimeInterval,
         ipfsHash,
         { from: this.projectOwner }
       );

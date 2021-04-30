@@ -28,7 +28,7 @@ export default async function suite() {
       const discountPerMillion = new BN(300000);
       const totalMilestones = new BN(3);
       const tokenId = totalMilestones.sub(new BN(1)).ishln(128).or(loanId); // Project tokens are minted with the generation at totalMilestons - 1 so they can initially only be used after all milestones were delivered.
-      const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
+      const paymentTimeInterval = new BN(3600);
       const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
 
       let milestoneDurations = new Array<BN>(totalMilestones);
@@ -48,7 +48,7 @@ export default async function suite() {
         discountPerMillion,
         totalMilestones,
         milestoneDurations,
-        timeDiffBetweenDeliveryAndRepayment,
+        paymentTimeInterval,
         ipfsHash,
         { from: this.projectOwner }
       );
@@ -90,7 +90,7 @@ export default async function suite() {
       expect(loanPayments.totalMilestones).to.be.bignumber.equal(totalMilestones);
       expect(loanPayments.milestonesDelivered).to.be.bignumber.equal(new BN(0));
       expect(loanPayments.milestonesExtended).to.be.bignumber.equal(new BN(0));
-      expect(loanPayments.timeDiffBetweenDeliveryAndRepayment).to.be.bignumber.equal(timeDiffBetweenDeliveryAndRepayment);
+      expect(loanPayments.paymentTimeInterval).to.be.bignumber.equal(paymentTimeInterval);
       expect(loanPayments.currentMilestoneStartingTimestamp).to.be.bignumber.equal(new BN(0));
       expect(loanPayments.currentMilestoneDeadlineTimestamp).to.be.bignumber.equal(new BN(0));
       //expect(loanPayments.amountToBeRepaid).to.be.bignumber.equal(totalAmountRequested.add(totalInterest));

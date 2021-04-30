@@ -56,6 +56,12 @@ contract LoanDetails is Storage {
             loanStatus[loanId] == LoanLibrary.LoanStatus.AWAITING_REPAYMENT,
             "Only on Repayment Status"
         );
+        require(
+            projectLoanPayments[loanId].awaitingForRepaymentDate.add(
+                projectLoanPayments[loanId].paymentTimeInterval
+            ) > block.timestamp,
+            "Only between awaiting for repayment timeframe"
+        );
         _;
     }
 

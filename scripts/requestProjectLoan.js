@@ -41,7 +41,7 @@ async function main() {
   const amountCollateralized = new BN(toWei("100000"));
   const interestPercentage = new BN(20);
   const discountPerMillion = new BN(300000);
-  const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
+  const paymentTimeInterval = new BN(3600);
   const ipfsHash = process.env.LOAN_REQUEST_IPFS_HASH;
   let milestoneDurations = [];
   let amountRequestedPerMilestone = [];
@@ -65,7 +65,7 @@ async function main() {
     discountPerMillion,
     totalMilestones,
     milestoneDurations,
-    timeDiffBetweenDeliveryAndRepayment,
+    paymentTimeInterval,
     ipfsHash,
     { from: borrower }
   );
