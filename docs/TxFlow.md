@@ -24,7 +24,6 @@ bool decision: True to approve the request.
 
 Delegators can now vote to approve the loan request. When enough unique delegators have given their approval before the approval duration is expired, the status of the loan will be changed to APPROVED and the loan NFT token transfers will be unpaused so they can be transferred to lenders during the loan funding.
 
-TODO: Review if the bool decision parameter is necessary if nothing is done in case of sending false. As-is this transaction is only used to approve a request.
 
 
 Governance:challengeRequest
@@ -38,7 +37,7 @@ uint256 partitionsToPurchase: The number of partitions of the loan to purchase.
 
 When a loan is approved and as long as there are partitions available to purchase it can be funded by lenders. The loan will go to the status FUNDING from the first successful fundLoan transaction that is made. In this transaction lending tokens will be sent from the lender to the escrow and in exchange the lender will get as much loan NFT’s as the partitions he purchased. If the last partition is purchased, the loan will automatically go to status STARTED, the first repayment period will be set and the lending tokens are transferred to the borrower.
 
-TODO: There should be an option for the borrower to cancel a loan request before it gets fully funded, so he gets back its collateral and the lenders get back their lending token.
+
 
 Registry:executePayment
 uint256 loanId: The id of the loan to repay.
@@ -46,7 +45,7 @@ uint256 loanId: The id of the loan to repay.
 A borrower should repay the loan back in batches in specified time intervals. He can do so by sending this transaction. The amount of lending token that should be paid back in the current batch will be sent from the borrower into the escrow.
 If all batches are paid, the loan will be SETTLED.
 
-TODO: I think the ‘batches skipped’ should be reset after a payment got made, so the borrower can get a time extension again for one of the following batches instead of the loan going to default directly. Or does a borrower may only skip one single batch during the whole loan time?
+
 
 
 Registry:receivePayment
@@ -56,14 +55,12 @@ bool onProjectTokens: Only used in projectLoans.
 
 The lenders holding loan NFT’s can claim their part of the repayments made by the borrower. By validating the generation of the loan NFT’s, the contract checks that the lender didn't receive its payment for this batch yet. If that is checked, the specified loan NFT’s will be burned and the same amount of new tokens of a next generation will be minted, which makes the holder eligible again to receive part of the next payment. The payment itself is received by the lender from the escrow in lending tokens with the amount depending on the number of loan NFT’s the lender used.
 
-TODO: Verify why the function _receivePersonalLoanPayment has the modifier onlySettledLoan while the receivePayment description says payments can be received from the moment a loan has received a repayment and not necessarily has to be settled completely.
 
 Registry:challengeLoan
 uint256 loanId: The id of the loan to challenge.
 
 After the deadline of a repayment is reached, anyone could challenge the loan. If it is the first time a deadline has passed, the time is extended. If the extended time is passed again without repayment, the loan can be challenged again resulting in the loan going to the DEFAULT state.
 
-TODO: Take actions when a loan goes to DEFAULT.
 
 ## Project loan
 Registry:requestProjectLoan
@@ -90,7 +87,6 @@ bool decision: True to approve the request.
 
 Delegators can now vote to approve the loan request. When enough unique delegators have given their approval before the approval duration is expired, the status of the loan will be changed to APPROVED and the loan NFT token transfers will be unpaused so they can be transferred to lenders during the loan funding.
 
-TODO: Now the delegators are a fixed set, make them dynamic with the DAO and staking for governance.
 
 Governance:challengeRequest
 uint256 requestId: The id of the request to challenge.
@@ -103,7 +99,6 @@ uint256 partitionsToPurchase: The number of partitions of the loan to purchase.
 
 When a loan is approved and as long as there are partitions available to purchase it can be funded by lenders. The loan will go to the status FUNDING from the first successful fundLoan transaction that is made. In this transaction lending tokens will be sent from the lender to the escrow and in exchange the lender will get as much loan NFT’s as the partitions he purchased. If the last partition is purchased, the loan will automatically go to status STARTED, the first milestone period will be set and the lending tokens for the first milestone are transferred from the escrow to the borrower.
 
-TODO: There should be an option for the borrower to cancel a loan request before it gets fully funded, so he gets back its collateral and the lenders get back their lending token.
 
 Registry:applyMilestone
 uint256 loanId: The id of the loan.
@@ -118,16 +113,13 @@ bool decision: True to approve the request.
 Delegators can now vote to approve the milestone approval request. When enough unique delegators have given their approval before the approval duration is expired, the status of the loan will be changed to AWAITING_MILESTONE_APPLICATION again and the lending tokens for the next milestone are liberated from the escrow to the borrower.
 If all milestones are completed the loan will be set to AWAITING_REPAYMENT and should be paid back by the borrower.
 
-TODO: Now the delegators are a fixed set, make them dynamic with the DAO and staking for governance.
+
 
 Governance:challengeRequest
 uint256 requestId: The id of the request to challenge.
 
 After the deadline of a milestone approval is reached, anyone could challenge the approval request. If it is the first time a deadline has passed, the time is extended. If the extended time is passed again without an approval of the milestone, the request can be challenged again resulting in the loan going to the DEFAULT state.
 
-TODO: Take actions when a project loan goes to DEFAULT.
-
-TODO: I think the ‘milestonesExtended’ should be reset after a milestone gets approved, so the borrower can get a time extension again for one of the following milestones instead of the loan going to default directly. Or does a borrower may only get one milestone duration extension during the whole loan time?
 
 Registry:executePayment
 uint256 loanId: The id of the loan to repay.
@@ -139,7 +131,6 @@ uint256 loanId: The id of the loan to challenge.
 
 If a borrower did not repay the loan after the deadline of repayment is reached, anyone could challenge the loan. If it is the first time a deadline has passed, the time is extended. If the extended time is passed again without repayment, the loan can be challenged again resulting in the loan going to the DEFAULT state.
 
-TODO: Take actions when a loan goes to DEFAULT.
 
 Registry:receivePayment
 uint256 tokenId: The token id of the ERC1155 tokens, which is eligible for the payment.
@@ -147,4 +138,3 @@ uint256 amountOfTokens: The amount of tokens to receive payment for.
 bool onProjectTokens: Repayment in project tokens or lending token.
 
 When a project loan is settled, the lenders holding loan NFT’s can claim their part of the repayment made by the borrower. Their loan NFT’s will be burned and they will get the corresponding amount of lending tokens back from the escrow.
-TODO: Pay the lenders back in the project’s own tokens.
