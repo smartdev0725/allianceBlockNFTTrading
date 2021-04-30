@@ -12,7 +12,7 @@
 8. NFT Investment Token will keep only funding economic data, other information on the project required for DAO to vote and to trigger funding events will be stored in IPFS.  
 
 ## Life cycle of a Funding NFT
-![NFT-flowchart](img/fundingNFT.png)
+![NFT-flowchart](img/nftLifeCycle.png)
 
 1. Investors are informed on the token sale details containing information on how much ALBT token is required per one Investment Unit.
 2. Investment is calculated into Investment Units in order to have further flexibility in trading parts of the investments. 

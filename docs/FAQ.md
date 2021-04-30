@@ -1,49 +1,52 @@
 
 # FAQs
 
-How convertible notes works 
+## How convertible notes works?
 Convertible notes are originally structured as debt investments but have a provision that allows the principal plus accrued interest to convert into an equity investment at a later date. 
 * Are essentially a hybrid of debt and equity 
 * Are debt instruments that include terms like a maturity date, an interest rate
 * Will convert into equity if a future equity round is raised
 Convertible Note Economics
 
-Discount Rate
+## Discount Rate
 Convertible notes are set up to convert to preferred stock at the next equity round at a "discount". This rewards early stage investors for taking more risk than the later investors. A typical conversion discount is 20%.
 
-Valuation Cap
+## Valuation Cap
 Maximum valuation allowed for the startup for the purpose of conversion to preferred stock, regardless of what the valuation of the startup is at the time of the next priced equity round. This protects the early investors by making sure they retain a reasonable percentage of ownership even if the startup becomes much more valuable later on.
 
-Interest rate
+## Interest rate
 The interest is not paid out but accrued until the first priced round, at which point the interest is converted to shares the same like the principal for the loan.
 
-Maturity date
+## Maturity date
 This denotes the date on which the note is due, at which time the company needs to repay it.
 
-Amount
+## Amount
 Denotes how much money will be lended.
 
-Closing date
+## Closing date
 Date on which the money will be provided to the startup/entrepreneur.
 
-Conversion
+## Conversion
 Describes when and how the loan amount converts into ownership (shares)
 
-Automatic: When in the future, when there is an “equity round” where investors prevalue the startup, which determines the value of the share. Investors are buying stock in the company to make an investment
+* Automatic: When in the future, when there is an “equity round” where investors prevalue the startup, which determines the value of the share. Investors are buying stock in the company to make an investment
 
-Optional:  Occurs when the loan has reached the maturity and there was no equity investment 
+* Optional:  Occurs when the loan has reached the maturity and there was no equity investment 
 
 
-What Happens If the Maturity Date is reached prior to raising money in equity round?
+## What Happens If the Maturity Date is reached prior to raising money in equity round?
 
-Investor can call a loan : Investor can demand loan repayment, however since the startup was not able to raise equity, investor would not receive cash back, or will receive only worthless fraction of the investment. 
+## Investor can call a loan
+Investor can demand loan repayment, however since the startup was not able to raise equity, investor would not receive cash back, or will receive only worthless fraction of the investment. 
 
-Extend the maturity date: Investors can agree to extend the maturity date and continue on accruing interest. This gives a startup time for growth and possibility to receive financing.
+## Extend the maturity date
+Investors can agree to extend the maturity date and continue on accruing interest. This gives a startup time for growth and possibility to receive financing.
 
-Enter into the repayment schedule: Startup will repay the notes in tranches over an agreed period of time. By paying the loan in tranches, the company can repay the loan without going out of business. 
+## Enter into the repayment schedule
+Startup will repay the notes in tranches over an agreed period of time. By paying the loan in tranches, the company can repay the loan without going out of business. 
 What mechanism should be introduced in case of product not delivering - solution proposal
 
-AllianceBlock decentralized app can provide funding for projects that:
+## AllianceBlock decentralized app can provide funding for projects that:
 1. Will conduct Token Generation Event along with funding process via AllianceBlock
 2. Project already has a Token and is seeking to find liquidity. Project is willing to sell a certain part of tokens at a discount in order to receive financing for project growth.
 
