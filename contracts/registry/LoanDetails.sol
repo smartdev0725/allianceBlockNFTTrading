@@ -4,6 +4,7 @@ pragma solidity 0.7.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Storage.sol";
+import "../libs/TokenFormat.sol";
 
 /**
  * @title AllianceBlock LoanDetails contract
@@ -11,6 +12,7 @@ import "./Storage.sol";
  */
 contract LoanDetails is Storage {
     using SafeMath for uint256;
+    using TokenFormat for uint256;
 
     modifier onlyGovernance() {
         require(msg.sender == address(governance), "Only Governance");
@@ -138,10 +140,17 @@ contract LoanDetails is Storage {
     }
 
     modifier onlyEnoughERC1155Balance(uint256 loanId, uint256 amountOfTokens) {
-        require(
-            loanNFT.balanceOf(msg.sender, loanId) >= amountOfTokens,
-            "Only when enough balance"
-        );
+        uint256 balance;
+        for (
+            uint256 i = 0;
+            i < projectLoanPayments[loanId].totalMilestones;
+            i++
+        ) {
+            balance = balance.add(
+                loanNFT.balanceOf(msg.sender, i.getTokenId(loanId))
+            );
+        }
+        require(balance >= amountOfTokens, "Only when enough balance");
         _;
     }
 
