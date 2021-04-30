@@ -21,7 +21,8 @@ contract DaoCronjob is GovernanceTypesAndStorage {
     }
 
     function checkCronjobs() public returns (bool) {
-        if (block.timestamp < cronjobList.getHeadValue()) return false;
+        uint256 mostRecentCronjobTimestamp = cronjobList.getHeadValue();
+        if (mostRecentCronjobTimestamp == 0 || block.timestamp < mostRecentCronjobTimestamp) return false;
         else { // only pop head for now for gas reasons, maybe later we can execute them all together.
             (uint256 head, uint256 timestamp) = cronjobList.popHeadAndValue();
             executeCronjob(head, timestamp);
