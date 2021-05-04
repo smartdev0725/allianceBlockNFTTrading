@@ -17,7 +17,7 @@ library LoanLibrary {
         APPROVED, // Status when loan has been approved from governors.
         FUNDING, // Status when loan has started getting funded, but not fully funded yet.
         STARTED, // Status when loan has been fully funded.
-        AWAITING_MILESTONE_APPROVAL, // Status when loan is waiting for DAO to approve a finished milestone.        
+        AWAITING_MILESTONE_APPROVAL, // Status when loan is waiting for DAO to approve a finished milestone.
         AWAITING_REPAYMENT, // Status when milestones have all been delivered and waiting for repayment from the project.
         SETTLED, // Status when loan has been fully repaid by the borrower.
         DEFAULT, // Status when borrower has not been able to repay the loan.
@@ -37,6 +37,7 @@ library LoanLibrary {
         uint256 lendingAmount; // The amount of tokens that was lended to the borrower.
         uint256 totalPartitions; // The total partitions or ERC1155 tokens, in which loan is splitted.
         uint256 totalInterest; // The amount of interest to be paid.
+        uint256 interestPercentage; // The interest percentage to pay back over the amount in lending tokens.
         string extraInfo; // The ipfs hash, where all extra info about the loan are stored.
         uint256 partitionsPurchased; // The total partitions or ERC1155 tokens that have already been purchased.
     }
@@ -62,7 +63,8 @@ library LoanLibrary {
         uint256 milestonesExtended; // The times that project has taken an extension for milestone delivery.
         uint256 currentMilestoneStartingTimestamp; // Timestamp that milestone/repayment started.
         uint256 currentMilestoneDeadlineTimestamp; // Timestamp that milestone/repayment should be delivered.
-        uint256 amountToBeRepaid; // The total amount of lending tokens to be repaid.
         uint256 discountPerMillion; // The discount / 1M if lenders decide to get paid by the project tokens.
+        mapping(uint256 => uint256) milestoneProjectTokenPrice; // The price the project tokens can be claimed for after delivery of the milestone.
+        uint256 partitionsPaidInProjectTokens; // The number of partitions lenders used to claim project tokens.
     }
 }

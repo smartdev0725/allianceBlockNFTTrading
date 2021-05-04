@@ -19,13 +19,15 @@ export default async function suite() {
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
       initBorrowerCollateralBalance = new BN(await this.projectToken.balanceOf(this.projectOwner));
       initEscrowCollateralBalance = new BN(await this.projectToken.balanceOf(this.escrow.address));
-      initEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
+      initEscrowLoanNftBalance = new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
     });
 
     it('when requesting an project loan', async function () {
       const amountCollateralized = new BN(toWei('100000'));
       const interestPercentage = new BN(20);
+      const discountPerMillion = new BN(300000);
       const totalMilestones = new BN(3);
+      const tokenId = totalMilestones.sub(new BN(1)).ishln(128).or(loanId); // Project tokens are minted with the generation at totalMilestons - 1 so they can initially only be used after all milestones were delivered.
       const paymentTimeInterval = new BN(3600);
       const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
 
@@ -34,8 +36,8 @@ export default async function suite() {
       const currentTime = await getCurrentTimestamp();
 
       for (let i = 0; i < Number(totalMilestones); i++) {
-        milestoneDurations[i] = currentTime.add(new BN((i+1) * ONE_DAY))
-        amountRequestedPerMilestone[i] = new BN(toWei('10000'));  
+        milestoneDurations[i] = currentTime.add(new BN((i + 1) * ONE_DAY))
+        amountRequestedPerMilestone[i] = new BN(toWei('10000'));
       }
 
       const tx = await this.registry.requestProjectLoan(
@@ -43,6 +45,7 @@ export default async function suite() {
         this.projectToken.address,
         amountCollateralized.toString(),
         interestPercentage,
+        discountPerMillion,
         totalMilestones,
         milestoneDurations,
         paymentTimeInterval,
@@ -56,7 +59,7 @@ export default async function suite() {
 
       const newBorrowerCollateralBalance = new BN(await this.projectToken.balanceOf(this.projectOwner));
       const newEscrowCollateralBalance = new BN(await this.projectToken.balanceOf(this.escrow.address));
-      const newEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
+      const newEscrowLoanNftBalance = new BN(await this.loanNft.balanceOf(this.escrow.address, tokenId));
 
       const isPaused = await this.loanNft.transfersPaused(loanId);
 
@@ -69,7 +72,7 @@ export default async function suite() {
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.REQUESTED);
 
       // Correct Event.
-      expectEvent(tx.receipt, 'ProjectLoanRequested', { loanId , user: this.projectOwner, amount: totalAmountRequested.toString() });
+      expectEvent(tx.receipt, 'ProjectLoanRequested', { loanId, user: this.projectOwner, amount: totalAmountRequested.toString() });
 
       // Correct Details.
       expect(loanDetails.loanId).to.be.bignumber.equal(loanId);
@@ -90,10 +93,11 @@ export default async function suite() {
       expect(loanPayments.paymentTimeInterval).to.be.bignumber.equal(paymentTimeInterval);
       expect(loanPayments.currentMilestoneStartingTimestamp).to.be.bignumber.equal(new BN(0));
       expect(loanPayments.currentMilestoneDeadlineTimestamp).to.be.bignumber.equal(new BN(0));
-      expect(loanPayments.amountToBeRepaid).to.be.bignumber.equal(totalAmountRequested.add(totalInterest));
-      expect(loanPayments.discountPerMillion).to.be.bignumber.equal(new BN(0));
+      //expect(loanPayments.amountToBeRepaid).to.be.bignumber.equal(totalAmountRequested.add(totalInterest));
+      expect(await this.registry.getAmountToBeRepaid(loanId)).to.be.bignumber.equal(totalAmountRequested.add(totalInterest));
+      expect(loanPayments.discountPerMillion).to.be.bignumber.equal(new BN(300000));
       for (const i in milestoneDurations) {
-        const {amount, timestamp} = await this.registry.getMilestonesInfo(loanId, i);
+        const { amount, timestamp } = await this.registry.getMilestonesInfo(loanId, i);
         expect(amount).to.be.bignumber.equal(amountRequestedPerMilestone[i]);
         expect(timestamp).to.be.bignumber.equal(milestoneDurations[i]);
       }

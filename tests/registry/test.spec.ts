@@ -8,11 +8,12 @@ import checkProjectFundLoanOffLimit from "./project/checkFundLoanOffLimit";
 import checkProjectMilestoneRepayment from "./project/checkProjectMilestoneRepayment";
 
 // Project
-import checkProjectLoanRequests from "./project/checkProjectLoanRequests";
-import checkProjectLoanApproval from "./project/checkLoanApproval";
-import checkProjectFundLoan from "./project/checkLoanApproval";
-import checkProjectMilestoneApplication from "./project/checkProjectMilestoneApplication";
-import checkProjectMilestoneApproval from "./project/checkProjectMilestoneApproval";
+import checkProjectLoanRequests from './project/checkProjectLoanRequests';
+import checkProjectLoanApproval from './project/checkLoanApproval';
+import checkProjectFundLoan from './project/checkLoanApproval';
+import checkProjectMilestoneApplication from './project/checkProjectMilestoneApplication';
+import checkProjectMilestoneApproval from './project/checkProjectMilestoneApproval';
+import checkProjectTokenRepayment from './project/checkProjectTokenRepayment';
 
 import {
   DAO_LOAN_APPROVAL,
@@ -41,8 +42,8 @@ const ALBT = artifacts.require("ALBT");
 const LoanNFT = artifacts.require("LoanNFT");
 const MainNFT = artifacts.require("MainNFT");
 
-describe("Registry", function() {
-  before(async function() {
+describe("Registry", function () {
+  before(async function () {
     const accounts = await web3.eth.getAccounts();
 
     this.owner = accounts[0];
@@ -112,7 +113,7 @@ describe("Registry", function() {
     );
 
     // Transfer tokens.
-    const amountToTransfer = new BN(toWei("1000000")).toString();
+    const amountToTransfer = new BN(toWei("10000000")).toString();
 
     for (let i = 0; i < this.lenders.length; i++) {
       await this.lendingToken.mint(this.lenders[i], amountToTransfer, {
@@ -180,6 +181,10 @@ describe("Registry", function() {
     checkProjectMilestoneApproval.bind(this)
   );
   describe(
+    "When checking project repayment in project tokens",
+    checkProjectTokenRepayment.bind(this)
+  );
+  describe(
     "When checking personal loan funding off limit",
     checkPersonalFundLoanOffLimit.bind(this)
   );
@@ -189,6 +194,6 @@ describe("Registry", function() {
   );
   describe(
     "When checking project loan repayment",
-      checkProjectMilestoneRepayment.bind(this)
+    checkProjectMilestoneRepayment.bind(this)
   );
 });

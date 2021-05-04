@@ -1,7 +1,7 @@
 import BN from 'bn.js';
 import { toWei } from 'web3-utils';
 import { expect } from 'chai';
-import {  LoanStatus } from '../../helpers/registryEnums';
+import { LoanStatus } from '../../helpers/registryEnums';
 import { ONE_DAY, BASE_AMOUNT, DAO_MILESTONE_APPROVAL } from "../../helpers/constants";
 import { getCurrentTimestamp } from "../../helpers/time";
 const { expectEvent } = require("@openzeppelin/test-helpers");
@@ -17,6 +17,7 @@ export default async function suite() {
 
       const amountCollateralized = new BN(toWei('100000'));
       const interestPercentage = new BN(20);
+      const discountPerMillion = new BN(400000);
       const totalMilestones = new BN(3);
       const paymentTimeInterval = new BN(3600);
       const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
@@ -26,8 +27,8 @@ export default async function suite() {
       const currentTime = await getCurrentTimestamp();
 
       for (let i = 0; i < Number(totalMilestones); i++) {
-        milestoneDurations[i] = currentTime.add(new BN((i+1) * ONE_DAY))
-        amountRequestedPerMilestone[i] = new BN(toWei('10000'));  
+        milestoneDurations[i] = currentTime.add(new BN((i + 1) * ONE_DAY))
+        amountRequestedPerMilestone[i] = new BN(toWei('10000'));
       }
 
       await this.registry.requestProjectLoan(
@@ -35,6 +36,7 @@ export default async function suite() {
         this.projectToken.address,
         amountCollateralized.toString(),
         interestPercentage,
+        discountPerMillion,
         totalMilestones,
         milestoneDurations,
         paymentTimeInterval,
@@ -55,26 +57,26 @@ export default async function suite() {
     it("when applying a milestone to a project loan", async function () {
 
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
-      
+
       // Correct Initial Status.
       let loanStatus = await this.registry.loanStatus(loanId);
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.STARTED);
-      
+
       // Milestone Application By Project Owner
       const tx = await this.registry.applyMilestone(loanId, { from: this.projectOwner });
-      
+
       const currentTime = await getCurrentTimestamp();
 
       const loanPayments = await this.registry.projectLoanPayments(loanId);
       const daoApprovalRequest = await this.governance.approvalRequests(approvalRequest);
       const isPaused = await this.loanNft.transfersPaused(loanId);
       loanStatus = await this.registry.loanStatus(loanId);
-      
+
       // Correct Status
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.AWAITING_MILESTONE_APPROVAL);
 
       // Correct Event.
-      expectEvent(tx.receipt, 'ProjectLoanMilestoneApprovalRequested', { loanId , milestoneNumber: new BN(0).toString() });
+      expectEvent(tx.receipt, 'ProjectLoanMilestoneApprovalRequested', { loanId, milestoneNumber: new BN(0).toString() });
 
       // Correct Dao Request.
       expect(daoApprovalRequest.isMilestone).to.be.true;

@@ -12,13 +12,14 @@ export default async function suite() {
     let loanId: BN;
     let approvalRequest: BN;
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       // Given
       loanId = new BN(await this.registry.totalLoans());
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
 
       const amountCollateralized = new BN(toWei("100000"));
       const interestPercentage = new BN(20);
+      const discountPerMillion = new BN(400000);
       const totalMilestones = new BN(1);
       const paymentTimeInterval = new BN(20 * ONE_DAY);
       const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ";
@@ -37,6 +38,7 @@ export default async function suite() {
         this.projectToken.address,
         amountCollateralized.toString(),
         interestPercentage,
+        discountPerMillion,
         totalMilestones,
         milestoneDurations,
         paymentTimeInterval,
@@ -77,12 +79,12 @@ export default async function suite() {
       });
     });
 
-    it("when repaying a project loan", async function() {
+    it("when repaying a project loan", async function () {
       const loanPayments = await this.registry.projectLoanPayments(loanId);
 
       await this.lendingToken.approve(
         this.registry.address,
-        loanPayments.amountToBeRepaid,
+        await this.registry.getAmountToBeRepaid(loanId),
         {
           from: this.projectOwner
         }
@@ -94,7 +96,7 @@ export default async function suite() {
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.SETTLED);
     });
 
-    it("should revert in case it does not have allowancee", async function() {
+    it("should revert in case it does not have allowancee", async function () {
       // When && Then
       await expectRevert(
         this.registry.executePayment(loanId, { from: this.projectOwner }),
@@ -102,7 +104,7 @@ export default async function suite() {
       );
     });
 
-    it("should revert when repaying a project loan out of time", async function() {
+    it("should revert when repaying a project loan out of time", async function () {
       // When
       const loanPayments = await this.registry.projectLoanPayments(loanId);
 
@@ -111,7 +113,7 @@ export default async function suite() {
 
       await this.lendingToken.approve(
         this.registry.address,
-        loanPayments.amountToBeRepaid,
+        await this.registry.getAmountToBeRepaid(loanId),
         {
           from: this.projectOwner
         }
