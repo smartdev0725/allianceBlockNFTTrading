@@ -124,6 +124,9 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
 
     /**
      * @dev Mint tokens of a specific generation directly
+     * @param to The address to mint the tokens to.
+     * @param amount The amount of tokens to mint.
+     * @param generation The generation of the tokens. The id of the tokens will be composed of the loan id and this generation number.
      */
     function mintOfGen(
         address to,
