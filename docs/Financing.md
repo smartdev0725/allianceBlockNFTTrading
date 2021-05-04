@@ -18,7 +18,7 @@ A project that needs funding will seek for investors. We call this project a [Se
     * Tier 0 receives 1% of the tickets: users who have declared intent but have no ALBT staked.
     * Tier 1 receives 5% of the tickets: users who have declared intent but have 5k ALBT staked
     * Tier 2 receives 10% of the tickets: users who have declared intent but have 50k ALBT staked
-    * Tier 3 receives 5% of the tickets: users who have declared intent but have 200k ALBT staked.
+    * Tier 3 receives the rest of the tickets: users who have declared intent but have 200k ALBT staked.
 
 **Note: within each tier there is a *first-come first-served* distribution of the tickets.**
 
