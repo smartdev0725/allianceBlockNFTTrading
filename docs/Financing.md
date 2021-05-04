@@ -1,6 +1,6 @@
 # How projects get financed
 
-## Project investment
+## Project investment stages
 
 A project that needs funding will seek for investors. We call this project a [Seeker](Glossary.md). The **Seeker** will have to go through several stages in order to receive funding.
 

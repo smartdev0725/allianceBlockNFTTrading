@@ -33,6 +33,31 @@ EXPLANATION HERE
 ## Storage
 [**Storage Subsystem**](Storage.md) or **Storage** is responsible for holding all the information. It stores the variables for every investment, loan and project as well as the active roles for the [Governance](DAO.md).
 
+## Discount Rate
+Convertible notes are set up to convert to preferred stock at the next equity round at a "discount". This rewards early stage investors for taking more risk than the later investors. A typical conversion discount is 20%.
+
+## Valuation Cap
+Maximum valuation allowed for the startup for the purpose of conversion to preferred stock, regardless of what the valuation of the startup is at the time of the next priced equity round. This protects the early investors by making sure they retain a reasonable percentage of ownership even if the startup becomes much more valuable later on.
+
+## Interest rate
+The interest is not paid out but accrued until the first priced round, at which point the interest is converted to shares the same like the principal for the loan.
+
+## Maturity date
+This denotes the date on which the note is due, at which time the company needs to repay it.
+
+## Amount
+Denotes how much money will be lended.
+
+## Closing date
+Date on which the money will be provided to the startup/entrepreneur.
+
+## Conversion
+Describes when and how the loan amount converts into ownership (shares)
+
+* Automatic: When in the future, when there is an “equity round” where investors prevalue the startup, which determines the value of the share. Investors are buying stock in the company to make an investment
+
+* Optional:  Occurs when the loan has reached the maturity and there was no equity investment 
+
 
 ## Network participants:
 | DAO Actors     | How to become                                                                              | Function                                                                                                                                                                                                             | Incentives                                                                                                                             |   |

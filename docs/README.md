@@ -1,22 +1,28 @@
 # P2PLINFT
-The Protocol aims to provide a decentralized infrastructure allowing  blockchain-based projects to receive funding from the platform users as well as p2p lenders integrated with AllianceBlock. Users providing funding ([Funders](Glossary.md)) for a project receive NTFs that represent investments which can be exchanged for the tokens at discount or can be repaid with accrued interest at pre-agreed conditions.
 
+## In a nutshell
+The Protocol aims to provide a decentralized infrastructure allowing blockchain-based projects to receive funding from the platform users as well as other p2p lenders integrated with [AllianceBlock](https://allianceblock.io). Users providing funding (a.k.a. [Funders](Glossary.md)) for a project receive [Funding NTFs](Glossary.md) that represent investments which can be exchanged for the [Project tokens](Glossary.md) at discount, or can be repaid with accrued interest at pre-agreed conditions.
 
-Read more about the [Project Financing](Financing.md) process.
-
-
-
-
+* Read more about the stages for [Project Financing](Financing.md).
 
 
 
+## The Protocol
 
-----
+![Protocol Graph](img/protocol.png)
+
+The protocol is comprised of several parts.
+* The [Registry subsystem](Registry.md), handles most of the user's interactions at the core of the protocol.
+* The [Governance subsystem](DAO.md), handling all **Governance** interactions, voting process and updates to the protocol.
+* The [Escrow subsystem](Escrow.md), that acts as an independant intermediary, holding the funds and supporting the financial aspect of the protocol.
+* The [Storage subsystem](Storage.md), holds the hard data for every loan, project or investment.
+
+## How it works 
 
 First the different token contracts and interfaces that are implemented and/or used are described to understand the tokenomics. Tokens are used as collateral, to give out and pay back loans, to represent ownership of a lender and to stake to take part in the protocol’s governance.
 Then the contracts that orchestrate the interactions between these different tokens and between different actors will be presented as well to understand the complete flow and know all available (external) transactions.
 
-![Protocol Graph](img/protocol.png)
+
 
 The code of the smart contracts that is currently developed for the p2p, decentralized lending platform permits borrowers to request a personal loan or a loan for a project.
 Both will follow these steps:
