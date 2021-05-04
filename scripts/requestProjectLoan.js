@@ -39,6 +39,7 @@ async function main() {
   const totalMilestones = new BN(process.env.LOAN_REQUEST_TOTAL_MILESTONES);
   const currentTime = await getCurrentTimestamp();
   const amountCollateralized = new BN(toWei("100000"));
+  const projectTokenPrice = new BN("1");
   const interestPercentage = new BN(20);
   const discountPerMillion = new BN(300000);
   const paymentTimeInterval = new BN(3600);
@@ -61,6 +62,7 @@ async function main() {
     amountRequestedPerMilestone,
     collateral.address,
     amountCollateralized.toString(),
+    projectTokenPrice,
     interestPercentage,
     discountPerMillion,
     totalMilestones,
