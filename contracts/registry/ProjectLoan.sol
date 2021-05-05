@@ -37,7 +37,7 @@ contract ProjectLoan is LoanDetails {
      * @param amountRequestedPerMilestone The lending amounts project is looking to get for each milestone.
      * @param collateralToken The token that will be used by the proect as collateral.
      * @param collateralAmount The amount of tokens that will be used by the project as collateral.
-     * @param collateralTokenPrice The price the project wants to sell its token for.
+     * @param projectTokenPrice The price the project wants to sell its token for.
      * @param interestPercentage The interest percentage that will be obtained after whole repayment.
      * @param discountPerMillion The discount given on the token price when funders claim repayment in project tokens.
      * @param totalMilestones The total amount of Milestones project is requesting funds for.
@@ -50,7 +50,7 @@ contract ProjectLoan is LoanDetails {
         uint256[] calldata amountRequestedPerMilestone,
         address collateralToken,
         uint256 collateralAmount,
-        uint256 collateralTokenPrice,
+        uint256 projectTokenPrice,
         uint256 interestPercentage,
         uint256 discountPerMillion,
         uint256 totalMilestones,
@@ -82,7 +82,7 @@ contract ProjectLoan is LoanDetails {
 
         _storeProjectLoanPayments(
             discountPerMillion,
-            collateralTokenPrice,
+            projectTokenPrice,
             totalMilestones,
             paymentTimeInterval
         );
@@ -204,7 +204,7 @@ contract ProjectLoan is LoanDetails {
 
     function _storeProjectLoanPayments(
         uint256 discountPerMillion_,
-        uint256 collateralTokenPrice_,
+        uint256 projectTokenPrice_,
         uint256 totalMilestones_,
         uint256 paymentTimeInterval_
     ) internal {
@@ -212,7 +212,7 @@ contract ProjectLoan is LoanDetails {
             .discountPerMillion = discountPerMillion_;
         projectLoanPayments[totalLoans].milestoneProjectTokenPrice[
             0
-        ] = collateralTokenPrice_;
+        ] = projectTokenPrice_;
         projectLoanPayments[totalLoans].totalMilestones = totalMilestones_;
         projectLoanPayments[totalLoans]
             .paymentTimeInterval = paymentTimeInterval_;
