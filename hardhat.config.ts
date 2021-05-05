@@ -29,6 +29,9 @@ const config: HardhatUserConfig = {
       url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
       accounts: [process.env.MAINNET_PRIVKEY],
     },
+    fork: {
+      url: process.env.FORK_URL,
+    },
   },
   paths: {
     artifacts: "./artifacts",

@@ -1,17 +1,13 @@
-// Personal
-import checkPersonalLoanRequests from "./personal/checkPersonalLoanRequests";
-import checkLoanApproval from "./personal/checkLoanApproval";
-import checkFundLoan from "./personal/checkFundLoan";
-import checkLoanRepayment from "./personal/checkLoanRepayment";
-import checkPersonalFundLoanOffLimit from "./personal/checkFundLoanOffLimit";
-import checkProjectFundLoanOffLimit from "./project/checkFundLoanOffLimit";
-
 // Project
-import checkProjectLoanRequests from "./project/checkProjectLoanRequests";
-import checkProjectLoanApproval from "./project/checkLoanApproval";
-import checkProjectFundLoan from "./project/checkLoanApproval";
-import checkProjectMilestoneApplication from "./project/checkProjectMilestoneApplication";
-import checkProjectMilestoneApproval from "./project/checkProjectMilestoneApproval";
+import checkProjectFundLoanOffLimit from "./project/checkFundLoanOffLimit";
+import checkProjectMilestoneRepayment from "./project/checkProjectMilestoneRepayment";
+import checkProjectLoanRequests from './project/checkProjectLoanRequests';
+import checkProjectLoanApproval from './project/checkLoanApproval';
+import checkProjectFundLoan from './project/checkLoanApproval';
+import checkProjectMilestoneApplication from './project/checkProjectMilestoneApplication';
+import checkProjectMilestoneApproval from './project/checkProjectMilestoneApproval';
+import checkProjectTokenRepayment from './project/checkProjectTokenRepayment';
+import checkProjectInvestment from './project/checkProjectInvestment';
 
 import {
   DAO_LOAN_APPROVAL,
@@ -44,8 +40,8 @@ const ALBT = artifacts.require("ALBT");
 const LoanNFT = artifacts.require("LoanNFT");
 const MainNFT = artifacts.require("MainNFT");
 
-describe("Registry Project Loans", function() {
-  before(async function() {
+describe("Registry Project Loans", function () {
+  before(async function () {
     const accounts = await web3.eth.getAccounts();
 
     this.owner = accounts[0];
@@ -106,9 +102,6 @@ describe("Registry Project Loans", function() {
     );
     await this.escrow.initialize(this.registry.address);
 
-    // Open dao delegating
-    this.governance.openDaoDelegating(2, ONE_DAY, ONE_DAY, ONE_DAY, ONE_DAY);
-
     // Add roles.
     await this.loanNft.grantRole(
       web3.utils.keccak256("MINTER_ROLE"),
@@ -122,7 +115,7 @@ describe("Registry Project Loans", function() {
     );
 
     // Transfer tokens.
-    const amountToTransfer = new BN(toWei("1000000")).toString();
+    const amountToTransfer = new BN(toWei("10000000")).toString();
 
     for (let i = 0; i < this.lenders.length; i++) {
       await this.lendingToken.mint(this.lenders[i], amountToTransfer, {
@@ -176,7 +169,19 @@ describe("Registry Project Loans", function() {
     checkProjectMilestoneApproval.bind(this)
   );
   describe(
+    "When checking project repayment in project tokens",
+    checkProjectTokenRepayment.bind(this)
+  );
+  describe(
     "When checking project loan funding off limit",
     checkProjectFundLoanOffLimit.bind(this)
+  );
+  describe(
+    "When checking project loan repayment",
+    checkProjectMilestoneRepayment.bind(this)
+  );
+  describe(
+    "When checking project investment and direct token repayment",
+    checkProjectInvestment.bind(this)
   );
 });

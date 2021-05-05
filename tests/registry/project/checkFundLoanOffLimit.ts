@@ -6,7 +6,7 @@ const { time, expectRevert } = require("@openzeppelin/test-helpers");
 
 export default async function suite() {
   describe("Succeeds", async () => {
-    it("when funding a project loan off the limit should revert", async function() {
+    it("when funding a project loan off the limit should revert", async function () {
       // Given
 
       const loanId = new BN(await this.registry.totalLoans());
@@ -16,9 +16,11 @@ export default async function suite() {
       const smallPartition = new BN(25);
 
       const amountCollateralized = new BN(toWei("100000"));
+      const projectTokenPrice = new BN("1");
       const interestPercentage = new BN(20);
+      const discountPerMillion = new BN(300000);
       const totalMilestones = new BN(3);
-      const timeDiffBetweenDeliveryAndRepayment = new BN(3600);
+      const paymentTimeInterval = new BN(3600);
       const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ";
 
       let milestoneDurations = new Array<BN>(totalMilestones);
@@ -34,10 +36,12 @@ export default async function suite() {
         amountRequestedPerMilestone,
         this.projectToken.address,
         amountCollateralized.toString(),
+        projectTokenPrice,
         interestPercentage,
+        discountPerMillion,
         totalMilestones,
         milestoneDurations,
-        timeDiffBetweenDeliveryAndRepayment,
+        paymentTimeInterval,
         ipfsHash,
         { from: this.projectOwner }
       );

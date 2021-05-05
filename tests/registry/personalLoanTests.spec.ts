@@ -4,14 +4,6 @@ import checkLoanApproval from "./personal/checkLoanApproval";
 import checkFundLoan from "./personal/checkFundLoan";
 import checkLoanRepayment from "./personal/checkLoanRepayment";
 import checkPersonalFundLoanOffLimit from "./personal/checkFundLoanOffLimit";
-import checkProjectFundLoanOffLimit from "./project/checkFundLoanOffLimit";
-
-// Project
-import checkProjectLoanRequests from "./project/checkProjectLoanRequests";
-import checkProjectLoanApproval from "./project/checkLoanApproval";
-import checkProjectFundLoan from "./project/checkLoanApproval";
-import checkProjectMilestoneApplication from "./project/checkProjectMilestoneApplication";
-import checkProjectMilestoneApproval from "./project/checkProjectMilestoneApproval";
 
 import {
   DAO_LOAN_APPROVAL,

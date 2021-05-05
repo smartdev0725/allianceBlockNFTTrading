@@ -2,13 +2,10 @@ import BN from "bn.js";
 import { toWei } from "web3-utils";
 import { expect } from "chai";
 import { LoanStatus } from "../../helpers/registryEnums";
-import {
-  ONE_DAY,
-  BASE_AMOUNT,
-  DAO_MILESTONE_APPROVAL
-} from "../../helpers/constants";
+import { ONE_DAY, BASE_AMOUNT } from "../../helpers/constants";
 import { getCurrentTimestamp } from "../../helpers/time";
-const { expectEvent } = require("@openzeppelin/test-helpers");
+
+const { time, expectRevert } = require("@openzeppelin/test-helpers");
 
 export default async function suite() {
   describe("Succeeds", async () => {
@@ -16,6 +13,7 @@ export default async function suite() {
     let approvalRequest: BN;
 
     beforeEach(async function() {
+      // Given
       loanId = new BN(await this.registry.totalLoans());
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
 
@@ -23,8 +21,8 @@ export default async function suite() {
       const projectTokenPrice = new BN("1");
       const interestPercentage = new BN(20);
       const discountPerMillion = new BN(400000);
-      const totalMilestones = new BN(3);
-      const paymentTimeInterval = new BN(3600);
+      const totalMilestones = new BN(1);
+      const paymentTimeInterval = new BN(20 * ONE_DAY);
       const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ";
 
       let milestoneDurations = new Array<BN>(totalMilestones);
@@ -68,57 +66,63 @@ export default async function suite() {
       await this.registry.fundLoan(loanId, bigPartition, {
         from: this.lenders[1]
       });
-    });
-    it("when applying a milestone to a project loan", async function() {
+
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
+      await this.registry.applyMilestone(loanId, { from: this.projectOwner });
 
-      // Correct Initial Status.
-      let loanStatus = await this.registry.loanStatus(loanId);
-      expect(loanStatus).to.be.bignumber.equal(LoanStatus.STARTED);
-
-      // Milestone Application By Project Owner
-      const tx = await this.registry.applyMilestone(loanId, { from: this.projectOwner
+      await this.governance.voteForRequest(approvalRequest, true, {
+        from: this.delegators[0]
       });
-      const currentTime = await getCurrentTimestamp();
+      await this.governance.voteForRequest(approvalRequest, true, {
+        from: this.delegators[1]
+      });
+    });
 
+    it("when repaying a project loan", async function() {
       const loanPayments = await this.registry.projectLoanPayments(loanId);
-      const daoApprovalRequest = await this.governance.approvalRequests(
-        approvalRequest
-      );
-      const isPaused = await this.loanNft.transfersPaused(loanId);
-      loanStatus = await this.registry.loanStatus(loanId);
 
-      // Correct Status
-      expect(loanStatus).to.be.bignumber.equal(
-        LoanStatus.AWAITING_MILESTONE_APPROVAL
+      await this.lendingToken.approve(
+        this.registry.address,
+        await this.registry.getAmountToBeRepaid(loanId),
+        {
+          from: this.projectOwner
+        }
+      );
+      await this.registry.executePayment(loanId, { from: this.projectOwner });
+      const loanStatus = await this.registry.loanStatus(loanId);
+
+      // Correct Status.
+      expect(loanStatus).to.be.bignumber.equal(LoanStatus.SETTLED);
+    });
+
+    it("should revert in case it does not have allowancee", async function() {
+      // When && Then
+      await expectRevert(
+        this.registry.executePayment(loanId, { from: this.projectOwner }),
+        "transfer amount exceeds allowance"
+      );
+    });
+
+    it("should revert when repaying a project loan out of time", async function() {
+      // When
+      const loanPayments = await this.registry.projectLoanPayments(loanId);
+
+      // Move time to 1 month, so we can trigger the exception
+      time.increase(30 * 24 * 60 * 60); // One Month
+
+      await this.lendingToken.approve(
+        this.registry.address,
+        await this.registry.getAmountToBeRepaid(loanId),
+        {
+          from: this.projectOwner
+        }
       );
 
-      // Correct Event.
-      expectEvent(tx.receipt, "ProjectLoanMilestoneApprovalRequested", {
-        loanId,
-        milestoneNumber: new BN(0).toString()
-      });
-
-      // Correct Dao Request.
-      expect(daoApprovalRequest.isMilestone).to.be.true;
-      expect(daoApprovalRequest.loanId).to.be.bignumber.equal(loanId);
-      expect(daoApprovalRequest.approvalsProvided).to.be.bignumber.equal(
-        new BN(0)
+      // Then
+      await expectRevert(
+        this.registry.executePayment(loanId, { from: this.projectOwner }),
+        "Only between awaiting for repayment timeframe"
       );
-      expect(daoApprovalRequest.milestoneNumber).to.be.bignumber.equal(
-        new BN(0)
-      );
-      expect(daoApprovalRequest.deadlineTimestamp).to.be.bignumber.equal(
-        new BN(currentTime).add(new BN(DAO_MILESTONE_APPROVAL))
-      );
-      expect(daoApprovalRequest.isApproved).to.be.equal(false);
-
-      // Correct Payments.
-      expect(loanPayments.milestonesDelivered).to.be.bignumber.equal(new BN(0));
-      expect(loanPayments.milestonesExtended).to.be.bignumber.equal(new BN(0));
-
-      // Correct Nft Behavior.
-      expect(isPaused).to.be.equal(false);
     });
   });
 }
