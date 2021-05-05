@@ -45,8 +45,9 @@ export default async function suite() {
         { from: this.borrower }
       );
 
-      await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[0] });
-      await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[1] });
+      await this.governance.superVoteForRequest(approvalRequest, true, {
+          from: this.owner
+      });
     });
 
     it('when funding a loan', async function () {

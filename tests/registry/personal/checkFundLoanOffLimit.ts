@@ -35,15 +35,12 @@ export default async function suite() {
         { from: this.borrower }
       );
 
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[0]
-      });
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[1]
+      await this.governance.superVoteForRequest(approvalRequest, true, {
+        from: this.owner
       });
 
       // When
-      time.increase(30 * 24 * 60 * 60); // One Month
+      time.increase(3 * 24 * 60 * 60); // Three days
 
       // Then
       await expectRevert(

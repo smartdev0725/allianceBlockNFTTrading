@@ -42,11 +42,8 @@ export default async function suite() {
         { from: this.projectOwner }
       );
 
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[0]
-      });
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[1]
+      await this.governance.superVoteForRequest(approvalRequest, true, {
+        from: this.owner
       });
 
       // When

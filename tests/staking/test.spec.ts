@@ -16,7 +16,7 @@ describe('Staking', function () {
 
     // Deploy contracts.
     this.albt = await ALBT.new();
-    this.staking = await Staking.new(this.albt.address);
+    this.staking = await Staking.new(this.albt.address, [ new BN(toWei('1000')), new BN(toWei('1000'))]);
 
     // Set reward distributor.
     await this.staking.setRewardDistribution(this.rewardDistributor);

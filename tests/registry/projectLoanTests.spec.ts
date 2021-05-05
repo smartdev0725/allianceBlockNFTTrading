@@ -23,7 +23,11 @@ import {
   MAX_MILESTONES,
   MILESTONE_EXTENSION,
   AMOUNT_FOR_DAO_MEMBERSHIP,
-  FUNDING_TIME_INTERVAL
+  FUNDING_TIME_INTERVAL,
+  DAO_UPDATE_REQUEST_DURATION,
+  DAO_APPROVALS_NEEDED_FOR_REGISTRY_REQUEST,
+  DAO_APPROVALS_NEEDED_FOR_GOVERNANCE_REQUEST,
+  ONE_DAY
 } from "../helpers/constants";
 
 import BN from "bn.js";
@@ -40,7 +44,7 @@ const ALBT = artifacts.require("ALBT");
 const LoanNFT = artifacts.require("LoanNFT");
 const MainNFT = artifacts.require("MainNFT");
 
-describe("Registry", function() {
+describe("Registry Project Loans", function() {
   before(async function() {
     const accounts = await web3.eth.getAccounts();
 
@@ -61,11 +65,12 @@ describe("Registry", function() {
     const amountStakedForDaoMembership = new BN(toWei("10000"));
 
     this.governance = await Governance.new(
-      this.delegators,
-      2,
+      this.owner,
       DAO_LOAN_APPROVAL,
       DAO_MILESTONE_APPROVAL,
-      new BN(toWei(AMOUNT_FOR_DAO_MEMBERSHIP.toString()))
+      DAO_UPDATE_REQUEST_DURATION,
+      DAO_APPROVALS_NEEDED_FOR_REGISTRY_REQUEST,
+      DAO_APPROVALS_NEEDED_FOR_GOVERNANCE_REQUEST
     );
 
     this.escrow = await Escrow.new(
@@ -74,7 +79,10 @@ describe("Registry", function() {
       this.loanNft.address
     );
 
-    this.staking = await Staking.new(this.albt.address);
+    this.staking = await Staking.new(this.albt.address, [
+      new BN(100),
+      new BN(200)
+    ]);
 
     this.registry = await Registry.new(
       this.escrow.address,
@@ -97,6 +105,9 @@ describe("Registry", function() {
       this.staking.address
     );
     await this.escrow.initialize(this.registry.address);
+
+    // Open dao delegating
+    this.governance.openDaoDelegating(2, ONE_DAY, ONE_DAY, ONE_DAY, ONE_DAY);
 
     // Add roles.
     await this.loanNft.grantRole(
@@ -145,20 +156,6 @@ describe("Registry", function() {
   });
 
   describe(
-    "When checking personal loan requests",
-    checkPersonalLoanRequests.bind(this)
-  );
-  describe(
-    "When checking personal loan approval requests",
-    checkLoanApproval.bind(this)
-  );
-  describe("When checking personal loan funding", checkFundLoan.bind(this));
-  describe(
-    "When checking personal loan repayment",
-    checkLoanRepayment.bind(this)
-  );
-
-  describe(
     "When checking project loan requests",
     checkProjectLoanRequests.bind(this)
   );
@@ -177,10 +174,6 @@ describe("Registry", function() {
   describe(
     "When checking project milestone approval",
     checkProjectMilestoneApproval.bind(this)
-  );
-  describe(
-    "When checking personal loan funding off limit",
-    checkPersonalFundLoanOffLimit.bind(this)
   );
   describe(
     "When checking project loan funding off limit",
