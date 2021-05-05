@@ -250,7 +250,7 @@ contract ProjectLoan is LoanDetails {
             .timestamp
             .add(projectLoanPayments[loanId_].milestoneDuration[0]);
 
-        // For investments without milestones (or a milestone of 0 duration),
+        // For investments without real milestones (the only milestone is of 0 duration),
         // the first and only milestone should be approved automatically so project tokens can be claimed
         if (
             projectLoanPayments[loanId_].totalMilestones == 1 &&
