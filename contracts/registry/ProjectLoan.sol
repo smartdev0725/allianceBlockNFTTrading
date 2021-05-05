@@ -250,9 +250,11 @@ contract ProjectLoan is LoanDetails {
             .timestamp
             .add(projectLoanPayments[loanId_].milestoneDuration[0]);
 
+        // For investments without milestones (or a milestone of 0 duration),
+        // the first and only milestone should be approved automatically so project tokens can be claimed
         if (
             projectLoanPayments[loanId_].totalMilestones == 1 &&
-            projectLoanPayments[loanId_].milestoneDurations[0] == 0
+            projectLoanPayments[loanId_].milestoneDuration[0] == 0
         ) {
             _approveMilestone(loanId_);
         }
