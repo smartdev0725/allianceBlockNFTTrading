@@ -14,6 +14,7 @@ import checkProjectFundLoan from './project/checkLoanApproval';
 import checkProjectMilestoneApplication from './project/checkProjectMilestoneApplication';
 import checkProjectMilestoneApproval from './project/checkProjectMilestoneApproval';
 import checkProjectTokenRepayment from './project/checkProjectTokenRepayment';
+import checkProjectInvestment from './project/checkProjectInvestment';
 
 import {
   DAO_LOAN_APPROVAL,
@@ -195,5 +196,9 @@ describe("Registry", function () {
   describe(
     "When checking project loan repayment",
     checkProjectMilestoneRepayment.bind(this)
+  );
+  describe(
+    "When checking project investment and direct token repayment",
+    checkProjectInvestment.bind(this)
   );
 });
