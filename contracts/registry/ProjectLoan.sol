@@ -37,6 +37,7 @@ contract ProjectLoan is LoanDetails {
      * @param amountRequestedPerMilestone The lending amounts project is looking to get for each milestone.
      * @param collateralToken The token that will be used by the proect as collateral.
      * @param collateralAmount The amount of tokens that will be used by the project as collateral.
+     * @param projectTokenPrice The price the project wants to sell its token for.
      * @param interestPercentage The interest percentage that will be obtained after whole repayment.
      * @param discountPerMillion The discount given on the token price when funders claim repayment in project tokens.
      * @param totalMilestones The total amount of Milestones project is requesting funds for.
@@ -49,6 +50,7 @@ contract ProjectLoan is LoanDetails {
         uint256[] calldata amountRequestedPerMilestone,
         address collateralToken,
         uint256 collateralAmount,
+        uint256 projectTokenPrice,
         uint256 interestPercentage,
         uint256 discountPerMillion,
         uint256 totalMilestones,
@@ -62,25 +64,12 @@ contract ProjectLoan is LoanDetails {
             "Total milestones requested should coincide with requested amounts and durations"
         );
 
-        uint256 totalAmountRequested;
-        for (uint256 i = 0; i < totalMilestones; i++) {
-            require(
-                amountRequestedPerMilestone[i].mod(
-                    baseAmountForEachPartition
-                ) == 0,
-                "Requested milestone amounts must be multipliers of base amount"
+        uint256 totalAmountRequested =
+            _storeMilestoneDetailsAndGetTotalAmount(
+                amountRequestedPerMilestone,
+                milestoneDurations,
+                totalMilestones
             );
-            projectLoanPayments[totalLoans].milestoneLendingAmount[
-                i
-            ] = amountRequestedPerMilestone[i];
-            projectLoanPayments[totalLoans].milestoneDuration[
-                i
-            ] = milestoneDurations[i];
-
-            totalAmountRequested = totalAmountRequested.add(
-                amountRequestedPerMilestone[i]
-            );
-        }
 
         _storeLoanDetails(
             LoanLibrary.LoanType.PROJECT,
@@ -93,6 +82,7 @@ contract ProjectLoan is LoanDetails {
 
         _storeProjectLoanPayments(
             discountPerMillion,
+            projectTokenPrice,
             totalMilestones,
             paymentTimeInterval
         );
@@ -195,7 +185,7 @@ contract ProjectLoan is LoanDetails {
                     projectLoanPayments[loanId_].milestonesDelivered
                 ]
             );
-            // TODO: get real price from DEX or Oracle
+            // TODO: get real price from DEX, Oracle or user input
             projectLoanPayments[loanId_].milestoneProjectTokenPrice[
                 projectLoanPayments[loanId_].milestonesDelivered
             ] = _getMockedPriceForMilestone(0);
@@ -214,14 +204,43 @@ contract ProjectLoan is LoanDetails {
 
     function _storeProjectLoanPayments(
         uint256 discountPerMillion_,
+        uint256 projectTokenPrice_,
         uint256 totalMilestones_,
         uint256 paymentTimeInterval_
     ) internal {
         projectLoanPayments[totalLoans]
             .discountPerMillion = discountPerMillion_;
+        projectLoanPayments[totalLoans].milestoneProjectTokenPrice[
+            0
+        ] = projectTokenPrice_;
         projectLoanPayments[totalLoans].totalMilestones = totalMilestones_;
         projectLoanPayments[totalLoans]
             .paymentTimeInterval = paymentTimeInterval_;
+    }
+
+    function _storeMilestoneDetailsAndGetTotalAmount(
+        uint256[] memory amountRequestedPerMilestone,
+        uint256[] memory milestoneDurations,
+        uint256 totalMilestones
+    ) internal returns (uint256 totalAmountRequested) {
+        for (uint256 i = 0; i < totalMilestones; i++) {
+            require(
+                amountRequestedPerMilestone[i].mod(
+                    baseAmountForEachPartition
+                ) == 0,
+                "Requested milestone amounts must be multipliers of base amount"
+            );
+            projectLoanPayments[totalLoans].milestoneLendingAmount[
+                i
+            ] = amountRequestedPerMilestone[i];
+            projectLoanPayments[totalLoans].milestoneDuration[
+                i
+            ] = milestoneDurations[i];
+
+            totalAmountRequested = totalAmountRequested.add(
+                amountRequestedPerMilestone[i]
+            );
+        }
     }
 
     function _startProjectLoan(uint256 loanId_) internal {
@@ -230,10 +249,6 @@ contract ProjectLoan is LoanDetails {
         projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp = block
             .timestamp
             .add(projectLoanPayments[loanId_].milestoneDuration[0]);
-        // TODO: get real price from DEX or Oracle
-        projectLoanPayments[loanId_].milestoneProjectTokenPrice[
-            0
-        ] = _getMockedPriceForMilestone(0);
 
         escrow.transferLendingToken(
             loanBorrower[loanId_],

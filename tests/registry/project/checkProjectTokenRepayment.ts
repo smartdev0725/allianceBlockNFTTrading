@@ -22,6 +22,7 @@ export default async function suite() {
             approvalRequest = new BN(await this.governance.totalApprovalRequests());
 
             const amountCollateralized = new BN(toWei('100000'));
+            const projectTokenPrice = new BN("1");
             const discountPerMillion = new BN(400000);
             const paymentTimeInterval = new BN(20 * ONE_DAY);
             const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
@@ -37,6 +38,7 @@ export default async function suite() {
                 amountRequestedPerMilestone,
                 this.projectToken.address,
                 amountCollateralized.toString(),
+                projectTokenPrice,
                 interestPercentage,
                 discountPerMillion,
                 totalMilestones,
