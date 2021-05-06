@@ -51,7 +51,7 @@ contract Governance is DaoSubscriptions {
         approvalRequests[totalApprovalRequests].isMilestone = isMilestone;
         approvalRequests[totalApprovalRequests].epochSubmitted = currentEpoch;
 
-        if(isMilestone) {
+        if (isMilestone) {
             approvalRequests[totalApprovalRequests].milestoneNumber = milestoneNumber;
             approvalRequests[totalApprovalRequests].deadlineTimestamp =
                 block.timestamp.add(updatableVariables[keccak256(abi.encode("milestoneApprovalRequestDuration"))]);
@@ -60,16 +60,18 @@ contract Governance is DaoSubscriptions {
                 block.timestamp.add(updatableVariables[keccak256(abi.encode("loanApprovalRequestDuration"))]);
         }
 
-        addCronjob(
-            CronjobType.DAO_APPROVAL,
-            approvalRequests[totalApprovalRequests].deadlineTimestamp,
-            totalApprovalRequests
-        );
+        if (currentEpoch > 1) {
+            addCronjob(
+                CronjobType.DAO_APPROVAL,
+                approvalRequests[totalApprovalRequests].deadlineTimestamp,
+                totalApprovalRequests
+            );
 
-        requestsPerEpoch[currentEpoch].addNode(totalApprovalRequests);
+            requestsPerEpoch[currentEpoch].addNode(totalApprovalRequests);
 
-        if (epochDaoDelegators[currentEpoch].getSize() > 0) {
-            epochDaoDelegators[currentEpoch].cloneList(remainingDelegatorIdsToVotePerRequest[totalApprovalRequests]);
+            if (epochDaoDelegators[currentEpoch].getSize() > 0) {
+                epochDaoDelegators[currentEpoch].cloneList(remainingDelegatorIdsToVotePerRequest[totalApprovalRequests]);
+            }
         }
 
         emit ApprovalRequested(
