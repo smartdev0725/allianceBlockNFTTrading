@@ -69,6 +69,7 @@ export default async function suite() {
         from: this.lenders[1]
       });
     });
+
     it("when applying a milestone to a project loan", async function() {
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
 

@@ -3,9 +3,9 @@ import { toWei } from "web3-utils";
 import { expect } from "chai";
 import { LoanStatus } from "../../helpers/registryEnums";
 import { ONE_DAY, BASE_AMOUNT } from "../../helpers/constants";
-import { getCurrentTimestamp } from "../../helpers/time";
+import { increaseTime, getCurrentTimestamp } from "../../helpers/time";
 
-const { time, expectRevert } = require("@openzeppelin/test-helpers");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 export default async function suite() {
   describe("Succeeds", async () => {
@@ -108,7 +108,7 @@ export default async function suite() {
       const loanPayments = await this.registry.projectLoanPayments(loanId);
 
       // Move time to 1 month, so we can trigger the exception
-      time.increase(30 * 24 * 60 * 60); // One Month
+      increaseTime(new BN(30 * 24 * 60 * 60)); // One Month
 
       await this.lendingToken.approve(
         this.registry.address,

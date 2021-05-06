@@ -44,12 +44,14 @@ export default async function suite() {
       startingEscrowLendingBalance = new BN(
         await this.lendingToken.balanceOf(this.escrow.address)
       );
+      const projectTokenPrice = new BN("1");
+      const discountPerMillion = new BN(400000);
 
       const amountCollateralized = new BN(toWei("100000"));
       const interestPercentage = new BN(20);
       const totalMilestones = new BN(3);
       const paymentTimeInterval = new BN(3600);
-      const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
+      const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ";
 
       let milestoneDurations = new Array<BN>(totalMilestones);
       let amountRequestedPerMilestone = new Array<BN>(totalMilestones);
@@ -64,7 +66,9 @@ export default async function suite() {
         amountRequestedPerMilestone,
         this.projectToken.address,
         amountCollateralized.toString(),
+        projectTokenPrice,
         interestPercentage,
+        discountPerMillion,
         totalMilestones,
         milestoneDurations,
         paymentTimeInterval,

@@ -58,11 +58,13 @@ export default async function suite() {
             await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[0] });
             await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[1] });
         });
+
         it("when the first milestone is already approved after funding", async function () {
             const loanPayments = await this.registry.projectLoanPayments(loanId);
 
             expect(loanPayments.milestonesDelivered).to.be.bignumber.equal(new BN(1));
         });
+
         it("when all NFT can be converted after funding", async function () {
             const convertibleAmountLender0 = await this.registry.getAvailableLoanNFTForConversion(loanId, this.lenders[0]);
 
