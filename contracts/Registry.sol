@@ -61,7 +61,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         address governanceAddress_,
         address lendingToken_,
         address mainNFT_,
-        address loanNFT_,
+        address fundingNFT_,
         uint256 baseAmountForEachPartition_,
         uint256 minimumInterestPercentage_,
         uint256 maxMilestones_,
@@ -76,7 +76,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         lendingToken = IERC20(lendingToken_);
         minimumInterestPercentage = minimumInterestPercentage_;
         mainNFT = IERC721Mint(mainNFT_);
-        loanNFT = IERC1155Mint(loanNFT_);
+        fundingNFT = IERC1155Mint(fundingNFT_);
         maxMilestones = maxMilestones_;
         milestoneExtensionInterval = milestoneExtensionInterval_;
         vestingBatches = vestingBatches_;
@@ -125,9 +125,9 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         );
 
         if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
-            escrow.transferLoanNFT(loanId, partitionsToPurchase, msg.sender);
+            escrow.transferFundingNFT(loanId, partitionsToPurchase, msg.sender);
         } else {
-            _transferLoanNFTToProjectFunder(
+            _transferFundingNFTToProjectFunder(
                 loanId,
                 partitionsToPurchase,
                 msg.sender
@@ -210,7 +210,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     function _approveLoan(uint256 loanId_) internal {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.APPROVED;
         loanDetails[loanId_].approvalDate = block.timestamp;
-        loanNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
+        fundingNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
         emit LoanApproved(loanId_, loanDetails[loanId_].loanType);
     }
 

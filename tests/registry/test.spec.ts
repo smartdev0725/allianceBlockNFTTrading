@@ -40,7 +40,7 @@ const LendingToken = artifacts.require("LendingToken");
 const CollateralToken = artifacts.require("CollateralToken");
 const ProjectToken = artifacts.require("ProjectToken");
 const ALBT = artifacts.require("ALBT");
-const LoanNFT = artifacts.require("LoanNFT");
+const FundingNFT = artifacts.require("FundingNFT");
 const MainNFT = artifacts.require("MainNFT");
 
 describe("Registry", function () {
@@ -58,7 +58,7 @@ describe("Registry", function () {
     this.lendingToken = await LendingToken.new();
     this.collateralToken = await CollateralToken.new();
     this.projectToken = await ProjectToken.new();
-    this.loanNft = await LoanNFT.new();
+    this.fundingNft = await FundingNFT.new();
     this.mainNft = await MainNFT.new();
 
     const amountStakedForDaoMembership = new BN(toWei("10000"));
@@ -74,7 +74,7 @@ describe("Registry", function () {
     this.escrow = await Escrow.new(
       this.lendingToken.address,
       this.mainNft.address,
-      this.loanNft.address
+      this.fundingNft.address
     );
 
     this.staking = await Staking.new(this.albt.address);
@@ -84,7 +84,7 @@ describe("Registry", function () {
       this.governance.address,
       this.lendingToken.address,
       this.mainNft.address,
-      this.loanNft.address,
+      this.fundingNft.address,
       new BN(toWei(BASE_AMOUNT.toString())),
       MINIMUM_INTEREST_PERCENTAGE,
       MAX_MILESTONES,
@@ -102,12 +102,12 @@ describe("Registry", function () {
     await this.escrow.initialize(this.registry.address);
 
     // Add roles.
-    await this.loanNft.grantRole(
+    await this.fundingNft.grantRole(
       web3.utils.keccak256("MINTER_ROLE"),
       this.registry.address,
       { from: this.owner }
     );
-    await this.loanNft.grantRole(
+    await this.fundingNft.grantRole(
       web3.utils.keccak256("PAUSER_ROLE"),
       this.registry.address,
       { from: this.owner }
