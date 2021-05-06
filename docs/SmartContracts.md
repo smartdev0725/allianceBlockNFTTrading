@@ -5,7 +5,7 @@
 Responsible for handling the current delegators as well as voting functionality.
 
 ### Registry
-Central point of control for the P2P ecosystem. Responsible for starting, approving, rejecting loans, executing payments (e.g. a borrower paying his interest + nominal monthly amount), receiving payments (e.g. a lender collecting the payments based on erc1155 ownership). Users can either request Personal Loans (receive 100% of amount once accepted) or Project Loans (receive loan amount by milestones).
+Central point of control for the P2P ecosystem. Responsible for starting, approving, rejecting loans, executing payments (e.g. a **Seeker** paying his interest + nominal monthly amount), receiving payments (e.g. a lender collecting the payments based on erc1155 ownership). Users can either request Personal Loans (receive 100% of amount once accepted) or Project Loans (receive loan amount by milestones).
 
 ### PersonalLoan
 An extension that includes all functionality to do with a personal loan. That includes the logic for calculating and initializing the loan, accepting payments (interest only or nominal + interest) and challenging the personal loan.

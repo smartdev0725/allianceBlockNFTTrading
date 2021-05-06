@@ -1,6 +1,6 @@
 # Registry Subsystem
 
-The **Registry** is the central point of control for the P2P ecosystem. It is responsible for managing every loan transaction. From starting, approving, rejecting loans, executing payments (e.g. a borrower paying his interest + nominal monthly amount) to receiving payments (e.g. a lender collecting the payments based on erc1155 ownership).
+The **Registry** is the central point of control for the P2P ecosystem. It is responsible for managing every loan transaction. From starting, approving, rejecting loans, executing payments (e.g. a **Seeker** paying his interest + nominal monthly amount) to receiving payments (e.g. a lender collecting the payments based on erc1155 ownership).
 
 On top of that, the **Registry** also stores key information regarding the protocol:
 
@@ -24,11 +24,11 @@ Since the **Registry** is at the core of the protocol, it interacts directly wit
 
 * When a loan gets approved, it becomes active and it is time to fund loan. [Funders](Glossary.md) will then be able to call the `function fundLoan(...)`
 
-* When a [Borrower](Glossary.md) wants to return part of the owed amount for a loan, they will do so by calling the `function executePayment(...)`
+* When a [Seeker](Glossary.md) wants to return part of the owed amount for a loan, they will do so by calling the `function executePayment(...)`
 
-* When a [Funder](Glossary.md) (or any holder of the [ERC-1155 tokens](Glossary.md)) wants to cash out their investment to receive a payment after borrower has repaid part of loan, they do so by calling the `function receivePayment(...)`
+* When a [Funder](Glossary.md) (or any holder of the [ERC-1155 tokens](Glossary.md)) wants to cash out their investment to receive a payment after **seeker** has repaid part of loan, they do so by calling the `function receivePayment(...)`
 
-* For security measures, in case of rules breaking by the borrower, any address can challenge a loan by calling the `function challengeLoan(...)`
+* For security measures, in case of rules breaking by the **seeker**, any address can challenge a loan by calling the `function challengeLoan(...)`
 
 Aside from all those important functions, the **Registry** also controls other important functions, like `_approveLoan(...)`, `_rejectLoan(...)` and `_startLoan(...)`.
 

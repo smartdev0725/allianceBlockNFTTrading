@@ -7,11 +7,11 @@ According to [investopedia](https://www.investopedia.com/terms/s/smart-contracts
 ## Funder
 Funders (a.k.a. *Investors*) are the individuals who seek to make an investment by funding a project or loan.
 
-## Borrower
-Borrowers (a.k.a. *Seekers*) are the projects or individuals looking for **Funders** to invest in their projects (or loans). They do so by **Requesting Funding**.
+## Seeker
+Seekers (a.k.a. *Borrowers*) are the projects or individuals looking for **Funders** to invest in their projects (or loans). They do so by **Requesting Funding**.
 
 ## Request Investment
-**Funding Request** or **Request for Investment** is the first step in the process by which **Borrowers** solicit the necesary funding for their **Project** or **Loan**. See [Financial](Financing.md) for more information on this process.
+**Funding Request** or **Request for Investment** is the first step in the process by which **Seekers** solicit the necesary funding for their **Project** or **Loan**. See [Financial](Financing.md) for more information on this process.
 
 ## Hard Data
 The basic information required for the **Governance** system to perform their *Due Dilligence*. This usually requires the **Borrower** or **Seeker** to provide verifiable documentation regarding their company, project and individuals related to the transactions.
@@ -20,13 +20,13 @@ The basic information required for the **Governance** system to perform their *D
 *TGE* or **Token Generation Event** is the blockchain-based transaction that generates a token. This is also sometimes called **minting**
 
 ## Personal Loan
-A *Personal Loan* is one made by an individual *Borrower*. This works similarly to the loans granted by the classic bank institutions:
-1. A person (the *Borrower*) would request financial support to a bank and provide some *Collateral* in exchange for the funds required.
+A *Personal Loan* is one made by an individual *Seeker*. This works similarly to the loans granted by the classic bank institutions:
+1. A person (the *Seeker*) would request financial support to a bank and provide some *Collateral* in exchange for the funds required.
 2. The bank would review the case and decide whether or not to grant the request
-3. If granted, the *Borrower* would receive the funds and repay them following a pre-arranged schedule.
+3. If granted, the *Seeker* would receive the funds and repay them following a pre-arranged schedule.
 
 ## Collateral
-The assets provided by *Borrowers* as a guarantee that they will repay their debt.
+The assets provided by *Seekers* as a guarantee that they will repay their debt.
 
 ## Escrow
 The [**Escrow Subsystem**](Escrow.md) or **Escrow**, is responsible for handling the funds in the protocol's ecosystem.
@@ -50,15 +50,15 @@ The *ERC-1155 NTF* representing the notes given to *Funders* by the *Escrow* in 
 The assets a **Funder** utilizes to support a *Project* or *Loan*. See [Financial](Financing.md) for more information on this process.
 
 ## Collateral token
-The collateral token is the token a borrower should deposit as a guarantee for the lenders in case the loan is not repaid on time or when other agreements are not fulfilled. Any ERC20 token can be used as collateral. In the transaction(s) for requesting a loan (function requestPersonalLoan in PersonalLoan.sol or function requestProjectLoan in ProjectLoan.sol), the borrower itself can choose the ERC20 token and the amount to use as collateral. The contract will then transfer the specified amount of the token to the escrow contract.
-When the loan is rejected by the governance, the collateral token will be sent back to the borrower (function decideForLoan in Registry.sol)
+The collateral token is the token a *Seeker* should deposit as a guarantee for the lenders in case the loan is not repaid on time or when other agreements are not fulfilled. Any ERC20 token can be used as collateral. In the transaction(s) for requesting a loan (function requestPersonalLoan in PersonalLoan.sol or function requestProjectLoan in ProjectLoan.sol), the *Seeker* itself can choose the ERC20 token and the amount to use as collateral. The contract will then transfer the specified amount of the token to the escrow contract.
+When the loan is rejected by the governance, the collateral token will be sent back to the *Seeker* (function decideForLoan in Registry.sol)
 
 ## Lending token
-The lending token is the token the loans are given out in, in other words, this is the token the borrower receives from the lenders when the loan is accepted. For the moment the lending token is an ERC20 token and is set in the deployment of the contracts (constructor of Registry.sol), so all loans will be given out in the same specific token.
+The lending token is the token the loans are given out in, in other words, this is the token the *Seeker* receives from the lenders when the loan is accepted. For the moment the lending token is an ERC20 token and is set in the deployment of the contracts (constructor of Registry.sol), so all loans will be given out in the same specific token.
 
-After a loan is accepted, lenders can fund a loan (function fundLoan in Registry.sol), this will take the amount of lending tokens they want to lend and deposit them into the escrow contract. Once a loan is fully funded, the loan will be started and the lending tokens will be sent from the escrow to the borrower.
+After a loan is accepted, lenders can fund a loan (function fundLoan in Registry.sol), this will take the amount of lending tokens they want to lend and deposit them into the escrow contract. Once a loan is fully funded, the loan will be started and the lending tokens will be sent from the escrow to the *Seeker*.
 
-The borrower should pay the lending token back in the established repayment times (function executePayment in Registry.sol). These payments will send the lending token from the borrower back into the escrow. A lender can then claim back his part of the loan from the escrow (function receivePayment in Registry.sol).
+The *Seeker* should pay the lending token back in the established repayment times (function executePayment in Registry.sol). These payments will send the lending token from the *Seeker* back into the escrow. A lender can then claim back his part of the loan from the escrow (function receivePayment in Registry.sol).
 
 ## Loan NFT
 The loan NFT is the token to represent the parts of a loan given by lenders and makes holders eligible to claim the loan payments.
