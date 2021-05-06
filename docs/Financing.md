@@ -11,9 +11,9 @@ A project that needs funding will seek for investors. We call this project a [Se
 
 2. Review stage: The [DAO](DAO.md) will review the **Seeker's request** and decide whether to approve the project for investment or not.
     * If the DAO decides not to approve, the **Seeker** will receive a notification and they will be able to claim back their [project tokens](Glossary.md).
-    * If the DAO decides that the project is worth investing in, the **Seeker** will be notified and a [Funding Stage](Glossary.md) begins.
+    * If the DAO decides that the project is worth investing in, the **Seeker** will be notified and a **Funding Stage** begins.
 3. Listing stage: At the start of the funding process, the Project will become [listed](Glossary.md) on the website. Potential [Funders](Glossary.md) will receive a notification via e-mail, encouraging them to sign-in to their accounts and [Subscribing](Glossary.md) to the project.
-4. Subscribing stage: **Funders** subscribe to a project for a chance at winning a [Founder Ticket](Glossary.md). Subscribing is a declaration of intent to invest a certain amount of assets (generally USDT/USDC/DAI) in a specific project.
+4. Subscribing stage: **Funders** subscribe to a project for a chance at winning a [Funder Ticket](Glossary.md). Subscribing is a declaration of intent to invest a certain amount of assets (generally USDT/USDC/DAI) in a specific project.
 5. Ticket stage: Once the subscription (*declaration of intent by the potential funders*) has concluded, the **DAO** emmits the tickets and distributes them according to the tiers:
     * Tier 0 receives 1% of the tickets: users who have declared intent but have no ALBT staked.
     * Tier 1 receives 5% of the tickets: users who have declared intent but have 5k ALBT staked

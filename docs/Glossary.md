@@ -8,7 +8,16 @@ According to [investopedia](https://www.investopedia.com/terms/s/smart-contracts
 Funders (a.k.a. *Investors*) are the individuals who seek to make an investment by funding a project or loan.
 
 ## Borrower
-Borrowers (a.k.a. *Seekers*) are the projects or individuals looking for **Funders** to invest in their projects (or loans).
+Borrowers (a.k.a. *Seekers*) are the projects or individuals looking for **Funders** to invest in their projects (or loans). They do so by **Requesting Funding**.
+
+## Request Investment
+**Funding Request** or **Request for Investment** is the first step in the process by which **Borrowers** solicit the necesary funding for their **Project** or **Loan**. See [Financial](Financing.md) for more information on this process.
+
+## Hard Data
+The basic information required for the **Governance** system to perform their *Due Dilligence*. This usually requires the **Borrower** or **Seeker** to provide verifiable documentation regarding their company, project and individuals related to the transactions.
+
+## TGE
+*TGE* or **Token Generation Event** is the blockchain-based transaction that generates a token. This is also sometimes called **minting**
 
 ## Personal Loan
 A *Personal Loan* is one made by an individual *Borrower*. This works similarly to the loans granted by the classic bank institutions:
@@ -35,7 +44,10 @@ Fungibility is an asset’s interchangeability with other individual goods or as
 The *ERC-721 NFT* representing a *Project*, wrapping the **Funding NFT**. Each *Main NFT* is unique as it holds relevant information regarding the listing.
 
 ## Funding NFT
-The *ERC-1155 NTF* representing the notes given to *Funders* by the *Escrow* in exchange for their investment. See [Financial](Financing.md) for more information on this.
+The *ERC-1155 NTF* representing the notes given to *Funders* by the *Escrow* in exchange for their **Investment Funds**.
+
+## Investment Funds
+The assets a **Funder** utilizes to support a *Project* or *Loan*. See [Financial](Financing.md) for more information on this process.
 
 ### Collateral token
 The collateral token is the token a borrower should deposit as a guarantee for the lenders in case the loan is not repaid on time or when other agreements are not fulfilled. Any ERC20 token can be used as collateral. In the transaction(s) for requesting a loan (function requestPersonalLoan in PersonalLoan.sol or function requestProjectLoan in ProjectLoan.sol), the borrower itself can choose the ERC20 token and the amount to use as collateral. The contract will then transfer the specified amount of the token to the escrow contract.
@@ -60,6 +72,18 @@ When a loan is funded by a lender, loan NFT tokens are transferred from the escr
 
 ### Project tokens
 The tokens a *Seeker* will deposit in the **Escrow** when the *Project* is approved. See [Financial](Financing.md) for more information on this subject.
+
+## Listing
+When a **Project** or **Loan** becomes *Listed*, it means that it's **Hard Data** has been approved by **Goverannce** and it should be published in the website and available for **Funders** to subscribe to.
+
+## Subscribing
+A **Subscription** is a declaration of intent made by a **Funder**. When a **Funder** decides to invest in a **Project** or **Loan**, they will first have to *Subscribe*.
+
+## Funder Ticket
+Not all **Funders** who *subscribe* are elligible to invest in a **Project** or **Loan**. Only **Funders** with a *Funder ticket* are elligible. In order to earn one, they must win the **Ticket Raffle**.
+
+## Ticket Raffle
+Some investment opportunities are very popular, requiring a mechanism to even the odds between potential **Funders**. This mechanism distributes **Funder Tickets** among the **Subscribed Funders**
 
 ## Partition:
 EXPLANATION HERE
@@ -93,7 +117,7 @@ Describes when and how the loan amount converts into ownership (shares)
 
 * Automatic: When in the future, when there is an “equity round” where investors prevalue the startup, which determines the value of the share. Investors are buying stock in the company to make an investment
 
-* Optional:  Occurs when the loan has reached the maturity and there was no equity investment 
+* Optional:  Occurs when the loan has reached the maturity and there was no equity investment
 
 
 ## Network participants:
