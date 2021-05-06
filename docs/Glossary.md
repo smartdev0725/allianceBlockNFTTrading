@@ -49,18 +49,18 @@ The *ERC-1155 NTF* representing the notes given to *Funders* by the *Escrow* in 
 ## Investment Funds
 The assets a **Funder** utilizes to support a *Project* or *Loan*. See [Financial](Financing.md) for more information on this process.
 
-### Collateral token
+## Collateral token
 The collateral token is the token a borrower should deposit as a guarantee for the lenders in case the loan is not repaid on time or when other agreements are not fulfilled. Any ERC20 token can be used as collateral. In the transaction(s) for requesting a loan (function requestPersonalLoan in PersonalLoan.sol or function requestProjectLoan in ProjectLoan.sol), the borrower itself can choose the ERC20 token and the amount to use as collateral. The contract will then transfer the specified amount of the token to the escrow contract.
 When the loan is rejected by the governance, the collateral token will be sent back to the borrower (function decideForLoan in Registry.sol)
 
-### Lending token
+## Lending token
 The lending token is the token the loans are given out in, in other words, this is the token the borrower receives from the lenders when the loan is accepted. For the moment the lending token is an ERC20 token and is set in the deployment of the contracts (constructor of Registry.sol), so all loans will be given out in the same specific token.
 
 After a loan is accepted, lenders can fund a loan (function fundLoan in Registry.sol), this will take the amount of lending tokens they want to lend and deposit them into the escrow contract. Once a loan is fully funded, the loan will be started and the lending tokens will be sent from the escrow to the borrower.
 
 The borrower should pay the lending token back in the established repayment times (function executePayment in Registry.sol). These payments will send the lending token from the borrower back into the escrow. A lender can then claim back his part of the loan from the escrow (function receivePayment in Registry.sol).
 
-### Loan NFT
+## Loan NFT
 The loan NFT is the token to represent the parts of a loan given by lenders and makes holders eligible to claim the loan payments.
 
 This token is implemented in the LoanNFT.sol contract and is an ERC1155 token so different loans can be managed by the same contract and every loan can be split up in partitions for different lenders to hold.
@@ -70,7 +70,7 @@ The tokens are minted at the time a loan is requested (function requestPersonalL
 The tokens are paused until the loan is approved (function decideForLoan in Registry.sol)
 When a loan is funded by a lender, loan NFT tokens are transferred from the escrow contract to the lender (function fundLoan in Registry.sol).
 
-### Project tokens
+## Project tokens
 The tokens a *Seeker* will deposit in the **Escrow** when the *Project* is approved. See [Financial](Financing.md) for more information on this subject.
 
 ## Listing
@@ -85,7 +85,7 @@ Not all **Funders** who *subscribe* are elligible to invest in a **Project** or 
 ## Ticket Raffle
 Some investment opportunities are very popular, requiring a mechanism to even the odds between potential **Funders**. This mechanism distributes **Funder Tickets** among the **Subscribed Funders**
 
-## Partition:
+## Partition
 EXPLANATION HERE
 
 ## Milestone
@@ -120,7 +120,7 @@ Describes when and how the loan amount converts into ownership (shares)
 * Optional:  Occurs when the loan has reached the maturity and there was no equity investment
 
 
-## Network participants:
+## Network participants
 | DAO Actors     | How to become                                                                              | Function                                                                                                                                                                                                             | Incentives                                                                                                                             |   |
 |----------------|--------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|---|
 | ALBT Stakers   | Stake 5000 Every user who is willing to stake ALBT tokens                                  | - secure the network                                                                                                                                                                                                 | - receive the network fees                                                                                                             |   |
