@@ -50,7 +50,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     event PaymentExecuted(
         uint256 indexed loanId,
         LoanLibrary.LoanType indexed loanType,
-        address indexed borrower
+        address indexed seeker
     );
 
     /**
@@ -148,10 +148,10 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     }
 
     /**
-     * @dev This function is called by the borrower to return part of or whole owed amount for a loan (depending on agreement).
+     * @dev This function is called by the seeker to return part of or whole owed amount for a loan (depending on agreement).
      * @param loanId The id of the loan.
      */
-    function executePayment(uint256 loanId) external onlyBorrower(loanId) {
+    function executePayment(uint256 loanId) external onlySeeker(loanId) {
         if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
             _executePersonalLoanPayment(loanId);
         } else {
@@ -161,7 +161,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     }
 
     /**
-     * @dev This function is called by ERC1155 holders to receive a payment (after borrower has repaid part of loan).
+     * @dev This function is called by ERC1155 holders to receive a payment (after seeker has repaid part of loan).
      * @param tokenId The token id of the ERC1155 tokens, which is eligible for the payment.
      * @param amountOfTokens The amount of NFT tokens to receive payment for.
      * @param onProjectTokens Only used in project loans. [true -> repayment in project token] [false -> repayment in lending token]
@@ -192,7 +192,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     }
 
     /**
-     * @dev Through this function any address can challenge a loan in case of rules breaking by the borrower.
+     * @dev Through this function any address can challenge a loan in case of rules breaking by the seeker.
             If challenging succeeds it can end up to either small penalty or whole collateral loss.
      * @param loanId The id of the loan.
      */
@@ -218,7 +218,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.REJECTED;
         escrow.transferCollateralToken(
             loanDetails[loanId_].collateralToken,
-            loanBorrower[loanId_],
+            loanSeeker[loanId_],
             loanDetails[loanId_].collateralAmount
         );
         emit LoanRejected(loanId_, loanDetails[loanId_].loanType);
@@ -244,14 +244,14 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         returns (
             LoanLibrary.LoanDetails memory, // the loanDetails
             LoanLibrary.LoanStatus, // the loanStatus
-            address, // the loanBorrower,
+            address, // the loanSeeker,
             LoanLibrary.RepaymentBatchType // the repaymentBatchType
         )
     {
         return (
             loanDetails[loanId],
             loanStatus[loanId],
-            loanBorrower[loanId],
+            loanSeeker[loanId],
             personalLoanPayments[loanId].repaymentBatchType
         );
     }
