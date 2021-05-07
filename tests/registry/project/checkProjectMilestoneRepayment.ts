@@ -70,11 +70,8 @@ export default async function suite() {
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
       await this.registry.applyMilestone(loanId, { from: this.projectOwner });
 
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[0]
-      });
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[1]
+      await this.governance.superVoteForRequest(approvalRequest, true, {
+        from: this.owner
       });
     });
 
