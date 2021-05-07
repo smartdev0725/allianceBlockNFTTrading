@@ -75,7 +75,8 @@ contract PersonalLoan is LoanDetails {
         // mainNFT.mint(address(escrow));
         fundingNFT.mintGen0(
             address(escrow),
-            loanDetails[totalLoans].totalPartitions
+            loanDetails[totalLoans].totalPartitions,
+            totalLoans
         );
 
         fundingNFT.pauseTokenTransfer(totalLoans); //Pause trades for ERC1155s with the specific loan ID.
