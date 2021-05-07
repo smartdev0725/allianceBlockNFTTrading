@@ -73,7 +73,7 @@ export default async function suite() {
 
       const loanPayments = await this.registry.projectLoanPayments(loanId);
       const daoApprovalRequest = await this.governance.approvalRequests(approvalRequest);
-      const isPaused = await this.loanNft.transfersPaused(loanId);
+      const isPaused = await this.fundingNft.transfersPaused(loanId);
       let loanStatus = await this.registry.loanStatus(loanId);
 
       const { amount } = await this.registry.getMilestonesInfo(loanId, 0);

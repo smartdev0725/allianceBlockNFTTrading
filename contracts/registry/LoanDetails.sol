@@ -153,7 +153,7 @@ contract LoanDetails is Storage {
             i++
         ) {
             balance = balance.add(
-                loanNFT.balanceOf(msg.sender, i.getTokenId(loanId))
+                fundingNFT.balanceOf(msg.sender, i.getTokenId(loanId))
             );
         }
         require(balance >= amountOfTokens, "Only when enough balance");

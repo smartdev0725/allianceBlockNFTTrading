@@ -58,16 +58,10 @@ export default async function suite() {
             await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[0] });
             await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[1] });
 
-            /*
-            console.log(await this.registry.getTotalLoanNFTBalance(loanId, { from: this.lenders[0] }));
-            console.log(await this.registry.getLoanNFTBalanceOfGeneration(loanId, new BN(0), { from: this.lenders[0] }));
-            console.log(await this.registry.getLoanNFTBalanceOfGeneration(loanId, new BN(1), { from: this.lenders[0] }));
-            console.log(await this.registry.getLoanNFTBalanceOfGeneration(loanId, new BN(2), { from: this.lenders[0] }));
-            */
         });
         it("when project tokens can not be claimed if no milestones are delivered yet", async function () {
-            const convertibleAmountLender0 = await this.registry.getAvailableLoanNFTForConversion(loanId, this.lenders[0]);
-            const convertibleAmountLender1 = await this.registry.getAvailableLoanNFTForConversion(loanId, this.lenders[1]);
+            const convertibleAmountLender0 = await this.registry.getAvailableFundingNFTForConversion(loanId, this.lenders[0]);
+            const convertibleAmountLender1 = await this.registry.getAvailableFundingNFTForConversion(loanId, this.lenders[1]);
 
             expect(convertibleAmountLender0).to.be.bignumber.equal(new BN(0));
             expect(convertibleAmountLender1).to.be.bignumber.equal(new BN(0));
@@ -78,21 +72,21 @@ export default async function suite() {
             await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[0] });
             await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[1] });
 
-            const convertibleAmountLender0 = await this.registry.getAvailableLoanNFTForConversion(loanId, this.lenders[0]);
+            const convertibleAmountLender0 = await this.registry.getAvailableFundingNFTForConversion(loanId, this.lenders[0]);
             const expectedAmount = bigPartition.mul(amountRequestedPerMilestone[0]).div(totalAmountRequested);
 
             expect(convertibleAmountLender0).to.be.bignumber.equal(expectedAmount);
 
             const balanceLenderBefore = await this.projectToken.balanceOf(this.lenders[0]);
             const balanceEscrowBefore = await this.projectToken.balanceOf(this.escrow.address);
-            const balanceNFTLenderBefore = await this.registry.balanceOfAllLoanNFTGenerations(loanId, this.lenders[0]);
+            const balanceNFTLenderBefore = await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.lenders[0]);
 
             // Test getter first
             const getterProjectTokenAmount = await this.registry.getAmountOfProjectTokensToReceive(loanId, convertibleAmountLender0, { from: this.lenders[0] });
             // Request to receive project tokens as repayment for all of the convertible NFT
             const tx1 = await this.registry.receivePayment(loanId, convertibleAmountLender0, true, { from: this.lenders[0] });
 
-            const balanceNFTLenderAfter = await this.registry.balanceOfAllLoanNFTGenerations(loanId, this.lenders[0]);
+            const balanceNFTLenderAfter = await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.lenders[0]);
             const balanceLenderAfter = await this.projectToken.balanceOf(this.lenders[0]);
             const balanceEscrowAfter = await this.projectToken.balanceOf(this.escrow.address);
             const loanPayments = await this.registry.projectLoanPayments(loanId);
@@ -134,21 +128,21 @@ export default async function suite() {
                 await increaseTime(milestoneDurations[i]);
             }
 
-            const convertibleAmountLender0 = await this.registry.getAvailableLoanNFTForConversion(loanId, this.lenders[0]);
+            const convertibleAmountLender0 = await this.registry.getAvailableFundingNFTForConversion(loanId, this.lenders[0]);
             const expectedAmount = bigPartition.mul(amountRequestedPerMilestone[0].add(amountRequestedPerMilestone[1])).div(totalAmountRequested);
 
             expect(convertibleAmountLender0).to.be.bignumber.equal(expectedAmount);
 
             const balanceLenderBefore = await this.projectToken.balanceOf(this.lenders[0]);
             const balanceEscrowBefore = await this.projectToken.balanceOf(this.escrow.address);
-            const balanceNFTLenderBefore = await this.registry.balanceOfAllLoanNFTGenerations(loanId, this.lenders[0]);
+            const balanceNFTLenderBefore = await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.lenders[0]);
 
             // Test getter first
             const getterProjectTokenAmount = await this.registry.getAmountOfProjectTokensToReceive(loanId, convertibleAmountLender0, { from: this.lenders[0] });
             // Request to receive project tokens as repayment
             const tx1 = await this.registry.receivePayment(loanId, convertibleAmountLender0, true, { from: this.lenders[0] });
 
-            const balanceNFTLenderAfter = await this.registry.balanceOfAllLoanNFTGenerations(loanId, this.lenders[0]);
+            const balanceNFTLenderAfter = await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.lenders[0]);
             const balanceLenderAfter = await this.projectToken.balanceOf(this.lenders[0]);
             const balanceEscrowAfter = await this.projectToken.balanceOf(this.escrow.address);
             const loanPayments = await this.registry.projectLoanPayments(loanId);
@@ -189,7 +183,7 @@ export default async function suite() {
                 await increaseTime(milestoneDurations[i]);
             }
 
-            const convertibleAmountLender0 = await this.registry.getAvailableLoanNFTForConversion(loanId, this.lenders[0]);
+            const convertibleAmountLender0 = await this.registry.getAvailableFundingNFTForConversion(loanId, this.lenders[0]);
             const expectedAmount = bigPartition;
 
             expect(convertibleAmountLender0).to.be.bignumber.equal(expectedAmount);

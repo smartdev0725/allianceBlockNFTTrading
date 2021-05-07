@@ -11,10 +11,10 @@ import "../utils/Strings.sol";
 import "../libs/TokenFormat.sol";
 
 /**
- * @title Alliance Block Loan NFTs
+ * @title Alliance Block Funding NFTs
  * @notice NFTs that will be held by users
  */
-contract LoanNFT is Context, AccessControl, ERC1155 {
+contract FundingNFT is Context, AccessControl, ERC1155 {
     using Counters for Counters.Counter;
     using TokenFormat for uint256;
 

@@ -73,12 +73,12 @@ contract PersonalLoan is LoanDetails {
 
         // TODO - Mint Correctly And Burn on Settlement
         // mainNFT.mint(address(escrow));
-        loanNFT.mintGen0(
+        fundingNFT.mintGen0(
             address(escrow),
             loanDetails[totalLoans].totalPartitions
         );
 
-        loanNFT.pauseTokenTransfer(totalLoans); //Pause trades for ERC1155s with the specific loan ID.
+        fundingNFT.pauseTokenTransfer(totalLoans); //Pause trades for ERC1155s with the specific loan ID.
 
         governance.requestApproval(totalLoans, false, 0);
 
@@ -245,13 +245,13 @@ contract PersonalLoan is LoanDetails {
                 );
             }
 
-            loanNFT.burn(
+            fundingNFT.burn(
                 msg.sender,
                 generation_.getTokenId(loanId_),
                 amountOfTokens_
             );
         } else {
-            loanNFT.increaseGenerations(
+            fundingNFT.increaseGenerations(
                 generation_.getTokenId(loanId_),
                 msg.sender,
                 amountOfTokens_,
