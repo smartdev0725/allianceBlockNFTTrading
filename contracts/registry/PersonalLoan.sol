@@ -22,10 +22,10 @@ contract PersonalLoan is LoanDetails {
     );
 
     /**
-     * @dev This function is used for potential borrowers to request a personal loan.
-     * @param amountRequested The lending amount borrower is looking to get.
-     * @param collateralToken The token that will be used by the borrower as collateral.
-     * @param collateralAmount The amount of tokens that will be used by the borrower as collateral.
+     * @dev This function is used for potential seekers to request a personal loan.
+     * @param amountRequested The lending amount seeker is looking to get.
+     * @param collateralToken The token that will be used by the seeker as collateral.
+     * @param collateralAmount The amount of tokens that will be used by the seeker as collateral.
      * @param totalAmountOfBatches The amount of batches in which loan will be repaid.
      * @param interestPercentage The interest percentage that will be obtained after whole repayment.
      * @param batchTimeInterval The time interval between repayment batches.
@@ -92,7 +92,7 @@ contract PersonalLoan is LoanDetails {
         uint256 batchTimeInterval_,
         LoanLibrary.RepaymentBatchType repaymentBatchType_
     ) internal {
-        // Calculate repayment of borrower for each batch.
+        // Calculate repayment of seeker for each batch.
         if (
             repaymentBatchType_ == LoanLibrary.RepaymentBatchType.ONLY_INTEREST
         ) {
@@ -125,7 +125,7 @@ contract PersonalLoan is LoanDetails {
             .add(personalLoanPayments[loanId_].timeIntervalBetweenBatches);
 
         escrow.transferLendingToken(
-            loanBorrower[loanId_],
+            loanSeeker[loanId_],
             loanDetails[loanId_].lendingAmount
         );
     }
@@ -203,7 +203,7 @@ contract PersonalLoan is LoanDetails {
             loanStatus[loanId_] = LoanLibrary.LoanStatus.SETTLED;
             escrow.transferCollateralToken(
                 loanDetails[loanId_].collateralToken,
-                loanBorrower[loanId_],
+                loanSeeker[loanId_],
                 loanDetails[loanId_].collateralAmount
             );
         } else {

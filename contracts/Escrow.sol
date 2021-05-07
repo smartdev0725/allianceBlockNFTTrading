@@ -61,22 +61,22 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
     }
 
     /**
-     * @dev This function is used to send the lended amount to the borrower.
-     * @param borrower Borrower's address.
-     * @param amount The amount of lending tokens to be sent to borrower.
+     * @dev This function is used to send the lended amount to the seeker.
+     * @param seeker Seeker's address.
+     * @param amount The amount of lending tokens to be sent to seeker.
      */
-    function transferLendingToken(address borrower, uint256 amount)
+    function transferLendingToken(address seeker, uint256 amount)
         external
         onlyRegistry()
     {
-        lendingToken.transfer(borrower, amount);
+        lendingToken.transfer(seeker, amount);
     }
 
     /**
-     * @dev This function is used to send the collateral amount to the borrower.
+     * @dev This function is used to send the collateral amount to the seeker.
      * @param collateralToken The collateral token's contract address.
      * @param recipient The address to transfer the collateral tokens to.
-     * @param amount The amount of collateral tokens to be sent to borrower.
+     * @param amount The amount of collateral tokens to be sent to seeker.
      */
     function transferCollateralToken(
         address collateralToken,

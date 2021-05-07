@@ -116,7 +116,7 @@ contract ProjectLoan is LoanDetails {
      */
     function applyMilestone(uint256 loanId)
         external
-        onlyBorrower(loanId)
+        onlySeeker(loanId)
         onlyActiveLoan(loanId)
         onlyProjectLoan(loanId)
         onlyBetweenMilestoneTimeframe(loanId)
@@ -172,7 +172,7 @@ contract ProjectLoan is LoanDetails {
                 .LoanStatus
                 .AWAITING_MILESTONE_APPLICATION;
             escrow.transferLendingToken(
-                loanBorrower[loanId_],
+                loanSeeker[loanId_],
                 projectLoanPayments[loanId_].milestoneLendingAmount[
                     projectLoanPayments[loanId_].milestonesDelivered
                 ]
@@ -260,7 +260,7 @@ contract ProjectLoan is LoanDetails {
         }
 
         escrow.transferLendingToken(
-            loanBorrower[loanId_],
+            loanSeeker[loanId_],
             projectLoanPayments[loanId_].milestoneLendingAmount[0]
         );
     }
@@ -333,7 +333,7 @@ contract ProjectLoan is LoanDetails {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.SETTLED;
         escrow.transferCollateralToken(
             loanDetails[loanId_].collateralToken,
-            loanBorrower[loanId_],
+            loanSeeker[loanId_],
             loanDetails[loanId_].collateralAmount
         );
     }
@@ -552,7 +552,7 @@ contract ProjectLoan is LoanDetails {
         view
         returns (uint256 balance)
     {
-        // If the loan is already settled, the borrower already paid everything back and also got its collateral back already
+        // If the loan is already settled, the seeker already paid everything back and also got its collateral back already
         if (loanStatus[loanId] == LoanLibrary.LoanStatus.SETTLED) {
             return 0;
         }

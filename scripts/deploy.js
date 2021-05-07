@@ -28,7 +28,7 @@ async function main() {
   const accounts = await web3.eth.getAccounts();
 
   this.owner = accounts[0];
-  this.borrower = accounts[1];
+  this.seeker = accounts[1];
   this.lenders = [accounts[2], accounts[3], accounts[4]];
   this.delegators = [accounts[5], accounts[6], accounts[7]];
 
@@ -94,17 +94,17 @@ async function main() {
     });
   }
 
-  await this.lendingToken.mint(this.borrower, amountToTransfer, {
+  await this.lendingToken.mint(this.seeker, amountToTransfer, {
     from: this.owner
   });
   await this.lendingToken.approve(this.registry.address, amountToTransfer, {
-    from: this.borrower
+    from: this.seeker
   });
-  await this.collateralToken.mint(this.borrower, amountToTransfer, {
+  await this.collateralToken.mint(this.seeker, amountToTransfer, {
     from: this.owner
   });
   await this.collateralToken.approve(this.registry.address, amountToTransfer, {
-    from: this.borrower
+    from: this.seeker
   });
 
   // Deployment Addresses

@@ -30,7 +30,7 @@ export default async function suite() {
         batchTimeInterval,
         ipfsHash,
         RepaymentBatchType.ONLY_INTEREST,
-        { from: this.borrower }
+        { from: this.seeker }
       );
     });
 

@@ -10,14 +10,14 @@ export default async function suite() {
   describe('Succeeds', async () => {
     let loanId: BN;
     let approvalRequest: BN;
-    let initBorrowerCollateralBalance: BN;
+    let initSeekerCollateralBalance: BN;
     let initEscrowCollateralBalance: BN;
     let initEscrowFundingNftBalance: BN;
 
     beforeEach(async function () {
       loanId = new BN(await this.registry.totalLoans());
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
-      initBorrowerCollateralBalance = new BN(await this.projectToken.balanceOf(this.projectOwner));
+      initSeekerCollateralBalance = new BN(await this.projectToken.balanceOf(this.projectOwner));
       initEscrowCollateralBalance = new BN(await this.projectToken.balanceOf(this.escrow.address));
       initEscrowFundingNftBalance = new BN(await this.fundingNft.balanceOf(this.escrow.address, loanId));
     });
@@ -59,7 +59,7 @@ export default async function suite() {
       const totalPartitions = totalAmountRequested.div(new BN(toWei(BASE_AMOUNT.toString())));
       const totalInterest = totalAmountRequested.mul(interestPercentage).div(new BN(100));
 
-      const newBorrowerCollateralBalance = new BN(await this.projectToken.balanceOf(this.projectOwner));
+      const newSeekerCollateralBalance = new BN(await this.projectToken.balanceOf(this.projectOwner));
       const newEscrowCollateralBalance = new BN(await this.projectToken.balanceOf(this.escrow.address));
       const newEscrowFundingNftBalance = new BN(await this.fundingNft.balanceOf(this.escrow.address, tokenId));
 
@@ -105,7 +105,7 @@ export default async function suite() {
       }
 
       // Correct Balances.
-      expect(initBorrowerCollateralBalance.sub(newBorrowerCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
+      expect(initSeekerCollateralBalance.sub(newSeekerCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
       expect(newEscrowCollateralBalance.sub(initEscrowCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
       expect(newEscrowFundingNftBalance.sub(initEscrowFundingNftBalance)).to.be.bignumber.equal(totalPartitions);
 

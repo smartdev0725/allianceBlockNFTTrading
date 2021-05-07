@@ -60,13 +60,13 @@ export default async function suite() {
     });
     it("when approving a milestone for a project loan", async function () {
 
-      const initBorrowerLendingBalance = new BN(await this.lendingToken.balanceOf(this.projectOwner));
+      const initSeekerLendingBalance = new BN(await this.lendingToken.balanceOf(this.projectOwner));
       const initEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
 
       await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[0] });
       await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[1] });
 
-      const newBorrowerLendingBalance = new BN(await this.lendingToken.balanceOf(this.projectOwner));
+      const newSeekerLendingBalance = new BN(await this.lendingToken.balanceOf(this.projectOwner));
       const newEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
 
       const currentTime = await getCurrentTimestamp();
@@ -80,7 +80,7 @@ export default async function suite() {
       const { timestamp } = await this.registry.getMilestonesInfo(loanId, 1);
 
       // Correct Balances.
-      expect(newBorrowerLendingBalance).to.be.bignumber.equal(initBorrowerLendingBalance.add(amount));
+      expect(newSeekerLendingBalance).to.be.bignumber.equal(initSeekerLendingBalance.add(amount));
       expect(newEscrowLendingBalance).to.be.bignumber.equal(initEscrowLendingBalance.sub(amount));
 
       // Correct Status

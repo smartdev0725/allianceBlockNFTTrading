@@ -23,8 +23,8 @@ contract Storage {
     mapping(uint256 => LoanLibrary.ProjectLoanPayments) public projectLoanPayments;
     // Mapping from loan id -> loan status.
     mapping(uint256 => LoanLibrary.LoanStatus) public loanStatus;
-    // Mapping from loan id -> loan borrower's address.
-    mapping(uint256 => address) public loanBorrower;
+    // Mapping from loan id -> loan seeker's address.
+    mapping(uint256 => address) public loanSeeker;
 
     IGovernance public governance; // Governance's contract address.
     IERC20 public lendingToken; // Lending token's contract address.

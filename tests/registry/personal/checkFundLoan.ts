@@ -42,7 +42,7 @@ export default async function suite() {
         batchTimeInterval,
         ipfsHash,
         RepaymentBatchType.ONLY_INTEREST,
-        { from: this.borrower }
+        { from: this.seeker }
       );
 
       await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[0] });
@@ -50,20 +50,20 @@ export default async function suite() {
     });
 
     it('when funding a loan', async function () {
-      const initBorrowerLendingBalance = new BN(await this.lendingToken.balanceOf(this.borrower));
+      const initSeekerLendingBalance = new BN(await this.lendingToken.balanceOf(this.seeker));
       let initEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
-      let initEscrowFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.escrow.address, loanId));
+      let initEscrowFundingNftBalance = new BN(await this.fundingNft.balanceOf(this.escrow.address, loanId));
       let initLenderLendingBalance = new BN(await this.lendingToken.balanceOf(this.lenders[0]));
-      let initLenderFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.lenders[0], loanId));
+      let initLenderFundingNftBalance = new BN(await this.fundingNft.balanceOf(this.lenders[0], loanId));
 
       let partitionsPurchased = new BN(0);
 
       await this.registry.fundLoan(loanId, smallPartition, { from: this.lenders[0] });
 
       let newEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
-      let newEscrowFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.escrow.address, loanId));
+      let newEscrowFundingNftBalance = new BN(await this.fundingNft.balanceOf(this.escrow.address, loanId));
       let newLenderLendingBalance = new BN(await this.lendingToken.balanceOf(this.lenders[0]));
-      let newLenderFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.lenders[0], loanId));
+      let newLenderFundingNftBalance = new BN(await this.fundingNft.balanceOf(this.lenders[0], loanId));
 
       partitionsPurchased = partitionsPurchased.add(smallPartition);
 
@@ -83,16 +83,16 @@ export default async function suite() {
       expect(loanDetails.partitionsPurchased).to.be.bignumber.equal(partitionsPurchased);
 
       initEscrowLendingBalance = newEscrowLendingBalance;
-      initEscrowFundingNftBalance =  newEscrowFundingNftBalance;
+      initEscrowFundingNftBalance = newEscrowFundingNftBalance;
       initLenderLendingBalance = new BN(await this.lendingToken.balanceOf(this.lenders[1]));
-      initLenderFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.lenders[1], loanId));
+      initLenderFundingNftBalance = new BN(await this.fundingNft.balanceOf(this.lenders[1], loanId));
 
       await this.registry.fundLoan(loanId, smallPartition, { from: this.lenders[1] });
 
       newEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
-      newEscrowFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.escrow.address, loanId));
+      newEscrowFundingNftBalance = new BN(await this.fundingNft.balanceOf(this.escrow.address, loanId));
       newLenderLendingBalance = new BN(await this.lendingToken.balanceOf(this.lenders[1]));
-      newLenderFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.lenders[1], loanId));
+      newLenderFundingNftBalance = new BN(await this.fundingNft.balanceOf(this.lenders[1], loanId));
 
       partitionsPurchased = partitionsPurchased.add(smallPartition);
 
@@ -111,18 +111,18 @@ export default async function suite() {
       // Correct Details.
       expect(loanDetails.partitionsPurchased).to.be.bignumber.equal(partitionsPurchased);
 
-      initEscrowFundingNftBalance =  newEscrowFundingNftBalance;
+      initEscrowFundingNftBalance = newEscrowFundingNftBalance;
       initLenderLendingBalance = new BN(await this.lendingToken.balanceOf(this.lenders[2]));
-      initLenderFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.lenders[2], loanId));
+      initLenderFundingNftBalance = new BN(await this.fundingNft.balanceOf(this.lenders[2], loanId));
 
       const tx = await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[2] });
 
-      const newBorrowerLendingBalance = new BN(await this.lendingToken.balanceOf(this.borrower));
+      const newSeekerLendingBalance = new BN(await this.lendingToken.balanceOf(this.seeker));
 
       newEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
-      newEscrowFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.escrow.address, loanId));
+      newEscrowFundingNftBalance = new BN(await this.fundingNft.balanceOf(this.escrow.address, loanId));
       newLenderLendingBalance = new BN(await this.lendingToken.balanceOf(this.lenders[2]));
-      newLenderFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.lenders[2], loanId));
+      newLenderFundingNftBalance = new BN(await this.fundingNft.balanceOf(this.lenders[2], loanId));
 
       partitionsPurchased = partitionsPurchased.add(bigPartition);
 
@@ -135,7 +135,7 @@ export default async function suite() {
       expect(initEscrowFundingNftBalance.sub(newEscrowFundingNftBalance)).to.be.bignumber.equal(bigPartition);
       expect(initLenderLendingBalance.sub(newLenderLendingBalance)).to.be.bignumber.equal(bigPartitionAmountToPurchase);
       expect(newLenderFundingNftBalance.sub(initLenderFundingNftBalance)).to.be.bignumber.equal(bigPartition);
-      expect(newBorrowerLendingBalance.sub(initBorrowerLendingBalance)).to.be.bignumber.equal(loanDetails.lendingAmount);
+      expect(newSeekerLendingBalance.sub(initSeekerLendingBalance)).to.be.bignumber.equal(loanDetails.lendingAmount);
 
       // Correct Status.
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.STARTED);
