@@ -12,8 +12,9 @@ contract Staking is DaoStaking, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    constructor(IERC20 albt_, uint256[] memory stakingTypeAmounts_) public {
+    constructor(IERC20 albt_, address governance_, uint256[] memory stakingTypeAmounts_) public {
         albt = albt_;
+        governance = IGovernanceStaking(governance_);
         for(uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
             stakingTypeAmounts[i] = stakingTypeAmounts_[i];
         }

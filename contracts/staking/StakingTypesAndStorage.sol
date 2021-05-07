@@ -3,6 +3,7 @@ pragma solidity 0.7.0;
 
 import "../interfaces/IGovernanceStaking.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "hardhat/console.sol";
 
 /**
  * @title AllianceBlock StakingStorage contract
@@ -52,7 +53,7 @@ contract StakingTypesAndStorage {
     }
 
     modifier onlyGovernance() {
-        require(msg.sender == address(governance));
+        require(msg.sender == address(governance), "Caller can only be governance");
         _;
     }
 }

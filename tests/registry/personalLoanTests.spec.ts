@@ -71,10 +71,11 @@ describe("Registry Personal Loans", function() {
       this.loanNft.address
     );
 
-    this.staking = await Staking.new(this.albt.address, [
-      new BN(100),
-      new BN(200)
-    ]);
+    this.staking = await Staking.new(
+      this.albt.address,
+      this.governance.address,
+      [new BN(100), new BN(200)]
+    );
 
     this.registry = await Registry.new(
       this.escrow.address,
