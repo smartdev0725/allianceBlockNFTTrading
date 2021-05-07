@@ -58,12 +58,6 @@ export default async function suite() {
             await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[0] });
             await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[1] });
 
-            /*
-            console.log(await this.registry.getTotalLoanNFTBalance(loanId, { from: this.lenders[0] }));
-            console.log(await this.registry.getLoanNFTBalanceOfGeneration(loanId, new BN(0), { from: this.lenders[0] }));
-            console.log(await this.registry.getLoanNFTBalanceOfGeneration(loanId, new BN(1), { from: this.lenders[0] }));
-            console.log(await this.registry.getLoanNFTBalanceOfGeneration(loanId, new BN(2), { from: this.lenders[0] }));
-            */
         });
         it("when project tokens can not be claimed if no milestones are delivered yet", async function () {
             const convertibleAmountLender0 = await this.registry.getAvailableFundingNFTForConversion(loanId, this.lenders[0]);
