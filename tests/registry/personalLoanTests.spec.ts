@@ -100,7 +100,7 @@ describe("Registry Personal Loans", function() {
     await this.escrow.initialize(this.registry.address);
 
     // Open dao delegating
-    this.governance.openDaoDelegating(2, ONE_DAY, ONE_DAY, ONE_DAY, ONE_DAY);
+    // this.governance.openDaoDelegating(2, ONE_DAY, ONE_DAY, ONE_DAY, ONE_DAY);
 
     // Add roles.
     await this.loanNft.grantRole(
