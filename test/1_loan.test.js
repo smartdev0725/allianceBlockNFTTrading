@@ -79,10 +79,10 @@ contract("LoanNFT", function () {
   describe("Basic Minting", function () {
     it("only minter role should be able to mint a new NFT", async function () {
       await expectRevert(
-        fundingNFT.mintGen0(alice, 10, { from: random }),
+        fundingNFT.mintGen0(alice, 10, 1, { from: random }),
         "must have minter role to mint"
       );
-      await fundingNFT.mintGen0(alice, 10, { from: admin });
+      await fundingNFT.mintGen0(alice, 10, 1, { from: admin });
     });
 
     it("should get correct balance for alice", async function () {
@@ -103,7 +103,7 @@ contract("LoanNFT", function () {
     });
 
     it("new minter should be able to mint a new NFT", async function () {
-      await fundingNFT.mintGen0(bob, 20, { from: minter });
+      await fundingNFT.mintGen0(bob, 20, 1, { from: minter });
       const balance = await fundingNFT.balanceOf(bob, 2);
       assert.equal(balance, 20);
     });
@@ -119,10 +119,10 @@ contract("LoanNFT", function () {
   describe("Loan Id and Generation", function () {
     it("only minter role should be able to mint gen0", async function () {
       await expectRevert(
-        fundingNFT.mintGen0(alice, 10, { from: random }),
+        fundingNFT.mintGen0(alice, 10, 1,{ from: random }),
         "must have minter role to mint"
       );
-      const tx = await fundingNFT.mintGen0(alice, 10, { from: admin });
+      const tx = await fundingNFT.mintGen0(alice, 10, 1, { from: admin });
 
       expectEvent(tx, "TransferSingle", {
         operator: admin,

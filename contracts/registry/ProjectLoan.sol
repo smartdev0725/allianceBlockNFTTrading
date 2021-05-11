@@ -98,7 +98,8 @@ contract ProjectLoan is LoanDetails {
         fundingNFT.mintOfGen(
             address(escrow),
             loanDetails[totalLoans].totalPartitions,
-            totalMilestones.sub(1)
+            totalMilestones.sub(1),
+            totalLoans
         );
 
         fundingNFT.pauseTokenTransfer(totalLoans); //Pause trades for ERC1155s with the specific loan ID.
