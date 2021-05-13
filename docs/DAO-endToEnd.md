@@ -1,6 +1,6 @@
 # DAO end to end process
 ### DAO is designed to incentivize making decisions in self-interest and the best interest of the DAO at the same time.
-![DAO Overview](img/overview.png)
+<!--- ![DAO Overview](img/overview.png) --->
 
 ## DAO Ecosystem actors:
 | DAO Actors     | How to become                                                                              | Function                                                                                                                                                                                                             | Incentives                                                                                                                             |   |

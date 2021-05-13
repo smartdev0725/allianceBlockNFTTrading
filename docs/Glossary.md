@@ -46,6 +46,9 @@ The *ERC-721 NFT* representing a *Project*, wrapping the **Funding NFT**. Each *
 ## Funding NFT
 The *ERC-1155 NTF* representing the notes given to *Funders* by the *Escrow* in exchange for their **Investment Funds**.
 
+## Reputation (rALBT)
+*Reputation* is earned by performing actions, completing quests and participating in the protocol. *Reputation* is represented by the [rALBT](RALBT.md) token.
+
 ## Investment Funds
 The assets a **Funder** utilizes to support a *Project* or *Loan*. See [Financial](Financing.md) for more information on this process.
 
@@ -82,11 +85,11 @@ A **Subscription** is a declaration of intent made by a **Funder**. When a **Fun
 ## Funder Ticket
 Not all **Funders** who *subscribe* are elligible to invest in a **Project** or **Loan**. Only **Funders** with a *Funder ticket* are elligible. In order to earn one, they must win the **Ticket Raffle**.
 
-## Ticket Raffle
-Some investment opportunities are very popular, requiring a mechanism to even the odds between potential **Funders**. This mechanism distributes **Funder Tickets** among the **Subscribed Funders**
+## Investment Ticket Raffle
+Some investment opportunities are very popular, requiring a mechanism to even the odds between potential **Funders**. This mechanism distributes **Funder Tickets** among the **Subscribed Funders** for every **Tier**
 
-## Partition
-EXPLANATION HERE
+## Tier
+The amount of staked **ALBT** a user chooses to lock defines the *Tiers* they will participate in. Different *Tiers* run different probabilities of earning an **Investment Ticket** 
 
 ## Milestone
 Each successful *Project* is required to have a set of *Milestones* or goals. If the *Project* is listed, the total required funds will be granted in steps, as each *Milestone* is reached and verified by **Governance**.

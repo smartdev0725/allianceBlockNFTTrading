@@ -1,8 +1,9 @@
-# How projects get financed
+# How Crypto Startup Projects get financed
+
+## Scenario
+A project that needs funding to launch an ERC-20 token usually seeks investors. We call this a [Seeker](Glossary.md) Project. The **Seeker** will have to go through several stages in order to receive funding.
 
 ## Project investment stages
-
-A project that needs funding will seek for investors. We call this project a [Seeker](Glossary.md). The **Seeker** will have to go through several stages in order to receive funding.
 
 1. Request stage: Seeker will [Request Investment](Glossary.md). This request consist of several parts
     * [Hard data](Glossary.md) regarding the project.
@@ -15,7 +16,8 @@ A project that needs funding will seek for investors. We call this project a [Se
 3. Listing stage: At the start of the funding process, the Project will become [listed](Glossary.md) on the website. Potential [Funders](Glossary.md) will receive a notification via e-mail, encouraging them to sign-in to their accounts and [Subscribing](Glossary.md) to the project.
 4. Subscribing stage: **Funders** subscribe to a project for a chance at winning a [Funder Ticket](Glossary.md). Subscribing is a declaration of intent to invest a certain amount of assets (generally USDT/USDC/DAI) in a specific project.
 5. Ticket stage: Once the subscription (*declaration of intent by the potential funders*) has concluded, the **DAO** emmits the tickets and distributes them according to the tiers:
-    * Tier 0 receives 1% of the tickets: users who have declared intent but have no ALBT staked.
+    * Tier 0 receives 1% of the tickets: users who have declared intent but have no 
+     staked.
     * Tier 1 receives 5% of the tickets: users who have declared intent but have 5k ALBT staked
     * Tier 2 receives 10% of the tickets: users who have declared intent but have 50k ALBT staked
     * Tier 3 receives the rest of the tickets: users who have declared intent but have 200k ALBT staked.

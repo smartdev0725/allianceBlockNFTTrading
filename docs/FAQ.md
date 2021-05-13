@@ -1,6 +1,16 @@
 
 # FAQs
 
+## What is ALBT?
+
+## What is rALBT?
+
+## What is Reputation?
+
+## What is the NFT and what rights do I get?
+
+
+
 ## How convertible notes works?
 Convertible notes are originally structured as debt investments but have a provision that allows the principal plus accrued interest to convert into an equity investment at a later date. 
 * Are essentially a hybrid of debt and equity 
