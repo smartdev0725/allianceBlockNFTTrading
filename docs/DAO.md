@@ -74,4 +74,4 @@ Every month this cycle repeats:
 
 * If any Active DAO Delegators don't vote for the project requests, they loose their rewards and they cannot become Active DAO Delegator next month.
 
-* The *end-to-end* Governance process is documented [here](DAO-endToEnd.md)
+* The *end-to-end* Governance process is documented [here](Financing.md)

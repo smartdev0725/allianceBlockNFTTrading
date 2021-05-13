@@ -83,10 +83,16 @@ When a **Project** or **Loan** becomes *Listed*, it means that it's **Hard Data*
 A **Subscription** is a declaration of intent made by a **Funder**. When a **Funder** decides to invest in a **Project** or **Loan**, they will first have to *Subscribe*.
 
 ## Funder Ticket
-Not all **Funders** who *subscribe* are elligible to invest in a **Project** or **Loan**. Only **Funders** with a *Funder ticket* are elligible. In order to earn one, they must win the **Ticket Raffle**.
+A **Funder Ticket** represents a the opportunity to invest in a fraction of a project. Each *listed project* will have **Funder Tickets** to distribute among the *subscribers*. All of the tickets for a project will have the same value. The next equation applies:
 
-## Investment Ticket Raffle
-Some investment opportunities are very popular, requiring a mechanism to even the odds between potential **Funders**. This mechanism distributes **Funder Tickets** among the **Subscribed Funders** for every **Tier**
+* **ticket_Price x #total_tickets = project_funds**
+
+This means that the sum of funds required by the **Seeker** is equal to the amount of tickets multiplied by the ticket price.
+
+Note that not all **Funders** who *subscribe* are elligible to invest in a **Project** or **Loan**. Only **Funders** with a *Funder ticket* are elligible. In order to earn one, they must win the **Ticket Lottery**.
+
+## Investment Ticket Lottery
+Some investment opportunities are very popular, requiring a mechanism to even the odds between potential **Funders**. This mechanism distributes **Funder Tickets** among the **Subscribed Funders** for every **Tier**. The user's **Reputation** heavily influences the chances they have of securing a ticket.
 
 ## Participation Tier
 The amount of staked **ALBT** a user chooses to lock defines the *Tiers* they will participate in. Different *Tiers* run different probabilities of earning an **Investment Ticket** 
