@@ -64,6 +64,9 @@ Every month this cycle repeats:
 
 ---
 
+![DAO Decision Process](img/daoDecission.png)
+
+---
 # Extra notes:
 * If you are an Active DAO Member and you don't vote for DAO Delegator Subscribers, you have a penalty: you don't receive rewards plus you cannot become an Active DAO Member the nextMonth.
 

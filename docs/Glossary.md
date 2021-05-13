@@ -88,7 +88,7 @@ Not all **Funders** who *subscribe* are elligible to invest in a **Project** or 
 ## Investment Ticket Raffle
 Some investment opportunities are very popular, requiring a mechanism to even the odds between potential **Funders**. This mechanism distributes **Funder Tickets** among the **Subscribed Funders** for every **Tier**
 
-## Tier
+## Participation Tier
 The amount of staked **ALBT** a user chooses to lock defines the *Tiers* they will participate in. Different *Tiers* run different probabilities of earning an **Investment Ticket** 
 
 ## Milestone
