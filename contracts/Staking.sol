@@ -4,30 +4,11 @@ import "@openzeppelin/contracts/math/Math.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "hardhat/console.sol";
 
-contract RewardDistributionRecipient is Ownable {
-    address public rewardDistribution;
-
-    modifier onlyRewardDistribution() {
-        require(
-            _msgSender() == rewardDistribution,
-            "Caller is not reward distribution"
-        );
-        _;
-    }
-
-    function setRewardDistribution(address _rewardDistribution)
-        external
-        onlyOwner
-    {
-        rewardDistribution = _rewardDistribution;
-    }
-}
-
-contract tokenWrapper is RewardDistributionRecipient {
+contract tokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -61,27 +42,24 @@ contract tokenWrapper is RewardDistributionRecipient {
     }
 }
 
-contract Staking is tokenWrapper {
+contract Staking is Initializable, OwnableUpgradeable, tokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     uint256 public constant DURATION = 1 days;
 
-    uint256 public periodFinish = 0;
-    uint256 public rewardRate = 0;
+    uint256 public periodFinish;
+    uint256 public rewardRate;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
     mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public rewards;
+    address public rewardDistribution;
 
     event RewardAdded(uint256 reward);
     event Staked(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
     event RewardPaid(address indexed user, uint256 reward);
-
-    constructor(IERC20 albt_) public {
-        albt = albt_;
-    }
 
     modifier updateReward(address account) {
         rewardPerTokenStored = rewardPerToken();
@@ -91,6 +69,25 @@ contract Staking is tokenWrapper {
             userRewardPerTokenPaid[account] = rewardPerTokenStored;
         }
         _;
+    }
+
+    modifier onlyRewardDistribution() {
+        require(
+            _msgSender() == rewardDistribution,
+            "Caller is not reward distribution"
+        );
+        _;
+    }
+
+    function setRewardDistribution(address _rewardDistribution) external onlyOwner {
+        rewardDistribution = _rewardDistribution;
+    }
+
+    function initialize(IERC20 albt_) public initializer {
+        OwnableUpgradeable.__Ownable_init();
+        albt = albt_;
+        periodFinish = 0;
+        rewardRate = 0;
     }
 
     function lastTimeRewardApplicable() public view returns (uint256) {

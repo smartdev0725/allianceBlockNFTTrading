@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/GSN/ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/GSN/Context.sol";
 import "../utils/Strings.sol";
 import "../libs/TokenFormat.sol";
 
@@ -14,7 +14,7 @@ import "../libs/TokenFormat.sol";
  * @title Alliance Block Funding NFTs
  * @notice NFTs that will be held by users
  */
-contract FundingNFT is Context, AccessControl, ERC1155 {
+contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeable, ERC1155Upgradeable {
     using Counters for Counters.Counter;
     using TokenFormat for uint256;
 
@@ -52,11 +52,12 @@ contract FundingNFT is Context, AccessControl, ERC1155 {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /**
-     * @dev Initializes the contract by setting the base URI
+     * @dev Initializes the contract
      */
-    constructor() public ERC1155("") {
-        _baseURI = "ipfs://";
-        _contractURI = "https://allianceblock.io/";
+    function initialize(string memory baseUri, string memory contractUri) public initializer {
+        __ERC1155_init("");
+        _baseURI = baseUri;
+        _contractURI = contractUri;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(MINTER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());

@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IRegistry.sol";
 import "./interfaces/IStaking.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title AllianceBlock Governance contract
  * @notice Responsible for govern AllianceBlock's ecosystem
  */
-contract Governance is Ownable {
+contract Governance is Initializable, OwnableUpgradeable {
     using SafeMath for uint256;
 
     //events
@@ -79,14 +80,14 @@ contract Governance is Ownable {
     /**
      * @dev Initializes the contract by setting basic 
      */
-    constructor(
+    function initialize(
         address[] memory daoDelegators,
         uint256 approvalsNeeded_,
         uint256 loanApprovalRequestDuration_,
         uint256 milestoneApprovalRequestDuration_,
         uint256 amountStakedForDaoMembership_
-    )
-    {
+    ) public initializer {
+        __Ownable_init();
         for(uint256 i = 0; i < daoDelegators.length; i++) {
             isDaoDelegator[daoDelegators[i]] = true;
         }
@@ -97,7 +98,7 @@ contract Governance is Ownable {
         amountStakedForDaoMembership = amountStakedForDaoMembership_;
     }
 
-    function initialize(
+    function setRegistryAndStaking(
         address registryAddress_,
         address stakingAddress_
     )
