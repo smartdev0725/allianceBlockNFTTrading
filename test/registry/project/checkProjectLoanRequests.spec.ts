@@ -1,0 +1,224 @@
+import BN from 'bn.js';
+import {toWei} from 'web3-utils';
+import {expect} from 'chai';
+import {LoanType, LoanStatus} from '../../helpers/registryEnums';
+import {ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL} from '../../helpers/constants';
+import {getTransactionTimestamp, getCurrentTimestamp} from '../../helpers/time';
+const {expectEvent} = require('@openzeppelin/test-helpers');
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
+
+describe('Check project loan request', async () => {
+  let loanId: BN;
+  let approvalRequest: BN;
+  let initSeekerCollateralBalance: BN;
+  let initEscrowCollateralBalance: BN;
+  let initEscrowFundingNftBalance: BN;
+  let registryProxyContract: any;
+  let registryContract: any;
+  let governanceProxyContract: any;
+  let governanceContract: any;
+  let fundingNFTProxyContract: any;
+  let fundingNFTContract: any;
+  let escrowProxyContract: any;
+  let escrowContract: any;
+  let lendingTokenContract: any;
+  let projectTokenContract: any;
+
+  beforeEach(async function () {
+    // Deploy fixtures
+    await deployments.fixture();
+
+    // Get accounts
+    const {deployer} = await getNamedAccounts();
+
+    // Get contracts
+    registryProxyContract = await deployments.get('Registry_Proxy');
+    registryContract = await ethers.getContractAt(
+      'Registry',
+      registryProxyContract.address
+    );
+
+    governanceProxyContract = await deployments.get('Governance_Proxy');
+    governanceContract = await ethers.getContractAt(
+      'Governance',
+      governanceProxyContract.address
+    );
+
+    fundingNFTProxyContract = await deployments.get('FundingNFT_Proxy');
+    fundingNFTContract = await ethers.getContractAt(
+      'FundingNFT',
+      fundingNFTProxyContract.address
+    );
+
+    escrowProxyContract = await deployments.get('Escrow_Proxy');
+    escrowContract = await ethers.getContractAt(
+      'Escrow',
+      escrowProxyContract.address
+    );
+
+    lendingTokenContract = await ethers.getContract('LendingToken');
+
+    projectTokenContract = await ethers.getContract('ProjectToken');
+
+    loanId = new BN(await registryContract.totalLoans());
+    approvalRequest = new BN(await governanceContract.totalApprovalRequests());
+    initSeekerCollateralBalance = new BN(
+      await projectTokenContract.balanceOf(deployer)
+    );
+    initEscrowCollateralBalance = new BN(
+      await projectTokenContract.balanceOf(escrowContract.address)
+    );
+    initEscrowFundingNftBalance = new BN(
+      await fundingNFTContract.balanceOf(escrowContract.address, loanId)
+    );
+  });
+
+  it('when requesting an project loan', async function () {
+    const {deployer} = await getNamedAccounts();
+    const signers = await ethers.getSigners();
+    const deployerSigner = signers[0];
+
+    const amountCollateralized = new BN(toWei('100000'));
+    const projectTokenPrice = new BN('1');
+    const interestPercentage = new BN(20);
+    const discountPerMillion = new BN(300000);
+    const totalMilestones = new BN(3);
+    const tokenId = totalMilestones.sub(new BN(1)).ishln(128).or(loanId); // Project tokens are minted with the generation at totalMilestons - 1 so they can initially only be used after all milestones were delivered.
+    const paymentTimeInterval = new BN(3600);
+    const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
+
+    const milestoneDurations = new Array<BN>(totalMilestones);
+    const amountRequestedPerMilestone = new Array<BN>(totalMilestones);
+    const currentTime = await getCurrentTimestamp();
+
+    for (let i = 0; i < Number(totalMilestones); i++) {
+      milestoneDurations[i] = currentTime.add(new BN((i + 1) * ONE_DAY));
+      amountRequestedPerMilestone[i] = new BN(toWei('10000'));
+    }
+
+    const tx = await registryContract
+      .connect(deployerSigner)
+      .requestProjectLoan(
+        amountRequestedPerMilestone,
+        projectTokenContract.address,
+        amountCollateralized.toString(),
+        projectTokenPrice,
+        interestPercentage,
+        discountPerMillion,
+        totalMilestones,
+        milestoneDurations,
+        paymentTimeInterval,
+        ipfsHash
+      );
+
+    const totalAmountRequested =
+      amountRequestedPerMilestone[0].mul(totalMilestones);
+    const totalPartitions = totalAmountRequested.div(
+      new BN(toWei(BASE_AMOUNT.toString()))
+    );
+    const totalInterest = totalAmountRequested
+      .mul(interestPercentage)
+      .div(new BN(100));
+
+    const newSeekerCollateralBalance = new BN(
+      await projectTokenContract.balanceOf(deployer)
+    );
+    const newEscrowCollateralBalance = new BN(
+      await projectTokenContract.balanceOf(escrowContract.address)
+    );
+    const newEscrowFundingNftBalance = new BN(
+      await fundingNFTContract.balanceOf(escrowContract.address, tokenId)
+    );
+
+    const isPaused = await fundingNFTContract.transfersPaused(loanId);
+
+    const loanStatus = await registryContract.loanStatus(loanId);
+    const loanDetails = await registryContract.loanDetails(loanId);
+    const loanPayments = await registryContract.projectLoanPayments(loanId);
+    const daoApprovalRequest = await governanceContract.approvalRequests(
+      approvalRequest
+    );
+
+    // Correct Status.
+    expect(loanStatus).to.be.bignumber.equal(LoanStatus.REQUESTED);
+
+    // Correct Event.
+    expectEvent(tx.receipt, 'ProjectLoanRequested', {
+      loanId,
+      user: deployer,
+      amount: totalAmountRequested.toString(),
+    });
+
+    // Correct Details.
+    expect(loanDetails.loanId).to.be.bignumber.equal(loanId);
+    expect(loanDetails.loanType).to.be.bignumber.equal(LoanType.PROJECT);
+    expect(loanDetails.startingDate).to.be.bignumber.equal(new BN(0));
+    expect(loanDetails.collateralToken).to.be.equal(
+      projectTokenContract.address
+    );
+    expect(loanDetails.collateralAmount).to.be.bignumber.equal(
+      amountCollateralized
+    );
+    expect(loanDetails.lendingAmount).to.be.bignumber.equal(
+      totalAmountRequested
+    );
+    expect(loanDetails.totalPartitions).to.be.bignumber.equal(totalPartitions);
+    expect(loanDetails.totalInterest).to.be.bignumber.equal(totalInterest);
+    expect(loanDetails.extraInfo).to.be.equal(ipfsHash);
+    expect(loanDetails.partitionsPurchased).to.be.bignumber.equal(new BN(0));
+
+    // Correct Payments.
+    expect(loanPayments.totalMilestones).to.be.bignumber.equal(totalMilestones);
+    expect(loanPayments.milestonesDelivered).to.be.bignumber.equal(new BN(0));
+    expect(loanPayments.milestonesExtended).to.be.bignumber.equal(new BN(0));
+    expect(loanPayments.paymentTimeInterval).to.be.bignumber.equal(
+      paymentTimeInterval
+    );
+    expect(
+      loanPayments.currentMilestoneStartingTimestamp
+    ).to.be.bignumber.equal(new BN(0));
+    expect(
+      loanPayments.currentMilestoneDeadlineTimestamp
+    ).to.be.bignumber.equal(new BN(0));
+    expect(
+      await registryContract.getAmountToBeRepaid(loanId)
+    ).to.be.bignumber.equal(totalAmountRequested.add(totalInterest));
+    expect(loanPayments.discountPerMillion).to.be.bignumber.equal(
+      new BN(300000)
+    );
+    for (const i in milestoneDurations) {
+      const {amount, timestamp} = await registryContract.getMilestonesInfo(
+        loanId,
+        i
+      );
+      expect(amount).to.be.bignumber.equal(amountRequestedPerMilestone[i]);
+      expect(timestamp).to.be.bignumber.equal(milestoneDurations[i]);
+    }
+
+    // Correct Balances.
+    expect(
+      initSeekerCollateralBalance.sub(newSeekerCollateralBalance)
+    ).to.be.bignumber.equal(amountCollateralized);
+    expect(
+      newEscrowCollateralBalance.sub(initEscrowCollateralBalance)
+    ).to.be.bignumber.equal(amountCollateralized);
+    expect(
+      newEscrowFundingNftBalance.sub(initEscrowFundingNftBalance)
+    ).to.be.bignumber.equal(totalPartitions);
+
+    // Correct Nft Behavior.
+    expect(isPaused).to.be.equal(true);
+
+    // Correct Dao Request.
+    expect(daoApprovalRequest.loanId).to.be.bignumber.equal(loanId);
+    expect(daoApprovalRequest.isMilestone).to.be.equal(false);
+    expect(daoApprovalRequest.milestoneNumber).to.be.bignumber.equal(new BN(0));
+    expect(daoApprovalRequest.deadlineTimestamp).to.be.bignumber.equal(
+      (await getTransactionTimestamp(tx.tx)).add(new BN(DAO_LOAN_APPROVAL))
+    );
+    expect(daoApprovalRequest.approvalsProvided).to.be.bignumber.equal(
+      new BN(0)
+    );
+    expect(daoApprovalRequest.isApproved).to.be.equal(false);
+  });
+});
