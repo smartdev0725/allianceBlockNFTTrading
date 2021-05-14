@@ -1,4 +1,3 @@
-import BN from 'bn.js';
 const {time} = require('@openzeppelin/test-helpers');
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
@@ -7,7 +6,7 @@ export const getTransactionTimestamp = async (txHash: string) => {
   const blockNumber = (await ethers.provider.getTransaction(txHash))
     .blockNumber;
 
-  if (blockNumber == null) return new BN(0);
+  if (blockNumber == null) return BigNumber.from(0);
 
   const timestamp = (await ethers.provider.getBlock(blockNumber)).timestamp;
 
