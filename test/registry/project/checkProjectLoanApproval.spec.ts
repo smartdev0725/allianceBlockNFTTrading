@@ -1,80 +1,73 @@
 import BN from 'bn.js';
-import {toWei} from 'web3-utils';
 import {expect} from 'chai';
 import {LoanStatus} from '../../helpers/registryEnums';
 import {ONE_DAY} from '../../helpers/constants';
 import {getCurrentTimestamp} from '../../helpers/time';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import {BigNumber} from 'ethers';
+import {getContracts, getSigners, initializeTransfers} from "../../helpers/utils";
 
 describe('Check project loan approval', async () => {
-  let loanId: BN;
-  let approvalRequest: BN;
-  let registryProxyContract: any;
+  let loanId: BigNumber;
+  let approvalRequest: BigNumber;
   let registryContract: any;
-  let governanceProxyContract: any;
   let governanceContract: any;
-  let fundingNFTProxyContract: any;
   let fundingNFTContract: any;
-  let escrowProxyContract: any;
   let escrowContract: any;
   let lendingTokenContract: any;
   let projectTokenContract: any;
+  let collateralTokenContract: any;
 
   beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();
 
     // Get accounts
-    const signers = await ethers.getSigners();
-    const deployerSigner = signers[0];
+    const {deployer, seeker, lender1, lender2} = await getNamedAccounts();
+    const {deployerSigner, lender1Signer, lender2Signer, seekerSigner, delegator1Signer, delegator2Signer} =
+      await getSigners();
 
     // Get contracts
-    registryProxyContract = await deployments.get('Registry_Proxy');
-    registryContract = await ethers.getContractAt(
-      'Registry',
-      registryProxyContract.address
+    ({
+      registryContract,
+      governanceContract,
+      fundingNFTContract,
+      escrowContract,
+      lendingTokenContract,
+      projectTokenContract,
+      collateralTokenContract,
+    } = await getContracts());
+
+    // Initialize Transfers
+    await initializeTransfers(
+      {
+        registryContract,
+        lendingTokenContract,
+        projectTokenContract,
+        collateralTokenContract,
+      },
+      {lender1, lender2, seeker, deployer},
+      {deployerSigner, lender1Signer, lender2Signer, seekerSigner}
     );
 
-    governanceProxyContract = await deployments.get('Governance_Proxy');
-    governanceContract = await ethers.getContractAt(
-      'Governance',
-      governanceProxyContract.address
-    );
+    loanId = await registryContract.totalLoans();
+    approvalRequest = await governanceContract.totalApprovalRequests();
 
-    fundingNFTProxyContract = await deployments.get('FundingNFT_Proxy');
-    fundingNFTContract = await ethers.getContractAt(
-      'FundingNFT',
-      fundingNFTProxyContract.address
-    );
-
-    escrowProxyContract = await deployments.get('Escrow_Proxy');
-    escrowContract = await ethers.getContractAt(
-      'Escrow',
-      escrowProxyContract.address
-    );
-
-    lendingTokenContract = await ethers.getContract('LendingToken');
-
-    projectTokenContract = await ethers.getContract('ProjectToken');
-
-    loanId = new BN(await registryContract.totalLoans());
-    approvalRequest = new BN(await governanceContract.totalApprovalRequests());
-
-    const amountCollateralized = new BN(toWei('100000'));
-    const projectTokenPrice = new BN('1');
-    const interestPercentage = new BN(20);
-    const discountPerMillion = new BN(400000);
-    const totalMilestones = new BN(3);
-    const paymentTimeInterval = new BN(3600);
+    const amountCollateralized = ethers.utils.parseEther('100000');
+    const projectTokenPrice = BigNumber.from(1);
+    const interestPercentage = BigNumber.from(20);
+    const discountPerMillion = BigNumber.from(400000);
+    const totalMilestones = BigNumber.from(3);
+    const paymentTimeInterval = BigNumber.from(3600);
     const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-    const milestoneDurations = new Array<BN>(totalMilestones);
-    const amountRequestedPerMilestone = new Array<BN>(totalMilestones);
+    const milestoneDurations = new Array<BigNumber>(totalMilestones);
+    const amountRequestedPerMilestone = new Array<BigNumber>(totalMilestones);
     const currentTime = await getCurrentTimestamp();
 
     for (let i = 0; i < Number(totalMilestones); i++) {
-      milestoneDurations[i] = currentTime.add(new BN((i + 1) * ONE_DAY));
-      amountRequestedPerMilestone[i] = new BN(toWei('10000'));
+      milestoneDurations[i] = BigNumber.from(currentTime.add(new BN((i + 1) * ONE_DAY)));
+      amountRequestedPerMilestone[i] = ethers.utils.parseEther('10000');
     }
 
     await registryContract
@@ -111,9 +104,9 @@ describe('Check project loan approval', async () => {
     );
 
     // Correct Dao Request.
-    expect(daoApprovalRequest.loanId).to.be.bignumber.equal(loanId);
+    expect(daoApprovalRequest.loanId.toNumber()).to.be.equal(loanId.toNumber());
     expect(daoApprovalRequest.isMilestone).to.be.equal(false);
-    expect(daoApprovalRequest.approvalsProvided).to.be.bignumber.equal(
+    expect(daoApprovalRequest.approvalsProvided).to.be.equal(
       new BN(1)
     );
     expect(daoApprovalRequest.isApproved).to.be.equal(false);
@@ -137,8 +130,8 @@ describe('Check project loan approval', async () => {
     const loanStatus = await registryContract.loanStatus(loanId);
 
     // Correct Dao Request.
-    expect(daoApprovalRequest.approvalsProvided).to.be.bignumber.equal(
-      new BN(2)
+    expect(daoApprovalRequest.approvalsProvided.toNumber()).to.be.equal(
+      BigNumber.from(2)
     );
     expect(daoApprovalRequest.isApproved).to.be.equal(true);
 
@@ -149,6 +142,6 @@ describe('Check project loan approval', async () => {
     expect(isPaused).to.be.equal(false);
 
     // Correct Loan Status.
-    expect(loanStatus).to.be.bignumber.equal(LoanStatus.APPROVED);
+    expect(loanStatus.toString()).to.be.equal(LoanStatus.APPROVED);
   });
 });

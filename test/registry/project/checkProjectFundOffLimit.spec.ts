@@ -1,5 +1,4 @@
 import BN from 'bn.js';
-import {toWei} from 'web3-utils';
 import {ONE_DAY} from '../../helpers/constants';
 import {getCurrentTimestamp, increaseTime} from '../../helpers/time';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
@@ -66,7 +65,7 @@ describe('Check project fund off limit', async () => {
     const approvalRequest = await governanceContract.totalApprovalRequests();
     const smallPartition = BigNumber.from(25);
 
-    const amountCollateralized = BigNumber.from(toWei('100000'));
+    const amountCollateralized = ethers.utils.parseEther('100000');
     const projectTokenPrice = BigNumber.from('1');
     const interestPercentage = BigNumber.from(20);
     const discountPerMillion = BigNumber.from(300000);
@@ -82,7 +81,7 @@ describe('Check project fund off limit', async () => {
       milestoneDurations[i] = BigNumber.from(
         currentTime.add(new BN((i + 1) * ONE_DAY)).toString()
       );
-      amountRequestedPerMilestone[i] = BigNumber.from(toWei('10000'));
+      amountRequestedPerMilestone[i] = ethers.utils.parseEther('10000');
     }
 
     await registryContract

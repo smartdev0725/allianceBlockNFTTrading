@@ -1,5 +1,4 @@
 import BN from 'bn.js';
-import {toWei} from 'web3-utils';
 import {expect} from 'chai';
 import {LoanStatus} from '../../helpers/registryEnums';
 import {ONE_DAY, BASE_AMOUNT} from '../../helpers/constants';
@@ -188,7 +187,7 @@ describe('Check project fund loan', async () => {
     ).to.be.equal(smallPartition.toNumber());
 
     // Correct Status.
-    expect(loanStatus).to.be.bignumber.equal(LoanStatus.FUNDING);
+    expect(loanStatus.toString()).to.be.equal(LoanStatus.FUNDING);
 
     // Correct Details.
     expect(loanDetails.partitionsPurchased.toNumber()).to.be.equal(
@@ -240,7 +239,7 @@ describe('Check project fund loan', async () => {
     ).to.be.equal(smallPartition.toNumber());
 
     // Correct Status.
-    expect(loanStatus).to.be.bignumber.equal(LoanStatus.FUNDING);
+    expect(loanStatus.toString()).to.be.equal(LoanStatus.FUNDING);
 
     // Correct Details.
     expect(loanDetails.partitionsPurchased.toNumber()).to.be.equal(
