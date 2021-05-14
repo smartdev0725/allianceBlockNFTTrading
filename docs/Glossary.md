@@ -16,8 +16,11 @@ Seekers (a.k.a. *Borrowers*) are the projects or individuals looking for **Funde
 ## Hard Data
 The basic information required for the **Governance** system to perform their *Due Dilligence*. This usually requires the **Borrower** or **Seeker** to provide verifiable documentation regarding their company, project and individuals related to the transactions.
 
-## TGE
-*TGE* or **Token Generation Event** is the blockchain-based transaction that generates a token. This is also sometimes called **minting**
+## TGE or Token Generation Event
+Initially, the term "ICO", which refers to "initial coin offering", was used to refer the initial release of cryptocurrency tokens to the public as a fund raising mechanism. However, due to regulatory concerns of ICO being modeled after IPO (Initial Public Offering) and its implication as an investment vehicle, some projects begun coining different naming convention. **Token Generation Event (*TGE*)** is one such convention.
+
+## Minting
+**Minting** is the blockchain-based transaction that generates a token. This is also sometimes wrongly called a **TGE**.
 
 ## Personal Loan
 A *Personal Loan* is one made by an individual *Seeker*. This works similarly to the loans granted by the classic bank institutions:
