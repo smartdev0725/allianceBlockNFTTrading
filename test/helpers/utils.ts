@@ -1,5 +1,9 @@
 import {deployments, ethers} from 'hardhat';
-import {toWei} from 'web3-utils';
+
+import {
+  ContractReceipt,
+  ContractTransaction,
+} from 'ethers';
 
 export const getSigners = async () => {
   const signers = await ethers.getSigners();
@@ -18,35 +22,23 @@ export const getSigners = async () => {
 };
 
 export const getContracts = async () => {
-  const registryProxyContract = await deployments.get('Registry_Proxy');
-  const registryContract = await ethers.getContractAt(
-    'Registry',
-    registryProxyContract.address
-  );
+  const registryContract = await ethers.getContract('Registry');
 
-  const governanceProxyContract = await deployments.get('Governance_Proxy');
-  const governanceContract = await ethers.getContractAt(
-    'Governance',
-    governanceProxyContract.address
-  );
+  const governanceContract = await ethers.getContract('Governance');
 
-  const fundingNFTProxyContract = await deployments.get('FundingNFT_Proxy');
-  const fundingNFTContract = await ethers.getContractAt(
-    'FundingNFT',
-    fundingNFTProxyContract.address
-  );
+  const fundingNFTContract = await ethers.getContract('FundingNFT');
 
-  const escrowProxyContract = await deployments.get('Escrow_Proxy');
-  const escrowContract = await ethers.getContractAt(
-    'Escrow',
-    escrowProxyContract.address
-  );
+  const escrowContract = await ethers.getContract('Escrow');
+
+  const stakingContract = await ethers.getContract('Staking',);
 
   const lendingTokenContract = await ethers.getContract('LendingToken');
 
   const projectTokenContract = await ethers.getContract('ProjectToken');
 
   const collateralTokenContract = await ethers.getContract('CollateralToken');
+
+  const ALBTContract = await ethers.getContract('ALBT');
 
   return {
     registryContract,
@@ -56,6 +48,8 @@ export const getContracts = async () => {
     lendingTokenContract,
     projectTokenContract,
     collateralTokenContract,
+    ALBTContract,
+    stakingContract,
   };
 };
 
@@ -110,3 +104,9 @@ export const initializeTransfers = async (
     .connect(deployerSigner)
     .approve(registryContract.address, amountToTransfer);
 };
+
+export  const waitFor = (
+  p: Promise<ContractTransaction>
+): Promise<ContractReceipt> => {
+  return p.then((tx) => tx.wait());
+}
