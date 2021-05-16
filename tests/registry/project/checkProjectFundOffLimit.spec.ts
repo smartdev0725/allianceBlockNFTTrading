@@ -54,12 +54,13 @@ describe('Check project fund off limit', async () => {
 
   it('when funding a project loan off the limit should revert', async function () {
     // Given
-    const signers = await ethers.getSigners();
-    const deployerSigner = signers[0];
-    const delegator1Signer = signers[2];
-    const delegator2Signer = signers[3];
-    const staker1Signer = signers[4];
-    const lender1Signer = signers[7];
+    const {
+      deployerSigner,
+      lender1Signer,
+      delegator1Signer,
+      delegator2Signer,
+      staker1Signer,
+    } = await getSigners();
 
     const loanId = await registryContract.totalLoans();
     const approvalRequest = await governanceContract.totalApprovalRequests();

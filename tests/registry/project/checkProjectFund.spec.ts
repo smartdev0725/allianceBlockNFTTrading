@@ -8,6 +8,7 @@ import {
   getContracts,
   getSigners,
   initializeTransfers,
+  waitFor,
 } from '../../helpers/utils';
 import {BigNumber} from 'ethers';
 
@@ -83,9 +84,9 @@ describe('Check project fund loan', async () => {
     );
 
     const amountCollateralized = ethers.utils.parseEther('100000');
-    const interestPercentage = ethers.utils.parseEther('20');
-    const totalMilestones = ethers.utils.parseEther('3');
-    const paymentTimeInterval = ethers.utils.parseEther('3600');
+    const interestPercentage = BigNumber.from('20');
+    const totalMilestones = BigNumber.from('3');
+    const paymentTimeInterval = BigNumber.from('3600');
     const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
     const projectTokenPrice = ethers.utils.parseEther('1');
     const discountPerMillion = ethers.utils.parseEther('1');
@@ -126,9 +127,8 @@ describe('Check project fund loan', async () => {
 
   it('when funding a project loan', async function () {
     const {deployer, lender1, lender2} = await getNamedAccounts();
-    const signers = await ethers.getSigners();
-    const lender1Signer = signers[7];
-    const lender2Signer = signers[8];
+
+    const {lender1Signer, lender2Signer} = await getSigners();
 
     const initSeekerLendingBalance = await lendingTokenContract.balanceOf(
       deployer
@@ -150,9 +150,9 @@ describe('Check project fund loan', async () => {
 
     let partitionsPurchased = BigNumber.from(0);
 
-    await registryContract
-      .connect(lender1Signer)
-      .fundLoan(loanId, smallPartition);
+    await waitFor(
+      registryContract.connect(lender1Signer).fundLoan(loanId, smallPartition)
+    );
 
     let newEscrowLendingBalance = await lendingTokenContract.balanceOf(
       escrowContract.address
@@ -174,24 +174,24 @@ describe('Check project fund loan', async () => {
 
     // Correct Balances.
     expect(
-      newEscrowLendingBalance.sub(initEscrowLendingBalance).toNumber()
-    ).to.be.equal(smallPartitionAmountToPurchase.toNumber());
+      newEscrowLendingBalance.sub(initEscrowLendingBalance).toString()
+    ).to.be.equal(smallPartitionAmountToPurchase.toString());
     expect(
-      initEscrowFundingNftBalance.sub(newEscrowFundingNftBalance).toNumber()
-    ).to.be.equal(smallPartition.toNumber());
+      initEscrowFundingNftBalance.sub(newEscrowFundingNftBalance).toString()
+    ).to.be.equal(smallPartition.toString());
     expect(
-      initLenderLendingBalance.sub(newLenderLendingBalance).toNumber()
-    ).to.be.equal(smallPartitionAmountToPurchase.toNumber());
+      initLenderLendingBalance.sub(newLenderLendingBalance).toString()
+    ).to.be.equal(smallPartitionAmountToPurchase.toString());
     expect(
-      newLenderFundingNftBalance.sub(initLenderFundingNftBalance).toNumber
-    ).to.be.equal(smallPartition.toNumber());
+      newLenderFundingNftBalance.sub(initLenderFundingNftBalance).toString()
+    ).to.be.equal(smallPartition.toString());
 
     // Correct Status.
     expect(loanStatus.toString()).to.be.equal(LoanStatus.FUNDING);
 
     // Correct Details.
-    expect(loanDetails.partitionsPurchased.toNumber()).to.be.equal(
-      partitionsPurchased.toNumber()
+    expect(loanDetails.partitionsPurchased.toString()).to.be.equal(
+      partitionsPurchased.toString()
     );
 
     initEscrowLendingBalance = newEscrowLendingBalance;
@@ -226,24 +226,24 @@ describe('Check project fund loan', async () => {
 
     // Correct Balances.
     expect(
-      newEscrowLendingBalance.sub(initEscrowLendingBalance).toNumber()
-    ).to.be.equal(smallPartitionAmountToPurchase.toNumber());
+      newEscrowLendingBalance.sub(initEscrowLendingBalance).toString()
+    ).to.be.equal(smallPartitionAmountToPurchase.toString());
     expect(
-      initEscrowFundingNftBalance.sub(newEscrowFundingNftBalance).toNumber()
-    ).to.be.equal(smallPartition.toNumber());
+      initEscrowFundingNftBalance.sub(newEscrowFundingNftBalance).toString()
+    ).to.be.equal(smallPartition.toString());
     expect(
-      initLenderLendingBalance.sub(newLenderLendingBalance).toNumber()
-    ).to.be.equal(smallPartitionAmountToPurchase.toNumber());
+      initLenderLendingBalance.sub(newLenderLendingBalance).toString()
+    ).to.be.equal(smallPartitionAmountToPurchase.toString());
     expect(
-      newLenderFundingNftBalance.sub(initLenderFundingNftBalance).toNumber()
-    ).to.be.equal(smallPartition.toNumber());
+      newLenderFundingNftBalance.sub(initLenderFundingNftBalance).toString()
+    ).to.be.equal(smallPartition.toString());
 
     // Correct Status.
     expect(loanStatus.toString()).to.be.equal(LoanStatus.FUNDING);
 
     // Correct Details.
-    expect(loanDetails.partitionsPurchased.toNumber()).to.be.equal(
-      partitionsPurchased.toNumber()
+    expect(loanDetails.partitionsPurchased.toString()).to.be.equal(
+      partitionsPurchased.toString()
     );
 
     initEscrowFundingNftBalance = newEscrowFundingNftBalance;
@@ -281,31 +281,42 @@ describe('Check project fund loan', async () => {
     const loanPayments = await registryContract.projectLoanPayments(loanId);
 
     // Correct Balances.
-    expect(newEscrowLendingBalance).to.be.equal(startingEscrowLendingBalance);
+    expect(newEscrowLendingBalance.toString()).to.be.equal(
+      startingEscrowLendingBalance.toString()
+    );
     expect(
-      initEscrowFundingNftBalance.sub(newEscrowFundingNftBalance).toNumber()
-    ).to.be.equal(bigPartition.toNumber());
+      initEscrowFundingNftBalance.sub(newEscrowFundingNftBalance).toString()
+    ).to.be.equal(bigPartition.toString());
     expect(
-      initLenderLendingBalance.sub(newLenderLendingBalance).toNumber()
-    ).to.be.equal(bigPartitionAmountToPurchase.toNumber());
+      initLenderLendingBalance.sub(newLenderLendingBalance).toString()
+    ).to.be.equal(bigPartitionAmountToPurchase.toString());
     expect(
-      newLenderFundingNftBalance.sub(initLenderFundingNftBalance).toNumber()
-    ).to.be.equal(bigPartition.toNumber());
+      newLenderFundingNftBalance.sub(initLenderFundingNftBalance).toString()
+    ).to.be.equal(bigPartition.toString());
     expect(
-      newSeekerLendingBalance.sub(initSeekerLendingBalance).toNumber()
-    ).to.be.equal(loanDetails.lendingAmount.toNumber());
+      newSeekerLendingBalance.sub(initSeekerLendingBalance).toString()
+    ).to.be.equal(loanDetails.lendingAmount.toString());
 
     // Correct Status.
     expect(loanStatus.toString()).to.be.equal(LoanStatus.STARTED);
 
     // Correct Details.
-    expect(loanDetails.partitionsPurchased.toNumber()).to.be.equal(partitionsPurchased.toNumber());
-    expect(loanDetails.totalPartitions.toNumber()).to.be.equal(partitionsPurchased.toNumber());
-    expect(loanDetails.startingDate.toNumber()).to.be.equal((await getTransactionTimestamp(tx.tx)).toNumber());
+    expect(loanDetails.partitionsPurchased.toString()).to.be.equal(
+      partitionsPurchased.toString()
+    );
+    expect(loanDetails.totalPartitions.toString()).to.be.equal(
+      partitionsPurchased.toString()
+    );
+    expect(loanDetails.startingDate.toString()).to.be.equal(
+      (await getTransactionTimestamp(tx.tx)).toString()
+    );
 
     // Correct Payments.
-    expect(loanPayments.batchStartingTimestamp.toNumber()).to.be.equal((await getTransactionTimestamp(tx.tx)).toNumber());
-    expect(loanPayments.batchDeadlineTimestamp.toNumber()).to.be.equal(
-      (await getTransactionTimestamp(tx.tx)).add(batchTimeInterval).toNumber());
+    expect(loanPayments.batchStartingTimestamp.toString()).to.be.equal(
+      (await getTransactionTimestamp(tx.tx)).toString()
+    );
+    expect(loanPayments.batchDeadlineTimestamp.toString()).to.be.equal(
+      (await getTransactionTimestamp(tx.tx)).add(batchTimeInterval).toString()
+    );
   });
 });

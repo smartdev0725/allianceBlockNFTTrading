@@ -1,9 +1,6 @@
 import {deployments, ethers} from 'hardhat';
 
-import {
-  ContractReceipt,
-  ContractTransaction,
-} from 'ethers';
+import {ContractReceipt, ContractTransaction} from 'ethers';
 
 export const getSigners = async () => {
   const signers = await ethers.getSigners();
@@ -30,7 +27,7 @@ export const getContracts = async () => {
 
   const escrowContract = await ethers.getContract('Escrow');
 
-  const stakingContract = await ethers.getContract('Staking',);
+  const stakingContract = await ethers.getContract('Staking');
 
   const lendingTokenContract = await ethers.getContract('LendingToken');
 
@@ -105,8 +102,8 @@ export const initializeTransfers = async (
     .approve(registryContract.address, amountToTransfer);
 };
 
-export  const waitFor = (
+export const waitFor = (
   p: Promise<ContractTransaction>
 ): Promise<ContractReceipt> => {
   return p.then((tx) => tx.wait());
-}
+};

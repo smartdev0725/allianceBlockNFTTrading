@@ -5,7 +5,11 @@ import {ONE_DAY} from '../../helpers/constants';
 import {getCurrentTimestamp} from '../../helpers/time';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {BigNumber} from 'ethers';
-import {getContracts, getSigners, initializeTransfers} from "../../helpers/utils";
+import {
+  getContracts,
+  getSigners,
+  initializeTransfers,
+} from '../../helpers/utils';
 
 describe('Check project loan approval', async () => {
   let loanId: BigNumber;
@@ -24,8 +28,14 @@ describe('Check project loan approval', async () => {
 
     // Get accounts
     const {deployer, seeker, lender1, lender2} = await getNamedAccounts();
-    const {deployerSigner, lender1Signer, lender2Signer, seekerSigner, delegator1Signer, delegator2Signer} =
-      await getSigners();
+    const {
+      deployerSigner,
+      lender1Signer,
+      lender2Signer,
+      seekerSigner,
+      delegator1Signer,
+      delegator2Signer,
+    } = await getSigners();
 
     // Get contracts
     ({
@@ -66,7 +76,9 @@ describe('Check project loan approval', async () => {
     const currentTime = await getCurrentTimestamp();
 
     for (let i = 0; i < Number(totalMilestones); i++) {
-      milestoneDurations[i] = BigNumber.from(currentTime.add(new BN((i + 1) * ONE_DAY)));
+      milestoneDurations[i] = BigNumber.from(
+        currentTime.add(new BN((i + 1) * ONE_DAY)).toString()
+      );
       amountRequestedPerMilestone[i] = ethers.utils.parseEther('10000');
     }
 
@@ -87,8 +99,7 @@ describe('Check project loan approval', async () => {
   });
 
   it('when approving a project loan', async function () {
-    const signers = await ethers.getSigners();
-    const delegator1Signer = signers[2];
+    const {delegator1Signer} = await getSigners();
     const {delegator1} = await getNamedAccounts();
 
     await governanceContract
@@ -106,9 +117,7 @@ describe('Check project loan approval', async () => {
     // Correct Dao Request.
     expect(daoApprovalRequest.loanId.toNumber()).to.be.equal(loanId.toNumber());
     expect(daoApprovalRequest.isMilestone).to.be.equal(false);
-    expect(daoApprovalRequest.approvalsProvided).to.be.equal(
-      new BN(1)
-    );
+    expect(daoApprovalRequest.approvalsProvided.toNumber()).to.be.equal(1);
     expect(daoApprovalRequest.isApproved).to.be.equal(false);
 
     // Correct voting status for delegator.
@@ -130,9 +139,7 @@ describe('Check project loan approval', async () => {
     const loanStatus = await registryContract.loanStatus(loanId);
 
     // Correct Dao Request.
-    expect(daoApprovalRequest.approvalsProvided.toNumber()).to.be.equal(
-      BigNumber.from(2)
-    );
+    expect(daoApprovalRequest.approvalsProvided.toNumber()).to.be.equal(2);
     expect(daoApprovalRequest.isApproved).to.be.equal(true);
 
     // Correct voting status for delegator.

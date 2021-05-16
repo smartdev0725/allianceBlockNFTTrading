@@ -1,5 +1,5 @@
-import * as dotenv from "dotenv";
-dotenv.config({ path: __dirname+'/.env' });
+import * as dotenv from 'dotenv';
+dotenv.config({path: __dirname + '/.env'});
 
 import {HardhatUserConfig} from 'hardhat/types';
 import 'hardhat-deploy';
@@ -18,9 +18,6 @@ const config: HardhatUserConfig = {
       //   url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
       //   blockNumber: 11589707,
       // },
-      live: false,
-      saveDeployments: true,
-      tags: ['local', 'test'],
     },
     ganache: {
       url: node_url('localhost'),
@@ -63,7 +60,7 @@ const config: HardhatUserConfig = {
     artifacts: './artifacts',
     cache: './cache',
     sources: './contracts',
-    tests: './test',
+    tests: './tests',
   },
   solidity: {
     version: '0.7.3',
@@ -77,7 +74,7 @@ const config: HardhatUserConfig = {
   gasReporter: {
     currency: 'USD',
     gasPrice: 120,
-    enabled: true,
+    enabled: process.env.REPORT_GAS ? true : false,
     coinmarketcap: process.env.CMC_API_KEY,
   },
   typechain: {

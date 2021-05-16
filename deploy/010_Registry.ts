@@ -20,12 +20,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const {deployer} = await getNamedAccounts();
 
-  const Escrow = await get('Escrow');
-  const Governance = await get('Governance');
+  const Escrow = await get('Escrow_Proxy');
+  const Governance = await get('Governance_Proxy');
   const LendingToken = await get('LendingToken');
-  const MainNFT = await get('MainNFT');
-  const FundingNFT = await get('FundingNFT');
-  const Staking = await get('Staking');
+  const MainNFT = await get('MainNFT_Proxy');
+  const FundingNFT = await get('FundingNFT_Proxy');
+  const Staking = await get('Staking_Proxy');
 
   await deploy('Registry', {
     contract: 'Registry',
