@@ -3,7 +3,7 @@ import checkProjectFundLoanOffLimit from "./project/checkFundLoanOffLimit";
 import checkProjectMilestoneRepayment from "./project/checkProjectMilestoneRepayment";
 import checkProjectLoanRequests from './project/checkProjectLoanRequests';
 import checkProjectLoanApproval from './project/checkLoanApproval';
-import checkProjectFundLoan from './project/checkLoanApproval';
+import checkProjectFundLoan from './project/checkFundLoan';
 import checkProjectMilestoneApplication from './project/checkProjectMilestoneApplication';
 import checkProjectMilestoneApproval from './project/checkProjectMilestoneApproval';
 import checkProjectTokenRepayment from './project/checkProjectTokenRepayment';
