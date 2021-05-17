@@ -51,17 +51,20 @@ export default async function suite() {
             totalPartitions = totalAmountRequested.div(new BN(toWei(BASE_AMOUNT.toString())));
             bigPartition = totalPartitions.div(new BN(2));
 
-            await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[0] });
-            await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[1] });
+            await this.governance.superVoteForRequest(approvalRequest, true, {
+                from: this.owner
+            });
 
             await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[0] });
             await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[1] });
         });
+
         it("when the first milestone is already approved after funding", async function () {
             const loanPayments = await this.registry.projectLoanPayments(loanId);
 
             expect(loanPayments.milestonesDelivered).to.be.bignumber.equal(new BN(1));
         });
+
         it("when all NFT can be converted after funding", async function () {
             const convertibleAmountLender0 = await this.registry.getAvailableFundingNFTForConversion(loanId, this.lenders[0]);
 

@@ -19,7 +19,7 @@ export default async function suite() {
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
       initSeekerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.seeker));
       initEscrowCollateralBalance = new BN(await this.collateralToken.balanceOf(this.escrow.address));
-      initEscrowFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.escrow.address, loanId));
+      initEscrowFundingNftBalance =  new BN(await this.fundingNFT.balanceOf(this.escrow.address, loanId));
     });
 
     it('when requesting an interest only personal loan', async function () {
@@ -48,9 +48,9 @@ export default async function suite() {
 
       const newSeekerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.seeker));
       const newEscrowCollateralBalance = new BN(await this.collateralToken.balanceOf(this.escrow.address));
-      const newEscrowFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.escrow.address, loanId));
+      const newEscrowFundingNftBalance =  new BN(await this.fundingNFT.balanceOf(this.escrow.address, loanId));
 
-      const isPaused = await this.fundingNft.transfersPaused(loanId);
+      const isPaused = await this.fundingNFT.transfersPaused(loanId);
 
       const loanStatus = await this.registry.loanStatus(loanId);
       const loanDetails = await this.registry.loanDetails(loanId);
@@ -129,9 +129,9 @@ export default async function suite() {
 
       const newSeekerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.seeker));
       const newEscrowCollateralBalance = new BN(await this.collateralToken.balanceOf(this.escrow.address));
-      const newEscrowFundingNftBalance =  new BN(await this.fundingNft.balanceOf(this.escrow.address, loanId));
+      const newEscrowFundingNftBalance =  new BN(await this.fundingNFT.balanceOf(this.escrow.address, loanId));
 
-      const isPaused = await this.fundingNft.transfersPaused(loanId);
+      const isPaused = await this.fundingNFT.transfersPaused(loanId);
 
       const loanStatus = await this.registry.loanStatus(loanId);
       const loanDetails = await this.registry.loanDetails(loanId);

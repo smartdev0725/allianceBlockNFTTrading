@@ -1,12 +1,20 @@
-import BN from 'bn.js';
-import { toWei } from 'web3-utils';
-import { expect } from 'chai';
-import { RepaymentBatchType, LoanType, LoanStatus } from '../../helpers/registryEnums';
-import { ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL } from "../../helpers/constants";
-import { getTransactionTimestamp, getCurrentTimestamp } from "../../helpers/time";
+import BN from "bn.js";
+import { toWei } from "web3-utils";
+import { expect } from "chai";
+import {
+  LoanStatus
+} from "../../helpers/registryEnums";
+import {
+  ONE_DAY,
+  BASE_AMOUNT,
+} from "../../helpers/constants";
+import {
+  getTransactionTimestamp,
+  getCurrentTimestamp
+} from "../../helpers/time";
 
 export default async function suite() {
-  describe('Succeeds', async () => {
+  describe("Succeeds", async () => {
     const totalMilestones = new BN(3);
     let loanId: BN;
     let totalPartitions: BN;
@@ -28,13 +36,13 @@ export default async function suite() {
       const interestPercentage = new BN(20);
       const discountPerMillion = new BN(400000);
       const paymentTimeInterval = new BN(3600);
-      const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
+      const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ";
 
       const currentTime = await getCurrentTimestamp();
 
       for (let i = 0; i < Number(totalMilestones); i++) {
-        milestoneDurations[i] = currentTime.add(new BN((i + 1) * ONE_DAY))
-        amountRequestedPerMilestone[i] = new BN(toWei('10000'));
+        milestoneDurations[i] = currentTime.add(new BN((i + 1) * ONE_DAY));
+        amountRequestedPerMilestone[i] = new BN(toWei("10000"));
       }
 
       await this.registry.requestProjectLoan(
@@ -58,8 +66,9 @@ export default async function suite() {
       bigPartitionAmountToPurchase = bigPartition.mul(new BN(toWei(BASE_AMOUNT.toString())));
       smallPartitionAmountToPurchase = smallPartition.mul(new BN(toWei(BASE_AMOUNT.toString())));
 
-      await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[0] });
-      await this.governance.voteForRequest(approvalRequest, true, { from: this.delegators[1] });
+      await this.governance.superVoteForRequest(approvalRequest, true, {
+        from: this.owner
+      });
     });
 
     it('when funding a project loan', async function () {
@@ -68,10 +77,11 @@ export default async function suite() {
       let initEscrowFundingNftBalance = new BN(await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.escrow.address));
       let initLenderLendingBalance = new BN(await this.lendingToken.balanceOf(this.lenders[0]));
       let initLenderFundingNftBalance = new BN(await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.lenders[0]));
-
       let partitionsPurchased = new BN(0);
 
-      await this.registry.fundLoan(loanId, smallPartition, { from: this.lenders[0] });
+      await this.registry.fundLoan(loanId, smallPartition, {
+        from: this.lenders[0]
+      });
 
       let newEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
       let newEscrowFundingNftBalance = new BN(await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.escrow.address));
@@ -93,14 +103,18 @@ export default async function suite() {
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.FUNDING);
 
       // Correct Details.
-      expect(loanDetails.partitionsPurchased).to.be.bignumber.equal(partitionsPurchased);
+      expect(loanDetails.partitionsPurchased).to.be.bignumber.equal(
+        partitionsPurchased
+      );
 
       initEscrowLendingBalance = newEscrowLendingBalance;
       initEscrowFundingNftBalance = newEscrowFundingNftBalance;
       initLenderLendingBalance = new BN(await this.lendingToken.balanceOf(this.lenders[1]));
       initLenderFundingNftBalance = new BN(await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.lenders[1]));
 
-      await this.registry.fundLoan(loanId, smallPartition, { from: this.lenders[1] });
+      await this.registry.fundLoan(loanId, smallPartition, {
+        from: this.lenders[1]
+      });
 
       newEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
       newEscrowFundingNftBalance = new BN(await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.escrow.address));
@@ -122,16 +136,22 @@ export default async function suite() {
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.FUNDING);
 
       // Correct Details.
-      expect(loanDetails.partitionsPurchased).to.be.bignumber.equal(partitionsPurchased);
+      expect(loanDetails.partitionsPurchased).to.be.bignumber.equal(
+        partitionsPurchased
+      );
 
       initEscrowLendingBalance = newEscrowLendingBalance;
       initEscrowFundingNftBalance = newEscrowFundingNftBalance;
       initLenderLendingBalance = new BN(await this.lendingToken.balanceOf(this.lenders[2]));
       initLenderFundingNftBalance = new BN(await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.lenders[2]));
 
-      const tx = await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[2] });
+      const tx = await this.registry.fundLoan(loanId, bigPartition, {
+        from: this.lenders[2]
+      });
 
-      const newSeekerLendingBalance = new BN(await this.lendingToken.balanceOf(this.projectOwner));
+      const newSeekerLendingBalance = new BN(
+        await this.lendingToken.balanceOf(this.projectOwner)
+      );
 
       newEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
       newEscrowFundingNftBalance = new BN(await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.escrow.address));
@@ -155,9 +175,15 @@ export default async function suite() {
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.STARTED);
 
       // Correct Details.
-      expect(loanDetails.partitionsPurchased).to.be.bignumber.equal(partitionsPurchased);
-      expect(loanDetails.totalPartitions).to.be.bignumber.equal(partitionsPurchased);
-      expect(loanDetails.startingDate).to.be.bignumber.equal(await getTransactionTimestamp(tx.tx));
+      expect(loanDetails.partitionsPurchased).to.be.bignumber.equal(
+        partitionsPurchased
+      );
+      expect(loanDetails.totalPartitions).to.be.bignumber.equal(
+        partitionsPurchased
+      );
+      expect(loanDetails.startingDate).to.be.bignumber.equal(
+        await getTransactionTimestamp(tx.tx)
+      );
 
       // Correct Payments.
       expect(loanPayments.currentMilestoneStartingTimestamp).to.be.bignumber.equal(await getTransactionTimestamp(tx.tx));

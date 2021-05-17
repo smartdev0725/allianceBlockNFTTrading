@@ -3,16 +3,16 @@ import { toWei } from "web3-utils";
 import { expect } from "chai";
 import { LoanStatus } from "../../helpers/registryEnums";
 import { ONE_DAY, BASE_AMOUNT } from "../../helpers/constants";
-import { getCurrentTimestamp } from "../../helpers/time";
+import { increaseTime, getCurrentTimestamp } from "../../helpers/time";
 
-const { time, expectRevert } = require("@openzeppelin/test-helpers");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 export default async function suite() {
   describe("Succeeds", async () => {
     let loanId: BN;
     let approvalRequest: BN;
 
-    beforeEach(async function () {
+    beforeEach(async function() {
       // Given
       loanId = new BN(await this.registry.totalLoans());
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
@@ -56,11 +56,8 @@ export default async function suite() {
       );
       const bigPartition = totalPartitions.div(new BN(2));
 
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[0]
-      });
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[1]
+      await this.governance.superVoteForRequest(approvalRequest, true, {
+        from: this.owner
       });
 
       await this.registry.fundLoan(loanId, bigPartition, {
@@ -73,15 +70,12 @@ export default async function suite() {
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
       await this.registry.applyMilestone(loanId, { from: this.projectOwner });
 
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[0]
-      });
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[1]
+      await this.governance.superVoteForRequest(approvalRequest, true, {
+        from: this.owner
       });
     });
 
-    it("when repaying a project loan", async function () {
+    it("when repaying a project loan", async function() {
       const loanPayments = await this.registry.projectLoanPayments(loanId);
 
       await this.lendingToken.approve(
@@ -98,7 +92,7 @@ export default async function suite() {
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.SETTLED);
     });
 
-    it("should revert in case it does not have allowancee", async function () {
+    it("should revert in case it does not have allowancee", async function() {
       // When && Then
       await expectRevert(
         this.registry.executePayment(loanId, { from: this.projectOwner }),
@@ -106,12 +100,12 @@ export default async function suite() {
       );
     });
 
-    it("should revert when repaying a project loan out of time", async function () {
+    it("should revert when repaying a project loan out of time", async function() {
       // When
       const loanPayments = await this.registry.projectLoanPayments(loanId);
 
       // Move time to 1 month, so we can trigger the exception
-      time.increase(30 * 24 * 60 * 60); // One Month
+      increaseTime(new BN(30 * 24 * 60 * 60)); // One Month
 
       await this.lendingToken.approve(
         this.registry.address,
