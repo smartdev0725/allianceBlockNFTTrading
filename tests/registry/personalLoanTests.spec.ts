@@ -33,7 +33,7 @@ const LendingToken = artifacts.require("LendingToken");
 const CollateralToken = artifacts.require("CollateralToken");
 const ProjectToken = artifacts.require("ProjectToken");
 const ALBT = artifacts.require("ALBT");
-const LoanNFT = artifacts.require("LoanNFT");
+const FundingNFT = artifacts.require("FundingNFT");
 const MainNFT = artifacts.require("MainNFT");
 
 describe("Registry Personal Loans", function() {
@@ -41,7 +41,7 @@ describe("Registry Personal Loans", function() {
     const accounts = await web3.eth.getAccounts();
 
     this.owner = accounts[0];
-    this.borrower = accounts[1];
+    this.seeker = accounts[1];
     this.lenders = [accounts[2], accounts[3], accounts[4]];
     this.delegators = [accounts[5], accounts[6], accounts[7]];
     this.projectOwner = accounts[8];
@@ -51,7 +51,7 @@ describe("Registry Personal Loans", function() {
     this.lendingToken = await LendingToken.new();
     this.collateralToken = await CollateralToken.new();
     this.projectToken = await ProjectToken.new();
-    this.loanNft = await LoanNFT.new();
+    this.fundingNFT = await FundingNFT.new();
     this.mainNft = await MainNFT.new();
 
     const amountStakedForDaoMembership = new BN(toWei("10000"));
@@ -68,7 +68,7 @@ describe("Registry Personal Loans", function() {
     this.escrow = await Escrow.new(
       this.lendingToken.address,
       this.mainNft.address,
-      this.loanNft.address
+      this.fundingNFT.address
     );
 
     this.staking = await Staking.new(
@@ -82,7 +82,7 @@ describe("Registry Personal Loans", function() {
       this.governance.address,
       this.lendingToken.address,
       this.mainNft.address,
-      this.loanNft.address,
+      this.fundingNFT.address,
       new BN(toWei(BASE_AMOUNT.toString())),
       MINIMUM_INTEREST_PERCENTAGE,
       MAX_MILESTONES,
@@ -103,12 +103,12 @@ describe("Registry Personal Loans", function() {
     // this.governance.openDaoDelegating(2, ONE_DAY, ONE_DAY, ONE_DAY, ONE_DAY);
 
     // Add roles.
-    await this.loanNft.grantRole(
+    await this.fundingNFT.grantRole(
       web3.utils.keccak256("MINTER_ROLE"),
       this.registry.address,
       { from: this.owner }
     );
-    await this.loanNft.grantRole(
+    await this.fundingNFT.grantRole(
       web3.utils.keccak256("PAUSER_ROLE"),
       this.registry.address,
       { from: this.owner }
@@ -126,19 +126,19 @@ describe("Registry Personal Loans", function() {
       });
     }
 
-    await this.lendingToken.mint(this.borrower, amountToTransfer, {
+    await this.lendingToken.mint(this.seeker, amountToTransfer, {
       from: this.owner
     });
     await this.lendingToken.approve(this.registry.address, amountToTransfer, {
-      from: this.borrower
+      from: this.seeker
     });
-    await this.collateralToken.mint(this.borrower, amountToTransfer, {
+    await this.collateralToken.mint(this.seeker, amountToTransfer, {
       from: this.owner
     });
     await this.collateralToken.approve(
       this.registry.address,
       amountToTransfer,
-      { from: this.borrower }
+      { from: this.seeker }
     );
     await this.projectToken.mint(this.projectOwner, amountToTransfer, {
       from: this.owner

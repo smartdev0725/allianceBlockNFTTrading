@@ -67,24 +67,17 @@ export default async function suite() {
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
       await this.registry.applyMilestone(loanId, { from: this.projectOwner });
     });
+
     it("when approving a milestone for a project loan", async function() {
-      const initBorrowerLendingBalance = new BN(
-        await this.lendingToken.balanceOf(this.projectOwner)
-      );
-      const initEscrowLendingBalance = new BN(
-        await this.lendingToken.balanceOf(this.escrow.address)
-      );
+      const initSeekerLendingBalance = new BN(await this.lendingToken.balanceOf(this.projectOwner));
+      const initEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
 
       await this.governance.superVoteForRequest(approvalRequest, true, {
         from: this.owner
       });
 
-      const newBorrowerLendingBalance = new BN(
-        await this.lendingToken.balanceOf(this.projectOwner)
-      );
-      const newEscrowLendingBalance = new BN(
-        await this.lendingToken.balanceOf(this.escrow.address)
-      );
+      const newSeekerLendingBalance = new BN(await this.lendingToken.balanceOf(this.projectOwner));
+      const newEscrowLendingBalance = new BN(await this.lendingToken.balanceOf(this.escrow.address));
 
       const currentTime = await getCurrentTimestamp();
 
@@ -92,19 +85,15 @@ export default async function suite() {
       const daoApprovalRequest = await this.governance.approvalRequests(
         approvalRequest
       );
-      const isPaused = await this.loanNft.transfersPaused(loanId);
+      const isPaused = await this.fundingNft.transfersPaused(loanId);
       let loanStatus = await this.registry.loanStatus(loanId);
 
       const { amount } = await this.registry.getMilestonesInfo(loanId, 0);
       const { timestamp } = await this.registry.getMilestonesInfo(loanId, 1);
 
       // Correct Balances.
-      expect(newBorrowerLendingBalance).to.be.bignumber.equal(
-        initBorrowerLendingBalance.add(amount)
-      );
-      expect(newEscrowLendingBalance).to.be.bignumber.equal(
-        initEscrowLendingBalance.sub(amount)
-      );
+      expect(newSeekerLendingBalance).to.be.bignumber.equal(initSeekerLendingBalance.add(amount));
+      expect(newEscrowLendingBalance).to.be.bignumber.equal(initEscrowLendingBalance.sub(amount));
 
       // Correct Status
       expect(loanStatus).to.be.bignumber.equal(

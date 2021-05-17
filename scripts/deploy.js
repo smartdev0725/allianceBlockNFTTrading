@@ -5,7 +5,7 @@ const Staking = artifacts.require("Staking");
 const LendingToken = artifacts.require("LendingToken");
 const CollateralToken = artifacts.require("CollateralToken");
 const ALBT = artifacts.require("ALBT");
-const LoanNFT = artifacts.require("LoanNFT");
+const FundingNFT = artifacts.require("FundingNFT");
 const MainNFT = artifacts.require("MainNFT");
 
 const {
@@ -28,7 +28,7 @@ async function main() {
   const accounts = await web3.eth.getAccounts();
 
   this.owner = accounts[0];
-  this.borrower = accounts[1];
+  this.seeker = accounts[1];
   this.lenders = [accounts[2], accounts[3], accounts[4]];
   this.delegators = [accounts[5], accounts[6], accounts[7]];
 
@@ -36,7 +36,7 @@ async function main() {
   this.albt = await ALBT.new();
   this.lendingToken = await LendingToken.new();
   this.collateralToken = await CollateralToken.new();
-  this.loanNft = await LoanNFT.new();
+  this.fundingNft = await FundingNFT.new();
   this.mainNft = await MainNFT.new();
   this.governance = await Governance.new(
     this.delegators,
@@ -48,7 +48,7 @@ async function main() {
   this.escrow = await Escrow.new(
     this.lendingToken.address,
     this.mainNft.address,
-    this.loanNft.address
+    this.fundingNft.address
   );
   this.staking = await Staking.new(this.albt.address);
   this.registry = await Registry.new(
@@ -56,7 +56,7 @@ async function main() {
     this.governance.address,
     this.lendingToken.address,
     this.mainNft.address,
-    this.loanNft.address,
+    this.fundingNft.address,
     new BN(toWei(BASE_AMOUNT.toString())),
     MINIMUM_INTEREST_PERCENTAGE,
     MAX_MILESTONES,
@@ -71,12 +71,12 @@ async function main() {
   await this.escrow.initialize(this.registry.address);
 
   // Add roles.
-  await this.loanNft.grantRole(
+  await this.fundingNft.grantRole(
     web3.utils.keccak256("MINTER_ROLE"),
     this.registry.address,
     { from: this.owner }
   );
-  await this.loanNft.grantRole(
+  await this.fundingNft.grantRole(
     web3.utils.keccak256("PAUSER_ROLE"),
     this.registry.address,
     { from: this.owner }
@@ -94,17 +94,17 @@ async function main() {
     });
   }
 
-  await this.lendingToken.mint(this.borrower, amountToTransfer, {
+  await this.lendingToken.mint(this.seeker, amountToTransfer, {
     from: this.owner
   });
   await this.lendingToken.approve(this.registry.address, amountToTransfer, {
-    from: this.borrower
+    from: this.seeker
   });
-  await this.collateralToken.mint(this.borrower, amountToTransfer, {
+  await this.collateralToken.mint(this.seeker, amountToTransfer, {
     from: this.owner
   });
   await this.collateralToken.approve(this.registry.address, amountToTransfer, {
-    from: this.borrower
+    from: this.seeker
   });
 
   // Deployment Addresses
@@ -112,7 +112,7 @@ async function main() {
   console.log("\tALBT:", this.albt.address);
   console.log("\tCollateral:", this.collateralToken.address);
   console.log("\tLending:", this.lendingToken.address);
-  console.log("\tLoan NFT:", this.loanNft.address);
+  console.log("\tFunding NFT:", this.fundingNft.address);
   console.log("\tMain NFT:", this.mainNft.address);
   console.log("\tGovernance:", this.governance.address);
   console.log("\tEscrow:", this.escrow.address);

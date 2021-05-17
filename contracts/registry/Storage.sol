@@ -23,13 +23,13 @@ contract Storage {
     mapping(uint256 => LoanLibrary.ProjectLoanPayments) public projectLoanPayments;
     // Mapping from loan id -> loan status.
     mapping(uint256 => LoanLibrary.LoanStatus) public loanStatus;
-    // Mapping from loan id -> loan borrower's address.
-    mapping(uint256 => address) public loanBorrower;
+    // Mapping from loan id -> loan seeker's address.
+    mapping(uint256 => address) public loanSeeker;
 
     IGovernance public governance; // Governance's contract address.
     IERC20 public lendingToken; // Lending token's contract address.
     IERC721Mint public mainNFT; // Main nft's contract address.
-    IERC1155Mint public loanNFT; // Loan nft's contract address.
+    IERC1155Mint public fundingNFT; // Funding nft's contract address.
     IEscrow public escrow; // Escrow's contract address.
 
     // This variable represents the base amount in which every loan amount is divided to. (also the starting value for each ERC1155)

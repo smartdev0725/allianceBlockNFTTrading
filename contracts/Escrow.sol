@@ -16,16 +16,16 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
      * @dev Constructor of the contract.
      * @param lendingToken_ The token that lenders will be able to lend.
      * @param mainNFT_ The ERC721 token contract which will represent the whole loans.
-     * @param loanNFT_ The ERC1155 token contract which will represent the lending amounts.
+     * @param fundingNFT_ The ERC1155 token contract which will represent the lending amounts.
      */
     constructor(
         address lendingToken_,
         address mainNFT_,
-        address loanNFT_
+        address fundingNFT_
     ) public {
         lendingToken = IERC20(lendingToken_);
         mainNFT = IERC721Mint(mainNFT_);
-        loanNFT = IERC1155Mint(loanNFT_);
+        fundingNFT = IERC1155Mint(fundingNFT_);
     }
 
     /**
@@ -46,12 +46,12 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
      * @param partitionsPurchased The amount of ERC1155 tokens that should be sent back to the lender.
      * @param receiver Lender's address.
      */
-    function transferLoanNFT(
+    function transferFundingNFT(
         uint256 loanId,
         uint256 partitionsPurchased,
         address receiver
     ) external onlyRegistry() {
-        loanNFT.safeTransferFrom(
+        fundingNFT.safeTransferFrom(
             address(this),
             receiver,
             loanId,
@@ -61,22 +61,22 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
     }
 
     /**
-     * @dev This function is used to send the lended amount to the borrower.
-     * @param borrower Borrower's address.
-     * @param amount The amount of lending tokens to be sent to borrower.
+     * @dev This function is used to send the lended amount to the seeker.
+     * @param seeker Seeker's address.
+     * @param amount The amount of lending tokens to be sent to seeker.
      */
-    function transferLendingToken(address borrower, uint256 amount)
+    function transferLendingToken(address seeker, uint256 amount)
         external
         onlyRegistry()
     {
-        lendingToken.transfer(borrower, amount);
+        lendingToken.transfer(seeker, amount);
     }
 
     /**
-     * @dev This function is used to send the collateral amount to the borrower.
+     * @dev This function is used to send the collateral amount to the seeker.
      * @param collateralToken The collateral token's contract address.
      * @param recipient The address to transfer the collateral tokens to.
-     * @param amount The amount of collateral tokens to be sent to borrower.
+     * @param amount The amount of collateral tokens to be sent to seeker.
      */
     function transferCollateralToken(
         address collateralToken,

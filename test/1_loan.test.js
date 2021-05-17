@@ -1,4 +1,4 @@
-const LoanNFT = artifacts.require("LoanNFT");
+const FundingNFT = artifacts.require("FundingNFT");
 
 const {
   expectEvent,
@@ -9,23 +9,23 @@ const {
 const { assert } = require("hardhat");
 
 contract("LoanNFT", function () {
-  let admin, alice, bob, minter, loanNFT;
+  let admin, alice, bob, minter, fundingNFT;
 
   before(async function () {
     [admin, alice, bob, minter, random] = await web3.eth.getAccounts();
-    loanNFT = await LoanNFT.new();
+    fundingNFT = await FundingNFT.new();
   });
 
   describe("Initial Values", function () {
     it("should get correct contract uri", async function () {
-      const contractURI = await loanNFT.contractURI();
+      const contractURI = await fundingNFT.contractURI();
       assert.equal(contractURI, "https://allianceblock.io/");
     });
 
     it("should get correct role keys", async function () {
-      const MINTER_ROLE = await loanNFT.MINTER_ROLE();
-      const PAUSER_ROLE = await loanNFT.PAUSER_ROLE();
-      const DEFAULT_ADMIN_ROLE = await loanNFT.DEFAULT_ADMIN_ROLE();
+      const MINTER_ROLE = await fundingNFT.MINTER_ROLE();
+      const PAUSER_ROLE = await fundingNFT.PAUSER_ROLE();
+      const DEFAULT_ADMIN_ROLE = await fundingNFT.DEFAULT_ADMIN_ROLE();
 
       assert.equal(MINTER_ROLE, web3.utils.soliditySha3("MINTER_ROLE"));
       assert.equal(PAUSER_ROLE, web3.utils.soliditySha3("PAUSER_ROLE"));
@@ -36,15 +36,15 @@ contract("LoanNFT", function () {
     });
 
     it("should get correct role status for admin", async function () {
-      const isMinter = await loanNFT.hasRole(
+      const isMinter = await fundingNFT.hasRole(
         web3.utils.soliditySha3("MINTER_ROLE"),
         admin
       );
-      const isPauser = await loanNFT.hasRole(
+      const isPauser = await fundingNFT.hasRole(
         web3.utils.soliditySha3("PAUSER_ROLE"),
         admin
       );
-      const isAdmin = await loanNFT.hasRole("0x0", admin);
+      const isAdmin = await fundingNFT.hasRole("0x0", admin);
 
       assert(isAdmin);
       assert(isMinter);
@@ -52,15 +52,15 @@ contract("LoanNFT", function () {
     });
 
     it("should get correct role status for random address", async function () {
-      const isMinter = await loanNFT.hasRole(
+      const isMinter = await fundingNFT.hasRole(
         web3.utils.soliditySha3("MINTER_ROLE"),
         random
       );
-      const isPauser = await loanNFT.hasRole(
+      const isPauser = await fundingNFT.hasRole(
         web3.utils.soliditySha3("PAUSER_ROLE"),
         random
       );
-      const isAdmin = await loanNFT.hasRole("0x0", random);
+      const isAdmin = await fundingNFT.hasRole("0x0", random);
 
       assert(!isAdmin);
       assert(!isMinter);
@@ -68,8 +68,8 @@ contract("LoanNFT", function () {
     });
 
     it("should get correct interface support", async function () {
-      const supportERC1155 = await loanNFT.supportsInterface("0xd9b67a26");
-      const supportMetadata = await loanNFT.supportsInterface("0x0e89341c");
+      const supportERC1155 = await fundingNFT.supportsInterface("0xd9b67a26");
+      const supportMetadata = await fundingNFT.supportsInterface("0x0e89341c");
 
       assert(supportERC1155);
       assert(supportMetadata);
@@ -79,37 +79,37 @@ contract("LoanNFT", function () {
   describe("Basic Minting", function () {
     it("only minter role should be able to mint a new NFT", async function () {
       await expectRevert(
-        loanNFT.mintGen0(alice, 10, { from: random }),
+        fundingNFT.mintGen0(alice, 10, 1, { from: random }),
         "must have minter role to mint"
       );
-      await loanNFT.mintGen0(alice, 10, { from: admin });
+      await fundingNFT.mintGen0(alice, 10, 1, { from: admin });
     });
 
     it("should get correct balance for alice", async function () {
-      const balance = await loanNFT.balanceOf(alice, 1);
+      const balance = await fundingNFT.balanceOf(alice, 1);
       assert.equal(balance, 10);
     });
 
     it("only admin should grant role to new account", async function () {
       await expectRevert(
-        loanNFT.grantRole(web3.utils.soliditySha3("MINTER_ROLE"), minter, {
+        fundingNFT.grantRole(web3.utils.soliditySha3("MINTER_ROLE"), minter, {
           from: random,
         }),
         "AccessControl: sender must be an admin to grant"
       );
-      await loanNFT.grantRole(web3.utils.soliditySha3("MINTER_ROLE"), minter, {
+      await fundingNFT.grantRole(web3.utils.soliditySha3("MINTER_ROLE"), minter, {
         from: admin,
       });
     });
 
     it("new minter should be able to mint a new NFT", async function () {
-      await loanNFT.mintGen0(bob, 20, { from: minter });
-      const balance = await loanNFT.balanceOf(bob, 2);
+      await fundingNFT.mintGen0(bob, 20, 1, { from: minter });
+      const balance = await fundingNFT.balanceOf(bob, 2);
       assert.equal(balance, 20);
     });
 
     it("should be able to query balances in batch", async function () {
-      const balances = await loanNFT.balanceOfBatch([alice, bob], [1, 2]);
+      const balances = await fundingNFT.balanceOfBatch([alice, bob], [1, 2]);
 
       assert.equal(balances[0], 10);
       assert.equal(balances[1], 20);
@@ -119,10 +119,10 @@ contract("LoanNFT", function () {
   describe("Loan Id and Generation", function () {
     it("only minter role should be able to mint gen0", async function () {
       await expectRevert(
-        loanNFT.mintGen0(alice, 10, { from: random }),
+        fundingNFT.mintGen0(alice, 10, 1,{ from: random }),
         "must have minter role to mint"
       );
-      const tx = await loanNFT.mintGen0(alice, 10, { from: admin });
+      const tx = await fundingNFT.mintGen0(alice, 10, 1, { from: admin });
 
       expectEvent(tx, "TransferSingle", {
         operator: admin,
@@ -135,11 +135,11 @@ contract("LoanNFT", function () {
 
     it("should be able to increase loan generation", async function () {
       await expectRevert(
-        loanNFT.increaseGeneration(3, alice, 10, { from: random }),
+        fundingNFT.increaseGeneration(3, alice, 10, { from: random }),
         "caller is not owner nor approved"
       );
 
-      const tx = await loanNFT.increaseGeneration(3, alice, 10, {
+      const tx = await fundingNFT.increaseGeneration(3, alice, 10, {
         from: alice,
       });
 
@@ -161,17 +161,17 @@ contract("LoanNFT", function () {
       });
 
       const newTokenId = String(tx.logs[1].args.id);
-      const { generation, loanId } = await loanNFT.formatTokenId(newTokenId);
+      const { generation, loanId } = await fundingNFT.formatTokenId(newTokenId);
 
       assert.equal(generation, 1);
       assert.equal(loanId, 3);
     });
 
     it("should get correct balance for alice", async function () {
-      const balanceGen0 = await loanNFT.balanceOf(alice, 3);
+      const balanceGen0 = await fundingNFT.balanceOf(alice, 3);
 
-      const tokenId = await loanNFT.getTokenId(1, 3);
-      const balanceGen1 = await loanNFT.balanceOf(alice, tokenId);
+      const tokenId = await fundingNFT.getTokenId(1, 3);
+      const balanceGen1 = await fundingNFT.balanceOf(alice, tokenId);
 
       assert.equal(balanceGen0, 0);
       assert.equal(balanceGen1, 10);
@@ -181,17 +181,17 @@ contract("LoanNFT", function () {
   describe("Token Pausing", function () {
     it("only pauser role should be able to pause token transfers", async function () {
       await expectRevert(
-        loanNFT.pauseTokenTransfer(3, { from: random }),
+        fundingNFT.pauseTokenTransfer(3, { from: random }),
         "must have pauser role"
       );
-      await loanNFT.pauseTokenTransfer(3, { from: admin });
+      await fundingNFT.pauseTokenTransfer(3, { from: admin });
     });
 
     it("should revert when transfering a paused token", async function () {
-      const tokenId = await loanNFT.getTokenId(1, 3);
+      const tokenId = await fundingNFT.getTokenId(1, 3);
 
       await expectRevert(
-        loanNFT.safeTransferFrom(alice, bob, tokenId, 10, "0x", {
+        fundingNFT.safeTransferFrom(alice, bob, tokenId, 10, "0x", {
           from: alice,
         }),
         "Transfers paused"
@@ -199,10 +199,10 @@ contract("LoanNFT", function () {
     });
 
     it("should revert when increasing token generation of paused token", async function () {
-      const tokenId = await loanNFT.getTokenId(1, 3);
+      const tokenId = await fundingNFT.getTokenId(1, 3);
 
       await expectRevert(
-        loanNFT.increaseGeneration(tokenId, alice, 10, {
+        fundingNFT.increaseGeneration(tokenId, alice, 10, {
           from: alice,
         }),
         "Transfers paused"
@@ -210,10 +210,10 @@ contract("LoanNFT", function () {
     });
 
     it("should revert when user tries to burn a paused token", async function () {
-      const tokenId = await loanNFT.getTokenId(1, 3);
+      const tokenId = await fundingNFT.getTokenId(1, 3);
 
       await expectRevert(
-        loanNFT.burn(alice, tokenId, 10, {
+        fundingNFT.burn(alice, tokenId, 10, {
           from: alice,
         }),
         "Transfers paused"

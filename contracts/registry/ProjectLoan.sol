@@ -95,13 +95,14 @@ contract ProjectLoan is LoanDetails {
 
         // TODO - Mint Correctly And Burn on Settlement
         // mainNFT.mint(address(escrow));
-        loanNFT.mintOfGen(
+        fundingNFT.mintOfGen(
             address(escrow),
             loanDetails[totalLoans].totalPartitions,
-            totalMilestones.sub(1)
+            totalMilestones.sub(1),
+            totalLoans
         );
 
-        loanNFT.pauseTokenTransfer(totalLoans); //Pause trades for ERC1155s with the specific loan ID.
+        fundingNFT.pauseTokenTransfer(totalLoans); //Pause trades for ERC1155s with the specific loan ID.
 
         governance.requestApproval(totalLoans, false, 0);
 
@@ -116,7 +117,7 @@ contract ProjectLoan is LoanDetails {
      */
     function applyMilestone(uint256 loanId)
         external
-        onlyBorrower(loanId)
+        onlySeeker(loanId)
         onlyActiveLoan(loanId)
         onlyProjectLoan(loanId)
         onlyBetweenMilestoneTimeframe(loanId)
@@ -172,7 +173,7 @@ contract ProjectLoan is LoanDetails {
                 .LoanStatus
                 .AWAITING_MILESTONE_APPLICATION;
             escrow.transferLendingToken(
-                loanBorrower[loanId_],
+                loanSeeker[loanId_],
                 projectLoanPayments[loanId_].milestoneLendingAmount[
                     projectLoanPayments[loanId_].milestonesDelivered
                 ]
@@ -260,7 +261,7 @@ contract ProjectLoan is LoanDetails {
         }
 
         escrow.transferLendingToken(
-            loanBorrower[loanId_],
+            loanSeeker[loanId_],
             projectLoanPayments[loanId_].milestoneLendingAmount[0]
         );
     }
@@ -292,7 +293,7 @@ contract ProjectLoan is LoanDetails {
         }
     }
 
-    function _transferLoanNFTToProjectFunder(
+    function _transferFundingNFTToProjectFunder(
         uint256 loanId_,
         uint256 partitionsFunded_,
         address funder_
@@ -300,7 +301,7 @@ contract ProjectLoan is LoanDetails {
         uint256 tokenGeneration =
             projectLoanPayments[loanId_].totalMilestones.sub(1);
         uint256 tokenId = tokenGeneration.getTokenId(loanId_);
-        escrow.transferLoanNFT(tokenId, partitionsFunded_, funder_);
+        escrow.transferFundingNFT(tokenId, partitionsFunded_, funder_);
         // Decrease the generation of a percentage of the tokens so they can already be converted in project tokens after every milestone instead of only being repaid at the end of the loan.
         for (
             uint256 i = 0;
@@ -312,7 +313,7 @@ contract ProjectLoan is LoanDetails {
                     .mul(projectLoanPayments[loanId_].milestoneLendingAmount[i])
                     .div(loanDetails[loanId_].lendingAmount);
 
-            loanNFT.decreaseGenerations(
+        fundingNFT.decreaseGenerations(
                 tokenId,
                 funder_,
                 partitionsToConvertAtMilestone,
@@ -333,7 +334,7 @@ contract ProjectLoan is LoanDetails {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.SETTLED;
         escrow.transferCollateralToken(
             loanDetails[loanId_].collateralToken,
-            loanBorrower[loanId_],
+            loanSeeker[loanId_],
             loanDetails[loanId_].collateralAmount
         );
     }
@@ -358,7 +359,7 @@ contract ProjectLoan is LoanDetails {
     ) internal onlySettledLoan(loanId_) {
         uint256 tokenId = generation_.getTokenId(loanId_);
         require(
-            loanNFT.balanceOf(msg.sender, tokenId) >= amountOfTokens_,
+        fundingNFT.balanceOf(msg.sender, tokenId) >= amountOfTokens_,
             "Insufficient Loan NFT Balance"
         );
         uint256 amountToReceive =
@@ -368,31 +369,31 @@ contract ProjectLoan is LoanDetails {
                 )
             );
 
-        loanNFT.burn(msg.sender, tokenId, amountOfTokens_);
+        fundingNFT.burn(msg.sender, tokenId, amountOfTokens_);
         escrow.transferLendingToken(msg.sender, amountToReceive);
     }
 
     function _receiveProjectTokenPayment(
         uint256 loanId_,
-        uint256 amountLoanNFT_
+        uint256 amountFundingNFT_
     ) internal {
         require(
-            getAvailableLoanNFTForConversion(loanId_, msg.sender) >=
-                amountLoanNFT_,
-            "No loan NFT available for conversion to project tokens"
+            getAvailableFundingNFTForConversion(loanId_, msg.sender) >=
+                amountFundingNFT_,
+            "No funding NFT available for conversion to project tokens"
         );
 
         uint256 amount =
-            getAmountOfProjectTokensToReceive(loanId_, amountLoanNFT_);
+            getAmountOfProjectTokensToReceive(loanId_, amountFundingNFT_);
 
         // Keep track of the partitions paid in project tokens to reduce them from the settlement amount after milestone delivery
         projectLoanPayments[loanId_]
             .partitionsPaidInProjectTokens = projectLoanPayments[loanId_]
             .partitionsPaidInProjectTokens
-            .add(amountLoanNFT_);
+            .add(amountFundingNFT_);
 
-        // Burn the loan NFT used to claim the project tokens
-        _burnLoanNFTAmountOverGenerations(loanId_, amountLoanNFT_);
+        // Burn the funding NFT used to claim the project tokens
+        _burnFundingNFTAmountOverGenerations(loanId_, amountFundingNFT_);
 
         // Transfer the project tokens to the funder
         escrow.transferCollateralToken(
@@ -409,27 +410,27 @@ contract ProjectLoan is LoanDetails {
         );
     }
 
-    function _burnLoanNFTAmountOverGenerations(
+    function _burnFundingNFTAmountOverGenerations(
         uint256 loanId_,
-        uint256 amountLoanNFT_
+        uint256 amountFundingNFT_
     ) internal {
-        uint256 totalLoanNFTToBurn = amountLoanNFT_;
+        uint256 totalFundingNFTToBurn = amountFundingNFT_;
         for (
             uint256 i = 0;
             i < projectLoanPayments[loanId_].milestonesDelivered &&
-                totalLoanNFTToBurn > 0;
+                totalFundingNFTToBurn > 0;
             i++
         ) {
-            uint256 loanNFTBalance =
-                balanceOfLoanNFTGeneration(loanId_, i, msg.sender);
-            uint256 loanNFTToBurn =
-                loanNFTBalance > totalLoanNFTToBurn
-                    ? totalLoanNFTToBurn
-                    : loanNFTBalance;
+            uint256 fundingNFTBalance =
+                balanceOfFundingNFTGeneration(loanId_, i, msg.sender);
+            uint256 fundingNFTToBurn =
+                fundingNFTBalance > totalFundingNFTToBurn
+                    ? totalFundingNFTToBurn
+                    : fundingNFTBalance;
 
-            loanNFT.burn(msg.sender, i.getTokenId(loanId_), loanNFTToBurn);
+            fundingNFT.burn(msg.sender, i.getTokenId(loanId_), fundingNFTToBurn);
 
-            totalLoanNFTToBurn = totalLoanNFTToBurn.sub(loanNFTToBurn);
+            totalFundingNFTToBurn = totalFundingNFTToBurn.sub(fundingNFTToBurn);
         }
     }
 
@@ -495,7 +496,7 @@ contract ProjectLoan is LoanDetails {
             .div(100);
     }
 
-    function balanceOfAllLoanNFTGenerations(uint256 loanId, address funder)
+    function balanceOfAllFundingNFTGenerations(uint256 loanId, address funder)
         public
         view
         returns (uint256 balance)
@@ -506,17 +507,17 @@ contract ProjectLoan is LoanDetails {
             i++
         ) {
             balance = balance.add(
-                balanceOfLoanNFTGeneration(loanId, i, funder)
+                balanceOfFundingNFTGeneration(loanId, i, funder)
             );
         }
     }
 
-    function balanceOfLoanNFTGeneration(
+    function balanceOfFundingNFTGeneration(
         uint256 loanId,
         uint256 generation,
         address funder
     ) public view returns (uint256 balance) {
-        balance = loanNFT.balanceOf(funder, generation.getTokenId(loanId));
+        balance = fundingNFT.balanceOf(funder, generation.getTokenId(loanId));
     }
 
     function getProjectTokenPrice(uint256 loanId)
@@ -547,12 +548,12 @@ contract ProjectLoan is LoanDetails {
         );
     }
 
-    function getAvailableLoanNFTForConversion(uint256 loanId, address funder)
+    function getAvailableFundingNFTForConversion(uint256 loanId, address funder)
         public
         view
         returns (uint256 balance)
     {
-        // If the loan is already settled, the borrower already paid everything back and also got its collateral back already
+        // If the loan is already settled, the seeker already paid everything back and also got its collateral back already
         if (loanStatus[loanId] == LoanLibrary.LoanStatus.SETTLED) {
             return 0;
         }
@@ -563,17 +564,17 @@ contract ProjectLoan is LoanDetails {
             i++
         ) {
             balance = balance.add(
-                balanceOfLoanNFTGeneration(loanId, i, funder)
+                balanceOfFundingNFTGeneration(loanId, i, funder)
             );
         }
     }
 
     function getAmountOfProjectTokensToReceive(
         uint256 loanId,
-        uint256 amountLoanNFT
+        uint256 amountFundingNFT
     ) public view returns (uint256 amount) {
         uint256 amountToReceiveInProjectTokens =
-            amountLoanNFT.mul(baseAmountForEachPartition);
+            amountFundingNFT.mul(baseAmountForEachPartition);
         // Calculate amount of project tokens based on the discounted price
         amount = amountToReceiveInProjectTokens.div(
             getDiscountedProjectTokenPrice(loanId)

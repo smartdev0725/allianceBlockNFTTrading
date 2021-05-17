@@ -24,7 +24,7 @@ export default async function suite() {
       let loanId: BN;
       let totalPartitions: BN;
       let bigPartition: BN;
-      let startingBorrowerLendingBalance: BN;
+      let startingSeekerLendingBalance: BN;
       let batchTimeInterval: BN;
       let amountEachBatch: BN;
       let lendingAmount: BN;
@@ -38,7 +38,7 @@ export default async function suite() {
         );
         totalPartitions = new BN(100);
         bigPartition = new BN(50);
-        startingBorrowerLendingBalance = new BN(
+        startingSeekerLendingBalance = new BN(
           await this.lendingToken.balanceOf(this.escrow.address)
         );
 
@@ -60,7 +60,7 @@ export default async function suite() {
           batchTimeInterval,
           ipfsHash,
           repaymentBatchType,
-          { from: this.borrower }
+          { from: this.seeker }
         );
 
         await this.governance.superVoteForRequest(approvalRequest, true, {
@@ -82,8 +82,8 @@ export default async function suite() {
         timeInterval = loanPayments.timeIntervalBetweenBatches;
         firstBatchEndingTimestamp = loanPayments.batchDeadlineTimestamp;
 
-        startingBorrowerLendingBalance = new BN(
-          await this.lendingToken.balanceOf(this.borrower)
+        startingSeekerLendingBalance = new BN(
+          await this.lendingToken.balanceOf(this.seeker)
         );
       });
 
@@ -92,21 +92,21 @@ export default async function suite() {
           ? "only interest"
           : "interest plus nominal"
       }`, async function() {
-        let initBorrowerLendingBalance = new BN(
-          await this.lendingToken.balanceOf(this.borrower)
+        let initSeekerLendingBalance = new BN(
+          await this.lendingToken.balanceOf(this.seeker)
         );
         let initEscrowLendingBalance = new BN(
           await this.lendingToken.balanceOf(this.escrow.address)
         );
         const initCollateralBalance = new BN(
-          await this.collateralToken.balanceOf(this.borrower)
+          await this.collateralToken.balanceOf(this.seeker)
         );
         const loanDetails = await this.registry.loanDetails(loanId);
 
-        await this.registry.executePayment(loanId, { from: this.borrower });
+        await this.registry.executePayment(loanId, { from: this.seeker });
 
-        let newBorrowerLendingBalance = new BN(
-          await this.lendingToken.balanceOf(this.borrower)
+        let newSeekerLendingBalance = new BN(
+          await this.lendingToken.balanceOf(this.seeker)
         );
         let newEscrowLendingBalance = new BN(
           await this.lendingToken.balanceOf(this.escrow.address)
@@ -116,12 +116,8 @@ export default async function suite() {
         timeInterval = loanPayments.timeIntervalBetweenBatches;
 
         // Correct Balances.
-        expect(
-          initBorrowerLendingBalance.sub(newBorrowerLendingBalance)
-        ).to.be.bignumber.equal(amountEachBatch);
-        expect(
-          newEscrowLendingBalance.sub(initEscrowLendingBalance)
-        ).to.be.bignumber.equal(amountEachBatch);
+        expect(initSeekerLendingBalance.sub(newSeekerLendingBalance)).to.be.bignumber.equal(amountEachBatch);
+        expect(newEscrowLendingBalance.sub(initEscrowLendingBalance)).to.be.bignumber.equal(amountEachBatch);
 
         // Correct Payments.
         expect(loanPayments.batchesPaid).to.be.bignumber.equal(new BN(1));
@@ -132,8 +128,8 @@ export default async function suite() {
           firstBatchEndingTimestamp.add(timeInterval)
         );
 
-        initBorrowerLendingBalance = new BN(
-          await this.lendingToken.balanceOf(this.borrower)
+        initSeekerLendingBalance = new BN(
+          await this.lendingToken.balanceOf(this.seeker)
         );
         initEscrowLendingBalance = new BN(
           await this.lendingToken.balanceOf(this.escrow.address)
@@ -141,10 +137,10 @@ export default async function suite() {
 
         await increaseTime(timeInterval);
 
-        await this.registry.executePayment(loanId, { from: this.borrower });
+        await this.registry.executePayment(loanId, { from: this.seeker });
 
-        newBorrowerLendingBalance = new BN(
-          await this.lendingToken.balanceOf(this.borrower)
+        newSeekerLendingBalance = new BN(
+          await this.lendingToken.balanceOf(this.seeker)
         );
         newEscrowLendingBalance = new BN(
           await this.lendingToken.balanceOf(this.escrow.address)
@@ -159,19 +155,15 @@ export default async function suite() {
             : amountEachBatch;
 
         const newCollateralBalance = new BN(
-          await this.collateralToken.balanceOf(this.borrower)
+          await this.collateralToken.balanceOf(this.seeker)
         );
 
         // Correct Status.
         expect(loanStatus).to.be.bignumber.equal(LoanStatus.SETTLED);
 
         // Correct Balances.
-        expect(
-          initBorrowerLendingBalance.sub(newBorrowerLendingBalance)
-        ).to.be.bignumber.equal(amountLastBatch);
-        expect(
-          newEscrowLendingBalance.sub(initEscrowLendingBalance)
-        ).to.be.bignumber.equal(amountLastBatch);
+        expect(initSeekerLendingBalance.sub(newSeekerLendingBalance)).to.be.bignumber.equal(amountLastBatch);
+        expect(newEscrowLendingBalance.sub(initEscrowLendingBalance)).to.be.bignumber.equal(amountLastBatch);
 
         // Correct Payments.
         expect(loanPayments.batchesPaid).to.be.bignumber.equal(new BN(2));

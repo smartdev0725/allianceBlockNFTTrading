@@ -19,9 +19,9 @@ contract EscrowDetails {
     
     IERC20 public lendingToken;
     IERC721Mint public mainNFT;
-    IERC1155Mint public loanNFT;
+    IERC1155Mint public fundingNFT;
 
-    mapping(uint256 => address) public loanBorrower;
+    mapping(uint256 => address) public loanSeeker;
 
     modifier onlyRegistry() {
         require(msg.sender == address(registry), "Only Registry");

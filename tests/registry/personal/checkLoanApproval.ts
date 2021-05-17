@@ -38,7 +38,7 @@ export default async function suite() {
         batchTimeInterval,
         ipfsHash,
         RepaymentBatchType.ONLY_INTEREST,
-        { from: this.borrower }
+        { from: this.seeker }
       );
     });
 
@@ -61,7 +61,7 @@ export default async function suite() {
       );
       expect(daoApprovalRequest.isApproved).to.be.equal(true);
 
-      const isPaused = await this.loanNft.transfersPaused(loanId);
+      const isPaused = await this.fundingNFT.transfersPaused(loanId);
 
       // Correct Nft Behavior.
       expect(isPaused).to.be.equal(false);
