@@ -2,7 +2,8 @@ import BN from "bn.js";
 import { toWei } from "web3-utils";
 import { RepaymentBatchType } from "../../helpers/registryEnums";
 import { ONE_DAY, BASE_AMOUNT } from "../../helpers/constants";
-const { time, expectRevert } = require("@openzeppelin/test-helpers");
+const { expectRevert } = require("@openzeppelin/test-helpers");
+import { increaseTime } from "../../helpers/time";
 
 export default async function suite() {
   describe("Succeeds", async () => {
@@ -35,15 +36,12 @@ export default async function suite() {
         { from: this.seeker }
       );
 
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[0]
-      });
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[1]
+      await this.governance.superVoteForRequest(approvalRequest, true, {
+        from: this.owner
       });
 
       // When
-      time.increase(30 * 24 * 60 * 60); // One Month
+      await increaseTime(new BN(3 * 24 * 60 * 60)); // Three days
 
       // Then
       await expectRevert(

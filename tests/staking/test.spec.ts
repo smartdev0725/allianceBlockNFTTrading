@@ -3,8 +3,26 @@ import checkStaking from './checkStaking';
 import BN from 'bn.js';
 import { toWei } from 'web3-utils';
 
+import {
+  DAO_LOAN_APPROVAL,
+  DAO_MILESTONE_APPROVAL,
+  VESTING_TIME_INTERVAL,
+  VESTING_BATCHES,
+  BASE_AMOUNT,
+  MINIMUM_INTEREST_PERCENTAGE,
+  MAX_MILESTONES,
+  MILESTONE_EXTENSION,
+  AMOUNT_FOR_DAO_MEMBERSHIP,
+  FUNDING_TIME_INTERVAL,
+  DAO_UPDATE_REQUEST_DURATION,
+  DAO_APPROVALS_NEEDED_FOR_REGISTRY_REQUEST,
+  DAO_APPROVALS_NEEDED_FOR_GOVERNANCE_REQUEST,
+  ONE_DAY
+} from "../helpers/constants";
+
 const Staking = artifacts.require('Staking');
 const ALBT = artifacts.require('ALBT');
+const Governance = artifacts.require("Governance");
 
 describe('Staking', function () {
   before(async function () {
@@ -16,7 +34,21 @@ describe('Staking', function () {
 
     // Deploy contracts.
     this.albt = await ALBT.new();
-    this.staking = await Staking.new(this.albt.address);
+
+    this.governance = await Governance.new(
+      this.owner,
+      DAO_LOAN_APPROVAL,
+      DAO_MILESTONE_APPROVAL,
+      DAO_UPDATE_REQUEST_DURATION,
+      DAO_APPROVALS_NEEDED_FOR_REGISTRY_REQUEST,
+      DAO_APPROVALS_NEEDED_FOR_GOVERNANCE_REQUEST
+    );
+
+    this.staking = await Staking.new(
+      this.albt.address,
+      this.governance.address,
+      [ new BN(toWei('1000')), new BN(toWei('1000'))]
+    );
 
     // Set reward distributor.
     await this.staking.setRewardDistribution(this.rewardDistributor);

@@ -1,12 +1,12 @@
 import BN from "bn.js";
 import { toWei } from "web3-utils";
 import { ONE_DAY } from "../../helpers/constants";
-import { getCurrentTimestamp } from "../../helpers/time";
-const { time, expectRevert } = require("@openzeppelin/test-helpers");
+import { increaseTime, getCurrentTimestamp } from "../../helpers/time";
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 export default async function suite() {
   describe("Succeeds", async () => {
-    it("when funding a project loan off the limit should revert", async function () {
+    it("when funding a project loan off the limit should revert", async function() {
       // Given
 
       const loanId = new BN(await this.registry.totalLoans());
@@ -46,15 +46,12 @@ export default async function suite() {
         { from: this.projectOwner }
       );
 
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[0]
-      });
-      await this.governance.voteForRequest(approvalRequest, true, {
-        from: this.delegators[1]
+      await this.governance.superVoteForRequest(approvalRequest, true, {
+        from: this.owner
       });
 
       // When
-      time.increase(30 * 24 * 60 * 60); // One Month
+      increaseTime(new BN(3 * 24 * 60 * 60)); // three days
 
       // Then
       await expectRevert(
