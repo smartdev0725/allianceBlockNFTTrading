@@ -21,12 +21,30 @@ contract EscrowDetails {
     IERC20 public lendingToken;
     IERC721Mint public mainNFT;
     IERC1155Mint public fundingNFT;
+    address public actionVerifier;
+    address public staking;
 
     mapping(uint256 => address) public loanSeeker;
     rALBT public reputationalALBT;
 
     modifier onlyRegistry() {
         require(msg.sender == address(registry), "Only Registry");
+        _;
+    }
+
+    modifier onlyActionVerifier() {
+        require(msg.sender == actionVerifier, "Only Action Verifier");
+        _;
+    }
+
+    modifier onlyStaking() {
+        require(msg.sender == staking, "Only Staking");
+        _;
+    }
+
+    modifier onlyRegistryOrStaking() {
+        require(msg.sender == staking || msg.sender == address(registry),
+            "Only Registry or Staking");
         _;
     }
 }

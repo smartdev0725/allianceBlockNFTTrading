@@ -34,13 +34,20 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
     /**
      * @dev Initializes the contract.
      * @param registryAddress_ The registry address.
+     * @param actionVerifierAddress_ The actionVerifier address.
      */
-    function initialize(address registryAddress_) external onlyOwner() {
+    function initialize(
+        address registryAddress_,
+        address actionVerifierAddress_,
+        address stakingAddress_
+    ) external onlyOwner() {
         require(
             address(registry) == address(0),
             "Cannot initialize second time"
         );
         registry = IRegistry(registryAddress_);
+        actionVerifier = actionVerifierAddress_;
+        staking = stakingAddress_;
     }
 
     /**
@@ -90,6 +97,18 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
     }
 
     /**
+     * @dev This function is used to multi mint reputational tokens.
+     * @param recipients The addresses to mint the reputational tokens to.
+     * @param amounts The amounts of reputational tokens to be minted.
+     */
+    function multiMintReputationalToken(
+        address[] memory recipients,
+        uint256[] memory amounts
+    ) external onlyActionVerifier() {
+        reputationalALBT.multiMintTo(recipients, amounts);
+    }
+
+    /**
      * @dev This function is used to mint reputational tokens.
      * @param recipient The address to mint the reputational tokens to.
      * @param amount The amount of reputational tokens to be minted.
@@ -97,7 +116,7 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
     function mintReputationalToken(
         address recipient,
         uint256 amount
-    ) external onlyRegistry() {
+    ) external onlyRegistryOrStaking() {
         reputationalALBT.mintTo(recipient, amount);
     }
 
@@ -109,7 +128,7 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
     function burnReputationalToken(
         address from,
         uint256 amount
-    ) external onlyRegistry() {
+    ) external onlyStaking() {
         reputationalALBT.burnFrom(from, amount);
     }
 

@@ -2,6 +2,7 @@
 pragma solidity 0.7.0;
 
 import "../interfaces/IGovernanceStaking.sol";
+import "../interfaces/IEscrow.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
@@ -35,6 +36,7 @@ contract StakingTypesAndStorage {
     IERC20 public albt;
 
     IGovernanceStaking public governance;
+    IEscrow public escrow;
     address public rewardDistribution;
 
     uint256 public totalSupply;
@@ -42,6 +44,7 @@ contract StakingTypesAndStorage {
     mapping(address => uint256) public balance;
     mapping(address => bool) public freezed;
     mapping(uint256 => uint256) public stakingTypeAmounts; // Amounts required for each staking type.
+    mapping(uint256 => uint256) public reputationalStakingTypeAmounts; // Amounts of rALBT provided for each staking type.
 
     event RewardAdded(uint256 reward);
     event Staked(address indexed user, uint256 amount);
