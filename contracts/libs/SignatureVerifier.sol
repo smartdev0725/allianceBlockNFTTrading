@@ -22,7 +22,7 @@ library SignatureVerifier {
 
     bytes32 constant ACTION_TYPEHASH = 0x1f76bf6993440811cef7b51dc00dee9d4e8fa911023c7f2d088ce4e46ac2346f;
 
-    bytes32 constant DOMAIN_SEPARATOR = 0x026c87c5ea84034c02b2828527576ab446ce44a5d09b63e31d0ee33f2a71444e;
+    bytes32 constant DOMAIN_SEPARATOR = 0x1dfa77e97babb94d286b16b99eb32c73720eb70b034d837f9cc6c0d2b01ba2ce;
 
     function getActionStructHash(Action memory action) internal view returns (bytes32) {
         return keccak256(abi.encode(

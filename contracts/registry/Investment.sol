@@ -90,7 +90,7 @@ contract Investement is LoanDetails {
 
         loanDetails[investmentId].partitionsPurchased = loanDetails[investmentId].partitionsPurchased.add(amountOfPartitions);
 
-        uint256 reputationalBalance = _updateReputationalBalance();
+        uint256 reputationalBalance = _updateReputationalBalanceForPreviouslyLockedTokens();
         uint256 totalLotteryNumbers = reputationalBalance.div(rAlbtPerLotteryNumber);
 
         if (totalLotteryNumbers == 0) return; // Maybe revert here?
@@ -190,7 +190,7 @@ contract Investement is LoanDetails {
         ticketsWonPerAddress[investmentId][msg.sender] = ticketsWonPerAddress[investmentId][msg.sender].sub(
             ticketsToLock).sub(ticketsToWithdraw);
 
-        _updateReputationalBalance();
+        _updateReputationalBalanceForPreviouslyLockedTokens();
 
         if (ticketsToLock > 0) {
             lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender] =
@@ -212,6 +212,8 @@ contract Investement is LoanDetails {
             escrow.transferLendingToken(msg.sender, amountToReturnForNonWonTickets);
     }
 
+    // TODO - Just withdraw non-won tickets
+
     /**
      * @dev This function is called by an investor to withdraw his locked tickets.
      * @param investmentId The id of the investment.
@@ -226,7 +228,7 @@ contract Investement is LoanDetails {
             "Not enough tickets to withdraw"
         );
 
-        _updateReputationalBalance();
+        _updateReputationalBalanceForPreviouslyLockedTokens();
 
         lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender] =
             lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender].sub(ticketsToWithdraw);
@@ -234,7 +236,7 @@ contract Investement is LoanDetails {
         lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].sub(ticketsToWithdraw);
         
         uint256 amountToWithdraw = investmentTokensPerTicket[investmentId].mul(ticketsToWithdraw);
-        escrow.transferCollateralToken(loanDetails[investmentId].collateralToken ,msg.sender, amountToWithdraw);
+        escrow.transferCollateralToken(loanDetails[investmentId].collateralToken, msg.sender, amountToWithdraw);
     }
 
     /**
@@ -256,7 +258,7 @@ contract Investement is LoanDetails {
             ))).mod(maxNumber);
     }
 
-    function _updateReputationalBalance() internal returns (uint256) {
+    function _updateReputationalBalanceForPreviouslyLockedTokens() internal returns (uint256) {
         if (lockedTicketsPerAddress[msg.sender] > 0) {
             uint256 amountOfReputationalAlbtPerTicket = (block.number.sub(
                 lastBlockCheckedForLockedTicketsPerAddress[msg.sender])).div(blocksLockedForReputation);

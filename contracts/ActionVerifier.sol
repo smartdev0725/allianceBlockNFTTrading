@@ -56,6 +56,7 @@ contract ActionVerifier is Ownable {
         onlyOwner()
     {
         require(actions.length == signatures.length, "Invalid length");
+        // TODO - Rachid specifies the require to add here.
 
         address[] memory accounts = new address[](actions.length.add(1));
         uint256[] memory rewards = new uint256[](actions.length.add(1));
