@@ -63,8 +63,11 @@ contract ActionVerifier is Ownable {
         uint256 rewardForCaller;
 
         for (uint256 i = 0; i < actions.length; i++) {
-            // Verify signature
-            if (/*isValidSignature &&*/ rewardPerAction[keccak256(abi.encodePacked(actions[i].actionName))] > 0) {
+            if (
+                actions[i].isValidSignature(signatures[i]) &&
+                rewardPerAction[keccak256(abi.encodePacked(actions[i].actionName))] > 0
+            )
+            {
                 accounts[i] = actions[i].account;
                 rewards[i] = rewardPerAction[keccak256(abi.encodePacked(actions[i].actionName))];
 

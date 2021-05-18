@@ -2,7 +2,10 @@
 pragma solidity 0.7.0;
 pragma experimental ABIEncoderV2;
 
-library SignatureVerifier {    
+import "./BytesReader.sol";
+
+library SignatureVerifier {
+    using BytesReader for bytes;
     struct EIP712Domain {
         string  name;
         string  version;
@@ -21,7 +24,7 @@ library SignatureVerifier {
 
     bytes32 constant DOMAIN_SEPARATOR = 0x026c87c5ea84034c02b2828527576ab446ce44a5d09b63e31d0ee33f2a71444e;
 
-    function hash(Action memory action) internal view returns (bytes32) {
+    function getActionStructHash(Action memory action) internal view returns (bytes32) {
         return keccak256(abi.encode(
             ACTION_TYPEHASH,
             keccak256(bytes(action.actionName)),
@@ -31,13 +34,36 @@ library SignatureVerifier {
         ));
     }
 
-    function verify(Action memory action, uint8 v, bytes32 r, bytes32 s) internal view returns (bool) {
-        bytes32 digest = keccak256(abi.encodePacked(
+    function getActionTypedDataHash(Action memory action) internal view returns (bytes32 actionHash) {
+        actionHash = keccak256(abi.encodePacked(
             "\x19\x01",
             DOMAIN_SEPARATOR,
-            hash(action)
+            getActionStructHash(action)
         ));
+    }
 
-        return ecrecover(digest, v, r, s) == action.account;
+    /// @dev Verifies that an action has been signed by the action.account.
+    /// @param action The action to verify the signature for.
+    /// @param signature Proof that the hash has been signed by action.account.
+    /// @return True if the address recovered from the provided signature matches the action.account.
+    function isValidSignature(
+        Action memory action,
+        bytes memory signature
+    )
+        public
+        view
+        returns (bool)
+    {
+        if (signature.length != 65) return false;
+
+        bytes32 hash = getActionTypedDataHash(action);
+
+        uint8 v = uint8(signature[0]);
+        bytes32 r = signature.readBytes32(1);
+        bytes32 s = signature.readBytes32(33);
+
+        address recovered = ecrecover(hash, v, r, s);
+
+        return action.account == recovered;
     }
 }
