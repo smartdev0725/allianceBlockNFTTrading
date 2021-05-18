@@ -45,7 +45,7 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         else if (cronjobs[cronjobId].cronjobType == CronjobType.DAO_DELEGATORS_VOTING) {
             updateDaoDelegationVotingState(timestamp);
         }
-        else if (cronjobs[cronjobId].cronjobType == CronjobType.DAO_REWARDS_PROVISION) {            
+        else if (cronjobs[cronjobId].cronjobType == CronjobType.DAO_REWARDS_PROVISION) {         
             staking.provideRewards(
                 rewardsForDaoMembersPerEpoch[currentEpoch.sub(1)],
                 rewardsForDaoDelegatorsPerEpoch[currentEpoch.sub(1)],

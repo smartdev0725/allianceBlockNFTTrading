@@ -19,10 +19,10 @@ contract LoanDetails is Storage {
         _;
     }
 
-    modifier onlyBorrower(uint256 loanId) {
+    modifier onlySeeker(uint256 loanId) {
         require(
-            msg.sender == loanBorrower[loanId],
-            "Only Borrower of the loan"
+            msg.sender == loanSeeker[loanId],
+            "Only seeker of the loan"
         );
         _;
     }
@@ -153,7 +153,7 @@ contract LoanDetails is Storage {
             i++
         ) {
             balance = balance.add(
-                loanNFT.balanceOf(msg.sender, i.getTokenId(loanId))
+                fundingNFT.balanceOf(msg.sender, i.getTokenId(loanId))
             );
         }
         require(balance >= amountOfTokens, "Only when enough balance");
@@ -191,6 +191,6 @@ contract LoanDetails is Storage {
         loanDetails[totalLoans] = loan;
 
         loanStatus[totalLoans] = LoanLibrary.LoanStatus.REQUESTED;
-        loanBorrower[totalLoans] = msg.sender;
+        loanSeeker[totalLoans] = msg.sender;
     }
 }

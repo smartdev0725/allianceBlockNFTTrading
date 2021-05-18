@@ -10,16 +10,16 @@ export default async function suite() {
   describe('Succeeds', async () => {
     let loanId: BN;
     let approvalRequest: BN;
-    let initBorrowerCollateralBalance: BN;
+    let initSeekerCollateralBalance: BN;
     let initEscrowCollateralBalance: BN;
-    let initEscrowLoanNftBalance: BN;
+    let initEscrowFundingNftBalance: BN;
 
     beforeEach(async function () {
       loanId = new BN(await this.registry.totalLoans());
       approvalRequest = new BN(await this.governance.totalApprovalRequests());
-      initBorrowerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.borrower));
+      initSeekerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.seeker));
       initEscrowCollateralBalance = new BN(await this.collateralToken.balanceOf(this.escrow.address));
-      initEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
+      initEscrowFundingNftBalance =  new BN(await this.fundingNFT.balanceOf(this.escrow.address, loanId));
     });
 
     it('when requesting an interest only personal loan', async function () {
@@ -39,18 +39,18 @@ export default async function suite() {
         batchTimeInterval,
         ipfsHash,
         RepaymentBatchType.ONLY_INTEREST,
-        { from: this.borrower }
+        { from: this.seeker }
       );
 
       const totalPartitions = amountRequested.div(new BN(toWei(BASE_AMOUNT.toString())));
       const totalInterest = amountRequested.mul(interestPercentage).div(new BN(100));
       const amountEachBatch = totalInterest.div(totalAmountOfBatches);
 
-      const newBorrowerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.borrower));
+      const newSeekerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.seeker));
       const newEscrowCollateralBalance = new BN(await this.collateralToken.balanceOf(this.escrow.address));
-      const newEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
+      const newEscrowFundingNftBalance =  new BN(await this.fundingNFT.balanceOf(this.escrow.address, loanId));
 
-      const isPaused = await this.loanNft.transfersPaused(loanId);
+      const isPaused = await this.fundingNFT.transfersPaused(loanId);
 
       const loanStatus = await this.registry.loanStatus(loanId);
       const loanDetails = await this.registry.loanDetails(loanId);
@@ -61,7 +61,7 @@ export default async function suite() {
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.REQUESTED);
 
       // Correct Event.
-      expectEvent(tx.receipt, 'PersonalLoanRequested', { loanId , user: this.borrower, amount: amountRequested.toString() });
+      expectEvent(tx.receipt, 'PersonalLoanRequested', { loanId , user: this.seeker, amount: amountRequested.toString() });
 
       // Correct Details.
       expect(loanDetails.loanId).to.be.bignumber.equal(loanId);
@@ -86,9 +86,9 @@ export default async function suite() {
       expect(loanPayments.repaymentBatchType).to.be.bignumber.equal(RepaymentBatchType.ONLY_INTEREST);
 
       // Correct Balances.
-      expect(initBorrowerCollateralBalance.sub(newBorrowerCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
+      expect(initSeekerCollateralBalance.sub(newSeekerCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
       expect(newEscrowCollateralBalance.sub(initEscrowCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
-      expect(newEscrowLoanNftBalance.sub(initEscrowLoanNftBalance)).to.be.bignumber.equal(totalPartitions);
+      expect(newEscrowFundingNftBalance.sub(initEscrowFundingNftBalance)).to.be.bignumber.equal(totalPartitions);
 
       // Correct Nft Behavior.
       expect(isPaused).to.be.equal(true);
@@ -120,18 +120,18 @@ export default async function suite() {
         batchTimeInterval,
         ipfsHash,
         RepaymentBatchType.INTEREST_PLUS_NOMINAL,
-        { from: this.borrower }
+        { from: this.seeker }
       );
 
       const totalPartitions = amountRequested.div(new BN(toWei(BASE_AMOUNT.toString())));
       const totalInterest = amountRequested.mul(interestPercentage).div(new BN(100));
       const amountEachBatch = (totalInterest.add(amountRequested)).div(totalAmountOfBatches);
 
-      const newBorrowerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.borrower));
+      const newSeekerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.seeker));
       const newEscrowCollateralBalance = new BN(await this.collateralToken.balanceOf(this.escrow.address));
-      const newEscrowLoanNftBalance =  new BN(await this.loanNft.balanceOf(this.escrow.address, loanId));
+      const newEscrowFundingNftBalance =  new BN(await this.fundingNFT.balanceOf(this.escrow.address, loanId));
 
-      const isPaused = await this.loanNft.transfersPaused(loanId);
+      const isPaused = await this.fundingNFT.transfersPaused(loanId);
 
       const loanStatus = await this.registry.loanStatus(loanId);
       const loanDetails = await this.registry.loanDetails(loanId);
@@ -142,7 +142,7 @@ export default async function suite() {
       expect(loanStatus).to.be.bignumber.equal(LoanStatus.REQUESTED);
 
       // Correct Event.
-      expectEvent(tx.receipt, 'PersonalLoanRequested', { loanId , user: this.borrower, amount: amountRequested.toString() });
+      expectEvent(tx.receipt, 'PersonalLoanRequested', { loanId , user: this.seeker, amount: amountRequested.toString() });
 
         // Correct Details.
       expect(loanDetails.loanId).to.be.bignumber.equal(loanId);
@@ -167,9 +167,9 @@ export default async function suite() {
       expect(loanPayments.repaymentBatchType).to.be.bignumber.equal(RepaymentBatchType.INTEREST_PLUS_NOMINAL);
 
       // Correct Balances.
-      expect(initBorrowerCollateralBalance.sub(newBorrowerCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
+      expect(initSeekerCollateralBalance.sub(newSeekerCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
       expect(newEscrowCollateralBalance.sub(initEscrowCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
-      expect(newEscrowLoanNftBalance.sub(initEscrowLoanNftBalance)).to.be.bignumber.equal(totalPartitions);
+      expect(newEscrowFundingNftBalance.sub(initEscrowFundingNftBalance)).to.be.bignumber.equal(totalPartitions);
 
       // Correct Nft Behavior.
       expect(isPaused).to.be.equal(true);

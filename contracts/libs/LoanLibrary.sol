@@ -8,8 +8,8 @@ library LoanLibrary {
     }
 
     enum LoanType {
-        PERSONAL, // The type of loan where borrower is a person.
-        PROJECT, // The type of loan where borrower is a project.
+        PERSONAL, // The type of loan where seeker is a person.
+        PROJECT, // The type of loan where seeker is a project.
         INVESTMENT // The type of loan where seeker is a project seeking for IDO.
     }
 
@@ -20,8 +20,8 @@ library LoanLibrary {
         STARTED, // Status when loan has been fully funded.
         AWAITING_MILESTONE_APPROVAL, // Status when loan is waiting for DAO to approve a finished milestone.
         AWAITING_REPAYMENT, // Status when milestones have all been delivered and waiting for repayment from the project.
-        SETTLED, // Status when loan has been fully repaid by the borrower.
-        DEFAULT, // Status when borrower has not been able to repay the loan.
+        SETTLED, // Status when loan has been fully repaid by the seeker.
+        DEFAULT, // Status when seeker has not been able to repay the loan.
         LIQUIDATED, // Status when collateral's value was not enough, so loan got liquidated.
         REJECTED, // Status when loan has been rejected by governors.
         // TEMPORAL: waiting for status order and to not break tests
@@ -35,7 +35,7 @@ library LoanLibrary {
         uint256 startingDate; // The timestamp in which loan was funded.
         address collateralToken; // The address of the token that was put as collateral for the loan.
         uint256 collateralAmount; // The amount of collateral tokens locked as colateral.
-        uint256 lendingAmount; // The amount of tokens that was lended to the borrower.
+        uint256 lendingAmount; // The amount of tokens that was lended to the seeker.
         uint256 totalPartitions; // The total partitions or ERC1155 tokens, in which loan is splitted.
         uint256 totalInterest; // The amount of interest to be paid.
         uint256 interestPercentage; // The interest percentage to pay back over the amount in lending tokens.
@@ -44,13 +44,13 @@ library LoanLibrary {
     }
 
     struct PersonalLoanPayments {
-        uint256 batchesPaid; // The amount of batches that have been paid by the borrower.
-        uint256 amountEachBatch; // The amount to be paid in each batch by the borrower.
+        uint256 batchesPaid; // The amount of batches that have been paid by the seeker.
+        uint256 amountEachBatch; // The amount to be paid in each batch by the seeker.
         uint256 totalAmountOfBatches; // The total amount of batches for the loan repayment.
-        uint256 timeIntervalBetweenBatches; // The time interval, which represents how often borrower should pay a batch.
-        uint256 batchesSkipped; // The times that borrower skipped the payment (only 1 is accepted, then loan gets to DEFAULT).
-        uint256 batchStartingTimestamp; // Timestamp from which borrower is able to pay next batch.
-        uint256 batchDeadlineTimestamp; // Timestamp till which borrower should pay next batch.
+        uint256 timeIntervalBetweenBatches; // The time interval, which represents how often seeker should pay a batch.
+        uint256 batchesSkipped; // The times that seeker skipped the payment (only 1 is accepted, then loan gets to DEFAULT).
+        uint256 batchStartingTimestamp; // Timestamp from which seeker is able to pay next batch.
+        uint256 batchDeadlineTimestamp; // Timestamp till which seeker should pay next batch.
         RepaymentBatchType repaymentBatchType; // The repayment batch type of the loan.
     }
 

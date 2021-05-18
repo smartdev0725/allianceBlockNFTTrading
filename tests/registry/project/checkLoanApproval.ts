@@ -66,7 +66,7 @@ export default async function suite() {
       );
       expect(daoApprovalRequest.isApproved).to.be.equal(true);
 
-      const isPaused = await this.loanNft.transfersPaused(loanId);
+      const isPaused = await this.fundingNft.transfersPaused(loanId);
       const loanStatus = await this.registry.loanStatus(loanId);
 
       // Correct Nft Behavior.

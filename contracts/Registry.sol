@@ -50,7 +50,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     event PaymentExecuted(
         uint256 indexed loanId,
         LoanLibrary.LoanType indexed loanType,
-        address indexed borrower
+        address indexed seeker
     );
 
     /**
@@ -61,7 +61,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         address governanceAddress_,
         address lendingToken_,
         address mainNFT_,
-        address loanNFT_,
+        address fundingNFT_,
         uint256 baseAmountForEachPartition_,
         uint256 minimumInterestPercentage_,
         uint256 maxMilestones_,
@@ -76,7 +76,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         lendingToken = IERC20(lendingToken_);
         minimumInterestPercentage = minimumInterestPercentage_;
         mainNFT = IERC721Mint(mainNFT_);
-        loanNFT = IERC1155Mint(loanNFT_);
+        fundingNFT = IERC1155Mint(fundingNFT_);
         maxMilestones = maxMilestones_;
         milestoneExtensionInterval = milestoneExtensionInterval_;
         vestingBatches = vestingBatches_;
@@ -150,9 +150,9 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         );
 
         if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
-            escrow.transferLoanNFT(loanId, partitionsToPurchase, msg.sender);
+            escrow.transferFundingNFT(loanId, partitionsToPurchase, msg.sender);
         } else {
-            _transferLoanNFTToProjectFunder(
+            _transferFundingNFTToProjectFunder(
                 loanId,
                 partitionsToPurchase,
                 msg.sender
@@ -173,10 +173,10 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     }
 
     /**
-     * @dev This function is called by the borrower to return part of or whole owed amount for a loan (depending on agreement).
+     * @dev This function is called by the seeker to return part of or whole owed amount for a loan (depending on agreement).
      * @param loanId The id of the loan.
      */
-    function executePayment(uint256 loanId) external onlyBorrower(loanId) {
+    function executePayment(uint256 loanId) external onlySeeker(loanId) {
         if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
             _executePersonalLoanPayment(loanId);
         } else {
@@ -186,7 +186,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     }
 
     /**
-     * @dev This function is called by ERC1155 holders to receive a payment (after borrower has repaid part of loan).
+     * @dev This function is called by ERC1155 holders to receive a payment (after seeker has repaid part of loan).
      * @param tokenId The token id of the ERC1155 tokens, which is eligible for the payment.
      * @param amountOfTokens The amount of NFT tokens to receive payment for.
      * @param onProjectTokens Only used in project loans. [true -> repayment in project token] [false -> repayment in lending token]
@@ -258,7 +258,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.REJECTED;
         escrow.transferCollateralToken(
             loanDetails[loanId_].collateralToken,
-            loanBorrower[loanId_],
+            loanSeeker[loanId_],
             loanDetails[loanId_].collateralAmount
         );
         emit LoanRejected(loanId_, loanDetails[loanId_].loanType);
@@ -285,14 +285,14 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         returns (
             LoanLibrary.LoanDetails memory, // the loanDetails
             LoanLibrary.LoanStatus, // the loanStatus
-            address, // the loanBorrower,
+            address, // the loanSeeker,
             LoanLibrary.RepaymentBatchType // the repaymentBatchType
         )
     {
         return (
             loanDetails[loanId],
             loanStatus[loanId],
-            loanBorrower[loanId],
+            loanSeeker[loanId],
             personalLoanPayments[loanId].repaymentBatchType
         );
     }

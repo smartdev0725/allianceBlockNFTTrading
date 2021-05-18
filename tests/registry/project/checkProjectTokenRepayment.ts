@@ -67,22 +67,11 @@ export default async function suite() {
         from: this.lenders[1]
       });
 
-      /*
-            console.log(await this.registry.getTotalLoanNFTBalance(loanId, { from: this.lenders[0] }));
-            console.log(await this.registry.getLoanNFTBalanceOfGeneration(loanId, new BN(0), { from: this.lenders[0] }));
-            console.log(await this.registry.getLoanNFTBalanceOfGeneration(loanId, new BN(1), { from: this.lenders[0] }));
-            console.log(await this.registry.getLoanNFTBalanceOfGeneration(loanId, new BN(2), { from: this.lenders[0] }));
-            */
-    });
-    it("when project tokens can not be claimed if no milestones are delivered yet", async function() {
-      const convertibleAmountLender0 = await this.registry.getAvailableLoanNFTForConversion(
-        loanId,
-        this.lenders[0]
-      );
-      const convertibleAmountLender1 = await this.registry.getAvailableLoanNFTForConversion(
-        loanId,
-        this.lenders[1]
-      );
+
+        });
+        it("when project tokens can not be claimed if no milestones are delivered yet", async function () {
+            const convertibleAmountLender0 = await this.registry.getAvailableFundingNFTForConversion(loanId, this.lenders[0]);
+            const convertibleAmountLender1 = await this.registry.getAvailableFundingNFTForConversion(loanId, this.lenders[1]);
 
       expect(convertibleAmountLender0).to.be.bignumber.equal(new BN(0));
       expect(convertibleAmountLender1).to.be.bignumber.equal(new BN(0));
@@ -95,7 +84,7 @@ export default async function suite() {
         from: this.owner
       });
 
-      const convertibleAmountLender0 = await this.registry.getAvailableLoanNFTForConversion(
+      const convertibleAmountLender0 = await this.registry.getAvailableFundingNFTForConversion(
         loanId,
         this.lenders[0]
       );
@@ -111,7 +100,7 @@ export default async function suite() {
       const balanceEscrowBefore = await this.projectToken.balanceOf(
         this.escrow.address
       );
-      const balanceNFTLenderBefore = await this.registry.balanceOfAllLoanNFTGenerations(
+      const balanceNFTLenderBefore = await this.registry.balanceOfAllFundingNFTGenerations(
         loanId,
         this.lenders[0]
       );
@@ -130,7 +119,7 @@ export default async function suite() {
         { from: this.lenders[0] }
       );
 
-      const balanceNFTLenderAfter = await this.registry.balanceOfAllLoanNFTGenerations(
+      const balanceNFTLenderAfter = await this.registry.balanceOfAllFundingNFTGenerations(
         loanId,
         this.lenders[0]
       );
@@ -209,7 +198,7 @@ export default async function suite() {
         await increaseTime(milestoneDurations[i]);
       }
 
-      const convertibleAmountLender0 = await this.registry.getAvailableLoanNFTForConversion(
+      const convertibleAmountLender0 = await this.registry.getAvailableFundingNFTForConversion(
         loanId,
         this.lenders[0]
       );
@@ -225,7 +214,7 @@ export default async function suite() {
       const balanceEscrowBefore = await this.projectToken.balanceOf(
         this.escrow.address
       );
-      const balanceNFTLenderBefore = await this.registry.balanceOfAllLoanNFTGenerations(
+      const balanceNFTLenderBefore = await this.registry.balanceOfAllFundingNFTGenerations(
         loanId,
         this.lenders[0]
       );
@@ -244,7 +233,7 @@ export default async function suite() {
         { from: this.lenders[0] }
       );
 
-      const balanceNFTLenderAfter = await this.registry.balanceOfAllLoanNFTGenerations(
+      const balanceNFTLenderAfter = await this.registry.balanceOfAllFundingNFTGenerations(
         loanId,
         this.lenders[0]
       );
@@ -324,7 +313,7 @@ export default async function suite() {
         await increaseTime(milestoneDurations[i]);
       }
 
-      const convertibleAmountLender0 = await this.registry.getAvailableLoanNFTForConversion(
+      const convertibleAmountLender0 = await this.registry.getAvailableFundingNFTForConversion(
         loanId,
         this.lenders[0]
       );

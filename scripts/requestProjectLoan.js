@@ -31,7 +31,7 @@ async function main() {
   const governance = await Governance.at(process.env.GOVERNANCE_ADDRESS);
   // Get accounts
   const accounts = await web3.eth.getAccounts();
-  const borrower = accounts[1];
+  const seeker = accounts[1];
   const delegators = [accounts[5], accounts[6], accounts[7]];
   // Set loan params
   const loanId = new BN(await registry.totalLoans());
@@ -69,7 +69,7 @@ async function main() {
     milestoneDurations,
     paymentTimeInterval,
     ipfsHash,
-    { from: borrower }
+    { from: seeker }
   );
 
   await governance.voteForRequest(approvalRequest, true, {

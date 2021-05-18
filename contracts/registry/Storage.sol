@@ -47,7 +47,7 @@ contract Storage {
     IGovernance public governance; // Governance's contract address.
     IERC20 public lendingToken; // Lending token's contract address.
     IERC721Mint public mainNFT; // Main nft's contract address.
-    IERC1155Mint public loanNFT; // Loan nft's contract address.
+    IERC1155Mint public fundingNFT; // Funding nft's contract address.
     IEscrow public escrow; // Escrow's contract address.
     IERC20 public rALBT; // rALBT's contract address.
 

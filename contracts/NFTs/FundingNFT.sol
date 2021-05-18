@@ -4,18 +4,16 @@ pragma solidity 0.7.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/GSN/Context.sol";
 import "../utils/Strings.sol";
 import "../libs/TokenFormat.sol";
 
 /**
- * @title Alliance Block Loan NFTs
+ * @title Alliance Block Funding NFTs
  * @notice NFTs that will be held by users
  */
-contract LoanNFT is Context, AccessControl, ERC1155 {
-    using Counters for Counters.Counter;
+contract FundingNFT is Context, AccessControl, ERC1155 {
     using TokenFormat for uint256;
 
     // Events
@@ -31,9 +29,6 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
     );
     event TransfersPaused(uint256 loanId);
     event TransfersResumed(uint256 loanId);
-
-    // Keep track of loan Ids
-    Counters.Counter private _loanIdTracker;
 
     // contract URI for marketplaces
     string private _contractURI;
@@ -107,19 +102,11 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
     }
 
     /**
-     * @dev Format tokenId into generation and index
-     */
-    function getCurrentLoanId() public view returns (uint256 loanId) {
-        return _loanIdTracker.current();
-    }
-
-    /**
      * @dev Mint generation 0 tokens
      */
-    function mintGen0(address to, uint256 amount) external onlyMinter {
-        uint256 tokenId = getCurrentLoanId();
-        _mint(to, tokenId, amount, "");
-        _loanIdTracker.increment();
+    function mintGen0(address to, uint256 amount, uint256 loanId) external onlyMinter {
+        // LoanId is the tokenId used to mint
+        _mint(to, loanId, amount, "");
     }
 
     /**
@@ -127,15 +114,16 @@ contract LoanNFT is Context, AccessControl, ERC1155 {
      * @param to The address to mint the tokens to.
      * @param amount The amount of tokens to mint.
      * @param generation The generation of the tokens. The id of the tokens will be composed of the loan id and this generation number.
+     * @param loanId The loan identifier
      */
     function mintOfGen(
         address to,
         uint256 amount,
-        uint256 generation
+        uint256 generation,
+        uint256 loanId
     ) external onlyMinter {
-        uint256 tokenId = generation.getTokenId(getCurrentLoanId());
+        uint256 tokenId = generation.getTokenId(loanId);
         _mint(to, tokenId, amount, "");
-        _loanIdTracker.increment();
     }
 
     /**
