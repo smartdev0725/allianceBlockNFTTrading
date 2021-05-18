@@ -8,10 +8,7 @@ contract DaoStaking is StakingTypesAndStorage {
     using SafeMath for uint256;
 
     function provideStakingForDaoMembership(address staker) external onlyGovernance() {
-        require(balance[staker] == stakingTypeAmounts[uint256(StakingType.STAKER)], "Must be already a staker");
-
-        uint256 amount = stakingTypeAmounts[uint256(StakingType.DAO_MEMBER)].sub(
-            stakingTypeAmounts[uint256(StakingType.STAKER)]);
+        uint256 amount = stakingTypeAmounts[uint256(StakingType.STAKER_LVL_3_OR_DAO_MEMBER)].sub(balance[staker]);
 
         freezed[staker] = true;
 
@@ -19,17 +16,19 @@ contract DaoStaking is StakingTypesAndStorage {
     }
 
     function provideStakingForDaoDelegator(address staker) external onlyGovernance() {
-        require(balance[staker] == stakingTypeAmounts[uint256(StakingType.DAO_MEMBER)], "Must be already a dao member subscriber");
+        require(balance[staker] == stakingTypeAmounts[uint256(StakingType.STAKER_LVL_3_OR_DAO_MEMBER)],
+            "Must be already a dao member subscriber");
 
         uint256 amount = stakingTypeAmounts[uint256(StakingType.DAO_DELEGATOR)].sub(
-            stakingTypeAmounts[uint256(StakingType.DAO_MEMBER)]);
+            stakingTypeAmounts[uint256(StakingType.STAKER_LVL_3_OR_DAO_MEMBER)]);
 
         _stake(staker, amount);
     }
 
     function unstakeDao(address staker, bool isDaoMember) external onlyGovernance() {
-        if (isDaoMember) _unstakeDaoMember(staker);
-        else _unstakeDaoDelegator(staker);
+        freezed[staker] = false;
+
+        if (!isDaoMember) _unstakeDaoDelegator(staker);
     }
 
     function provideRewards(
@@ -67,16 +66,9 @@ contract DaoStaking is StakingTypesAndStorage {
         _withdraw(msg.sender, amountToWithdraw);
     }
 
-    function _unstakeDaoMember(address staker_) internal {
-        uint256 amount = stakingTypeAmounts[uint256(StakingType.DAO_MEMBER)].sub(
-            stakingTypeAmounts[uint256(StakingType.STAKER)]);
-
-        _withdraw(staker_, amount);
-    }
-
     function _unstakeDaoDelegator(address staker_) internal {
         uint256 amount = stakingTypeAmounts[uint256(StakingType.DAO_DELEGATOR)].sub(
-            stakingTypeAmounts[uint256(StakingType.DAO_MEMBER)]);
+            stakingTypeAmounts[uint256(StakingType.STAKER_LVL_3_OR_DAO_MEMBER)]);
 
         _withdraw(staker_, amount);
     }
@@ -97,9 +89,15 @@ contract DaoStaking is StakingTypesAndStorage {
         return balance[staker_];
     }
 
-    function getAmountsToStake() external view returns (uint256 stakerAmount, uint256 daoMemberAmount, uint256 daoDelegatorAmount) {
-        stakerAmount = stakingTypeAmounts[uint256(StakingType.STAKER)];
-        daoMemberAmount = stakingTypeAmounts[uint256(StakingType.DAO_MEMBER)];
+    function getAmountsToStake() external view returns (
+        uint256 stakerLvl1Amount,
+        uint256 stakerLvl2Amount,
+        uint256 stakerLvl3orDaoMemberAmount,
+        uint256 daoDelegatorAmount
+    ) {
+        stakerLvl1Amount = stakingTypeAmounts[uint256(StakingType.STAKER_LVL_1)];
+        stakerLvl2Amount = stakingTypeAmounts[uint256(StakingType.STAKER_LVL_2)];
+        stakerLvl3orDaoMemberAmount = stakingTypeAmounts[uint256(StakingType.STAKER_LVL_3_OR_DAO_MEMBER)];
         daoDelegatorAmount = stakingTypeAmounts[uint256(StakingType.DAO_DELEGATOR)];
     }
 }

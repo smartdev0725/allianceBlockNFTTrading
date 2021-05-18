@@ -5,6 +5,7 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./GovernanceTypesAndStorage.sol";
+import "../interfaces/IRegistry.sol";
 
 /**
  * @title AllianceBlock Governance contract
@@ -51,8 +52,11 @@ contract DaoCronjob is GovernanceTypesAndStorage {
                 currentEpoch.sub(1)
             );
         }
-        else {
+        else if (cronjobs[cronjobId].cronjobType == CronjobType.DAO_SUBSTITUTES) {
             updateSubstitutes();
+        }
+        else {
+            updateInvestment(cronjobs[cronjobId].externalId, timestamp);
         }
     }
 
@@ -64,6 +68,17 @@ contract DaoCronjob is GovernanceTypesAndStorage {
 
     function removeCronjob(uint256 cronjobId) internal {
         cronjobList.removeNode(cronjobId);
+    }
+
+    function updateInvestment(uint256 investmentId, uint256 timestamp) internal {
+        if (registry.getRequestingInterestStatus(investmentId)) {
+            registry.startLotteryPhase(investmentId);
+        }
+        else {
+            uint256 nextCronjobTimestamp = timestamp.add(
+                updatableVariables[keccak256(abi.encode("lateApplicationsForInvestmentDuration"))]);
+            addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, investmentId);
+        }
     }
 
     function updateDaoMembershipVotingState(uint256 timestamp) internal {

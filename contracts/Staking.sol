@@ -62,9 +62,10 @@ contract Staking is DaoStaking, Ownable {
                 .add(rewards[account]);
     }
 
-    function stake() public updateReward(msg.sender) {
-        require(balance[msg.sender] == 0, "Cannot stake again");
-        uint256 amount = stakingTypeAmounts[uint256(StakingType.STAKER)];
+    function stake(StakingType stakingType) public updateReward(msg.sender) {
+        require(uint256(stakingType) < 3, "Delegator type stake only via Governance");
+        require(balance[msg.sender] < stakingTypeAmounts[uint256(stakingType)], "Cannot stake for same type again");
+        uint256 amount = stakingTypeAmounts[uint256(stakingType)];
 
         _stake(msg.sender, amount);
         emit Staked(msg.sender, amount);

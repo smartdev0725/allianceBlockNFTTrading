@@ -25,12 +25,31 @@ contract Storage {
     mapping(uint256 => LoanLibrary.LoanStatus) public loanStatus;
     // Mapping from loan id -> loan borrower's address.
     mapping(uint256 => address) public loanBorrower;
+    // The amount of investment tokens each ticket contains. (Only for INVESTMENT type)
+    mapping(uint256 => uint256) public investmentTokensPerTicket;
+    // The amount of tickets remaining to be allocated to investors. (Only for INVESTMENT type)
+    mapping(uint256 => uint256) public ticketsRemaining;
+    // The number lottery numbers allocated from all investors for a specific investment.
+    mapping(uint256 => uint256) public totalLotteryNumbersPerInvestment;
+    // The address of the investor that has allocated a specific lottery number on a specific investment.
+    mapping(uint256 => mapping(uint256 => address)) public addressOfLotteryNumber;
+    // The amount of tickets that an investor requested that are still not allocated.
+    mapping(uint256 => mapping(address => uint256)) public remainingTicketsPerAddress;
+    // The amount of tickets that an investor requested that have been won already.
+    mapping(uint256 => mapping(address => uint256)) public ticketsWonPerAddress;
+    // The amount of tickets that an investor locked for a specific investment.
+    mapping(uint256 => mapping(address => uint256)) public lockedTicketsForSpecificInvestmentPerAddress;
+    // The amount of tickets that an investor locked from all investments.
+    mapping(address => uint256) public lockedTicketsPerAddress;
+    // The last block checked for rewards for the tickets locked per address.
+    mapping(address => uint256) public lastBlockCheckedForLockedTicketsPerAddress;
 
     IGovernance public governance; // Governance's contract address.
     IERC20 public lendingToken; // Lending token's contract address.
     IERC721Mint public mainNFT; // Main nft's contract address.
     IERC1155Mint public loanNFT; // Loan nft's contract address.
     IEscrow public escrow; // Escrow's contract address.
+    IERC20 public rALBT; // rALBT's contract address.
 
     // This variable represents the base amount in which every loan amount is divided to. (also the starting value for each ERC1155)
     uint256 public baseAmountForEachPartition;
@@ -44,6 +63,16 @@ contract Storage {
     uint256 public vestingBatches;
     // The time interval between vesting batches when a lender decides to get project tokens.
     uint256 public vestingTimeInterval;
-    // The time interval for adding funds
+    // The time interval for adding funds.
     uint256 public fundingTimeInterval;
+    // The amount of tickets to be provided by each run of the lottery.
+    uint256 public totalTicketsPerRun;
+    // The amount of rALBT needed to allocate one lottery number.
+    uint256 public rAlbtPerLotteryNumber;
+    // The amount of blocks needed for a ticket to be locked, so as the investor to get 1 rALBT.
+    uint256 public blocksLockedForReputation;
+    // The amount of lottery numbers, that if investor has after number allocation he gets one ticket without lottery.
+    uint256 public lotteryNumbersForImmediateTicket;
+    // The nonce for the lottery numbers.
+    uint256 internal lotteryNonce;
 }

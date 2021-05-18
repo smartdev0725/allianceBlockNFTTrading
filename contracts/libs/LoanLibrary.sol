@@ -9,7 +9,8 @@ library LoanLibrary {
 
     enum LoanType {
         PERSONAL, // The type of loan where borrower is a person.
-        PROJECT // The type of loan where borrower is a project.
+        PROJECT, // The type of loan where borrower is a project.
+        INVESTMENT // The type of loan where seeker is a project seeking for IDO.
     }
 
     enum LoanStatus {

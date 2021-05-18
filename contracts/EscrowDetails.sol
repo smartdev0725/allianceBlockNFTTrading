@@ -8,6 +8,7 @@ import "./interfaces/IERC721Mint.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./libs/LoanLibrary.sol";
 import "./interfaces/IRegistry.sol";
+import "./rALBT.sol";
 
 /**
  * @title AllianceBlock EscrowDetails contract
@@ -20,8 +21,7 @@ contract EscrowDetails {
     IERC20 public lendingToken;
     IERC721Mint public mainNFT;
     IERC1155Mint public loanNFT;
-
-    mapping(uint256 => address) public loanBorrower;
+    rALBT public reputationalALBT;
 
     modifier onlyRegistry() {
         require(msg.sender == address(registry), "Only Registry");

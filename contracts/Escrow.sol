@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./libs/LoanLibrary.sol";
 import "./EscrowDetails.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155Holder.sol";
+import "./rALBT.sol";
 
 /**
  * @title AllianceBlock Escrow contract
@@ -26,6 +27,8 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
         lendingToken = IERC20(lendingToken_);
         mainNFT = IERC721Mint(mainNFT_);
         loanNFT = IERC1155Mint(loanNFT_);
+
+        reputationalALBT = new rALBT();
     }
 
     /**
@@ -84,6 +87,30 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
         uint256 amount
     ) external onlyRegistry() {
         IERC20(collateralToken).transfer(recipient, amount);
+    }
+
+    /**
+     * @dev This function is used to mint reputational tokens.
+     * @param recipient The address to mint the reputational tokens to.
+     * @param amount The amount of reputational tokens to be minted.
+     */
+    function mintReputationalToken(
+        address recipient,
+        uint256 amount
+    ) external onlyRegistry() {
+        reputationalALBT.mintTo(recipient, amount);
+    }
+
+    /**
+     * @dev This function is used to burn reputational tokens.
+     * @param from The address to burn the reputational tokens from.
+     * @param amount The amount of reputational tokens to be burnt.
+     */
+    function burnReputationalToken(
+        address from,
+        uint256 amount
+    ) external onlyRegistry() {
+        reputationalALBT.burnFrom(from, amount);
     }
 
     /**

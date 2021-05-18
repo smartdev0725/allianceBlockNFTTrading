@@ -25,7 +25,9 @@ contract Governance is DaoSubscriptions {
         uint256 milestoneApprovalRequestDuration_,
         uint256 daoUpdateRequestDuration_,
         uint256 approvalsNeededForRegistryRequest_,
-        uint256 approvalsNeededForGovernanceRequest_
+        uint256 approvalsNeededForGovernanceRequest_,
+        uint256 applicationsForInvestmentDuration_,
+        uint256 lateApplicationsForInvestmentDuration_
     )
     public
     {
@@ -36,6 +38,8 @@ contract Governance is DaoSubscriptions {
         updatableVariables[keccak256(abi.encode("daoUpdateRequestDuration"))] = daoUpdateRequestDuration_;
         updatableVariables[keccak256(abi.encode("approvalsNeededForRegistryRequest"))] = approvalsNeededForRegistryRequest_;
         updatableVariables[keccak256(abi.encode("approvalsNeededForGovernanceRequest"))] = approvalsNeededForGovernanceRequest_;
+        updatableVariables[keccak256(abi.encode("applicationsForInvestmentDuration"))] = applicationsForInvestmentDuration_;
+        updatableVariables[keccak256(abi.encode("lateApplicationsForInvestmentDuration"))] = lateApplicationsForInvestmentDuration_;
     }
 
     function requestApproval(
@@ -100,6 +104,17 @@ contract Governance is DaoSubscriptions {
         remainingDelegatorIdsToVotePerRequest[requestId].removeNode(addressToId[msg.sender]);
 
         emit VotedForRequest(approvalRequests[requestId].loanId, requestId, decision, msg.sender);
+    }
+
+    function storeInvestmentTriggering(
+        uint256 investmentId
+    )
+    external
+    onlyRegistry()
+    {
+        uint256 nextCronjobTimestamp = block.timestamp.add(
+            updatableVariables[keccak256(abi.encode("applicationsForInvestmentDuration"))]);
+        addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, investmentId);
     }
 
     /**

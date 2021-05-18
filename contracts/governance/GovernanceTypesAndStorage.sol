@@ -106,12 +106,13 @@ contract GovernanceTypesAndStorage {
         DAO_MEMBERSHIP_VOTING, // Cronjob type for dao membership voting.
         DAO_DELEGATORS_VOTING, // Cronjob type for dao delegation voting.
         DAO_REWARDS_PROVISION, // Cronjob type for rewards provision in case there is a pending request and rewards after epoch change.
-        DAO_SUBSTITUTES // Cronjob type for dao substitutes to enter till list is renewed (if not filled).
+        DAO_SUBSTITUTES, // Cronjob type for dao substitutes to enter till list is renewed (if not filled).
+        INVESTMENT // Cronjob type for users to show interest for an investment.
     }
 
     struct Cronjob {
         CronjobType cronjobType; // This is the cronjob type.
-        uint256 externalId; // This is the id of the request in case of dao approval or change voting request.
+        uint256 externalId; // This is the id of the request in case of dao approval, change voting request or investment.
     }
 
     // TODO - Make this simple linked list, not double (we don't need to remove anything else than head MAYBE).

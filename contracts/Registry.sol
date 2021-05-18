@@ -85,6 +85,31 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     }
 
     /**
+     * @dev This function is called by the owner to initialize the investment type.
+     * @param reputationalAlbt The address of the rALBT contract.
+     * @param totalTicketsPerRun_ The amount of tickets that will be provided from each run of the lottery.
+     * @param rAlbtPerLotteryNumber_ The amount of rALBT needed to allocate one lucky number.
+     * @param blocksLockedForReputation_ The amount of blocks needed for a ticket to be locked,
+     *        so as investor to get 1 rALBT for locking it.
+     */
+    function initializeInvestment(
+        address reputationalAlbt,
+        uint256 totalTicketsPerRun_,
+        uint256 rAlbtPerLotteryNumber_,
+        uint256 blocksLockedForReputation_,
+        uint256 lotteryNumbersForImmediateTicket_
+    )
+        external
+        onlyOwner()
+    {
+        rALBT = IERC20(reputationalAlbt);
+        totalTicketsPerRun = totalTicketsPerRun_;
+        rAlbtPerLotteryNumber = rAlbtPerLotteryNumber_;
+        blocksLockedForReputation = blocksLockedForReputation_;
+        lotteryNumbersForImmediateTicket = lotteryNumbersForImmediateTicket_;
+    }
+
+    /**
      * @dev This function is called by governance to approve or reject a loan request.
      * @param loanId The id of the loan.
      * @param decision The decision of the governance. [true -> approved] [false -> rejected]
@@ -192,6 +217,17 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     }
 
     /**
+     * @dev This function is called by governance to start the lottery phase for an investment.
+     * @param investmentId The id of the investment.
+     */
+    function startLotteryPhase(uint256 investmentId)
+        external
+        onlyGovernance()
+    {
+        _startLoan(investmentId);
+    }
+
+    /**
      * @dev Through this function any address can challenge a loan in case of rules breaking by the borrower.
             If challenging succeeds it can end up to either small penalty or whole collateral loss.
      * @param loanId The id of the loan.
@@ -211,6 +247,10 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.APPROVED;
         loanDetails[loanId_].approvalDate = block.timestamp;
         loanNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
+        if (loanDetails[loanId_].loanType == LoanLibrary.LoanType.INVESTMENT) {
+            ticketsRemaining[loanId_] = loanDetails[loanId_].totalPartitions;
+            governance.storeInvestmentTriggering(loanId_);
+        }
         emit LoanApproved(loanId_, loanDetails[loanId_].loanType);
     }
 
@@ -230,7 +270,8 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
 
         if (loanDetails[loanId_].loanType == LoanLibrary.LoanType.PERSONAL)
             _startPersonalLoan(loanId_);
-        else _startProjectLoan(loanId_);
+        else if (loanDetails[loanId_].loanType == LoanLibrary.LoanType.PROJECT)
+            _startProjectLoan(loanId_);
         emit LoanStarted(loanId_, loanDetails[loanId_].loanType);
     }
 

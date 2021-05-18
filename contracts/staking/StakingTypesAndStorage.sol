@@ -10,8 +10,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  */
 contract StakingTypesAndStorage {
     enum StakingType {
-        STAKER,
-        DAO_MEMBER,
+        STAKER_LVL_1,
+        STAKER_LVL_2,
+        STAKER_LVL_3_OR_DAO_MEMBER,
         DAO_DELEGATOR
     }
 
