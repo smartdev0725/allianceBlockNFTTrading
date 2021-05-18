@@ -23,8 +23,8 @@ contract Storage {
     mapping(uint256 => LoanLibrary.ProjectLoanPayments) public projectLoanPayments;
     // Mapping from loan id -> loan status.
     mapping(uint256 => LoanLibrary.LoanStatus) public loanStatus;
-    // Mapping from loan id -> loan borrower's address.
-    mapping(uint256 => address) public loanBorrower;
+    // Mapping from loan id -> loan seeker's address.
+    mapping(uint256 => address) public loanSeeker;
     // The amount of investment tokens each ticket contains. (Only for INVESTMENT type)
     mapping(uint256 => uint256) public investmentTokensPerTicket;
     // The amount of tickets remaining to be allocated to investors. (Only for INVESTMENT type)

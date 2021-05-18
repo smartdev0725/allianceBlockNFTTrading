@@ -246,7 +246,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     function _approveLoan(uint256 loanId_) internal {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.APPROVED;
         loanDetails[loanId_].approvalDate = block.timestamp;
-        loanNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
+        fundingNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
         if (loanDetails[loanId_].loanType == LoanLibrary.LoanType.INVESTMENT) {
             ticketsRemaining[loanId_] = loanDetails[loanId_].totalPartitions;
             governance.storeInvestmentTriggering(loanId_);

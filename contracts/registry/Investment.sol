@@ -53,15 +53,16 @@ contract Investement is LoanDetails {
             amountOfInvestmentTokens
         );
 
-        loanNFT.mintGen0(
+        fundingNFT.mintGen0(
             address(escrow),
-            loanDetails[totalLoans].totalPartitions
+            loanDetails[totalLoans].totalPartitions,
+            totalLoans
         );
 
         investmentTokensPerTicket[totalLoans] = amountOfInvestmentTokens.div(
             loanDetails[totalLoans].totalPartitions);
 
-        loanNFT.pauseTokenTransfer(totalLoans); //Pause trades for ERC1155s with the specific loan ID.
+        fundingNFT.pauseTokenTransfer(totalLoans); //Pause trades for ERC1155s with the specific loan ID.
 
         governance.requestApproval(totalLoans, false, 0);
 
