@@ -12,11 +12,18 @@ contract Staking is DaoStaking, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    constructor(IERC20 albt_, address governance_, uint256[] memory stakingTypeAmounts_) public {
+    constructor(
+        IERC20 albt_,
+        address governance_,
+        uint256[] memory stakingTypeAmounts_,
+        uint256[] memory reputationalStakingTypeAmounts_
+    ) 
+    {
         albt = albt_;
         governance = IGovernanceStaking(governance_);
         for(uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
             stakingTypeAmounts[i] = stakingTypeAmounts_[i];
+            reputationalStakingTypeAmounts[i] = reputationalStakingTypeAmounts_[i];
         }
     }
 
@@ -68,8 +75,8 @@ contract Staking is DaoStaking, Ownable {
         require(balance[msg.sender] < stakingTypeAmounts[uint256(stakingType)], "Cannot stake for same type again");
         uint256 amount = stakingTypeAmounts[uint256(stakingType)];
 
-        _stake(msg.sender, amount);
-        emit Staked(msg.sender, amount);
+        _stake(msg.sender, amount.sub(balance[msg.sender]));
+        emit Staked(msg.sender, amount.sub(balance[msg.sender]));
     }
 
     function exit() external {
