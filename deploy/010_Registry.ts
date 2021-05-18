@@ -11,27 +11,26 @@ import {
   VESTING_BATCHES,
   VESTING_TIME_INTERVAL,
   FUNDING_TIME_INTERVAL,
-  AMOUNT_FOR_DAO_MEMBERSHIP,
 } from '../utils/constants';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
   const {deploy, get} = deployments;
 
-  const {deployer} = await getNamedAccounts();
+  const {deployer, proxyOwner} = await getNamedAccounts();
 
-  const Escrow = await get('Escrow_Proxy');
-  const Governance = await get('Governance_Proxy');
+  const Escrow = await get('Escrow');
+  const Governance = await get('Governance');
   const LendingToken = await get('LendingToken');
-  const MainNFT = await get('MainNFT_Proxy');
-  const FundingNFT = await get('FundingNFT_Proxy');
-  const Staking = await get('Staking_Proxy');
+  const MainNFT = await get('MainNFT');
+  const FundingNFT = await get('FundingNFT');
+  const Staking = await get('Staking');
 
   await deploy('Registry', {
     contract: 'Registry',
     from: deployer,
     proxy: {
-      owner: deployer,
+      owner: proxyOwner,
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
@@ -52,35 +51,15 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     log: true,
   });
 
-  const registryProxyContract = await deployments.get('Registry_Proxy');
-
-  const fundingNFTProxyContract = await deployments.get('FundingNFT_Proxy');
-  const fundingNFTContract = await ethers.getContractAt(
-    'FundingNFT',
-    fundingNFTProxyContract.address
-  );
-
-  const mainNFTProxyContract = await deployments.get('MainNFT_Proxy');
-  const mainNFTContract = await ethers.getContractAt(
-    'MainNFT',
-    mainNFTProxyContract.address
-  );
-
-  const governanceProxyContract = await deployments.get('Governance_Proxy');
-  const governanceContract = await ethers.getContractAt(
-    'Governance',
-    governanceProxyContract.address
-  );
-
-  const escrowProxyContract = await deployments.get('Escrow_Proxy');
-  const escrowContract = await ethers.getContractAt(
-    'Escrow',
-    escrowProxyContract.address
-  );
+  const registryContract = await ethers.getContract('Registry');
+  const fundingNFTContract = await ethers.getContract('FundingNFT');
+  const mainNFTContract = await ethers.getContract('MainNFT');
+  const governanceContract = await ethers.getContract('Governance');
+  const escrowContract = await ethers.getContract('Escrow');
 
   const registryAddress = await escrowContract.registry();
   if (registryAddress === ethers.constants.AddressZero) {
-    await escrowContract.setRegistry(registryProxyContract.address);
+    await escrowContract.setRegistry(registryContract.address);
   }
 
   const governanceAddress = await governanceContract.registry();
@@ -90,7 +69,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     stakingAddress === ethers.constants.AddressZero
   ) {
     await governanceContract.setRegistryAndStaking(
-      registryProxyContract.address,
+      registryContract.address,
       Staking.address
     );
   }
@@ -98,29 +77,30 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   // Add roles.
   const hasRoleMinter = await fundingNFTContract.hasRole(
     ethers.utils.keccak256(ethers.utils.toUtf8Bytes('MINTER_ROLE')),
-    registryProxyContract.address,
+    registryContract.address,
     {from: deployer}
   );
   if (!hasRoleMinter) {
     await fundingNFTContract.grantRole(
       ethers.utils.keccak256(ethers.utils.toUtf8Bytes('MINTER_ROLE')),
-      registryProxyContract.address,
+      registryContract.address,
       {from: deployer}
     );
   }
 
   const hasRolePauser = await fundingNFTContract.hasRole(
     ethers.utils.keccak256(ethers.utils.toUtf8Bytes('PAUSER_ROLE')),
-    registryProxyContract.address,
+    registryContract.address,
     {from: deployer}
   );
   if (!hasRolePauser) {
     await fundingNFTContract.grantRole(
       ethers.utils.keccak256(ethers.utils.toUtf8Bytes('PAUSER_ROLE')),
-      registryProxyContract.address,
+      registryContract.address,
       {from: deployer}
     );
   }
 };
 export default func;
 func.tags = ['Registry'];
+func.dependencies = ['FundingNFT', 'MainNFT', 'Staking', 'Governance', 'Escrow'];

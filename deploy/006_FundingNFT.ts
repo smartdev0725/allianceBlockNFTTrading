@@ -5,13 +5,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {deployer} = await getNamedAccounts();
+  const {deployer, proxyOwner} = await getNamedAccounts();
 
   await deploy('FundingNFT', {
     contract: 'FundingNFT',
     from: deployer,
     proxy: {
-      owner: deployer,
+      owner: proxyOwner,
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },

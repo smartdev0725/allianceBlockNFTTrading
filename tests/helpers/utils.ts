@@ -96,9 +96,9 @@ export const initializeTransfers = async (
     .approve(registryContract.address, amountToTransfer);
   await projectTokenContract
     .connect(deployerSigner)
-    .mint(deployer, amountToTransfer);
+    .mint(seeker, amountToTransfer);
   await projectTokenContract
-    .connect(deployerSigner)
+    .connect(seekerSigner)
     .approve(registryContract.address, amountToTransfer);
 };
 

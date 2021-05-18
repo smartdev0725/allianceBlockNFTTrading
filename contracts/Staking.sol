@@ -46,7 +46,7 @@ contract Staking is Initializable, OwnableUpgradeable, tokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    uint256 public constant DURATION = 1 days;
+    uint256 public DURATION;
 
     uint256 public periodFinish;
     uint256 public rewardRate;
@@ -88,6 +88,7 @@ contract Staking is Initializable, OwnableUpgradeable, tokenWrapper {
         albt = albt_;
         periodFinish = 0;
         rewardRate = 0;
+        DURATION = 1 days;
     }
 
     function lastTimeRewardApplicable() public view returns (uint256) {

@@ -48,14 +48,17 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
     mapping(uint256 => string) public ipfsHashes;
 
     // Access Roles
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public MINTER_ROLE;
+    bytes32 public PAUSER_ROLE;
 
     /**
      * @dev Initializes the contract
      */
     function initialize(string memory baseUri, string memory contractUri) public initializer {
+        MINTER_ROLE = keccak256("MINTER_ROLE");
+        PAUSER_ROLE = keccak256("PAUSER_ROLE");
         __ERC1155_init("");
+        __ERC1155_init_unchained("");
         _baseURI = baseUri;
         _contractURI = contractUri;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());

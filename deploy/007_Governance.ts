@@ -11,15 +11,15 @@ import {
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy, get} = deployments;
+  const {deploy} = deployments;
 
-  const {deployer, delegator1, delegator2} = await getNamedAccounts();
+  const {deployer, delegator1, delegator2, proxyOwner} = await getNamedAccounts();
 
   await deploy('Governance', {
     contract: 'Governance',
     from: deployer,
     proxy: {
-      owner: deployer,
+      owner: proxyOwner,
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },

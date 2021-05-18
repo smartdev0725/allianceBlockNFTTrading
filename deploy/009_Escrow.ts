@@ -6,17 +6,17 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
   const {deploy, get} = deployments;
 
-  const {deployer} = await getNamedAccounts();
+  const {deployer, proxyOwner} = await getNamedAccounts();
 
   const LendingToken = await get('LendingToken');
-  const MainNFT = await get('MainNFT_Proxy');
-  const FundingNFT = await get('FundingNFT_Proxy');
+  const MainNFT = await get('MainNFT');
+  const FundingNFT = await get('FundingNFT');
 
   await deploy('Escrow', {
     contract: 'Escrow',
     from: deployer,
     proxy: {
-      owner: deployer,
+      owner: proxyOwner,
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
@@ -26,3 +26,4 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 };
 export default func;
 func.tags = ['Escrow'];
+func.dependencies = ['FundingNFT', 'MainNFT']

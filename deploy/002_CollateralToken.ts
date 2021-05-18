@@ -8,6 +8,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployer} = await getNamedAccounts();
   const chainId = await getChainId();
 
+  // Only for development stage
   if (+chainId !== 1) {
     await deploy('CollateralToken', {
       contract: 'CollateralToken',

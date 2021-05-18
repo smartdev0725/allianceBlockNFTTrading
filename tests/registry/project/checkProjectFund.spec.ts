@@ -103,7 +103,7 @@ describe('Check project fund loan', async () => {
     }
 
     await registryContract
-      .connect(deployerSigner)
+      .connect(seekerSigner)
       .requestProjectLoan(
         amountRequestedPerMilestone,
         projectTokenContract.address,
@@ -129,6 +129,7 @@ describe('Check project fund loan', async () => {
     const {deployer, lender1, lender2} = await getNamedAccounts();
 
     const {lender1Signer, lender2Signer} = await getSigners();
+    loanId = await registryContract.totalLoans();
 
     const initSeekerLendingBalance = await lendingTokenContract.balanceOf(
       deployer
@@ -136,6 +137,7 @@ describe('Check project fund loan', async () => {
     let initEscrowLendingBalance = await lendingTokenContract.balanceOf(
       escrowContract.address
     );
+
     let initEscrowFundingNftBalance = await fundingNFTContract.balanceOf(
       escrowContract.address,
       loanId
@@ -157,11 +159,14 @@ describe('Check project fund loan', async () => {
     let newEscrowLendingBalance = await lendingTokenContract.balanceOf(
       escrowContract.address
     );
+
     let newEscrowFundingNftBalance = await fundingNFTContract.balanceOf(
       escrowContract.address,
       loanId
     );
+
     let newLenderLendingBalance = await lendingTokenContract.balanceOf(lender1);
+
     let newLenderFundingNftBalance = await fundingNFTContract.balanceOf(
       lender2,
       loanId
