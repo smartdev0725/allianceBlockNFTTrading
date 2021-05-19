@@ -85,6 +85,9 @@ When a **Project** or **Loan** becomes *Listed*, it means that it's **Hard Data*
 ## Subscribing
 A **Subscription** is a declaration of intent made by a **Funder**. When a **Funder** decides to invest in a **Project** or **Loan**, they will first have to *Subscribe*.
 
+## Partition
+A **Partition** is a portion of the **Investment** or **Project Token** offered by the **Seeker**. For example, if a **Seeker** offers 100k tokens of their **Project Tokens** as an investment opportunity, they may choose to partition it in chunks of 10k **Project Tokens** each. This would result in *10 Partitions* being offered to **Subscribers** to invest in. In order to be able to fund the project and earn a **Partition**, a **Subscriber** must first earn a **Funder Ticket**.
+
 ## Funder Ticket
 A **Funder Ticket** represents a the opportunity to invest in a fraction of a project. Each *listed project* will have **Funder Tickets** to distribute among the *subscribers*. All of the tickets for a project will have the same value. The next equation applies:
 
