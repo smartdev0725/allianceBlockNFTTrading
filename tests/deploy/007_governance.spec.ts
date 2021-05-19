@@ -1,9 +1,8 @@
 import {ethers, deployments} from 'hardhat';
 import {expect} from 'chai';
 import {
-  DAO_LOAN_APPROVAL,
-  DAO_MILESTONE_APPROVAL,
-  AMOUNT_FOR_DAO_MEMBERSHIP,
+  DAO_LOAN_APPROVAL_REQUEST_DURATION,
+  DAO_MILESTONE_APPROVAL_REQUEST_DURATION,
 } from '../../utils/constants';
 
 describe('Contract Governance', () => {
@@ -13,29 +12,17 @@ describe('Contract Governance', () => {
 
   it('should be deployed', async function () {
     // Given
-    const governanceProxyContract = await deployments.get('Governance_Proxy');
-    const governanceContract = await ethers.getContractAt(
-      'Governance',
-      governanceProxyContract.address
-    );
+    const governanceContract = await ethers.getContract('Governance');
 
     // When
-    const approvalsNeeded = await governanceContract.approvalsNeeded();
-    const loanApprovalRequestDuration =
-      await governanceContract.loanApprovalRequestDuration();
-    const milestoneApprovalRequestDuration =
-      await governanceContract.milestoneApprovalRequestDuration();
-    const amountStakedForDaoMembership =
-      await governanceContract.amountStakedForDaoMembership();
+    const [totalApprovalRequests, approvalsNeededForRegistryRequest, loanApprovalRequestDuration, milestoneApprovalRequestDuration, amountToStakeForDaoMember] =
+      await governanceContract.getDaoData();
 
     // Then
-    expect(approvalsNeeded.toNumber()).to.equal(2);
-    expect(loanApprovalRequestDuration.toNumber()).to.equal(DAO_LOAN_APPROVAL);
+    expect(loanApprovalRequestDuration.toNumber()).to.equal(DAO_LOAN_APPROVAL_REQUEST_DURATION);
     expect(milestoneApprovalRequestDuration.toNumber()).to.equal(
-      DAO_MILESTONE_APPROVAL
+      DAO_MILESTONE_APPROVAL_REQUEST_DURATION
     );
-    expect(amountStakedForDaoMembership.toString()).to.equal(
-      ethers.utils.parseEther(AMOUNT_FOR_DAO_MEMBERSHIP + '').toString()
-    );
+    expect(amountToStakeForDaoMember.toNumber()).to.equal(3);
   });
 });

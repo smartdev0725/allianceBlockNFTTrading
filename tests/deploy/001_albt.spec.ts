@@ -11,8 +11,8 @@ describe('Contract ALBT', () => {
     const albtContract = await ethers.getContract('ALBT');
 
     // When
-    const name = await albtContract.callStatic.name();
-    const symbol = await albtContract.callStatic.symbol();
+    const name = await albtContract.name();
+    const symbol = await albtContract.symbol();
 
     // Then
     expect(name).to.equal('AllianceBlock Token');

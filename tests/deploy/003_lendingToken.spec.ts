@@ -11,8 +11,8 @@ describe('Contract LendingToken', () => {
     const lendingTokenContract = await ethers.getContract('LendingToken');
 
     // When
-    const name = await lendingTokenContract.callStatic.name();
-    const symbol = await lendingTokenContract.callStatic.symbol();
+    const name = await lendingTokenContract.name();
+    const symbol = await lendingTokenContract.symbol();
 
     // Then
     expect(name).to.equal('Lending Token');

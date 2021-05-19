@@ -8,11 +8,7 @@ describe('Contract Escrow', () => {
 
   it('should be deployed', async function () {
     // Given
-    const escrowProxyContract = await deployments.get('Escrow_Proxy');
-    const escrowContract = await ethers.getContractAt(
-      'Escrow',
-      escrowProxyContract.address
-    );
+    const escrowContract = await ethers.getContract('Escrow');
 
     const fundingNFTProxyContract = await deployments.get('FundingNFT_Proxy');
     const mainNFTProxyContract = await deployments.get('MainNFT_Proxy');

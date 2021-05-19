@@ -55,6 +55,7 @@ const config: HardhatUserConfig = {
     lender1: 7,
     lender2: 8,
     seeker: 9,
+    superDelegator: 10,
   },
   paths: {
     artifacts: './artifacts',

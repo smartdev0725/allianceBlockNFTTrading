@@ -8,14 +8,10 @@ describe('Contract FundingNFT', () => {
 
   it('should be deployed', async function () {
     // Given
-    const fundingNFTProxyContract = await deployments.get('FundingNFT_Proxy');
-    const fundingNFTContract = await ethers.getContractAt(
-      'FundingNFT',
-      fundingNFTProxyContract.address
-    );
+    const fundingNFTContract = await ethers.getContract('FundingNFT');
 
     // When
-    const contractUri = await fundingNFTContract.callStatic.contractURI();
+    const contractUri = await fundingNFTContract.contractURI();
 
     // Then
     expect(contractUri).to.equal('https://allianceblock.io/');

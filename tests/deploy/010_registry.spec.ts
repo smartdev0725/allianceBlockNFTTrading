@@ -8,11 +8,7 @@ describe('Contract Registry', () => {
 
   it('should be deployed', async function () {
     // Given
-    const registryProxyContract = await deployments.get('Registry_Proxy');
-    const registryContract = await ethers.getContractAt(
-      'Registry',
-      registryProxyContract.address
-    );
+    const registryContract = await ethers.getContract('Registry');
 
     const fundingNFTProxyContract = await deployments.get('FundingNFT_Proxy');
     const mainNFTProxyContract = await deployments.get('MainNFT_Proxy');

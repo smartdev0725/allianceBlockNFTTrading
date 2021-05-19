@@ -11,8 +11,8 @@ describe('Contract CollateralToken', () => {
     const collateralTokenContract = await ethers.getContract('CollateralToken');
 
     // When
-    const name = await collateralTokenContract.callStatic.name();
-    const symbol = await collateralTokenContract.callStatic.symbol();
+    const name = await collateralTokenContract.name();
+    const symbol = await collateralTokenContract.symbol();
 
     // Then
     expect(name).to.equal('Collateral Token');

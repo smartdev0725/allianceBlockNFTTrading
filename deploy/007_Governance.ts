@@ -4,16 +4,16 @@ import '@nomiclabs/hardhat-ethers';
 import {ethers} from 'hardhat';
 
 import {
-  DAO_LOAN_APPROVAL,
-  DAO_MILESTONE_APPROVAL,
-  AMOUNT_FOR_DAO_MEMBERSHIP,
+  DAO_LOAN_APPROVAL_REQUEST_DURATION,
+  DAO_MILESTONE_APPROVAL_REQUEST_DURATION,
+  DAO_UPDATE_REQUEST_DURATION,
 } from '../utils/constants';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {deployer, delegator1, delegator2, proxyOwner} = await getNamedAccounts();
+  const {deployer, proxyOwner, superDelegator} = await getNamedAccounts();
 
   await deploy('Governance', {
     contract: 'Governance',
@@ -24,11 +24,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
     args: [
-      [delegator1, delegator2],
+      superDelegator,
+      DAO_LOAN_APPROVAL_REQUEST_DURATION,
+      DAO_MILESTONE_APPROVAL_REQUEST_DURATION,
+      DAO_UPDATE_REQUEST_DURATION,
       2,
-      DAO_LOAN_APPROVAL,
-      DAO_MILESTONE_APPROVAL,
-      ethers.utils.parseEther(AMOUNT_FOR_DAO_MEMBERSHIP + '').toString(), // Same as toWei in web3
+      2,
     ],
     log: true,
   });

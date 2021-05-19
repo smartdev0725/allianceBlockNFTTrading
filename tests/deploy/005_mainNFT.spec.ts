@@ -8,15 +8,11 @@ describe('Contract MainNFT', () => {
 
   it('should be deployed', async function () {
     // Given
-    const mainNFTProxyContract = await deployments.get('MainNFT_Proxy');
-    const mainNFTContract = await ethers.getContractAt(
-      'MainNFT',
-      mainNFTProxyContract.address
-    );
+    const mainNFTContract = await ethers.getContract('MainNFT');
 
     // When
-    const name = await mainNFTContract.callStatic.name();
-    const symbol = await mainNFTContract.callStatic.symbol();
+    const name = await mainNFTContract.name();
+    const symbol = await mainNFTContract.symbol();
 
     // Then
     expect(name).to.equal('Alliance Block Custody NFT');

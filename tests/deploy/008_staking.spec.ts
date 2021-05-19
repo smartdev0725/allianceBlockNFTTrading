@@ -9,11 +9,7 @@ describe('Contract Staking', () => {
   it('should be deployed', async function () {
     // Given
     const albtContract = await deployments.get('ALBT');
-    const stakingProxyContract = await deployments.get('Staking_Proxy');
-    const stakingContract = await ethers.getContractAt(
-      'Staking',
-      stakingProxyContract.address
-    );
+    const stakingContract = await ethers.getContract('Staking');
 
     // When
     const albtAddress = await stakingContract.albt();

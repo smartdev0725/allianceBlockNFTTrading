@@ -1,0 +1,36 @@
+import { expect } from 'chai';
+import { LoanStatus } from '../../helpers/registryEnums';
+import {deployments, getNamedAccounts, ethers} from "hardhat";
+
+export default async function suite() {
+  describe('Personal loan approval', async () => {
+    it('when approving a loan', async function () {
+      const approvalRequest = await this.governance.totalApprovalRequests();
+
+      await this.governance.superVoteForRequest(approvalRequest, true, {
+        from: this.owner
+      });
+
+      const loanStatus = await this.registry.loanStatus(this.loanId);
+
+      let daoApprovalRequest = await this.governance.approvalRequests(
+        approvalRequest
+      );
+
+      // Correct Dao Request.
+      expect(daoApprovalRequest.loanId.toString()).to.be.equal(this.loanId.toString());
+      expect(daoApprovalRequest.isMilestone).to.be.equal(false);
+      expect(daoApprovalRequest.approvalsProvided.toString()).to.be.equal("1");
+      expect(daoApprovalRequest.isApproved).to.be.equal(false);
+
+
+      const isPaused = await this.fundingNFT.transfersPaused(this.loanId);
+
+      // Correct Nft Behavior.
+      expect(isPaused).to.be.equal(false);
+
+      // Correct Loan Status.
+      expect(loanStatus.toString()).to.be.equal(LoanStatus.APPROVED);
+    });
+  });
+}

@@ -98,7 +98,8 @@ contract ProjectLoan is LoanDetails {
         fundingNFT.mintOfGen(
             address(escrow),
             loanDetails[totalLoans].totalPartitions,
-            totalMilestones.sub(1)
+            totalMilestones.sub(1),
+            totalLoans
         );
 
         fundingNFT.pauseTokenTransfer(totalLoans); //Pause trades for ERC1155s with the specific loan ID.
@@ -312,7 +313,7 @@ contract ProjectLoan is LoanDetails {
                     .mul(projectLoanPayments[loanId_].milestoneLendingAmount[i])
                     .div(loanDetails[loanId_].lendingAmount);
 
-        fundingNFT.decreaseGenerations(
+            fundingNFT.decreaseGenerations(
                 tokenId,
                 funder_,
                 partitionsToConvertAtMilestone,
@@ -358,7 +359,7 @@ contract ProjectLoan is LoanDetails {
     ) internal onlySettledLoan(loanId_) {
         uint256 tokenId = generation_.getTokenId(loanId_);
         require(
-        fundingNFT.balanceOf(msg.sender, tokenId) >= amountOfTokens_,
+            fundingNFT.balanceOf(msg.sender, tokenId) >= amountOfTokens_,
             "Insufficient Loan NFT Balance"
         );
         uint256 amountToReceive =
@@ -427,7 +428,11 @@ contract ProjectLoan is LoanDetails {
                     ? totalFundingNFTToBurn
                     : fundingNFTBalance;
 
-            fundingNFT.burn(msg.sender, i.getTokenId(loanId_), fundingNFTToBurn);
+            fundingNFT.burn(
+                msg.sender,
+                i.getTokenId(loanId_),
+                fundingNFTToBurn
+            );
 
             totalFundingNFTToBurn = totalFundingNFTToBurn.sub(fundingNFTToBurn);
         }
