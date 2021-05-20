@@ -26,12 +26,13 @@ describe('Registry Project Loans', function () {
     await deployments.fixture();
 
     // Get accounts
-    const {deployer, seeker, lender1, lender2, superDelegator} =
+    const {deployer, seeker, lender1, lender2, lender3, superDelegator} =
       await getNamedAccounts();
     this.deployer = deployer;
     this.seeker = seeker;
     this.lender1 = lender1;
     this.lender2 = lender2;
+    this.lender3 = lender3;
     this.superDelegator = superDelegator;
 
     // Get signers
@@ -41,6 +42,7 @@ describe('Registry Project Loans', function () {
       delegator2Signer,
       lender1Signer,
       lender2Signer,
+      lender3Signer,
       seekerSigner,
       superDelegatorSigner,
     } = await getSigners();
@@ -49,6 +51,7 @@ describe('Registry Project Loans', function () {
     this.delegator2Signer = delegator2Signer;
     this.lender1Signer = lender1Signer;
     this.lender2Signer = lender2Signer;
+    this.lender3Signer = lender3Signer;
     this.seekerSigner = seekerSigner;
     this.superDelegatorSigner = superDelegatorSigner;
 
@@ -78,22 +81,13 @@ describe('Registry Project Loans', function () {
         projectTokenContract,
         collateralTokenContract,
       },
-      {deployer, lender1, lender2, seeker},
-      {deployerSigner, lender1Signer, lender2Signer, seekerSigner}
+      {deployer, lender1, lender2, lender3, seeker},
+      {deployerSigner, lender1Signer, lender2Signer, lender3Signer, seekerSigner}
     );
 
     this.approvalRequest = await governanceContract.totalApprovalRequests();
 
     this.loanId = await this.registryContract.totalLoans();
-    this.totalPartitions = BigNumber.from(100);
-    this.bigPartition = BigNumber.from(50);
-    this.smallPartition = BigNumber.from(25);
-    this.bigPartitionAmountToPurchase = this.bigPartition.mul(
-      ethers.utils.parseEther(BASE_AMOUNT + '')
-    );
-    this.smallPartitionAmountToPurchase = this.smallPartition.mul(
-      ethers.utils.parseEther(BASE_AMOUNT + '')
-    );
     this.startingEscrowLendingBalance = await lendingTokenContract.balanceOf(
       escrowContract.address
     );
@@ -119,6 +113,17 @@ describe('Registry Project Loans', function () {
       );
       this.amountRequestedPerMilestone[i] = ethers.utils.parseEther('10000');
     }
+
+    const totalAmountRequested = this.amountRequestedPerMilestone[0].mul(this.totalMilestones);
+    this.totalPartitions = totalAmountRequested.div(ethers.utils.parseEther(BASE_AMOUNT + ''));
+    this.bigPartition = this.totalPartitions.div(BigNumber.from(2));
+    this.smallPartition = this.bigPartition.div(BigNumber.from(2));
+    this.bigPartitionAmountToPurchase = this.bigPartition.mul(
+      ethers.utils.parseEther(BASE_AMOUNT + '')
+    );
+    this.smallPartitionAmountToPurchase = this.smallPartition.mul(
+      ethers.utils.parseEther(BASE_AMOUNT + '')
+    );
 
     await this.registryContract
       .connect(this.seekerSigner)

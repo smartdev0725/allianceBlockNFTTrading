@@ -14,8 +14,9 @@ export const getSigners = async () => {
     rewardDistributorSigner: signers[6],
     lender1Signer: signers[7],
     lender2Signer: signers[8],
-    seekerSigner: signers[9],
-    superDelegatorSigner: signers[10],
+    lender3Signer: signers[9],
+    seekerSigner: signers[10],
+    superDelegatorSigner: signers[11],
   };
 };
 
@@ -63,12 +64,13 @@ export const initializeTransfers = async (
     collateralTokenContract,
   } = contracts;
 
-  const {lender1, lender2, seeker, deployer} = accounts;
-  const {deployerSigner, lender1Signer, lender2Signer, seekerSigner} = signers;
+  const {lender1, lender2, lender3, seeker, deployer} = accounts;
+  const {deployerSigner, lender1Signer, lender2Signer, lender3Signer, seekerSigner} = signers;
 
   // Transfer tokens.
   const amountToTransfer = ethers.utils.parseEther('10000000');
 
+  // Lender 1 minting
   await lendingTokenContract
     .connect(deployerSigner)
     .mint(lender1, amountToTransfer);
@@ -76,6 +78,7 @@ export const initializeTransfers = async (
     .connect(lender1Signer)
     .approve(registryContract.address, amountToTransfer);
 
+  // Lender 2 minting
   await lendingTokenContract
     .connect(deployerSigner)
     .mint(lender2, amountToTransfer);
@@ -83,6 +86,15 @@ export const initializeTransfers = async (
     .connect(lender2Signer)
     .approve(registryContract.address, amountToTransfer);
 
+  // Lender 3 minting
+  await lendingTokenContract
+    .connect(deployerSigner)
+    .mint(lender3, amountToTransfer);
+  await lendingTokenContract
+    .connect(lender3Signer)
+    .approve(registryContract.address, amountToTransfer);
+
+  // Seeker minting
   await lendingTokenContract
     .connect(deployerSigner)
     .mint(seeker, amountToTransfer);
