@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {LoanStatus} from '../../helpers/registryEnums';
-import {getCurrentTimestamp} from '../../helpers/time';
+import {getCurrentTimestamp, getTransactionTimestamp} from '../../helpers/time';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
 export default async function suite() {
@@ -13,13 +13,12 @@ export default async function suite() {
         .connect(this.lender2Signer)
         .fundLoan(this.loanId, this.bigPartition);
 
+      this.approvalRequest = await this.governanceContract.totalApprovalRequests();
+
       await this.registryContract
         .connect(this.seekerSigner)
         .applyMilestone(this.loanId);
 
-      await this.governanceContract
-        .connect(this.superDelegatorSigner)
-        .superVoteForRequest(this.approvalRequest, true);
     });
 
     it('when approving a milestone for a project loan', async function () {
@@ -28,9 +27,12 @@ export default async function suite() {
       const initEscrowLendingBalance =
         await this.lendingTokenContract.balanceOf(this.escrowContract.address);
 
+      await this.governanceContract
+        .connect(this.superDelegatorSigner)
+        .superVoteForRequest(this.approvalRequest, true);
 
       const newSeekerLendingBalance = await this.lendingTokenContract.balanceOf(
-        this.deployer
+        this.seeker
       );
       const newEscrowLendingBalance = await this.lendingTokenContract.balanceOf(
         this.escrowContract.address
@@ -76,16 +78,11 @@ export default async function suite() {
         this.loanId.toNumber()
       );
       expect(daoApprovalRequest.isMilestone).to.be.equal(true);
-      expect(daoApprovalRequest.approvalsProvided.toNumber()).to.be.equal(2);
+      expect(daoApprovalRequest.approvalsProvided.toNumber()).to.be.equal(1);
       expect(daoApprovalRequest.isApproved).to.be.equal(true);
       expect(daoApprovalRequest.milestoneNumber.toNumber()).to.be.equal(0);
+
       // Correct Payments.
-      expect(
-        loanPayments.currentMilestoneStartingTimestamp.toNumber()
-      ).to.be.equal(currentTime.toNumber());
-      expect(
-        loanPayments.currentMilestoneDeadlineTimestamp.toNumber()
-      ).to.be.equal(currentTime.add(timestamp));
       expect(loanPayments.milestonesDelivered.toNumber()).to.be.equal(1);
       expect(loanPayments.milestonesExtended.toNumber()).to.be.equal(0);
 
