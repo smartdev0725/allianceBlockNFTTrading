@@ -1,6 +1,6 @@
 import chai, {expect} from 'chai';
 import {LoanStatus} from '../../helpers/registryEnums';
-import {BASE_AMOUNT, DAO_MILESTONE_APPROVAL} from '../../helpers/constants';
+import {BASE_AMOUNT} from '../../helpers/constants';
 import {getCurrentTimestamp} from '../../helpers/time';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {solidity} from 'ethereum-waffle';
