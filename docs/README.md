@@ -1,7 +1,9 @@
 # P2PLINFT
 
 ## In a nutshell
-The Protocol aims to provide a decentralized infrastructure allowing blockchain-based projects to receive funding from the platform users as well as other p2p lenders integrated with [AllianceBlock](https://allianceblock.io). Users providing funding (a.k.a. [Funders](Glossary.md)) for a project receive [Funding NTFs](Glossary.md) that represent investments which can be exchanged for the [Project tokens](Glossary.md) at discount, or can be repaid with accrued interest at pre-agreed conditions.
+AllianceBlock is implementing a decentralized finance model on the principles of participatory capitalism by shifting the functions of validation, rating and governance from centralised entities to the collective input participants of the ecosystem.
+
+The **Protocol** aims to provide a decentralized infrastructure allowing blockchain-based projects to receive funding from the platform's users as well as from other p2p lenders that have integrated with [AllianceBlock](https://allianceblock.io). Users providing funding (a.k.a. [Funders](Glossary.md)) for a project receive [Funding NTFs](Glossary.md) that represent investments which can be exchanged for the [Project tokens](Glossary.md) at discount, or can be repaid with accrued interest at pre-agreed conditions.
 
 * Read more about the stages for [Project Financing](Financing.md).
 * For any definitions you may need, check out our [Glossary](Glossary.md)

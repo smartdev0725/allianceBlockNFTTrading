@@ -27,5 +27,13 @@ There are two major protections implemented:
 1) At launch, the `transfer()` functionalities within the [rALBT token](Glossary.md) will be locked, to protect the protocol from whales.
 2) The relation between the amount of **Reputation** and the benefits within the platform are equalized by the [GEV Distribution](https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution). This makes the *Reputation curve* asymptotic, discouraging hoarding **rALBT**. In other words: after certain point, earning more won't have any considerable effect.
 
-## Reputation markets
-After a grace period has passed and the *Reputation tokens* have converged to a stable system, the [DAO](DAO.md) will enable the `transfer()` of *rALBT*. This will open up the possibilities to trading **Reputation Tokens**. Because of the **GEV Distribution**
+
+---
+
+## Future updates
+* **Reputation markets**: After a grace period has passed and the *Reputation tokens* have converged to a stable system, the [DAO](DAO.md) will enable the `transfer()` of *rALBT*. This will open up the possibilities to trading **Reputation Tokens**. Because of the **GEV Distribution**
+
+* **Reputation Levels**: The user’s level reflects their skills. A user’s level is based on the total tokens earned for each project evaluated and their reputation. To reach a level, the user must pass the thresholds in tokens and reputation. Since the reputation is updated periodically, the level is also updated. A user’s level determines the minimum and maximum tokens involved during the project evaluation. The higher the level is, the higher the number of tokens involved. A better level implies a slightly higher peril but also better rewards. The level thresholds are not linearly spaced. The progression gets more challenging with levels. However, the calibration of these thresholds is designed to ensure that a talented participant can progress effectively.
+The user’s progress within a level is easier at the beginning of the level and is slower at the end of the level. The level change is a step to reach and exceed. This progression rate variation within a level is used for the total tokens and reputation, so the user has two progression levers.
+
+* **Project Rating**: Rating represents the collective user's opinion about a project. *The Wisdom of Crowds* by **AllianceBlock** means that each user's **Reputation** plays a role as important as their opinion on an early stage project.

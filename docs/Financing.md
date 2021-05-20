@@ -3,7 +3,9 @@
 ## Scenario
 A project that needs funding to launch an ERC-20 token usually seeks investors. We call this a [Seeker](Glossary.md) Project. The **Seeker** will have to go through several stages in order to receive funding.
 
-## Project investment stages
+---
+
+## From the Seeker's perspective
 
 1. **Request stage:** Seeker will [Request Investment](Glossary.md). This request consist of several parts
     * [Hard data](Glossary.md) regarding the project.
@@ -16,7 +18,10 @@ A project that needs funding to launch an ERC-20 token usually seeks investors. 
 
 3. **Listing stage:** At the start of the funding process, the Project will become [listed](Glossary.md) on the website. Potential [Funders](Glossary.md) will receive a notification via e-mail, encouraging them to sign-in to their accounts and [Subscribing](Glossary.md) to the project.
 
-4. **Subscribing stage:** *Funders* subscribe to a project for a chance at winning a [Funder Ticket](Glossary.md). Subscribing is a declaration of intent to invest a certain amount of assets (generally USDT/USDC/DAI) in a specific project. At the end of this step, the *Funders* will be required to choose a [Participation Tier](Glossary.md), depending on the amount of **ALBT** they wish to stake.
+4. **Subscribing stage:** *Funders* subscribe to a project for a chance at winning a [Funder Ticket](Glossary.md). Subscribing is a declaration of intent to invest a certain amount of assets (generally USDT/USDC/DAI) in a specific project.
+![Stake Tiers](img/stakeTiers.png)
+
+At the end of this step, the *Funders* will be required to choose a [Participation Tier](Glossary.md), depending on the amount of **ALBT** they wish to stake.
     * Tier 0 receives 1% of the tickets: users who have declared intent but have not staked any **ALBT**.
     * Tier 1 receives 5% of the tickets: users who have declared intent but have **5k ALBT** staked
     * Tier 2 receives 10% of the tickets: users who have declared intent but have **50k ALBT** staked
@@ -31,6 +36,17 @@ A project that needs funding to launch an ERC-20 token usually seeks investors. 
 
 7. **Claiming stage:** After the project goals have been reached and all of the **Funders** have purchased their **Funding NFT**, the **Funding Stage** is closed. **Funders** are now able to claim the **Project tokens** and Seekers are able to claim their project funding from the [Escrow](Glossary.md)
 
+---
+
+## From the Funder's perspective:
+
+![Fund Process](img/fundProcess.png)
+
+1. Users connect to the platform. Choose how much they want to stake, effectively earning a **Tier NFT**.
+2. Users earn [Reputation](Glossary.md)
+3. Users become [Subscribers](Glossary.md) by declaring their intention to invest in a project. Then they participate in the [Funding Ticket Lottery](Glossary.md) for a chance at becoming [Funders](Glossary.md)
+4. Users become [Funders](Glossary.md) by exchanging their funds for the [Project Tokens](Glossary.md)
+
 
 ---
 
@@ -43,3 +59,4 @@ A project that needs funding to launch an ERC-20 token usually seeks investors. 
 ## The token flow follows this chart:
 
 ![FinanceFLowChart](img/financeFlow.png)
+

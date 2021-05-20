@@ -82,6 +82,9 @@ The tokens a *Seeker* will deposit in the **Escrow** when the *Project* is appro
 ## Listing
 When a **Project** or **Loan** becomes *Listed*, it means that it's **Hard Data** has been approved by **Goverannce** and it should be published in the website and available for **Funders** to subscribe to.
 
+## Project Rating
+A *Project's Rating* represents the collective user's opinion about the Project. *The Wisdom of Crowds* by **AllianceBlock** means that each user's **Reputation** plays a role as important as their opinion on an *Early Stage Project*. It is more than the average of the individual scores. The added value comes from the feelings expressed in the users' comments.
+
 ## Subscribing
 A **Subscription** is a declaration of intent made by a **Funder**. When a **Funder** decides to invest in a **Project** or **Loan**, they will first have to *Subscribe*.
 
@@ -105,6 +108,9 @@ The amount of staked **ALBT** a user chooses to lock defines the *Tiers* they wi
 
 ## Tier NFT
 This NFT is not tradeable and represents the amount of **ALBT** staked by the user. It earns **Reputation** and allows the user to participate in the **Investment Ticket Lottery** with perks depending to the current user's level.
+
+## Reputation level
+As the *Protocol* matures, the **DAO** will enable the *Reputation Leveling System*. This will extend the [Reputation Subsystem](RALBT.md) with a leveling score for each user. The 7 levels will range from *Junior* to *Grand Master*.
 
 ## Milestone
 Each successful *Project* is required to have a set of *Milestones* or goals. If the *Project* is listed, the total required funds will be granted in steps, as each *Milestone* is reached and verified by **Governance**.
