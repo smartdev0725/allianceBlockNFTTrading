@@ -1,6 +1,6 @@
-import {expect} from 'chai';
-import {LoanStatus} from '../../helpers/registryEnums';
-import {deployments, getNamedAccounts, ethers} from 'hardhat';
+import { expect } from 'chai';
+import { LoanStatus } from '../../helpers/registryEnums';
+import { deployments, getNamedAccounts, ethers } from 'hardhat';
 
 export default async function suite() {
   describe('Personal loan approval', async () => {
@@ -12,7 +12,7 @@ export default async function suite() {
         .connect(this.superDelegatorSigner)
         .superVoteForRequest(approvalRequest, true);
 
-      const loanStatus = await this.registry.loanStatus(this.loanId);
+      const loanStatus = await this.registryContract.loanStatus(this.loanId);
 
       let daoApprovalRequest = await this.governanceContract.approvalRequests(
         approvalRequest
@@ -24,9 +24,9 @@ export default async function suite() {
       );
       expect(daoApprovalRequest.isMilestone).to.be.equal(false);
       expect(daoApprovalRequest.approvalsProvided.toString()).to.be.equal('1');
-      expect(daoApprovalRequest.isApproved).to.be.equal(false);
+      expect(daoApprovalRequest.isApproved).to.be.equal(true);
 
-      const isPaused = await this.fundingNFT.transfersPaused(this.loanId);
+      const isPaused = await this.fundingNFTContract.transfersPaused(this.loanId);
 
       // Correct Nft Behavior.
       expect(isPaused).to.be.equal(false);
