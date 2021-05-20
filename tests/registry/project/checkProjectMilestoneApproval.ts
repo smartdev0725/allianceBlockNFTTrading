@@ -13,22 +13,21 @@ export default async function suite() {
         .connect(this.lender2Signer)
         .fundLoan(this.loanId, this.bigPartition);
 
-      this.approvalRequest =
-        await this.governanceContract.totalApprovalRequests();
       await this.registryContract
-        .connect(this.deployerSigner)
+        .connect(this.seekerSigner)
         .applyMilestone(this.loanId);
-    });
-
-    it('when approving a milestone for a project loan', async function () {
-      const initSeekerLendingBalance =
-        await this.lendingTokenContract.balanceOf(this.deployer);
-      const initEscrowLendingBalance =
-        await this.lendingTokenContract.balanceOf(this.escrowContract.address);
 
       await this.governanceContract
         .connect(this.superDelegatorSigner)
         .superVoteForRequest(this.approvalRequest, true);
+    });
+
+    it('when approving a milestone for a project loan', async function () {
+      const initSeekerLendingBalance =
+        await this.lendingTokenContract.balanceOf(this.seeker);
+      const initEscrowLendingBalance =
+        await this.lendingTokenContract.balanceOf(this.escrowContract.address);
+
 
       const newSeekerLendingBalance = await this.lendingTokenContract.balanceOf(
         this.deployer

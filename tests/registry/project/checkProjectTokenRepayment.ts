@@ -36,7 +36,7 @@ export default async function suite() {
       this.approvalRequest =
         await this.governanceContract.totalApprovalRequests();
       await this.registryContract
-        .connect(this.deployerSigner)
+        .connect(this.seekerSigner)
         .applyMilestone(this.loanId);
       await this.governanceContract
         .connect(this.superDelegatorSigner)
