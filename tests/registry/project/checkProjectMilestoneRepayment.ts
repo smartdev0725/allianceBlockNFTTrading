@@ -11,7 +11,6 @@ export default async function suite() {
     let approvalRequest: BigNumber;
 
     beforeEach(async function () {
-
       await this.registryContract
         .connect(this.lender1Signer)
         .fundLoan(this.loanId, this.bigPartition);

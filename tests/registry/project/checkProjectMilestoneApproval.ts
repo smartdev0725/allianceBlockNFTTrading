@@ -13,12 +13,12 @@ export default async function suite() {
         .connect(this.lender2Signer)
         .fundLoan(this.loanId, this.bigPartition);
 
-      this.approvalRequest = await this.governanceContract.totalApprovalRequests();
+      this.approvalRequest =
+        await this.governanceContract.totalApprovalRequests();
 
       await this.registryContract
         .connect(this.seekerSigner)
         .applyMilestone(this.loanId);
-
     });
 
     it('when approving a milestone for a project loan', async function () {

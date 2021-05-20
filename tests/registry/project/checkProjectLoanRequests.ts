@@ -5,7 +5,7 @@ import {getCurrentTimestamp} from '../../helpers/time';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {BigNumber} from 'ethers';
 import chai, {expect} from 'chai';
-import {solidity} from "ethereum-waffle";
+import {solidity} from 'ethereum-waffle';
 
 chai.use(solidity);
 
@@ -75,7 +75,13 @@ export default async function suite() {
             paymentTimeInterval,
             ipfsHash
           )
-      ).to.emit(this.registryContract, 'ProjectLoanRequested').withArgs(loanId.toString(), this.seeker, totalAmountRequested.toString());
+      )
+        .to.emit(this.registryContract, 'ProjectLoanRequested')
+        .withArgs(
+          loanId.toString(),
+          this.seeker,
+          totalAmountRequested.toString()
+        );
 
       const newSeekerCollateralBalance =
         await this.projectTokenContract.balanceOf(this.seeker);

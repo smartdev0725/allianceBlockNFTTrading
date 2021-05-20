@@ -65,7 +65,13 @@ export const initializeTransfers = async (
   } = contracts;
 
   const {lender1, lender2, lender3, seeker, deployer} = accounts;
-  const {deployerSigner, lender1Signer, lender2Signer, lender3Signer, seekerSigner} = signers;
+  const {
+    deployerSigner,
+    lender1Signer,
+    lender2Signer,
+    lender3Signer,
+    seekerSigner,
+  } = signers;
 
   // Transfer tokens.
   const amountToTransfer = ethers.utils.parseEther('10000000');

@@ -82,7 +82,13 @@ describe('Registry Project Loans', function () {
         collateralTokenContract,
       },
       {deployer, lender1, lender2, lender3, seeker},
-      {deployerSigner, lender1Signer, lender2Signer, lender3Signer, seekerSigner}
+      {
+        deployerSigner,
+        lender1Signer,
+        lender2Signer,
+        lender3Signer,
+        seekerSigner,
+      }
     );
 
     this.approvalRequest = await governanceContract.totalApprovalRequests();
@@ -114,8 +120,12 @@ describe('Registry Project Loans', function () {
       this.amountRequestedPerMilestone[i] = ethers.utils.parseEther('10000');
     }
 
-    this.totalAmountRequested = this.amountRequestedPerMilestone[0].mul(this.totalMilestones);
-    this.totalPartitions = this.totalAmountRequested.div(ethers.utils.parseEther(BASE_AMOUNT + ''));
+    this.totalAmountRequested = this.amountRequestedPerMilestone[0].mul(
+      this.totalMilestones
+    );
+    this.totalPartitions = this.totalAmountRequested.div(
+      ethers.utils.parseEther(BASE_AMOUNT + '')
+    );
     this.bigPartition = this.totalPartitions.div(BigNumber.from(2));
     this.smallPartition = this.bigPartition.div(BigNumber.from(2));
     this.bigPartitionAmountToPurchase = this.bigPartition.mul(

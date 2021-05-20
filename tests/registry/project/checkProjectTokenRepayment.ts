@@ -3,7 +3,7 @@ import {BASE_AMOUNT} from '../../helpers/constants';
 import {increaseTime} from '../../helpers/time';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {BigNumber} from 'ethers';
-import {solidity} from "ethereum-waffle";
+import {solidity} from 'ethereum-waffle';
 
 chai.use(solidity);
 
@@ -19,20 +19,20 @@ export default async function suite() {
     });
 
     it('when project tokens can not be claimed if no milestones are delivered yet', async function () {
-        const convertibleAmountLender0 =
-          await this.registryContract.getAvailableFundingNFTForConversion(
-            this.loanId,
-            this.lender1
-          );
-        const convertibleAmountLender1 =
-          await this.registryContract.getAvailableFundingNFTForConversion(
-            this.loanId,
-            this.lender2
-          );
+      const convertibleAmountLender0 =
+        await this.registryContract.getAvailableFundingNFTForConversion(
+          this.loanId,
+          this.lender1
+        );
+      const convertibleAmountLender1 =
+        await this.registryContract.getAvailableFundingNFTForConversion(
+          this.loanId,
+          this.lender2
+        );
 
-        expect(convertibleAmountLender0.toNumber()).to.be.equal(0);
-        expect(convertibleAmountLender1.toNumber()).to.be.equal(0);
-      });
+      expect(convertibleAmountLender0.toNumber()).to.be.equal(0);
+      expect(convertibleAmountLender1.toNumber()).to.be.equal(0);
+    });
 
     it('when a percent of NFT can be converted after delivering the first milestone', async function () {
       this.approvalRequest =
@@ -83,8 +83,15 @@ export default async function suite() {
         this.registryContract
           .connect(this.lender1Signer)
           .receivePayment(this.loanId, convertibleAmountLender0, true)
-      ).to.emit(this.registryContract, 'PaymentReceived')
-        .withArgs(this.loanId.toString(), convertibleAmountLender0.toString(), '0', true, this.lender1);
+      )
+        .to.emit(this.registryContract, 'PaymentReceived')
+        .withArgs(
+          this.loanId.toString(),
+          convertibleAmountLender0.toString(),
+          '0',
+          true,
+          this.lender1
+        );
 
       const balanceNFTLenderAfter =
         await this.registryContract.balanceOfAllFundingNFTGenerations(
@@ -146,7 +153,6 @@ export default async function suite() {
       expect(amountToBeRepaidLoanId.toString()).to.be.equal(
         amountToBeRepaid.toString()
       );
-
     });
 
     it('when more NFT can be converted after delivering the second milestone', async function () {
@@ -208,9 +214,15 @@ export default async function suite() {
         this.registryContract
           .connect(this.lender1Signer)
           .receivePayment(this.loanId, convertibleAmountLender0, true)
-      ).to.emit(this.registryContract, 'PaymentReceived')
-        .withArgs(this.loanId.toString(), convertibleAmountLender0.toString(), '0', true, this.lender1);
-
+      )
+        .to.emit(this.registryContract, 'PaymentReceived')
+        .withArgs(
+          this.loanId.toString(),
+          convertibleAmountLender0.toString(),
+          '0',
+          true,
+          this.lender1
+        );
 
       const balanceNFTLenderAfter =
         await this.registryContract.balanceOfAllFundingNFTGenerations(

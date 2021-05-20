@@ -2,7 +2,7 @@ import chai, {expect} from 'chai';
 import {ONE_DAY, BASE_AMOUNT} from '../../helpers/constants';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {BigNumber} from 'ethers';
-import {solidity} from "ethereum-waffle";
+import {solidity} from 'ethereum-waffle';
 
 chai.use(solidity);
 
@@ -109,7 +109,13 @@ export default async function suite() {
           .receivePayment(loanId, convertibleAmountLender0, true)
       )
         .to.emit(this.registryContract, 'PaymentReceived')
-        .withArgs(loanId.toString(), convertibleAmountLender0.toString(), '0', true, this.lender1);
+        .withArgs(
+          loanId.toString(),
+          convertibleAmountLender0.toString(),
+          '0',
+          true,
+          this.lender1
+        );
 
       const balanceNFTLenderAfter =
         await this.registryContract.balanceOfAllFundingNFTGenerations(
@@ -171,7 +177,6 @@ export default async function suite() {
       expect(amountToBeRepaidLoanId.toString()).to.be.equal(
         amountToBeRepaid.toString()
       );
-
     });
   });
 }
