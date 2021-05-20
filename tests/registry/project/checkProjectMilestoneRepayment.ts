@@ -18,10 +18,10 @@ export default async function suite() {
       await this.registryContract.connect(this.lender1Signer).fundLoan(this.loanId, bigPartition);
       await this.registryContract.connect(this.lender2Signer).fundLoan(this.loanId, bigPartition);
 
-      approvalRequest = await this.governance.totalApprovalRequests();
+      approvalRequest = await this.governanceContract.totalApprovalRequests();
       await this.registryContract.connect(this.deployerSigner).applyMilestone(this.loanId);
 
-      await this.governance.connect(this.deployerSigner).superVoteForRequest(approvalRequest, true);
+      await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(approvalRequest, true);
 
     });
 

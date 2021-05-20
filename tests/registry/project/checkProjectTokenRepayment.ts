@@ -35,7 +35,7 @@ export default async function suite() {
     it('when a percent of NFT can be converted after delivering the first milestone', async function () {
       this.approvalRequest = await this.governanceContract.totalApprovalRequests();
       await this.registryContract.connect(this.deployerSigner).applyMilestone(this.loanId);
-      await this.governance.connect(this.deployerSigner).superVoteForRequest(this.approvalRequest, true);
+      await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(this.approvalRequest, true);
 
 
       const convertibleAmountLender0 =
@@ -139,7 +139,7 @@ export default async function suite() {
       for (let i = 0; i < milestonesToDeliver; i++) {
         this.approvalRequest = await this.governanceContract.totalApprovalRequests();
         await this.registryContract.connect(this.deployerSigner).applyMilestone(this.loanId);
-        await this.governance.connect(this.deployerSigner).superVoteForRequest(this.approvalRequest, true);
+        await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(this.approvalRequest, true);
 
         await increaseTime(this.deployerSigner.provider, +this.milestoneDurations[i]);
       }

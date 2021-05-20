@@ -22,11 +22,12 @@ describe("Registry Project Loans", function () {
     await deployments.fixture();
 
     // Get accounts
-    const {deployer, seeker, lender1, lender2} = await getNamedAccounts();
+    const {deployer, seeker, lender1, lender2, superDelegator} = await getNamedAccounts();
     this.deployer = deployer;
     this.seeker = seeker;
     this.lender1 = lender1;
     this.lender2 = lender2;
+    this.superDelegator = superDelegator;
 
     // Get signers
     const {
@@ -36,6 +37,7 @@ describe("Registry Project Loans", function () {
       lender1Signer,
       lender2Signer,
       seekerSigner,
+      superDelegatorSigner,
     } = await getSigners();
     this.deployerSigner = deployerSigner;
     this.delegator1Signer = delegator1Signer;
@@ -43,6 +45,7 @@ describe("Registry Project Loans", function () {
     this.lender1Signer = lender1Signer;
     this.lender2Signer = lender2Signer;
     this.seekerSigner = seekerSigner;
+    this.superDelegatorSigner = superDelegatorSigner;
 
     // Get contracts
     const {
@@ -118,7 +121,7 @@ describe("Registry Project Loans", function () {
         this.ipfsHash
       );
 
-    await this.governance.connect(this.deployerSigner).superVoteForRequest(this.approvalRequest, true);
+    await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(this.approvalRequest, true);
   });
 
   describe(

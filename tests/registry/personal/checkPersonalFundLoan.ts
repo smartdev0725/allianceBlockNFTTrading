@@ -65,7 +65,7 @@ export default async function suite() {
       expect(newLenderFundingNftBalance.sub(initLenderFundingNftBalance).toString()).to.be.equal(this.smallPartition.toString());
 
       // Correct Status.
-      expect(loanStatus).to.be.equal(LoanStatus.FUNDING);
+      expect(loanStatus.toString()).to.be.equal(LoanStatus.FUNDING);
 
       // Correct Details.
       expect(loanDetails.partitionsPurchased.toString()).to.be.equal(partitionsPurchased.toString());
@@ -76,7 +76,7 @@ export default async function suite() {
 
       const tx = await this.registryContract.connect(this.lender2Signer).fundLoan(this.loanId, this.bigPartition);
 
-      const newSeekerLendingBalance = new BN(await this.lendingToken.balanceOf(this.seeker));
+      const newSeekerLendingBalance = await this.lendingTokenContract.balanceOf(this.seeker);
 
       newEscrowLendingBalance = await this.lendingTokenContract.balanceOf(this.escrowContract.address);
       newEscrowFundingNftBalance = await this.fundingNFTContract.balanceOf(this.escrowContract.address, this.loanId);
@@ -102,12 +102,13 @@ export default async function suite() {
       // Correct Details.
       expect(loanDetails.partitionsPurchased.toString()).to.be.equal(partitionsPurchased.toString());
       expect(loanDetails.totalPartitions.toString()).to.be.equal(partitionsPurchased.toString());
-      expect(loanDetails.startingDate.toString()).to.be.equal((await getTransactionTimestamp(tx.tx)).toString());
+      const transactionTimestamp = await getTransactionTimestamp(tx.hash)
+      expect(loanDetails.startingDate.toString()).to.be.equal(transactionTimestamp.toString());
 
       // Correct Payments.
-      expect(loanPayments.batchStartingTimestamp.toString()).to.be.equal((await getTransactionTimestamp(tx.tx)).toString());
+      expect(loanPayments.batchStartingTimestamp.toString()).to.be.equal((await getTransactionTimestamp(tx.hash)).toString());
       expect(loanPayments.batchDeadlineTimestamp.toString()).to.be.equal(
-        (await getTransactionTimestamp(tx.tx)).add(this.batchTimeInterval).toString());
+        (await getTransactionTimestamp(tx.hash)).add(this.batchTimeInterval).toString());
     });
   });
 }

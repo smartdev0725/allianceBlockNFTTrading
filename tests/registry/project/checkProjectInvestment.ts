@@ -51,7 +51,7 @@ export default async function suite() {
       );
       bigPartition = totalPartitions.div(BigNumber.from(2));
 
-      await this.governance.connect(this.deployerSigner).superVoteForRequest(approvalRequest, true);
+      await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(approvalRequest, true);
 
       await this.registryContract
         .connect(this.lender1Signer)

@@ -7,7 +7,7 @@ export default async function suite() {
   describe('Check project loan approval', async () => {
 
     it('when approving a project loan', async function () {
-      let daoApprovalRequest = await this.governance.approvalRequests(
+      let daoApprovalRequest = await this.governanceContract.approvalRequests(
         this.approvalRequest
       );
 

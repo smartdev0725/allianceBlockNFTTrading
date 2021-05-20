@@ -26,7 +26,7 @@ export default async function suite() {
         this.escrowContract.address
       );
 
-      await this.governanceContract.connect(this.deployerSigner).superVoteForRequest(this.approvalRequest, true);
+      await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(this.approvalRequest, true);
 
 
       const newSeekerLendingBalance = await this.lendingTokenContract.balanceOf(

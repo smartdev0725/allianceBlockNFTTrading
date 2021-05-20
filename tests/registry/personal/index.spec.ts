@@ -17,11 +17,12 @@ describe("Registry Personal Loans", function() {
     await deployments.fixture();
 
     // Get accounts
-    const {deployer, seeker, lender1, lender2} = await getNamedAccounts();
+    const {deployer, seeker, lender1, lender2, superDelegator} = await getNamedAccounts();
     this.deployer = deployer;
     this.seeker = seeker;
     this.lender1 = lender1;
     this.lender2 = lender2;
+    this.superDelegator = superDelegator;
 
     // Get signers
     const {
@@ -31,6 +32,7 @@ describe("Registry Personal Loans", function() {
       lender1Signer,
       lender2Signer,
       seekerSigner,
+      superDelegatorSigner,
     } = await getSigners();
     this.deployerSigner = deployerSigner;
     this.delegator1Signer = delegator1Signer;
@@ -38,6 +40,7 @@ describe("Registry Personal Loans", function() {
     this.lender1Signer = lender1Signer;
     this.lender2Signer = lender2Signer;
     this.seekerSigner = seekerSigner;
+    this.superDelegatorSigner = superDelegatorSigner;
 
     // Get contracts
     const {
@@ -85,7 +88,7 @@ describe("Registry Personal Loans", function() {
     const interestPercentage = BigNumber.from(20);
     const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ'; // Dummy hash for testing.
 
-    await this.registryContract.connect(this.deployerSigner).requestPersonalLoan(
+    await this.registryContract.connect(this.seekerSigner).requestPersonalLoan(
       amountRequested,
       collateralTokenContract.address,
       amountCollateralized,
@@ -96,9 +99,7 @@ describe("Registry Personal Loans", function() {
       RepaymentBatchType.ONLY_INTEREST
     );
 
-    await this.governance.superVoteForRequest(approvalRequest, true, {
-      from: this.deployer
-    });
+    await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(approvalRequest, true);
 
   });
 

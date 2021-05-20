@@ -5,15 +5,13 @@ import {deployments, getNamedAccounts, ethers} from "hardhat";
 export default async function suite() {
   describe('Personal loan approval', async () => {
     it('when approving a loan', async function () {
-      const approvalRequest = await this.governance.totalApprovalRequests();
+      const approvalRequest = await this.governanceContract.totalApprovalRequests();
 
-      await this.governance.superVoteForRequest(approvalRequest, true, {
-        from: this.owner
-      });
+      await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(approvalRequest, true);
 
       const loanStatus = await this.registry.loanStatus(this.loanId);
 
-      let daoApprovalRequest = await this.governance.approvalRequests(
+      let daoApprovalRequest = await this.governanceContract.approvalRequests(
         approvalRequest
       );
 

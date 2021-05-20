@@ -15,6 +15,7 @@ export const getSigners = async () => {
     lender1Signer: signers[7],
     lender2Signer: signers[8],
     seekerSigner: signers[9],
+    superDelegatorSigner: signers[10],
   };
 };
 
