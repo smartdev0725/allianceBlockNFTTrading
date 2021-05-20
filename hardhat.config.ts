@@ -62,6 +62,7 @@ const config: HardhatUserConfig = {
     cache: './cache',
     sources: './contracts',
     tests: './tests',
+    deploy: './deploy',
   },
   solidity: {
     version: '0.7.3',
@@ -77,6 +78,7 @@ const config: HardhatUserConfig = {
     gasPrice: 120,
     enabled: process.env.REPORT_GAS ? true : false,
     coinmarketcap: process.env.CMC_API_KEY,
+    excludeContracts: ['./contracts/mocks/', './contracts/libs/'],
   },
   typechain: {
     outDir: 'types/contracts',
