@@ -114,8 +114,8 @@ describe('Registry Project Loans', function () {
       this.amountRequestedPerMilestone[i] = ethers.utils.parseEther('10000');
     }
 
-    const totalAmountRequested = this.amountRequestedPerMilestone[0].mul(this.totalMilestones);
-    this.totalPartitions = totalAmountRequested.div(ethers.utils.parseEther(BASE_AMOUNT + ''));
+    this.totalAmountRequested = this.amountRequestedPerMilestone[0].mul(this.totalMilestones);
+    this.totalPartitions = this.totalAmountRequested.div(ethers.utils.parseEther(BASE_AMOUNT + ''));
     this.bigPartition = this.totalPartitions.div(BigNumber.from(2));
     this.smallPartition = this.bigPartition.div(BigNumber.from(2));
     this.bigPartitionAmountToPurchase = this.bigPartition.mul(

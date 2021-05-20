@@ -11,20 +11,13 @@ export default async function suite() {
     let approvalRequest: BigNumber;
 
     beforeEach(async function () {
-      const totalAmountRequested = this.amountRequestedPerMilestone[0].mul(
-        this.totalMilestones
-      );
-      const totalPartitions = totalAmountRequested.div(
-        ethers.utils.parseEther(BASE_AMOUNT + '')
-      );
-      const bigPartition = totalPartitions.div(BigNumber.from(2));
 
       await this.registryContract
         .connect(this.lender1Signer)
-        .fundLoan(this.loanId, bigPartition);
+        .fundLoan(this.loanId, this.bigPartition);
       await this.registryContract
         .connect(this.lender2Signer)
-        .fundLoan(this.loanId, bigPartition);
+        .fundLoan(this.loanId, this.bigPartition);
 
       approvalRequest = await this.governanceContract.totalApprovalRequests();
       await this.registryContract

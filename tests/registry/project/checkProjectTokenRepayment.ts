@@ -1,9 +1,11 @@
-import {expect} from 'chai';
+import chai, {expect} from 'chai';
 import {BASE_AMOUNT} from '../../helpers/constants';
 import {increaseTime} from '../../helpers/time';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
-const {expectEvent} = require('@openzeppelin/test-helpers');
 import {BigNumber} from 'ethers';
+import {solidity} from "ethereum-waffle";
+
+chai.use(solidity);
 
 export default async function suite() {
   describe('Project token repayment', async () => {
@@ -17,20 +19,20 @@ export default async function suite() {
     });
 
     it('when project tokens can not be claimed if no milestones are delivered yet', async function () {
-      const convertibleAmountLender0 =
-        await this.registryContract.getAvailableFundingNFTForConversion(
-          this.loanId,
-          this.lender1
-        );
-      const convertibleAmountLender1 =
-        await this.registryContract.getAvailableFundingNFTForConversion(
-          this.loanId,
-          this.lender2
-        );
+        const convertibleAmountLender0 =
+          await this.registryContract.getAvailableFundingNFTForConversion(
+            this.loanId,
+            this.lender1
+          );
+        const convertibleAmountLender1 =
+          await this.registryContract.getAvailableFundingNFTForConversion(
+            this.loanId,
+            this.lender2
+          );
 
-      expect(convertibleAmountLender0.toNumber()).to.be.equal(0);
-      expect(convertibleAmountLender1.toNumber()).to.be.equal(0);
-    });
+        expect(convertibleAmountLender0.toNumber()).to.be.equal(0);
+        expect(convertibleAmountLender1.toNumber()).to.be.equal(0);
+      });
 
     it('when a percent of NFT can be converted after delivering the first milestone', async function () {
       this.approvalRequest =
@@ -38,6 +40,7 @@ export default async function suite() {
       await this.registryContract
         .connect(this.seekerSigner)
         .applyMilestone(this.loanId);
+
       await this.governanceContract
         .connect(this.superDelegatorSigner)
         .superVoteForRequest(this.approvalRequest, true);
@@ -74,10 +77,14 @@ export default async function suite() {
           this.loanId,
           convertibleAmountLender0
         );
+
       // Request to receive project tokens as repayment for all of the convertible NFT
-      const tx1 = await this.registryContract
-        .connect(this.lender1Signer)
-        .receivePayment(this.loanId, convertibleAmountLender0, true);
+      await expect(
+        this.registryContract
+          .connect(this.lender1Signer)
+          .receivePayment(this.loanId, convertibleAmountLender0, true)
+      ).to.emit(this.registryContract, 'PaymentReceived')
+        .withArgs(this.loanId.toString(), convertibleAmountLender0.toString(), '0', true, this.lender1);
 
       const balanceNFTLenderAfter =
         await this.registryContract.balanceOfAllFundingNFTGenerations(
@@ -140,20 +147,6 @@ export default async function suite() {
         amountToBeRepaid.toString()
       );
 
-      // Correct Event.
-      expectEvent(tx1.receipt, 'PaymentReceived', {
-        loanId: this.loanId,
-        amountOfTokens: convertibleAmountLender0,
-        generation: BigNumber.from(0),
-        onProjectTokens: true,
-        user: this.lender1,
-      });
-      expectEvent(tx1.receipt, 'ProjectTokenPaymentReceived', {
-        loanId: this.loanId,
-        user: this.lender1,
-        amountOfProjectTokens: expectedProjectTokenAmount,
-        discountedPrice,
-      });
     });
 
     it('when more NFT can be converted after delivering the second milestone', async function () {
@@ -162,7 +155,7 @@ export default async function suite() {
         this.approvalRequest =
           await this.governanceContract.totalApprovalRequests();
         await this.registryContract
-          .connect(this.deployerSigner)
+          .connect(this.seekerSigner)
           .applyMilestone(this.loanId);
         await this.governanceContract
           .connect(this.superDelegatorSigner)
@@ -211,9 +204,13 @@ export default async function suite() {
           convertibleAmountLender0
         );
       // Request to receive project tokens as repayment
-      const tx1 = await this.registryContract
-        .connect(this.lender1Signer)
-        .receivePayment(this.loanId, convertibleAmountLender0, true);
+      await expect(
+        this.registryContract
+          .connect(this.lender1Signer)
+          .receivePayment(this.loanId, convertibleAmountLender0, true)
+      ).to.emit(this.registryContract, 'PaymentReceived')
+        .withArgs(this.loanId.toString(), convertibleAmountLender0.toString(), '0', true, this.lender1);
+
 
       const balanceNFTLenderAfter =
         await this.registryContract.balanceOfAllFundingNFTGenerations(
@@ -275,21 +272,6 @@ export default async function suite() {
       expect(amountToBeRepaidLoanId.toString()).to.be.equal(
         amountToBeRepaid.toString()
       );
-
-      // Correct Event.
-      expectEvent(tx1.receipt, 'PaymentReceived', {
-        loanId: this.loanId,
-        amountOfTokens: convertibleAmountLender0,
-        generation: BigNumber.from(0),
-        onProjectTokens: true,
-        user: this.lender1,
-      });
-      expectEvent(tx1.receipt, 'ProjectTokenPaymentReceived', {
-        loanId: this.loanId,
-        user: this.lender1,
-        amountOfProjectTokens: expectedProjectTokenAmount,
-        discountedPrice,
-      });
     });
 
     it('when all NFT can be converted after delivering the third milestone', async function () {
@@ -298,14 +280,12 @@ export default async function suite() {
         this.approvalRequest =
           await this.governanceContract.totalApprovalRequests();
         await this.registryContract
-          .connect(this.deployerSigner)
+          .connect(this.seekerSigner)
           .applyMilestone(this.loanId);
+
         await this.governanceContract
-          .connect(this.delegator1Signer)
-          .voteForRequest(this.approvalRequest, true);
-        await this.governanceContract
-          .connect(this.delegator2Signer)
-          .voteForRequest(this.approvalRequest, true);
+          .connect(this.superDelegatorSigner)
+          .superVoteForRequest(this.approvalRequest, true);
 
         await increaseTime(
           this.deployerSigner.provider,
