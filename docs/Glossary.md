@@ -101,7 +101,10 @@ Note that not all **Funders** who *subscribe* are elligible to invest in a **Pro
 Some investment opportunities are very popular, requiring a mechanism to even the odds between potential **Funders**. This mechanism distributes **Funder Tickets** among the **Subscribed Funders** for every **Tier**. The user's **Reputation** heavily influences the chances they have of securing a ticket.
 
 ## Participation Tier
-The amount of staked **ALBT** a user chooses to lock defines the *Tiers* they will participate in. Different *Tiers* run different probabilities of earning an **Investment Ticket** 
+The amount of staked **ALBT** a user chooses to lock defines the *Tiers* they will participate in. Different *Tiers* run different probabilities of earning an **Investment Ticket**. Each *Tier* comes with it's own **Tier NFT**.
+
+## Tier NFT
+This NFT is not tradeable and represents the amount of **ALBT** staked by the user. It earns **Reputation** and allows the user to participate in the **Investment Ticket Lottery** with perks depending to the current user's level.
 
 ## Milestone
 Each successful *Project* is required to have a set of *Milestones* or goals. If the *Project* is listed, the total required funds will be granted in steps, as each *Milestone* is reached and verified by **Governance**.

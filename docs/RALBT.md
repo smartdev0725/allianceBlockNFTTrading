@@ -4,12 +4,16 @@
 **Reputation** is a key sub-system that permeates the whole P2P protocol. It is measured in ten levels: from **Junior** to **Grand Master**. Users can earn **Reputation** depending on the [Tier](Glossary.md) they picked prior to investing. By interacting with the protocol, users will earn a certain amount of [Reputation Tokens (rALBT)](RALBT.md):
 
 * Applying for a Loan
+* Locking their investment
 * Staking *ALBT*
 * Signing messages
-* Upvoting projects
-* Downvoting projects
+* Upvoting / Downvoting projects
+* Responding to threads or creating new ones
 * Sharing projects and helping them reach more people
 * Broadcasting messages on-chain (paying gas fees)
+* ... and more actions TBD by the DAO
+
+![Project Interactions](img/forum.png)
 
 ## Incentives
 **Reputation** is highly influential in the [Investment Ticket Lottery](Glossary.md). Users with higher reputation will have higher chances of winning the lottery they partake in.
