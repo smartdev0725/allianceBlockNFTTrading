@@ -1,8 +1,10 @@
-import {expect} from 'chai';
+import chai, {expect} from 'chai';
 import {ONE_DAY, BASE_AMOUNT} from '../../helpers/constants';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
-const {expectEvent} = require('@openzeppelin/test-helpers');
 import {BigNumber} from 'ethers';
+import {solidity} from "ethereum-waffle";
+
+chai.use(solidity);
 
 export default async function suite() {
   describe('Check project investment', async () => {
@@ -31,7 +33,7 @@ export default async function suite() {
       amountRequestedPerMilestone[0] = ethers.utils.parseEther('10000');
 
       await this.registryContract
-        .connect(this.deployerSigner)
+        .connect(this.seekerSigner)
         .requestProjectLoan(
           amountRequestedPerMilestone,
           this.projectTokenContract.address,
@@ -99,10 +101,15 @@ export default async function suite() {
       const getterProjectTokenAmount = await this.registryContract
         .connect(this.lender1Signer)
         .getAmountOfProjectTokensToReceive(loanId, convertibleAmountLender0);
+
       // Request to receive project tokens as repayment for all of the convertible NFT
-      const tx1 = await this.registryContract
-        .connect(this.lender1Signer)
-        .receivePayment(loanId, convertibleAmountLender0, true);
+      await expect(
+        this.registryContract
+          .connect(this.lender1Signer)
+          .receivePayment(loanId, convertibleAmountLender0, true)
+      )
+        .to.emit(this.registryContract, 'PaymentReceived')
+        .withArgs(loanId.toString(), convertibleAmountLender0.toString(), '0', true, this.lender1);
 
       const balanceNFTLenderAfter =
         await this.registryContract.balanceOfAllFundingNFTGenerations(
@@ -165,20 +172,6 @@ export default async function suite() {
         amountToBeRepaid.toString()
       );
 
-      // Correct Event.
-      expectEvent(tx1.receipt, 'PaymentReceived', {
-        loanId,
-        amountOfTokens: convertibleAmountLender0,
-        generation: BigNumber.from(0),
-        onProjectTokens: true,
-        user: this.lender1,
-      });
-      expectEvent(tx1.receipt, 'ProjectTokenPaymentReceived', {
-        loanId,
-        user: this.lender1,
-        amountOfProjectTokens: expectedProjectTokenAmount,
-        discountedPrice,
-      });
     });
   });
 }
