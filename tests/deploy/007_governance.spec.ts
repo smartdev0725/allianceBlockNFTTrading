@@ -15,11 +15,18 @@ describe('Contract Governance', () => {
     const governanceContract = await ethers.getContract('Governance');
 
     // When
-    const [totalApprovalRequests, approvalsNeededForRegistryRequest, loanApprovalRequestDuration, milestoneApprovalRequestDuration, amountToStakeForDaoMember] =
-      await governanceContract.getDaoData();
+    const [
+      totalApprovalRequests,
+      approvalsNeededForRegistryRequest,
+      loanApprovalRequestDuration,
+      milestoneApprovalRequestDuration,
+      amountToStakeForDaoMember,
+    ] = await governanceContract.getDaoData();
 
     // Then
-    expect(loanApprovalRequestDuration.toNumber()).to.equal(DAO_LOAN_APPROVAL_REQUEST_DURATION);
+    expect(loanApprovalRequestDuration.toNumber()).to.equal(
+      DAO_LOAN_APPROVAL_REQUEST_DURATION
+    );
     expect(milestoneApprovalRequestDuration.toNumber()).to.equal(
       DAO_MILESTONE_APPROVAL_REQUEST_DURATION
     );

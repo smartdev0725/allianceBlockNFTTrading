@@ -1,10 +1,10 @@
-import {deployments, getNamedAccounts, ethers} from "hardhat";
-const { expectRevert } = require("@openzeppelin/test-helpers");
-import {increaseTime} from "../../helpers/time";
+import {deployments, getNamedAccounts, ethers} from 'hardhat';
+const {expectRevert} = require('@openzeppelin/test-helpers');
+import {increaseTime} from '../../helpers/time';
 
 export default async function suite() {
-  describe("Personal fund loan off limit", async () => {
-    it("when funding a personal loan off the limit should revert", async function() {
+  describe('Personal fund loan off limit', async () => {
+    it('when funding a personal loan off the limit should revert', async function () {
       // Given
       // Request personal loan on beforeEach
 
@@ -13,8 +13,10 @@ export default async function suite() {
 
       // Then
       await expectRevert(
-        this.registryContract.connect(this.lender1Signer).fundLoan(this.loanId, this.smallPartition),
-        "Only between funding timeframe"
+        this.registryContract
+          .connect(this.lender1Signer)
+          .fundLoan(this.loanId, this.smallPartition),
+        'Only between funding timeframe'
       );
     });
   });

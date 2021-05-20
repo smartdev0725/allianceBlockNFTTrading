@@ -103,4 +103,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 };
 export default func;
 func.tags = ['Registry'];
-func.dependencies = ['FundingNFT', 'MainNFT', 'Staking', 'Governance', 'Escrow'];
+func.dependencies = [
+  'FundingNFT',
+  'MainNFT',
+  'Staking',
+  'Governance',
+  'Escrow',
+];

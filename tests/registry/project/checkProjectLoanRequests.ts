@@ -9,20 +9,19 @@ import {BigNumber} from 'ethers';
 
 export default async function suite() {
   describe('Check project loan request', async () => {
-
     it('when requesting an project loan', async function () {
       const loanId = await this.registryContract.totalLoans();
-      const approvalRequest = await this.governanceContract.totalApprovalRequests();
-      const initSeekerCollateralBalance = await this.projectTokenContract.balanceOf(
-        this.deployer
-      );
-      const initEscrowCollateralBalance = await this.projectTokenContract.balanceOf(
-        this.escrowContract.address
-      );
-      const initEscrowFundingNftBalance = await this.fundingNFTContract.balanceOf(
-        this.escrowContract.address,
-        loanId
-      );
+      const approvalRequest =
+        await this.governanceContract.totalApprovalRequests();
+      const initSeekerCollateralBalance =
+        await this.projectTokenContract.balanceOf(this.deployer);
+      const initEscrowCollateralBalance =
+        await this.projectTokenContract.balanceOf(this.escrowContract.address);
+      const initEscrowFundingNftBalance =
+        await this.fundingNFTContract.balanceOf(
+          this.escrowContract.address,
+          loanId
+        );
 
       const amountCollateralized = ethers.utils.parseEther('100000');
       const projectTokenPrice = BigNumber.from(1);
@@ -73,22 +72,23 @@ export default async function suite() {
         .mul(interestPercentage)
         .div(BigNumber.from(100));
 
-      const newSeekerCollateralBalance = await this.projectTokenContract.balanceOf(
-        this.deployer
-      );
-      const newEscrowCollateralBalance = await this.projectTokenContract.balanceOf(
-        this.escrowContract.address
-      );
-      const newEscrowFundingNftBalance = await this.fundingNFTContract.balanceOf(
-        this.escrowContract.address,
-        tokenId
-      );
+      const newSeekerCollateralBalance =
+        await this.projectTokenContract.balanceOf(this.deployer);
+      const newEscrowCollateralBalance =
+        await this.projectTokenContract.balanceOf(this.escrowContract.address);
+      const newEscrowFundingNftBalance =
+        await this.fundingNFTContract.balanceOf(
+          this.escrowContract.address,
+          tokenId
+        );
 
       const isPaused = await this.fundingNFTContract.transfersPaused(loanId);
 
       const loanStatus = await this.registryContract.loanStatus(loanId);
       const loanDetails = await this.registryContract.loanDetails(loanId);
-      const loanPayments = await this.registryContract.projectLoanPayments(loanId);
+      const loanPayments = await this.registryContract.projectLoanPayments(
+        loanId
+      );
       const daoApprovalRequest = await this.governanceContract.approvalRequests(
         approvalRequest
       );
@@ -141,18 +141,15 @@ export default async function suite() {
         loanPayments.currentMilestoneDeadlineTimestamp.toNumber()
       ).to.be.equal(0);
 
-      const amountToBeRepaidLoanId = await this.registryContract.getAmountToBeRepaid(
-        loanId
-      );
+      const amountToBeRepaidLoanId =
+        await this.registryContract.getAmountToBeRepaid(loanId);
       expect(amountToBeRepaidLoanId.toNumber()).to.be.equal(
         totalAmountRequested.add(totalInterest).toNumber()
       );
       expect(loanPayments.discountPerMillion.toNumber()).to.be.equal(300000);
       for (const i in milestoneDurations) {
-        const {amount, timestamp} = await this.registryContract.getMilestonesInfo(
-          loanId,
-          i
-        );
+        const {amount, timestamp} =
+          await this.registryContract.getMilestonesInfo(loanId, i);
         expect(amount.toNumber()).to.be.equal(
           amountRequestedPerMilestone[i].toNumber()
         );
@@ -176,7 +173,9 @@ export default async function suite() {
       expect(isPaused).to.be.equal(true);
 
       // Correct Dao Request.
-      expect(daoApprovalRequest.loanId.toNumber()).to.be.equal(loanId.toNumber());
+      expect(daoApprovalRequest.loanId.toNumber()).to.be.equal(
+        loanId.toNumber()
+      );
       expect(daoApprovalRequest.isMilestone).to.be.equal(false);
       expect(daoApprovalRequest.milestoneNumber.toNumber()).to.be.equal(0);
       expect(daoApprovalRequest.deadlineTimestamp.toNumber()).to.be.equal(

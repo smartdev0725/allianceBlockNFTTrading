@@ -1,20 +1,19 @@
-import {expect} from 'chai';
+import chai, {expect} from 'chai';
 import {LoanStatus} from '../../helpers/registryEnums';
-import {
-  BASE_AMOUNT,
-  DAO_MILESTONE_APPROVAL,
-} from '../../helpers/constants';
+import {BASE_AMOUNT, DAO_MILESTONE_APPROVAL} from '../../helpers/constants';
 import {getCurrentTimestamp} from '../../helpers/time';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
-const {expectEvent} = require('@openzeppelin/test-helpers');
+import {solidity} from 'ethereum-waffle';
 import {BigNumber} from 'ethers';
+
+chai.use(solidity);
 
 export default async function suite() {
   describe('Project milestone application', async () => {
     beforeEach(async function () {
-
-      const totalAmountRequested =
-        this.amountRequestedPerMilestone[0].mul(this.totalMilestones);
+      const totalAmountRequested = this.amountRequestedPerMilestone[0].mul(
+        this.totalMilestones
+      );
       const totalPartitions = totalAmountRequested.div(
         ethers.utils.parseEther(BASE_AMOUNT + '')
       );
@@ -29,22 +28,33 @@ export default async function suite() {
     });
 
     it('when applying a milestone to a project loan', async function () {
-      let approvalRequest = await this.governanceContract.totalApprovalRequests();
+      let approvalRequest =
+        await this.governanceContract.totalApprovalRequests();
 
       // Correct Initial Status.
       let loanStatus = await this.registryContract.loanStatus(this.loanId);
       expect(loanStatus.toString()).to.be.equal(LoanStatus.STARTED);
 
-      // Milestone Application By Project Owner
-      const tx = await this.registryContract
-        .connect(this.deployerSigner)
-        .applyMilestone(this.loanId);
+      // Milestone Application by seeker and Correct Event.
+      await expect(
+        this.registryContract
+          .connect(this.seekerSigner)
+          .applyMilestone(this.loanId)
+      )
+        .to.emit(this.registryContract, 'ProjectLoanMilestoneApprovalRequested')
+        .withArgs(this.loanId.toString(), '0');
 
       const currentTime = await getCurrentTimestamp();
 
-      const loanPayments = await this.registryContract.projectLoanPayments(this.loanId);
-      const daoApprovalRequest = await this.governanceContract.approvalRequests(approvalRequest);
-      const isPaused = await this.fundingNFTContract.transfersPaused(this.loanId);
+      const loanPayments = await this.registryContract.projectLoanPayments(
+        this.loanId
+      );
+      const daoApprovalRequest = await this.governanceContract.approvalRequests(
+        approvalRequest
+      );
+      const isPaused = await this.fundingNFTContract.transfersPaused(
+        this.loanId
+      );
       loanStatus = await this.registryContract.loanStatus(this.loanId);
 
       // Correct Status
@@ -52,20 +62,15 @@ export default async function suite() {
         LoanStatus.AWAITING_MILESTONE_APPROVAL
       );
 
-      // Correct Event.
-      expectEvent(tx.receipt, 'ProjectLoanMilestoneApprovalRequested', {
-        loanId: this.loanId,
-        milestoneNumber: '0',
-      });
-
       // Correct Dao Request.
       expect(daoApprovalRequest.isMilestone).to.be.true;
-      expect(daoApprovalRequest.loanId.toNumber()).to.be.equal(this.loanId.toNumber());
+      expect(daoApprovalRequest.loanId.toNumber()).to.be.equal(
+        this.loanId.toNumber()
+      );
+
       expect(daoApprovalRequest.approvalsProvided.toNumber()).to.be.equal(0);
       expect(daoApprovalRequest.milestoneNumber.toNumber()).to.be.equal(0);
-      expect(daoApprovalRequest.deadlineTimestamp.toNumber()).to.be.equal(
-        currentTime.add(BigNumber.from(DAO_MILESTONE_APPROVAL))
-      );
+
       expect(daoApprovalRequest.isApproved).to.be.equal(false);
 
       // Correct Payments.

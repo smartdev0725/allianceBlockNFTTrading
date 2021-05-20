@@ -10,7 +10,9 @@ export default async function suite() {
 
       // Then
       await expectRevert(
-        this.registryContract.connect(this.lender1Signer).fundLoan(this.loanId, this.smallPartition),
+        this.registryContract
+          .connect(this.lender1Signer)
+          .fundLoan(this.loanId, this.smallPartition),
         'Only between funding timeframe'
       );
     });

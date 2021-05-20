@@ -1,13 +1,16 @@
-import { expect } from 'chai';
-import { LoanStatus } from '../../helpers/registryEnums';
-import {deployments, getNamedAccounts, ethers} from "hardhat";
+import {expect} from 'chai';
+import {LoanStatus} from '../../helpers/registryEnums';
+import {deployments, getNamedAccounts, ethers} from 'hardhat';
 
 export default async function suite() {
   describe('Personal loan approval', async () => {
     it('when approving a loan', async function () {
-      const approvalRequest = await this.governanceContract.totalApprovalRequests();
+      const approvalRequest =
+        await this.governanceContract.totalApprovalRequests();
 
-      await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(approvalRequest, true);
+      await this.governanceContract
+        .connect(this.superDelegatorSigner)
+        .superVoteForRequest(approvalRequest, true);
 
       const loanStatus = await this.registry.loanStatus(this.loanId);
 
@@ -16,11 +19,12 @@ export default async function suite() {
       );
 
       // Correct Dao Request.
-      expect(daoApprovalRequest.loanId.toString()).to.be.equal(this.loanId.toString());
+      expect(daoApprovalRequest.loanId.toString()).to.be.equal(
+        this.loanId.toString()
+      );
       expect(daoApprovalRequest.isMilestone).to.be.equal(false);
-      expect(daoApprovalRequest.approvalsProvided.toString()).to.be.equal("1");
+      expect(daoApprovalRequest.approvalsProvided.toString()).to.be.equal('1');
       expect(daoApprovalRequest.isApproved).to.be.equal(false);
-
 
       const isPaused = await this.fundingNFT.transfersPaused(this.loanId);
 

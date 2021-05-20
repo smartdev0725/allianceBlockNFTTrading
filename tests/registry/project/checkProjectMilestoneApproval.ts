@@ -5,7 +5,6 @@ import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
 export default async function suite() {
   describe('Project milestone approval', async () => {
-
     beforeEach(async function () {
       await this.registryContract
         .connect(this.lender1Signer)
@@ -14,20 +13,22 @@ export default async function suite() {
         .connect(this.lender2Signer)
         .fundLoan(this.loanId, this.bigPartition);
 
-      this.approvalRequest = await this.governanceContract.totalApprovalRequests();
-      await this.registryContract.connect(this.deployerSigner).applyMilestone(this.loanId);
+      this.approvalRequest =
+        await this.governanceContract.totalApprovalRequests();
+      await this.registryContract
+        .connect(this.deployerSigner)
+        .applyMilestone(this.loanId);
     });
 
     it('when approving a milestone for a project loan', async function () {
-      const initSeekerLendingBalance = await this.lendingTokenContract.balanceOf(
-        this.deployer
-      );
-      const initEscrowLendingBalance = await this.lendingTokenContract.balanceOf(
-        this.escrowContract.address
-      );
+      const initSeekerLendingBalance =
+        await this.lendingTokenContract.balanceOf(this.deployer);
+      const initEscrowLendingBalance =
+        await this.lendingTokenContract.balanceOf(this.escrowContract.address);
 
-      await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(this.approvalRequest, true);
-
+      await this.governanceContract
+        .connect(this.superDelegatorSigner)
+        .superVoteForRequest(this.approvalRequest, true);
 
       const newSeekerLendingBalance = await this.lendingTokenContract.balanceOf(
         this.deployer
@@ -38,13 +39,25 @@ export default async function suite() {
 
       const currentTime = await getCurrentTimestamp();
 
-      const loanPayments = await this.registryContract.projectLoanPayments(this.loanId);
-      const daoApprovalRequest = await this.governanceContract.approvalRequests(this.approvalRequest);
-      const isPaused = await this.fundingNFTContract.transfersPaused(this.loanId);
+      const loanPayments = await this.registryContract.projectLoanPayments(
+        this.loanId
+      );
+      const daoApprovalRequest = await this.governanceContract.approvalRequests(
+        this.approvalRequest
+      );
+      const isPaused = await this.fundingNFTContract.transfersPaused(
+        this.loanId
+      );
       const loanStatus = await this.registryContract.loanStatus(this.loanId);
 
-      const {amount} = await this.registryContract.getMilestonesInfo(this.loanId, 0);
-      const {timestamp} = await this.registryContract.getMilestonesInfo(this.loanId, 1);
+      const {amount} = await this.registryContract.getMilestonesInfo(
+        this.loanId,
+        0
+      );
+      const {timestamp} = await this.registryContract.getMilestonesInfo(
+        this.loanId,
+        1
+      );
 
       // Correct Balances.
       expect(newSeekerLendingBalance.toString()).to.be.equal(
@@ -60,7 +73,9 @@ export default async function suite() {
       );
 
       // Correct Dao Request.
-      expect(daoApprovalRequest.loanId.toNumber()).to.be.equal(this.loanId.toNumber());
+      expect(daoApprovalRequest.loanId.toNumber()).to.be.equal(
+        this.loanId.toNumber()
+      );
       expect(daoApprovalRequest.isMilestone).to.be.equal(true);
       expect(daoApprovalRequest.approvalsProvided.toNumber()).to.be.equal(2);
       expect(daoApprovalRequest.isApproved).to.be.equal(true);

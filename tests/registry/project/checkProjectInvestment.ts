@@ -45,13 +45,16 @@ export default async function suite() {
           ipfsHash
         );
 
-      totalAmountRequested = amountRequestedPerMilestone[0].mul(totalMilestones);
+      totalAmountRequested =
+        amountRequestedPerMilestone[0].mul(totalMilestones);
       totalPartitions = totalAmountRequested.div(
         ethers.utils.parseEther(BASE_AMOUNT + '')
       );
       bigPartition = totalPartitions.div(BigNumber.from(2));
 
-      await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(approvalRequest, true);
+      await this.governanceContract
+        .connect(this.superDelegatorSigner)
+        .superVoteForRequest(approvalRequest, true);
 
       await this.registryContract
         .connect(this.lender1Signer)
@@ -62,7 +65,9 @@ export default async function suite() {
     });
 
     it('when the first milestone is already approved after funding', async function () {
-      const loanPayments = await this.registryContract.projectLoanPayments(loanId);
+      const loanPayments = await this.registryContract.projectLoanPayments(
+        loanId
+      );
 
       expect(loanPayments.milestonesDelivered.toNumber()).to.be.equal(1);
     });
@@ -78,25 +83,47 @@ export default async function suite() {
         bigPartition.toNumber()
       );
 
-      const balanceLenderBefore = await this.projectTokenContract.balanceOf(this.lender1);
-      const balanceEscrowBefore = await this.projectTokenContract.balanceOf(this.escrowContract.address);
-      const balanceNFTLenderBefore = await this.registryContract.balanceOfAllFundingNFTGenerations(loanId, this.lender1);
+      const balanceLenderBefore = await this.projectTokenContract.balanceOf(
+        this.lender1
+      );
+      const balanceEscrowBefore = await this.projectTokenContract.balanceOf(
+        this.escrowContract.address
+      );
+      const balanceNFTLenderBefore =
+        await this.registryContract.balanceOfAllFundingNFTGenerations(
+          loanId,
+          this.lender1
+        );
 
       // Test getter first
-      const getterProjectTokenAmount = await this.registryContract.connect(this.lender1Signer).getAmountOfProjectTokensToReceive(loanId, convertibleAmountLender0);
+      const getterProjectTokenAmount = await this.registryContract
+        .connect(this.lender1Signer)
+        .getAmountOfProjectTokensToReceive(loanId, convertibleAmountLender0);
       // Request to receive project tokens as repayment for all of the convertible NFT
-      const tx1 = await this.registryContract.connect(this.lender1Signer).receivePayment(loanId, convertibleAmountLender0, true);
+      const tx1 = await this.registryContract
+        .connect(this.lender1Signer)
+        .receivePayment(loanId, convertibleAmountLender0, true);
 
-      const balanceNFTLenderAfter = await this.registryContract.balanceOfAllFundingNFTGenerations(loanId, this.lender1);
-      const balanceLenderAfter = await this.projectTokenContract.balanceOf(this.lender1);
+      const balanceNFTLenderAfter =
+        await this.registryContract.balanceOfAllFundingNFTGenerations(
+          loanId,
+          this.lender1
+        );
+      const balanceLenderAfter = await this.projectTokenContract.balanceOf(
+        this.lender1
+      );
       const balanceEscrowAfter = await this.projectTokenContract.balanceOf(
         this.escrowContract.address
       );
-      const loanPayments = await this.registryContract.projectLoanPayments(loanId);
+      const loanPayments = await this.registryContract.projectLoanPayments(
+        loanId
+      );
       const expectedAmountToReceive = convertibleAmountLender0.mul(
         ethers.utils.parseEther(BASE_AMOUNT + '')
       );
-      const tokenPrice = await this.registryContract.getProjectTokenPrice(loanId);
+      const tokenPrice = await this.registryContract.getProjectTokenPrice(
+        loanId
+      );
       const discountedPrice = tokenPrice.sub(
         tokenPrice
           .mul(loanPayments.discountPerMillion)
@@ -132,9 +159,8 @@ export default async function suite() {
       expect(loanPayments.partitionsPaidInProjectTokens.toString()).to.be.equal(
         convertibleAmountLender0.toString()
       );
-      const amountToBeRepaidLoanId = await this.registryContract.getAmountToBeRepaid(
-        loanId
-      );
+      const amountToBeRepaidLoanId =
+        await this.registryContract.getAmountToBeRepaid(loanId);
       expect(amountToBeRepaidLoanId.toString()).to.be.equal(
         amountToBeRepaid.toString()
       );

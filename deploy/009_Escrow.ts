@@ -26,4 +26,4 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 };
 export default func;
 func.tags = ['Escrow'];
-func.dependencies = ['FundingNFT', 'MainNFT']
+func.dependencies = ['FundingNFT', 'MainNFT'];

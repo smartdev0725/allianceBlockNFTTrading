@@ -1,28 +1,33 @@
 // Project
 import checkProjectFundLoan from './checkProjectFundLoan';
-import checkProjectFundLoanOffLimit from "./checkProjectFundLoanOffLimit";
+import checkProjectFundLoanOffLimit from './checkProjectFundLoanOffLimit';
 import checkProjectInvestment from './checkProjectInvestment';
 import checkProjectLoanApproval from './checkProjectLoanApproval';
 import checkProjectLoanRequests from './checkProjectLoanRequests';
 import checkProjectMilestoneApplication from './checkProjectMilestoneApplication';
 import checkProjectMilestoneApproval from './checkProjectMilestoneApproval';
-import checkProjectMilestoneRepayment from "./checkProjectMilestoneRepayment";
+import checkProjectMilestoneRepayment from './checkProjectMilestoneRepayment';
 import checkProjectTokenRepayment from './checkProjectTokenRepayment';
 
-import {BigNumber} from "ethers";
-import {getContracts, getSigners, initializeTransfers} from "../../helpers/utils";
-import {BASE_AMOUNT, ONE_DAY} from "../../helpers/constants";
-import {deployments, ethers, getNamedAccounts} from "hardhat";
-import {getCurrentTimestamp} from "../../helpers/time";
+import {BigNumber} from 'ethers';
+import {
+  getContracts,
+  getSigners,
+  initializeTransfers,
+} from '../../helpers/utils';
+import {BASE_AMOUNT, ONE_DAY} from '../../helpers/constants';
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import {getCurrentTimestamp} from '../../helpers/time';
 import BN from 'bn.js';
 
-describe("Registry Project Loans", function () {
+describe('Registry Project Loans', function () {
   beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();
 
     // Get accounts
-    const {deployer, seeker, lender1, lender2, superDelegator} = await getNamedAccounts();
+    const {deployer, seeker, lender1, lender2, superDelegator} =
+      await getNamedAccounts();
     this.deployer = deployer;
     this.seeker = seeker;
     this.lender1 = lender1;
@@ -66,7 +71,8 @@ describe("Registry Project Loans", function () {
     this.collateralTokenContract = collateralTokenContract;
 
     // Initialize Transfers
-    await initializeTransfers({
+    await initializeTransfers(
+      {
         registryContract,
         lendingTokenContract,
         projectTokenContract,
@@ -82,9 +88,15 @@ describe("Registry Project Loans", function () {
     this.totalPartitions = BigNumber.from(100);
     this.bigPartition = BigNumber.from(50);
     this.smallPartition = BigNumber.from(25);
-    this.bigPartitionAmountToPurchase = this.bigPartition.mul(ethers.utils.parseEther(BASE_AMOUNT + ''));
-    this.smallPartitionAmountToPurchase = this.smallPartition.mul(ethers.utils.parseEther(BASE_AMOUNT + ''));
-    this.startingEscrowLendingBalance = await lendingTokenContract.balanceOf(escrowContract.address);
+    this.bigPartitionAmountToPurchase = this.bigPartition.mul(
+      ethers.utils.parseEther(BASE_AMOUNT + '')
+    );
+    this.smallPartitionAmountToPurchase = this.smallPartition.mul(
+      ethers.utils.parseEther(BASE_AMOUNT + '')
+    );
+    this.startingEscrowLendingBalance = await lendingTokenContract.balanceOf(
+      escrowContract.address
+    );
     this.batchTimeInterval = BigNumber.from(20 * ONE_DAY);
 
     this.amountCollateralized = ethers.utils.parseEther('100000');
@@ -96,7 +108,9 @@ describe("Registry Project Loans", function () {
     this.ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
     this.milestoneDurations = new Array<BigNumber>(this.totalMilestones);
-    this.amountRequestedPerMilestone = new Array<BigNumber>(this.totalMilestones);
+    this.amountRequestedPerMilestone = new Array<BigNumber>(
+      this.totalMilestones
+    );
     this.currentTime = await getCurrentTimestamp();
 
     for (let i = 0; i < Number(this.totalMilestones); i++) {
@@ -121,43 +135,45 @@ describe("Registry Project Loans", function () {
         this.ipfsHash
       );
 
-    await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(this.approvalRequest, true);
+    await this.governanceContract
+      .connect(this.superDelegatorSigner)
+      .superVoteForRequest(this.approvalRequest, true);
   });
 
   describe(
-    "When checking project loan requests",
+    'When checking project loan requests',
     checkProjectLoanRequests.bind(this)
   );
   describe(
-    "When checking project loan approval requests",
+    'When checking project loan approval requests',
     checkProjectLoanApproval.bind(this)
   );
   describe(
-    "When checking project loan funding",
+    'When checking project loan funding',
     checkProjectFundLoan.bind(this)
   );
   describe(
-    "When checking project milestone application",
+    'When checking project milestone application',
     checkProjectMilestoneApplication.bind(this)
   );
   describe(
-    "When checking project milestone approval",
+    'When checking project milestone approval',
     checkProjectMilestoneApproval.bind(this)
   );
   describe(
-    "When checking project repayment in project tokens",
+    'When checking project repayment in project tokens',
     checkProjectTokenRepayment.bind(this)
   );
   describe(
-    "When checking project loan funding off limit",
+    'When checking project loan funding off limit',
     checkProjectFundLoanOffLimit.bind(this)
   );
   describe(
-    "When checking project loan repayment",
+    'When checking project loan repayment',
     checkProjectMilestoneRepayment.bind(this)
   );
   describe(
-    "When checking project investment and direct token repayment",
+    'When checking project investment and direct token repayment',
     checkProjectInvestment.bind(this)
   );
 });
