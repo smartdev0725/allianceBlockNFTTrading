@@ -16,7 +16,7 @@ contract StakingTypesAndStorage {
         DAO_DELEGATOR
     }
 
-    uint256 public STAKING_DURATION = 7 days;
+    uint256 public constant STAKING_DURATION = 7 days;
 
     uint256 public periodFinish = 0;
     uint256 public rewardRate = 0;
