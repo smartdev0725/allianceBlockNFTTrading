@@ -3,7 +3,7 @@ import {LoanStatus} from '../../helpers/registryEnums';
 import {increaseTime} from '../../helpers/time';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {BigNumber} from 'ethers';
-import {BASE_AMOUNT, ONE_DAY} from "../../helpers/constants";
+import {BASE_AMOUNT, ONE_DAY} from '../../helpers/constants';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 import BN from 'bn.js';
 
@@ -12,8 +12,8 @@ export default async function suite() {
     let approvalRequest: BigNumber;
 
     beforeEach(async function () {
-
-      this.approvalRequest = await this.governanceContract.totalApprovalRequests();
+      this.approvalRequest =
+        await this.governanceContract.totalApprovalRequests();
       this.loanId = await this.registryContract.totalLoans();
       this.totalMilestones = BigNumber.from(1);
       this.milestoneDurations = new Array<BigNumber>(this.totalMilestones);

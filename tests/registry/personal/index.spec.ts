@@ -5,15 +5,15 @@ import checkPersonalLoanApproval from './checkPersonalLoanApproval';
 import checkPersonalLoanRepayment from './checkPersonalLoanRepayment';
 import checkPersonalFundLoanOffLimit from './checkPersonalFundLoanOffLimit';
 
-import { BigNumber } from 'ethers';
+import {BigNumber} from 'ethers';
 import {
   getContracts,
   getSigners,
   initializeTransfers,
 } from '../../helpers/utils';
-import { RepaymentBatchType } from '../../helpers/registryEnums';
-import { BASE_AMOUNT, ONE_DAY } from '../../helpers/constants';
-import { deployments, ethers, getNamedAccounts } from 'hardhat';
+import {RepaymentBatchType} from '../../helpers/registryEnums';
+import {BASE_AMOUNT, ONE_DAY} from '../../helpers/constants';
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
 describe('Registry Personal Loans', function () {
   beforeEach(async function () {
@@ -21,7 +21,7 @@ describe('Registry Personal Loans', function () {
     await deployments.fixture();
 
     // Get accounts
-    const { deployer, seeker, lender1, lender2, lender3, superDelegator } =
+    const {deployer, seeker, lender1, lender2, lender3, superDelegator} =
       await getNamedAccounts();
     this.deployer = deployer;
     this.seeker = seeker;
@@ -76,10 +76,13 @@ describe('Registry Personal Loans', function () {
         projectTokenContract,
         collateralTokenContract,
       },
-      { deployer, lender1, lender2, lender3, seeker },
+      {deployer, lender1, lender2, lender3, seeker},
       {
-        deployerSigner, lender1Signer, lender2Signer,
-        lender3Signer, seekerSigner
+        deployerSigner,
+        lender1Signer,
+        lender2Signer,
+        lender3Signer,
+        seekerSigner,
       }
     );
 

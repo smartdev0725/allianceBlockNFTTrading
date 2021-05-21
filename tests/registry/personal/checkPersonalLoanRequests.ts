@@ -1,15 +1,15 @@
-import chai, { expect } from 'chai';
+import chai, {expect} from 'chai';
 import {
   RepaymentBatchType,
   LoanType,
   LoanStatus,
 } from '../../helpers/registryEnums';
-import { ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL } from '../../helpers/constants';
-import { getTransactionTimestamp } from '../../helpers/time';
-import { deployments, getNamedAccounts, ethers } from 'hardhat';
-const { expectEvent } = require('@openzeppelin/test-helpers');
-import { BigNumber } from 'ethers';
-import { solidity } from 'ethereum-waffle';
+import {ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL} from '../../helpers/constants';
+import {getTransactionTimestamp} from '../../helpers/time';
+import {deployments, getNamedAccounts, ethers} from 'hardhat';
+const {expectEvent} = require('@openzeppelin/test-helpers');
+import {BigNumber} from 'ethers';
+import {solidity} from 'ethereum-waffle';
 
 chai.use(solidity);
 
@@ -85,7 +85,9 @@ export default async function suite() {
       expect(loanStatus.toString()).to.be.equal(LoanStatus.REQUESTED);
 
       // Correct Event.
-      await expect(tx).to.emit(this.registryContract, 'PersonalLoanRequested').withArgs(loanId, this.seeker, amountRequested.toString());
+      await expect(tx)
+        .to.emit(this.registryContract, 'PersonalLoanRequested')
+        .withArgs(loanId, this.seeker, amountRequested.toString());
 
       // Correct Details.
       expect(loanDetails.loanId.toString()).to.be.equal(loanId.toString());
@@ -213,9 +215,7 @@ export default async function suite() {
           loanId
         );
 
-      const isPaused = await this.fundingNFTContract.transfersPaused(
-        loanId
-      );
+      const isPaused = await this.fundingNFTContract.transfersPaused(loanId);
 
       const loanStatus = await this.registryContract.loanStatus(loanId);
       const loanDetails = await this.registryContract.loanDetails(loanId);
@@ -230,7 +230,9 @@ export default async function suite() {
       expect(loanStatus.toString()).to.be.equal(LoanStatus.REQUESTED);
 
       // Correct Event.
-      await expect(tx).to.emit(this.registryContract, 'PersonalLoanRequested').withArgs(loanId, this.seeker, amountRequested.toString());
+      await expect(tx)
+        .to.emit(this.registryContract, 'PersonalLoanRequested')
+        .withArgs(loanId, this.seeker, amountRequested.toString());
 
       // Correct Details.
       expect(loanDetails.loanId.toString()).to.be.equal(loanId.toString());
@@ -289,8 +291,9 @@ export default async function suite() {
       expect(daoApprovalRequest.isMilestone).to.be.equal(false);
       expect(daoApprovalRequest.milestoneNumber.toString()).to.be.equal('0');
       expect(daoApprovalRequest.deadlineTimestamp.toString()).to.be.equal(
-        (await getTransactionTimestamp(tx.hash))
-          .add(BigNumber.from(DAO_LOAN_APPROVAL))
+        (await getTransactionTimestamp(tx.hash)).add(
+          BigNumber.from(DAO_LOAN_APPROVAL)
+        )
       );
       expect(daoApprovalRequest.approvalsProvided.toString()).to.be.equal('0');
       expect(daoApprovalRequest.isApproved).to.be.equal(false);

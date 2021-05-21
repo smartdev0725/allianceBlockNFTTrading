@@ -1,7 +1,7 @@
 import checkStaking from './checkStaking';
 
-import { deployments, ethers, getNamedAccounts } from 'hardhat';
-import { getContracts, getSigners } from '../helpers/utils';
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import {getContracts, getSigners} from '../helpers/utils';
 
 describe('Staking', function () {
   before(async function () {
@@ -9,8 +9,15 @@ describe('Staking', function () {
     await deployments.fixture();
 
     // Get accounts
-    const { deployer, seeker, lender1, lender2, staker1, staker2, rewardDistributor } =
-      await getNamedAccounts();
+    const {
+      deployer,
+      seeker,
+      lender1,
+      lender2,
+      staker1,
+      staker2,
+      rewardDistributor,
+    } = await getNamedAccounts();
     this.deployer = deployer;
     this.seeker = seeker;
     this.lender1 = lender1;
@@ -90,6 +97,12 @@ describe('Staking', function () {
       amountToTransfer
     );
     await this.ALBTContract.connect(this.staker2Signer).approve(
+      this.stakingContract.address,
+      amountToTransfer
+    );
+
+    // Mint some ALBT to the staking contract
+    await this.ALBTContract.connect(this.deployerSigner).mint(
       this.stakingContract.address,
       amountToTransfer
     );

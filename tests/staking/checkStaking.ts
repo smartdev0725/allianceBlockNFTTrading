@@ -1,9 +1,9 @@
 import BN from 'bn.js';
-import { expect } from 'chai';
-import { ONE_DAY } from '../helpers/constants';
-import { increaseTime } from '../helpers/time';
-import { ethers } from 'hardhat';
-import { BigNumber } from 'ethers';
+import {expect} from 'chai';
+import {ONE_DAY} from '../helpers/constants';
+import {increaseTime} from '../helpers/time';
+import {ethers} from 'hardhat';
+import {BigNumber} from 'ethers';
 
 export default async function suite() {
   describe('Succeeds', async () => {
@@ -34,8 +34,8 @@ export default async function suite() {
       const postEarnedBal = await this.stakingContract.earned(this.staker1);
 
       // Then
-      expect(initialEarnedBal.toString()).to.be.greaterThan(
-        postEarnedBal.toString()
+      expect(initialEarnedBal.toNumber()).to.be.greaterThan(
+        postEarnedBal.toNumber()
       );
     });
 
