@@ -20,6 +20,12 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
         __Ownable_init();
         albt = albt_;
         governance = IGovernanceStaking(governance_);
+
+        // Initialize some constants
+        STAKING_DURATION = 7 days;
+        periodFinish = 0;
+        rewardRate = 0;
+
         for(uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
             stakingTypeAmounts[i] = stakingTypeAmounts_[i];
         }

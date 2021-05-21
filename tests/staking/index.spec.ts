@@ -1,7 +1,7 @@
 import checkStaking from './checkStaking';
 
 import { deployments, ethers, getNamedAccounts } from 'hardhat';
-import { getContracts, getSigners, initializeTransfers } from '../helpers/utils';
+import { getContracts, getSigners } from '../helpers/utils';
 
 describe('Staking', function () {
   before(async function () {
@@ -9,16 +9,16 @@ describe('Staking', function () {
     await deployments.fixture();
 
     // Get accounts
-    const { deployer, seeker, lender1, lender2, lender3, rewardDistributor, staker1, staker2 } =
+    const { deployer, seeker, lender1, lender2, staker1, staker2, rewardDistributor } =
       await getNamedAccounts();
     this.deployer = deployer;
     this.seeker = seeker;
     this.lender1 = lender1;
     this.lender2 = lender2;
-    this.lender3 = lender3;
     this.rewardDistributor = rewardDistributor;
     this.staker1 = staker1;
     this.staker2 = staker2;
+    this.rewardDistributor = rewardDistributor;
 
     // Get signers
     const {
@@ -27,7 +27,6 @@ describe('Staking', function () {
       delegator2Signer,
       lender1Signer,
       lender2Signer,
-      lender3Signer,
       seekerSigner,
       rewardDistributorSigner,
       staker1Signer,
@@ -38,11 +37,11 @@ describe('Staking', function () {
     this.delegator2Signer = delegator2Signer;
     this.lender1Signer = lender1Signer;
     this.lender2Signer = lender2Signer;
-    this.lender3Signer = lender3Signer;
     this.seekerSigner = seekerSigner;
     this.rewardDistributorSigner = rewardDistributorSigner;
     this.staker1Signer = staker1Signer;
     this.staker2Signer = staker2Signer;
+    this.rewardDistributorSigner = rewardDistributorSigner;
 
     // Get contracts
     const {
@@ -66,50 +65,35 @@ describe('Staking', function () {
     this.ALBTContract = ALBTContract;
     this.stakingContract = stakingContract;
 
-    // Initialize Transfers
-    await initializeTransfers(
-      {
-        registryContract,
-        lendingTokenContract,
-        projectTokenContract,
-        collateralTokenContract,
-      },
-      { deployer, lender1, lender2, lender3, seeker },
-      { deployerSigner, lender1Signer, lender2Signer, lender3Signer, seekerSigner }
-    );
-
     // Transfer tokens to reward distributor.
-    const amountForDistributor = ethers.utils
-      .parseEther('100000000')
-      .toString();
-    await this.ALBTContract.connect(deployerSigner).mint(
+    const amountForDistributor = ethers.utils.parseEther('100000000');
+    await this.ALBTContract.connect(this.deployerSigner).mint(
       this.rewardDistributor,
       amountForDistributor
     );
-    await this.ALBTContract.connect(rewardDistributorSigner).approve(
+    await this.ALBTContract.connect(this.rewardDistributorSigner).approve(
       this.stakingContract.address,
       amountForDistributor
     );
 
     // Transfer albt tokens to stakers.
-    const amountForStakers = ethers.utils.parseEther('1000000').toString();
-
-    await this.ALBTContract.connect(deployerSigner).mint(
-      staker1,
-      amountForStakers
+    const amountToTransfer = ethers.utils.parseEther('1000000');
+    await this.ALBTContract.connect(this.deployerSigner).mint(
+      this.staker1,
+      amountToTransfer
     );
-    await this.ALBTContract.connect(staker1Signer).approve(
+    await this.ALBTContract.connect(this.staker1Signer).approve(
       this.stakingContract.address,
-      amountForStakers
+      amountToTransfer
     );
 
-    await this.ALBTContract.connect(deployerSigner).mint(
-      staker2,
-      amountForStakers
+    await this.ALBTContract.connect(this.deployerSigner).mint(
+      this.staker2,
+      amountToTransfer
     );
-    await this.ALBTContract.connect(staker2Signer).approve(
+    await this.ALBTContract.connect(this.staker2Signer).approve(
       this.stakingContract.address,
-      amountForStakers
+      amountToTransfer
     );
   });
 

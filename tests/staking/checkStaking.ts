@@ -23,7 +23,7 @@ export default async function suite() {
 
       await this.stakingContract
         .connect(this.rewardDistributorSigner)
-        .notifyRewardAmount(rewardAmount.toString());
+        .notifyRewardAmount(rewardAmount);
 
       // When
       // Fast forward one day
