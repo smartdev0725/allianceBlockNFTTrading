@@ -18,7 +18,6 @@ describe('Staking', function () {
     this.rewardDistributor = rewardDistributor;
     this.staker1 = staker1;
     this.staker2 = staker2;
-    this.rewardDistributor = rewardDistributor;
 
     // Get signers
     const {
@@ -41,7 +40,6 @@ describe('Staking', function () {
     this.rewardDistributorSigner = rewardDistributorSigner;
     this.staker1Signer = staker1Signer;
     this.staker2Signer = staker2Signer;
-    this.rewardDistributorSigner = rewardDistributorSigner;
 
     // Get contracts
     const {
