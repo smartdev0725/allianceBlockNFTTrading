@@ -1,6 +1,6 @@
-import {deployments, ethers} from 'hardhat';
+import { deployments, ethers } from 'hardhat';
 
-import {ContractReceipt, ContractTransaction} from 'ethers';
+import { ContractReceipt, ContractTransaction } from 'ethers';
 
 export const getSigners = async () => {
   const signers = await ethers.getSigners();
@@ -64,7 +64,7 @@ export const initializeTransfers = async (
     collateralTokenContract,
   } = contracts;
 
-  const {lender1, lender2, lender3, seeker, deployer} = accounts;
+  const { lender1, lender2, lender3, seeker, deployer } = accounts;
   const {
     deployerSigner,
     lender1Signer,
@@ -119,6 +119,7 @@ export const initializeTransfers = async (
   await projectTokenContract
     .connect(seekerSigner)
     .approve(registryContract.address, amountToTransfer);
+
 };
 
 export const waitFor = (

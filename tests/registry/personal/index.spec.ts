@@ -5,15 +5,15 @@ import checkPersonalLoanApproval from './checkPersonalLoanApproval';
 import checkPersonalLoanRepayment from './checkPersonalLoanRepayment';
 import checkPersonalFundLoanOffLimit from './checkPersonalFundLoanOffLimit';
 
-import {BigNumber} from 'ethers';
+import { BigNumber } from 'ethers';
 import {
   getContracts,
   getSigners,
   initializeTransfers,
 } from '../../helpers/utils';
-import {RepaymentBatchType} from '../../helpers/registryEnums';
-import {BASE_AMOUNT, ONE_DAY} from '../../helpers/constants';
-import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import { RepaymentBatchType } from '../../helpers/registryEnums';
+import { BASE_AMOUNT, ONE_DAY } from '../../helpers/constants';
+import { deployments, ethers, getNamedAccounts } from 'hardhat';
 
 describe('Registry Personal Loans', function () {
   beforeEach(async function () {
@@ -21,12 +21,13 @@ describe('Registry Personal Loans', function () {
     await deployments.fixture();
 
     // Get accounts
-    const {deployer, seeker, lender1, lender2, superDelegator} =
+    const { deployer, seeker, lender1, lender2, lender3, superDelegator } =
       await getNamedAccounts();
     this.deployer = deployer;
     this.seeker = seeker;
     this.lender1 = lender1;
     this.lender2 = lender2;
+    this.lender3 = lender3;
     this.superDelegator = superDelegator;
 
     // Get signers
@@ -36,6 +37,7 @@ describe('Registry Personal Loans', function () {
       delegator2Signer,
       lender1Signer,
       lender2Signer,
+      lender3Signer,
       seekerSigner,
       superDelegatorSigner,
     } = await getSigners();
@@ -44,6 +46,7 @@ describe('Registry Personal Loans', function () {
     this.delegator2Signer = delegator2Signer;
     this.lender1Signer = lender1Signer;
     this.lender2Signer = lender2Signer;
+    this.lender3Signer = lender3Signer;
     this.seekerSigner = seekerSigner;
     this.superDelegatorSigner = superDelegatorSigner;
 
@@ -73,8 +76,11 @@ describe('Registry Personal Loans', function () {
         projectTokenContract,
         collateralTokenContract,
       },
-      {deployer, lender1, lender2, seeker},
-      {deployerSigner, lender1Signer, lender2Signer, seekerSigner}
+      { deployer, lender1, lender2, lender3, seeker },
+      {
+        deployerSigner, lender1Signer, lender2Signer,
+        lender3Signer, seekerSigner
+      }
     );
 
     const approvalRequest = await governanceContract.totalApprovalRequests();
