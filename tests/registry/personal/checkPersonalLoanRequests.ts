@@ -87,12 +87,6 @@ export default async function suite() {
       // Correct Event.
       await expect(tx).to.emit(this.registryContract, 'PersonalLoanRequested').withArgs(loanId, this.seeker, amountRequested.toString());
 
-      //expectEvent(tx.receipt, 'PersonalLoanRequested', {
-      //  loanId,
-      //  user: this.seeker,
-      //  amount: amountRequested.toString(),
-      //});
-
       // Correct Details.
       expect(loanDetails.loanId.toString()).to.be.equal(loanId.toString());
       expect(loanDetails.loanType.toString()).to.be.equal(LoanType.PERSONAL);
@@ -164,6 +158,8 @@ export default async function suite() {
 
     it('when requesting a nominal plus interest personal loan', async function () {
       const loanId = await this.registryContract.totalLoans();
+      const approvalRequest =
+        await this.governanceContract.totalApprovalRequests();
       let initSeekerCollateralBalance =
         await this.collateralTokenContract.balanceOf(this.seeker);
       let initEscrowCollateralBalance =
@@ -214,35 +210,30 @@ export default async function suite() {
       const newEscrowFundingNftBalance =
         await this.fundingNFTContract.balanceOf(
           this.escrowContract.address,
-          this.loanId
+          loanId
         );
 
       const isPaused = await this.fundingNFTContract.transfersPaused(
-        this.loanId
+        loanId
       );
 
-      const loanStatus = await this.registryContract.loanStatus(this.loanId);
-      const loanDetails = await this.registryContract.loanDetails(this.loanId);
+      const loanStatus = await this.registryContract.loanStatus(loanId);
+      const loanDetails = await this.registryContract.loanDetails(loanId);
       const loanPayments = await this.registryContract.personalLoanPayments(
-        this.loanId
+        loanId
       );
       const daoApprovalRequest = await this.governanceContract.approvalRequests(
-        this.approvalRequest
+        approvalRequest
       );
 
       // Correct Status.
       expect(loanStatus.toString()).to.be.equal(LoanStatus.REQUESTED);
 
       // Correct Event.
-      await expect(tx).to.emit(this.registryContract, 'PersonalLoanRequested').withArgs(this.loanId, this.seeker, amountRequested.toString());
-      //expectEvent(tx.receipt, 'PersonalLoanRequested', {
-      //  loanId: this.loanId,
-      //  user: this.seeker,
-      //  amount: amountRequested.toString(),
-      //});
+      await expect(tx).to.emit(this.registryContract, 'PersonalLoanRequested').withArgs(loanId, this.seeker, amountRequested.toString());
 
       // Correct Details.
-      expect(loanDetails.loanId.toString()).to.be.equal(this.loanId.toString());
+      expect(loanDetails.loanId.toString()).to.be.equal(loanId.toString());
       expect(loanDetails.loanType.toString()).to.be.equal(LoanType.PERSONAL);
       expect(loanDetails.startingDate.toString()).to.be.equal('0');
       expect(loanDetails.collateralToken.toString()).to.be.equal(
@@ -293,14 +284,13 @@ export default async function suite() {
 
       // Correct Dao Request.
       expect(daoApprovalRequest.loanId.toString()).to.be.equal(
-        this.loanId.toString()
+        loanId.toString()
       );
       expect(daoApprovalRequest.isMilestone).to.be.equal(false);
       expect(daoApprovalRequest.milestoneNumber.toString()).to.be.equal('0');
       expect(daoApprovalRequest.deadlineTimestamp.toString()).to.be.equal(
-        (await getTransactionTimestamp(tx.tx))
+        (await getTransactionTimestamp(tx.hash))
           .add(BigNumber.from(DAO_LOAN_APPROVAL))
-          .toString()
       );
       expect(daoApprovalRequest.approvalsProvided.toString()).to.be.equal('0');
       expect(daoApprovalRequest.isApproved).to.be.equal(false);
