@@ -108,6 +108,7 @@ The amount of staked **ALBT** a user chooses to lock defines the *Tiers* they wi
 
 ## Tier NFT
 This NFT is not tradeable and represents the amount of **ALBT** staked by the user. It earns **Reputation** and allows the user to participate in the **Investment Ticket Lottery** with perks depending on the current user's level.
+The *Tier NFT* may be **Bronze NFT**, **Silver NFT**, or **Gold NFT**.
 
 ## Reputation level
 As the *Protocol* matures, the **DAO** will enable the *Reputation Leveling System*. This will extend the [Reputation Subsystem](RALBT.md) with a leveling score for each user. The 7 levels will range from *Junior* to *Grand Master*.

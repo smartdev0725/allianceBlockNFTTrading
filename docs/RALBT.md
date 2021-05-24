@@ -4,13 +4,14 @@
 **Reputation** is a key sub-system that permeates the whole P2P protocol. It is measured in ten levels: from **Junior** to **Grand Master**. Users can earn **Reputation** depending on the [Tier](Glossary.md) they picked prior to investing. By interacting with the protocol, users will earn a certain amount of [Reputation Tokens (rALBT)](RALBT.md):
 
 * Applying for a Loan
-* Locking their investment
+* Locking their investment (instead of instantly claiming)
 * Staking *ALBT*
 * Signing messages
 * Upvoting / Downvoting projects
 * Responding to threads or creating new ones
 * Sharing projects and helping them reach more people
 * Broadcasting messages on-chain (paying gas fees)
+* Playing mini-games (like Trivia)
 * ... and more actions TBD by the DAO
 
 ![Project Interactions](img/forum.png)
@@ -29,6 +30,8 @@ Here's an example of the trivia game flow that will allow users to earn reputati
 There are two major protections implemented:
 1) At launch, the `transfer()` functionalities within the [rALBT token](Glossary.md) will be locked, to protect the protocol from whales.
 2) The relation between the amount of **Reputation** and the benefits within the platform are equalized by the [GEV Distribution](https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution). This makes the *Reputation curve* asymptotic, discouraging hoarding **rALBT**. In other words: after a certain point, earning more won't have any considerable effect.
+
+On top of that, the [Tier NFTs](Glossary.md) are balanced and each user may have as much as a single *Tier NFT*. This means that wales might own a single **Gold NFT**, equalizing their perks with the rest of the users.
 
 ---
 
