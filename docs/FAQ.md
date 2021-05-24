@@ -5,13 +5,13 @@
 *ALBT* represents the first globally compliant decentralized capital market. You can read more about this [here](https://blog.allianceblock.io/the-allianceblock-albt-token-economy-explained-3b88d4637245)
 
 ## What is rALBT?
-*rALBT* is the **Reputation Token** that users of [the Protocol](Glossary.md) can farm, hold, and eventually trade in order to earn investment opportunities.
+*rALBT* is the **Reputation Token** that users of the Protocol can farm, hold, and eventually trade in order to earn investment opportunities.
 
 ## What is Reputation?
 *Reputation* is a sub-system that encourages users to partake in the *Protocol*. You can read more about this [here](Reputation.md)
 
 ## What is a Ticket and what rights do I get?
-Note that not all **Funders** who *subscribed* to an investment opportunity are eligible to fund a **Project** or **Loan**. Only **Subscribers** with a **Funder ticket** are eligible. In order to earn one, they must win the [Ticket Lottery](Glossary.md). You can read more about this [here](Financing.md)
+Note that not all **Funders** who *subscribed* to an investment opportunity are eligible to fund a **Project** or **Loan**. Only **Subscribers** with a **Funder ticket** are eligible. In order to earn one, they must win the [Ticket Lottery](Glossary.md#investment-ticket-lottery). You can read more about this [here](Financing.md)
 
 
 ## How convertible notes work?
@@ -23,7 +23,7 @@ Convertible Note Economics
 
 
 ## What Happens If the Maturity Date is reached prior to raising money in equity round?
-The project gets reverted, and [the Escrow](Escrow.md) unlocks the funds for investors and [Seekers](Glossary.md) to re-claim.
+The project gets reverted, and [the Escrow](Escrow.md) unlocks the funds for investors and [Seekers](Glossary.md#seeker) to re-claim.
 
 ## Can Investors call off a loan?
 Investors can demand loan repayment, however since the startup was not able to raise equity, investors would not receive their cash back, or will receive only a worthless fraction of the investment.

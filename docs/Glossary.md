@@ -16,7 +16,7 @@ Seekers (a.k.a. *Borrowers*) are the projects or individuals looking for **Funde
 ## Hard Data
 The basic information required for the **Governance** system to perform their *Due Diligence*. This usually requires the **Borrower** or **Seeker** to provide verifiable documentation regarding their company, project, and individuals related to the transactions.
 
-## TGE or Token Generation Event
+## TGE
 Initially, the term "ICO", which refers to "initial coin offering", was used to refer to the initial release of cryptocurrency tokens to the public as a fundraising mechanism. However, due to regulatory concerns of ICO being modeled after IPO (Initial Public Offering) and its implication as an investment vehicle, some projects begun coining different naming conventions. **Token Generation Event (*TGE*)** is one such convention.
 
 ## Minting

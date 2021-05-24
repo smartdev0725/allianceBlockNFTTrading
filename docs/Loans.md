@@ -20,8 +20,8 @@ So, the **Seeker** is managing the following:
 1. Loan request by the **Seeker**.
 2. Loan validation by governance layer.
 
-After ERC1155 tokens are minted by the Escrow, [DAO Delegators](Glossary.md) (ALBT holders) decide whether or not the loan request is valid and approve or deny the loan request.
-This action unlocks the ERC1155 tokens, so they can be purchased by the [Funders](Glossary.md). At the same time, the staked ALBT is sent back to the **Seeker**.
+After ERC1155 tokens are minted by the Escrow, [DAO Delegators](DAO.md) (ALBT holders) decide whether or not the loan request is valid and approve or deny the loan request.
+This action unlocks the ERC1155 tokens, so they can be purchased by the [Funders](Glossary.md#funder). At the same time, the staked ALBT is sent back to the **Seeker**.
 
 There is a limited voting period for approval/dismissal. When the time limit is reached a distributed democratic decision has been made on whether to approve or deny the loan.
 
@@ -31,7 +31,7 @@ When this happens the votes are counted. If the majority of the votes are approv
 In the case where [DAO](DAO.md) decides that the loan request is not valid, the staked ALBT amount provided by the **Seeker** as collateral to request the loan will be distributed to the DAO holders or getting burnt.
 
 
-In the case that the [Seeker project](Glossary.md) provides as collateral the tokens of the project itself, the [DAO](DAO.md) is entitled to decide whether or not those tokens alongside the locked funds will be used for providing liquidity in a decentralized exchange.
+In the case that the [Seeker project](Glossary.md#seeker) provides as collateral the tokens of the project itself, the [DAO](DAO.md) is entitled to decide whether or not those tokens alongside the locked funds will be used for providing liquidity in a decentralized exchange.
 
 
 ---
@@ -71,7 +71,7 @@ There are two alternatives:
 ### **The third decision is about how the Seeker is getting the lending amount:**
 There are two options:
 1. The **Seeker** is getting paid the whole lending amount instantly when the amount is provided by lenders.
-2. **Seeker** is getting paid the amount lent in batches (this is how it usually works for [Project Loans](Glossary.md)).
+2. **Seeker** is getting paid the amount lent in batches (this is how it usually works for [Project Loans](Glossary.md#project-loan)).
 
 
 
