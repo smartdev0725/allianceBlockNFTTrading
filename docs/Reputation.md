@@ -19,7 +19,7 @@
 ## Incentives
 Users receive a *reputation reward* when participating in Project evaluations. Their reward is relative to the **rALBT** tokens staked, and the quality of the answers provided. **Reputation** is highly influential in the [Investment Ticket Lottery](Glossary.md#investment-ticket-lottery), since users with higher *reputation score* will have better chances of winning the lottery and partake in investment opportunities.
 
-Additionally, when a user has **10k rALBT**, they are entitled to claim an [Investment Ticket](Glossary.md#investment-ticket) that will automatically win them a chance at the next [Ticket Lottery](Glossary.md#ticket-lottery). In short, **rALBT** increases your chances of earning an investment opportunity. The more you participate, the better chances you'll have.
+Additionally, when a user has **10k rALBT**, they are entitled to claim an [Investment Ticket](Glossary.md#investment-ticket-lottery) that will automatically win them a chance at the next [Ticket Lottery](Glossary.md#investment-ticket-lottery). In short, **rALBT** increases your chances of earning an investment opportunity. The more you participate, the better chances you'll have.
 
 ### Trivia example
 Here's an example of the trivia game flow that will allow users to earn reputation and qualify for rewards, while at the same time providing valuable insights on the projects.
@@ -28,7 +28,7 @@ Here's an example of the trivia game flow that will allow users to earn reputati
 
 ## Protection from whales
 There are two major protections implemented:
-1) At launch, the `transfer()` functionalities within the [rALBT token](Glossary.md#ralbt) will be locked, to protect the protocol from whales.
+1) At launch, the `transfer()` functionalities within the [rALBT token](Glossary.md#reputation-ralbt) will be locked, to protect the protocol from whales.
 2) The relation between the amount of **Reputation** and the benefits within the platform are equalized by the [GEV Distribution](https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution). This makes the *Reputation curve* asymptotic, discouraging hoarding **rALBT**. In other words: after a certain point, earning more won't have any considerable effect.
 
 On top of that, the [Tier NFTs](Glossary.md#tier-nft) are balanced and each user may have as much as a single *Tier NFT*. This means that wales might own a single **Gold NFT**, equalizing their perks with the rest of the users.
