@@ -4,7 +4,7 @@
 
 ## What is DAO and how does it work?
 
-**DAO** is an organization designed to be automated and decentralized. In this case, the *DAO*  is composed by a series of Governance *Smart Contracts* that are designed in 6 phases that are designed to last roughly one month:
+**DAO** is an organization designed to be automated and decentralized. In this case, the *DAO*  is composed of a series of Governance *Smart Contracts* that are designed in 6 phases that are designed to last roughly one month:
 
 1. **Phase 1:**  *ALBT* holders may stake 5k ALBT to bnecome [**stakers**]().
 2. **Phase 2:**
@@ -50,16 +50,16 @@ Every month this cycle repeats:
 
 ---
 
-## How to become a dao member:
+## How to become a DAO member:
 1. Stake 5k ALBT
 2. Become DAO Member Subscriber by staking an extra 45k ALBT
-3. Become elligible for Active DAO Membership through voting (being the top N spots) or if somebody doesn't claim their membership and you are the next elligible in line.
+3. Become eligible for Active DAO Membership through voting (being the top N spots) or if somebody doesn't claim their membership and you are the next eligible in line.
 4. Claim your Active Dao Membership.
 
-## How to become a dao delegator:
+## How to become a DAO delegator:
 1. Become Active DAO Member
 2. Become a DAO Delegator Subscriber by staking an extra 200k ALBT
-3. Become elligible for Active DAO Delegator through voting (being the top M spots) or if somebody doesn't claim their delegator spot and you are the next elligible in line
+3. Become eligible for Active DAO Delegator through voting (being the top M spots) or if somebody doesn't claim their delegator spot and you are the next eligible in line
 4. Claim your Active DAO Delegator position
 
 ---
@@ -68,10 +68,11 @@ Every month this cycle repeats:
 
 ---
 # Extra notes:
-* If you are an Active DAO Member and you don't vote for DAO Delegator Subscribers, you have a penalty: you don't receive rewards plus you cannot become an Active DAO Member the nextMonth.
+* If you are an Active DAO Member and you don't vote for DAO Delegator Subscribers, you have a penalty: you don't receive rewards plus you cannot become an Active DAO Member the next month.
 
-* If someone is voted for becoming an Active DAO Delegator but is not voted to become Active DAO Member for next month, they will become elligible to become both Active DAO Member and Active DAO Delegator, since a DAO Delegator must also be a DAO Member.
+* If someone is voted for becoming an Active DAO Delegator but is not voted to become Active DAO Member for next month, they will become eligible to become both Active DAO Member and Active DAO Delegator, since a DAO Delegator must also be a DAO Member.
 
-* If an **Active DAO Delegators** won't vote for the project requests, **they loose their rewards and they cannot become Active DAO Delegator next month**.
+* If an **Active DAO Delegators** won't vote for the project requests, **they lose their rewards and they cannot become Active DAO Delegator next month**.
 
 * The *end-to-end* Financing process is documented [here](Financing.md)
+
