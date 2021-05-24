@@ -1,7 +1,7 @@
 
 # Reputation
 
-**Reputation** is a key sub-system that permeates the whole P2P protocol. It is measured in ten levels: from **Junior** to **Grand Master**. Users can earn **Reputation** depending on the [Tier](Glossary.md) they picked prior to investing. By interacting with the protocol, users will earn a certain amount of [Reputation Tokens (rALBT)](RALBT.md):
+**Reputation** is a key sub-system that permeates the whole P2P protocol. It is measured in ten levels: from **Junior** to **Grand Master**. Users can earn **Reputation** depending on the [Tier](Glossary.md) they picked prior to investing. By interacting with the protocol, users will earn a certain amount of [Reputation Tokens (rALBT)](Reputation.md):
 
 * Applying for a Loan
 * Locking their investment (instead of instantly claiming)

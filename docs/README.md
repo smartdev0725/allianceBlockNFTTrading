@@ -21,7 +21,7 @@ The protocol is comprised of several parts.
 * The [Governance subsystem](DAO.md), handling all **Governance** interactions, the voting process, and updates to the protocol. The *end-to-end* Governance process is documented [here](DAO-endToEnd.md)
 * The [Escrow subsystem](Escrow.md), that acts as an independent intermediary, holding the funds and supporting the financial aspect of the protocol.
 * The [Storage subsystem](Storage.md), holds the hard data for every loan, project or investment.
-* The [Reputation subsystem](RALBT.md), that runs through and affects almost every level of the protocol.
+* The [Reputation subsystem](Reputation.md), that runs through and affects almost every level of the protocol.
 
 ## How it works
 

@@ -8,7 +8,7 @@
 *rALBT* is the **Reputation Token** that users of [the Protocol](Glossary.md) can farm, hold, and eventually trade in order to earn investment opportunities.
 
 ## What is Reputation?
-*Reputation* is a sub-system that encourages users to partake in the *Protocol*. You can read more about this [here](RALBT.md)
+*Reputation* is a sub-system that encourages users to partake in the *Protocol*. You can read more about this [here](Reputation.md)
 
 ## What is a Ticket and what rights do I get?
 Note that not all **Funders** who *subscribed* to an investment opportunity are eligible to fund a **Project** or **Loan**. Only **Subscribers** with a **Funder ticket** are eligible. In order to earn one, they must win the [Ticket Lottery](Glossary.md). You can read more about this [here](Financing.md)

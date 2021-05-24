@@ -27,7 +27,7 @@ At the end of this step, the *Funders* will be required to choose a [Participati
     * Tier 2 receives 10% of the tickets: users who have declared intent but have **50k ALBT** staked
     * Tier 3 receives the rest of the tickets: users who have declared intent but have **200k ALBT** staked.
 
-5. **Ticket stage:** Once the subscription (*declaration of intent by the potential funders*) has concluded, the [Registry](Glossary.md) emits the tickets and distributes them according to the [Participation Tier](Glossary.md). This stage is heavily influenced by the [Reputation Subsystem](RALBT.md).
+5. **Ticket stage:** Once the subscription (*declaration of intent by the potential funders*) has concluded, the [Registry](Glossary.md) emits the tickets and distributes them according to the [Participation Tier](Glossary.md). This stage is heavily influenced by the [Reputation Subsystem](Reputation.md).
 
 **Note: within each tier, there is a *first-come-first-served* distribution of the tickets.**
 

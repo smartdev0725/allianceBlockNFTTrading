@@ -50,7 +50,7 @@ The *ERC-721 NFT* representing a *Project*, wrapping the **Funding NFT**. Each *
 The *ERC-1155 NTF* representing the notes given to *Funders* by the *Escrow* in exchange for their **Investment Funds**.
 
 ## Reputation (rALBT)
-*Reputation* is earned by performing actions, completing quests and participating in the protocol. *Reputation* is represented by the [rALBT](RALBT.md) token.
+*Reputation* is earned by performing actions, completing quests and participating in the protocol. *Reputation* is represented by the [rALBT](Reputation.md) token.
 
 ## Investment Funds
 The assets a **Funder** utilizes to support a *Project* or *Loan*. See [Financial](Financing.md) for more information on this process.
@@ -111,7 +111,7 @@ This NFT is not tradeable and represents the amount of **ALBT** staked by the us
 The *Tier NFT* may be **Bronze NFT**, **Silver NFT**, or **Gold NFT**.
 
 ## Reputation level
-As the *Protocol* matures, the **DAO** will enable the *Reputation Leveling System*. This will extend the [Reputation Subsystem](RALBT.md) with a leveling score for each user. The 7 levels will range from *Junior* to *Grand Master*.
+As the *Protocol* matures, the **DAO** will enable the *Reputation Leveling System*. This will extend the [Reputation Subsystem](Reputation.md) with a leveling score for each user. The 7 levels will range from *Junior* to *Grand Master*.
 
 ## Milestone
 Each successful *Project* is required to have a set of *Milestones* or goals. If the *Project* is listed, the total required funds will be granted in steps, as each *Milestone* is reached and verified by **Governance**.
