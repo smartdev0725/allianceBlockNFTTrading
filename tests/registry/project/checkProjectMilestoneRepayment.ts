@@ -1,124 +1,125 @@
-import BN from "bn.js";
-import { toWei } from "web3-utils";
-import { expect } from "chai";
-import { LoanStatus } from "../../helpers/registryEnums";
-import { ONE_DAY, BASE_AMOUNT } from "../../helpers/constants";
-import { increaseTime, getCurrentTimestamp } from "../../helpers/time";
-
-const { expectRevert } = require("@openzeppelin/test-helpers");
+import {expect} from 'chai';
+import {LoanStatus} from '../../helpers/registryEnums';
+import {increaseTime} from '../../helpers/time';
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import {BigNumber} from 'ethers';
+import {BASE_AMOUNT, ONE_DAY} from '../../helpers/constants';
+const {expectRevert} = require('@openzeppelin/test-helpers');
+import BN from 'bn.js';
 
 export default async function suite() {
-  describe("Succeeds", async () => {
-    let loanId: BN;
-    let approvalRequest: BN;
+  describe('Project milestone repayment', async () => {
+    let approvalRequest: BigNumber;
 
-    beforeEach(async function() {
-      // Given
-      loanId = new BN(await this.registry.totalLoans());
-      approvalRequest = new BN(await this.governance.totalApprovalRequests());
-
-      const amountCollateralized = new BN(toWei("100000"));
-      const projectTokenPrice = new BN("1");
-      const interestPercentage = new BN(20);
-      const discountPerMillion = new BN(400000);
-      const totalMilestones = new BN(1);
-      const paymentTimeInterval = new BN(20 * ONE_DAY);
-      const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ";
-
-      let milestoneDurations = new Array<BN>(totalMilestones);
-      let amountRequestedPerMilestone = new Array<BN>(totalMilestones);
-      const currentTime = await getCurrentTimestamp();
-
-      for (let i = 0; i < Number(totalMilestones); i++) {
-        milestoneDurations[i] = currentTime.add(new BN((i + 1) * ONE_DAY));
-        amountRequestedPerMilestone[i] = new BN(toWei("10000"));
+    beforeEach(async function () {
+      this.approvalRequest =
+        await this.governanceContract.totalApprovalRequests();
+      this.loanId = await this.registryContract.totalLoans();
+      this.totalMilestones = BigNumber.from(1);
+      this.milestoneDurations = new Array<BigNumber>(this.totalMilestones);
+      this.amountRequestedPerMilestone = new Array<BigNumber>(
+        this.totalMilestones
+      );
+      for (let i = 0; i < Number(this.totalMilestones); i++) {
+        this.milestoneDurations[i] = BigNumber.from(
+          this.currentTime.add(new BN((i + 1) * ONE_DAY)).toString()
+        );
+        this.amountRequestedPerMilestone[i] = ethers.utils.parseEther('10000');
       }
 
-      await this.registry.requestProjectLoan(
-        amountRequestedPerMilestone,
-        this.projectToken.address,
-        amountCollateralized.toString(),
-        projectTokenPrice,
-        interestPercentage,
-        discountPerMillion,
-        totalMilestones,
-        milestoneDurations,
-        paymentTimeInterval,
-        ipfsHash,
-        { from: this.projectOwner }
+      this.totalAmountRequested = this.amountRequestedPerMilestone[0].mul(
+        this.totalMilestones
+      );
+      this.totalPartitions = this.totalAmountRequested.div(
+        ethers.utils.parseEther(BASE_AMOUNT + '')
+      );
+      this.bigPartition = this.totalPartitions.div(BigNumber.from(2));
+      this.smallPartition = this.bigPartition.div(BigNumber.from(2));
+      this.bigPartitionAmountToPurchase = this.bigPartition.mul(
+        ethers.utils.parseEther(BASE_AMOUNT + '')
+      );
+      this.smallPartitionAmountToPurchase = this.smallPartition.mul(
+        ethers.utils.parseEther(BASE_AMOUNT + '')
       );
 
-      const totalAmountRequested = amountRequestedPerMilestone[0].mul(
-        totalMilestones
-      );
-      const totalPartitions = totalAmountRequested.div(
-        new BN(toWei(BASE_AMOUNT.toString()))
-      );
-      const bigPartition = totalPartitions.div(new BN(2));
+      await this.registryContract
+        .connect(this.seekerSigner)
+        .requestProjectLoan(
+          this.amountRequestedPerMilestone,
+          this.projectTokenContract.address,
+          this.amountCollateralized,
+          this.projectTokenPrice,
+          this.interestPercentage,
+          this.discountPerMillion,
+          this.totalMilestones,
+          this.milestoneDurations,
+          this.paymentTimeInterval,
+          this.ipfsHash
+        );
 
-      await this.governance.superVoteForRequest(approvalRequest, true, {
-        from: this.owner
-      });
+      await this.governanceContract
+        .connect(this.superDelegatorSigner)
+        .superVoteForRequest(this.approvalRequest, true);
 
-      await this.registry.fundLoan(loanId, bigPartition, {
-        from: this.lenders[0]
-      });
-      await this.registry.fundLoan(loanId, bigPartition, {
-        from: this.lenders[1]
-      });
+      await this.registryContract
+        .connect(this.lender1Signer)
+        .fundLoan(this.loanId, this.bigPartition);
+      await this.registryContract
+        .connect(this.lender2Signer)
+        .fundLoan(this.loanId, this.bigPartition);
 
-      approvalRequest = new BN(await this.governance.totalApprovalRequests());
-      await this.registry.applyMilestone(loanId, { from: this.projectOwner });
+      approvalRequest = await this.governanceContract.totalApprovalRequests();
+      await this.registryContract
+        .connect(this.seekerSigner)
+        .applyMilestone(this.loanId);
 
-      await this.governance.superVoteForRequest(approvalRequest, true, {
-        from: this.owner
-      });
+      await this.governanceContract
+        .connect(this.superDelegatorSigner)
+        .superVoteForRequest(approvalRequest, true);
     });
 
-    it("when repaying a project loan", async function() {
-      const loanPayments = await this.registry.projectLoanPayments(loanId);
-
-      await this.lendingToken.approve(
-        this.registry.address,
-        await this.registry.getAmountToBeRepaid(loanId),
-        {
-          from: this.projectOwner
-        }
+    it('when repaying a project loan', async function () {
+      const loanPayments = await this.registryContract.projectLoanPayments(
+        this.loanId
       );
-      await this.registry.executePayment(loanId, { from: this.projectOwner });
-      const loanStatus = await this.registry.loanStatus(loanId);
+
+      await this.lendingTokenContract.approve(
+        this.registryContract.address,
+        await this.registryContract
+          .connect(this.seekerSigner)
+          .getAmountToBeRepaid(this.loanId)
+      );
+      await this.registryContract
+        .connect(this.seekerSigner)
+        .executePayment(this.loanId);
+      const loanStatus = await this.registryContract.loanStatus(this.loanId);
 
       // Correct Status.
-      expect(loanStatus).to.be.bignumber.equal(LoanStatus.SETTLED);
+      expect(loanStatus.toString()).to.be.equal(LoanStatus.SETTLED);
     });
 
-    it("should revert in case it does not have allowancee", async function() {
-      // When && Then
-      await expectRevert(
-        this.registry.executePayment(loanId, { from: this.projectOwner }),
-        "transfer amount exceeds allowance"
-      );
-    });
-
-    it("should revert when repaying a project loan out of time", async function() {
+    it('should revert when repaying a project loan out of time', async function () {
       // When
-      const loanPayments = await this.registry.projectLoanPayments(loanId);
+      const loanPayments = await this.registryContract.projectLoanPayments(
+        this.loanId
+      );
 
       // Move time to 1 month, so we can trigger the exception
-      increaseTime(new BN(30 * 24 * 60 * 60)); // One Month
+      await increaseTime(this.deployerSigner.provider, 30 * 24 * 60 * 60); // One Month
 
-      await this.lendingToken.approve(
-        this.registry.address,
-        await this.registry.getAmountToBeRepaid(loanId),
-        {
-          from: this.projectOwner
-        }
-      );
+      await this.lendingTokenContract
+        .connect(this.seekerSigner)
+        .approve(
+          this.registryContract.address,
+          await this.registryContract.getAmountToBeRepaid(this.loanId)
+        );
 
       // Then
       await expectRevert(
-        this.registry.executePayment(loanId, { from: this.projectOwner }),
-        "Only between awaiting for repayment timeframe"
+        this.registryContract
+          .connect(this.seekerSigner)
+          .executePayment(this.loanId),
+        'Only between awaiting for repayment timeframe'
       );
     });
   });

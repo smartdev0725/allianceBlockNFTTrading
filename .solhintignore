@@ -1,3 +1,10 @@
 # folders
 contracts/uniswap/
 node_modules/
+export/
+deployments/
+artifacts/
+cache/
+coverage/
+node_modules/
+typechain/

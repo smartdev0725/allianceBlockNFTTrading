@@ -5,16 +5,27 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./staking/DaoStaking.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "hardhat/console.sol";
 
-contract Staking is DaoStaking, Ownable {
+contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    constructor(IERC20 albt_, address governance_, uint256[] memory stakingTypeAmounts_) public {
+    /**
+ * @dev Initialize of the contract.
+ */
+    function initialize(IERC20 albt_, address governance_, uint256[] memory stakingTypeAmounts_) public initializer {
+        __Ownable_init();
         albt = albt_;
         governance = IGovernanceStaking(governance_);
+
+        // Initialize some constants
+        STAKING_DURATION = 7 days;
+        periodFinish = 0;
+        rewardRate = 0;
+
         for(uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
             stakingTypeAmounts[i] = stakingTypeAmounts_[i];
         }

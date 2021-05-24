@@ -1,25 +1,25 @@
-const Registry = artifacts.require("Registry");
-const Governance = artifacts.require("Governance");
-const CollateralToken = artifacts.require("CollateralToken");
+const Registry = artifacts.require('Registry');
+const Governance = artifacts.require('Governance');
+const CollateralToken = artifacts.require('CollateralToken');
 
-const BN = require("bn.js");
-const { toWei } = require("web3-utils");
-const { getCurrentTimestamp } = require("../tests/helpers/time");
-const { ONE_DAY } = require("../tests/helpers/constants");
-const { LoanStatus } = require("../tests/helpers/registryEnums");
+const BN = require('bn.js');
+const {toWei} = require('web3-utils');
+const {getCurrentTimestamp} = require('../tests/helpers/time');
+const {ONE_DAY} = require('../tests/helpers/constants');
+const {LoanStatus} = require('../tests/helpers/registryEnums');
 
 if (!process.env.REGISTRY_ADDRESS)
-  throw new Error("REGISTRY_ADDRESS missing from .env file");
+  throw new Error('REGISTRY_ADDRESS missing from .env file');
 if (!process.env.COLLATERAL_TOKEN_ADDRESS)
-  throw new Error("COLLATERAL_TOKEN_ADDRESS missing from .env file");
+  throw new Error('COLLATERAL_TOKEN_ADDRESS missing from .env file');
 if (!process.env.GOVERNANCE_ADDRESS)
-  throw new Error("GOVERNANCE_ADDRESS missing from .env file");
+  throw new Error('GOVERNANCE_ADDRESS missing from .env file');
 if (!process.env.LOAN_REQUEST_TOTAL_MILESTONES)
-  throw new Error("LOAN_REQUEST_TOTAL_MILESTONES missing from .env file");
+  throw new Error('LOAN_REQUEST_TOTAL_MILESTONES missing from .env file');
 if (!process.env.LOAN_REQUEST_AMOUNT_PER_MILESTONE)
-  throw new Error("LOAN_REQUEST_AMOUNT_PER_MILESTONE missing from .env file");
+  throw new Error('LOAN_REQUEST_AMOUNT_PER_MILESTONE missing from .env file');
 if (!process.env.LOAN_REQUEST_DAYS_PER_MILESTONE)
-  throw new Error("LOAN_REQUEST_DAYS_PER_MILESTONE missing from .env file");
+  throw new Error('LOAN_REQUEST_DAYS_PER_MILESTONE missing from .env file');
 //if (!process.env.LOAN_REQUEST_IPFS_HASH) throw new Error("LOAN_REQUEST_IPFS_HASH missing from .env file");
 
 async function main() {
@@ -38,8 +38,8 @@ async function main() {
   const approvalRequest = new BN(await governance.totalApprovalRequests());
   const totalMilestones = new BN(process.env.LOAN_REQUEST_TOTAL_MILESTONES);
   const currentTime = await getCurrentTimestamp();
-  const amountCollateralized = new BN(toWei("100000"));
-  const projectTokenPrice = new BN("1");
+  const amountCollateralized = new BN(toWei('100000'));
+  const projectTokenPrice = new BN('1');
   const interestPercentage = new BN(20);
   const discountPerMillion = new BN(300000);
   const paymentTimeInterval = new BN(3600);
@@ -69,7 +69,7 @@ async function main() {
     milestoneDurations,
     paymentTimeInterval,
     ipfsHash,
-    { from: seeker }
+    {from: seeker}
   );
 
   await governance.voteForRequest(approvalRequest, true, {
@@ -81,7 +81,7 @@ async function main() {
 
   const loanStatus = await registry.loanStatus(loanId);
   if (loanStatus == LoanStatus.APPROVED) {
-    console.log("Requested and approved loan with ID", loanId.toNumber());
+    console.log('Requested and approved loan with ID', loanId.toNumber());
   }
 }
 

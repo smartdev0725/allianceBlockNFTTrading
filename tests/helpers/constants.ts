@@ -1,8 +1,8 @@
 export const DAO_LOAN_APPROVAL = 2 * 24 * 60 * 60; // Two days
 export const DAO_MILESTONE_APPROVAL = 24 * 60 * 60; // One day
 export const DAO_UPDATE_REQUEST_DURATION = 24 * 60 * 60; // One day
-export const DAO_APPROVALS_NEEDED_FOR_REGISTRY_REQUEST = 1
-export const DAO_APPROVALS_NEEDED_FOR_GOVERNANCE_REQUEST = 1
+export const DAO_APPROVALS_NEEDED_FOR_REGISTRY_REQUEST = 1;
+export const DAO_APPROVALS_NEEDED_FOR_GOVERNANCE_REQUEST = 1;
 
 export const VESTING_TIME_INTERVAL = 30 * 24 * 60 * 60; // One month
 export const VESTING_BATCHES = 4; // vesting batches : 4

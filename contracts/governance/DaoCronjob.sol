@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -44,7 +44,7 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         else if (cronjobs[cronjobId].cronjobType == CronjobType.DAO_DELEGATORS_VOTING) {
             updateDaoDelegationVotingState(timestamp);
         }
-        else if (cronjobs[cronjobId].cronjobType == CronjobType.DAO_REWARDS_PROVISION) {         
+        else if (cronjobs[cronjobId].cronjobType == CronjobType.DAO_REWARDS_PROVISION) {
             staking.provideRewards(
                 rewardsForDaoMembersPerEpoch[currentEpoch.sub(1)],
                 rewardsForDaoDelegatorsPerEpoch[currentEpoch.sub(1)],
@@ -258,7 +258,7 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         }
     }
 
-    function addSubstituteToAllActiveRequests(uint256 delegatorId, uint256 epoch) internal {        
+    function addSubstituteToAllActiveRequests(uint256 delegatorId, uint256 epoch) internal {
         uint256 requestsRemaining = requestsPerEpoch[epoch].getSize();
 
         if (requestsRemaining > 0) {

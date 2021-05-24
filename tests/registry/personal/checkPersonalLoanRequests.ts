@@ -1,186 +1,301 @@
-import BN from 'bn.js';
-import { toWei } from 'web3-utils';
-import { expect } from 'chai';
-import { RepaymentBatchType, LoanType, LoanStatus } from '../../helpers/registryEnums';
-import { ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL } from "../../helpers/constants";
-import { getTransactionTimestamp } from "../../helpers/time";
-const { expectEvent } = require("@openzeppelin/test-helpers");
+import chai, {expect} from 'chai';
+import {
+  RepaymentBatchType,
+  LoanType,
+  LoanStatus,
+} from '../../helpers/registryEnums';
+import {ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL} from '../../helpers/constants';
+import {getTransactionTimestamp} from '../../helpers/time';
+import {deployments, getNamedAccounts, ethers} from 'hardhat';
+const {expectEvent} = require('@openzeppelin/test-helpers');
+import {BigNumber} from 'ethers';
+import {solidity} from 'ethereum-waffle';
+
+chai.use(solidity);
 
 export default async function suite() {
-  describe('Succeeds', async () => {
-    let loanId: BN;
-    let approvalRequest: BN;
-    let initSeekerCollateralBalance: BN;
-    let initEscrowCollateralBalance: BN;
-    let initEscrowFundingNftBalance: BN;
-
-    beforeEach(async function () {
-      loanId = new BN(await this.registry.totalLoans());
-      approvalRequest = new BN(await this.governance.totalApprovalRequests());
-      initSeekerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.seeker));
-      initEscrowCollateralBalance = new BN(await this.collateralToken.balanceOf(this.escrow.address));
-      initEscrowFundingNftBalance =  new BN(await this.fundingNFT.balanceOf(this.escrow.address, loanId));
-    });
-
+  describe('Personal loan requests', async () => {
     it('when requesting an interest only personal loan', async function () {
-      const amountRequested = new BN(toWei('10000'));
-      const amountCollateralized = new BN(toWei('20000'));
-      const totalAmountOfBatches = new BN(2);
-      const interestPercentage = new BN(20);
-      const batchTimeInterval = new BN(20 * ONE_DAY);
-      const ipfsHash = web3.utils.keccak256('0x01'); // Dummy hash for testing.
-
-      const tx = await this.registry.requestPersonalLoan(
-        amountRequested.toString(),
-        this.collateralToken.address,
-        amountCollateralized.toString(),
-        totalAmountOfBatches,
-        interestPercentage,
-        batchTimeInterval,
-        ipfsHash,
-        RepaymentBatchType.ONLY_INTEREST,
-        { from: this.seeker }
+      const loanId = await this.registryContract.totalLoans();
+      const approvalRequest =
+        await this.governanceContract.totalApprovalRequests();
+      let initSeekerCollateralBalance =
+        await this.collateralTokenContract.balanceOf(this.seeker);
+      let initEscrowCollateralBalance =
+        await this.collateralTokenContract.balanceOf(
+          this.escrowContract.address
+        );
+      let initEscrowFundingNftBalance = await this.fundingNFTContract.balanceOf(
+        this.escrowContract.address,
+        loanId
       );
 
-      const totalPartitions = amountRequested.div(new BN(toWei(BASE_AMOUNT.toString())));
-      const totalInterest = amountRequested.mul(interestPercentage).div(new BN(100));
+      const amountRequested = ethers.utils.parseEther('10000');
+      const amountCollateralized = ethers.utils.parseEther('20000');
+      const totalAmountOfBatches = BigNumber.from(2);
+      const interestPercentage = BigNumber.from(20);
+      const batchTimeInterval = BigNumber.from(20 * ONE_DAY);
+      const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ'; // Dummy hash for testing.
+
+      const tx = await this.registryContract
+        .connect(this.seekerSigner)
+        .requestPersonalLoan(
+          amountRequested,
+          this.collateralTokenContract.address,
+          amountCollateralized,
+          totalAmountOfBatches,
+          interestPercentage,
+          batchTimeInterval,
+          ipfsHash,
+          RepaymentBatchType.ONLY_INTEREST
+        );
+
+      const totalPartitions = amountRequested.div(
+        ethers.utils.parseEther(BASE_AMOUNT + '')
+      );
+      const totalInterest = amountRequested
+        .mul(interestPercentage)
+        .div(BigNumber.from(100));
       const amountEachBatch = totalInterest.div(totalAmountOfBatches);
 
-      const newSeekerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.seeker));
-      const newEscrowCollateralBalance = new BN(await this.collateralToken.balanceOf(this.escrow.address));
-      const newEscrowFundingNftBalance =  new BN(await this.fundingNFT.balanceOf(this.escrow.address, loanId));
+      const newSeekerCollateralBalance =
+        await this.collateralTokenContract.balanceOf(this.seeker);
+      const newEscrowCollateralBalance =
+        await this.collateralTokenContract.balanceOf(
+          this.escrowContract.address
+        );
+      const newEscrowFundingNftBalance =
+        await this.fundingNFTContract.balanceOf(
+          this.escrowContract.address,
+          loanId
+        );
 
-      const isPaused = await this.fundingNFT.transfersPaused(loanId);
+      const isPaused = await this.fundingNFTContract.transfersPaused(loanId);
 
-      const loanStatus = await this.registry.loanStatus(loanId);
-      const loanDetails = await this.registry.loanDetails(loanId);
-      const loanPayments = await this.registry.personalLoanPayments(loanId);
-      const daoApprovalRequest = await this.governance.approvalRequests(approvalRequest);
+      const loanStatus = await this.registryContract.loanStatus(loanId);
+      const loanDetails = await this.registryContract.loanDetails(loanId);
+      const loanPayments = await this.registryContract.personalLoanPayments(
+        loanId
+      );
+      const daoApprovalRequest = await this.governanceContract.approvalRequests(
+        approvalRequest
+      );
 
       // Correct Status.
-      expect(loanStatus).to.be.bignumber.equal(LoanStatus.REQUESTED);
+      expect(loanStatus.toString()).to.be.equal(LoanStatus.REQUESTED);
 
       // Correct Event.
-      expectEvent(tx.receipt, 'PersonalLoanRequested', { loanId , user: this.seeker, amount: amountRequested.toString() });
+      await expect(tx)
+        .to.emit(this.registryContract, 'PersonalLoanRequested')
+        .withArgs(loanId, this.seeker, amountRequested.toString());
 
       // Correct Details.
-      expect(loanDetails.loanId).to.be.bignumber.equal(loanId);
-      expect(loanDetails.loanType).to.be.bignumber.equal(LoanType.PERSONAL);
-      expect(loanDetails.startingDate).to.be.bignumber.equal(new BN(0));
-      expect(loanDetails.collateralToken).to.be.equal(this.collateralToken.address);
-      expect(loanDetails.collateralAmount).to.be.bignumber.equal(amountCollateralized);
-      expect(loanDetails.lendingAmount).to.be.bignumber.equal(amountRequested);
-      expect(loanDetails.totalPartitions).to.be.bignumber.equal(totalPartitions);
-      expect(loanDetails.totalInterest).to.be.bignumber.equal(totalInterest);
+      expect(loanDetails.loanId.toString()).to.be.equal(loanId.toString());
+      expect(loanDetails.loanType.toString()).to.be.equal(LoanType.PERSONAL);
+      expect(loanDetails.startingDate.toString()).to.be.equal('0');
+      expect(loanDetails.collateralToken.toString()).to.be.equal(
+        this.collateralTokenContract.address
+      );
+      expect(loanDetails.collateralAmount.toString()).to.be.equal(
+        amountCollateralized.toString()
+      );
+      expect(loanDetails.lendingAmount.toString()).to.be.equal(
+        amountRequested.toString()
+      );
+      expect(loanDetails.totalPartitions.toString()).to.be.equal(
+        totalPartitions.toString()
+      );
+      expect(loanDetails.totalInterest.toString()).to.be.equal(
+        totalInterest.toString()
+      );
       expect(loanDetails.extraInfo).to.be.equal(ipfsHash);
-      expect(loanDetails.partitionsPurchased).to.be.bignumber.equal(new BN(0));
+      expect(loanDetails.partitionsPurchased.toString()).to.be.equal('0');
 
       // Correct Payments.
-      expect(loanPayments.batchesPaid).to.be.bignumber.equal(new BN(0));
-      expect(loanPayments.amountEachBatch).to.be.bignumber.equal(amountEachBatch);
-      expect(loanPayments.totalAmountOfBatches).to.be.bignumber.equal(totalAmountOfBatches);
-      expect(loanPayments.timeIntervalBetweenBatches).to.be.bignumber.equal(batchTimeInterval);
-      expect(loanPayments.batchesSkipped).to.be.bignumber.equal(new BN(0));
-      expect(loanPayments.batchStartingTimestamp).to.be.bignumber.equal(new BN(0));
-      expect(loanPayments.batchDeadlineTimestamp).to.be.bignumber.equal(new BN(0));
-      expect(loanPayments.repaymentBatchType).to.be.bignumber.equal(RepaymentBatchType.ONLY_INTEREST);
+      expect(loanPayments.batchesPaid.toString()).to.be.equal('0');
+      expect(loanPayments.amountEachBatch.toString()).to.be.equal(
+        amountEachBatch.toString()
+      );
+      expect(loanPayments.totalAmountOfBatches.toString()).to.be.equal(
+        totalAmountOfBatches.toString()
+      );
+      expect(loanPayments.timeIntervalBetweenBatches.toString()).to.be.equal(
+        batchTimeInterval.toString()
+      );
+      expect(loanPayments.batchesSkipped.toString()).to.be.equal('0');
+      expect(loanPayments.batchStartingTimestamp.toString()).to.be.equal('0');
+      expect(loanPayments.batchDeadlineTimestamp.toString()).to.be.equal('0');
+      expect(loanPayments.repaymentBatchType.toString()).to.be.equal(
+        RepaymentBatchType.ONLY_INTEREST
+      );
 
       // Correct Balances.
-      expect(initSeekerCollateralBalance.sub(newSeekerCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
-      expect(newEscrowCollateralBalance.sub(initEscrowCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
-      expect(newEscrowFundingNftBalance.sub(initEscrowFundingNftBalance)).to.be.bignumber.equal(totalPartitions);
+      expect(
+        initSeekerCollateralBalance.sub(newSeekerCollateralBalance).toString()
+      ).to.be.equal(amountCollateralized.toString());
+      expect(
+        newEscrowCollateralBalance.sub(initEscrowCollateralBalance).toString()
+      ).to.be.equal(amountCollateralized.toString());
+      expect(
+        newEscrowFundingNftBalance.sub(initEscrowFundingNftBalance).toString()
+      ).to.be.equal(totalPartitions.toString());
 
       // Correct Nft Behavior.
       expect(isPaused).to.be.equal(true);
 
       // Correct Dao Request.
-      expect(daoApprovalRequest.loanId).to.be.bignumber.equal(loanId);
+      expect(daoApprovalRequest.loanId.toString()).to.be.equal(
+        loanId.toString()
+      );
       expect(daoApprovalRequest.isMilestone).to.be.equal(false);
-      expect(daoApprovalRequest.milestoneNumber).to.be.bignumber.equal(new BN(0));
-      expect(daoApprovalRequest.deadlineTimestamp).to.be.bignumber.equal(
-        (await getTransactionTimestamp(tx.tx)).add(new BN(DAO_LOAN_APPROVAL)));
-      expect(daoApprovalRequest.approvalsProvided).to.be.bignumber.equal(new BN(0));
+      expect(daoApprovalRequest.milestoneNumber.toString()).to.be.equal('0');
+      expect(daoApprovalRequest.deadlineTimestamp.toString()).to.be.equal(
+        (await getTransactionTimestamp(tx.hash)).add(
+          BigNumber.from(DAO_LOAN_APPROVAL)
+        )
+      );
+      expect(daoApprovalRequest.approvalsProvided.toString()).to.be.equal('0');
       expect(daoApprovalRequest.isApproved).to.be.equal(false);
     });
 
     it('when requesting a nominal plus interest personal loan', async function () {
-      const amountRequested = new BN(toWei('10000'));
-      const amountCollateralized = new BN(toWei('20000'));
-      const totalAmountOfBatches = new BN(2);
-      const interestPercentage = new BN(20);
-      const batchTimeInterval = new BN(20 * ONE_DAY);
-      const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
-
-      const tx = await this.registry.requestPersonalLoan(
-        amountRequested.toString(),
-        this.collateralToken.address,
-        amountCollateralized.toString(),
-        totalAmountOfBatches,
-        interestPercentage,
-        batchTimeInterval,
-        ipfsHash,
-        RepaymentBatchType.INTEREST_PLUS_NOMINAL,
-        { from: this.seeker }
+      const loanId = await this.registryContract.totalLoans();
+      const approvalRequest =
+        await this.governanceContract.totalApprovalRequests();
+      let initSeekerCollateralBalance =
+        await this.collateralTokenContract.balanceOf(this.seeker);
+      let initEscrowCollateralBalance =
+        await this.collateralTokenContract.balanceOf(
+          this.escrowContract.address
+        );
+      let initEscrowFundingNftBalance = await this.fundingNFTContract.balanceOf(
+        this.escrowContract.address,
+        loanId
       );
 
-      const totalPartitions = amountRequested.div(new BN(toWei(BASE_AMOUNT.toString())));
-      const totalInterest = amountRequested.mul(interestPercentage).div(new BN(100));
-      const amountEachBatch = (totalInterest.add(amountRequested)).div(totalAmountOfBatches);
+      const amountRequested = ethers.utils.parseEther('10000');
+      const amountCollateralized = ethers.utils.parseEther('20000');
+      const totalAmountOfBatches = BigNumber.from(2);
+      const interestPercentage = BigNumber.from(20);
+      const batchTimeInterval = BigNumber.from(20 * ONE_DAY);
+      const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-      const newSeekerCollateralBalance = new BN(await this.collateralToken.balanceOf(this.seeker));
-      const newEscrowCollateralBalance = new BN(await this.collateralToken.balanceOf(this.escrow.address));
-      const newEscrowFundingNftBalance =  new BN(await this.fundingNFT.balanceOf(this.escrow.address, loanId));
+      const tx = await this.registryContract
+        .connect(this.seekerSigner)
+        .requestPersonalLoan(
+          amountRequested,
+          this.collateralTokenContract.address,
+          amountCollateralized,
+          totalAmountOfBatches,
+          interestPercentage,
+          batchTimeInterval,
+          ipfsHash,
+          RepaymentBatchType.INTEREST_PLUS_NOMINAL
+        );
 
-      const isPaused = await this.fundingNFT.transfersPaused(loanId);
+      const totalPartitions = amountRequested.div(
+        ethers.utils.parseEther(BASE_AMOUNT + '')
+      );
+      const totalInterest = amountRequested
+        .mul(interestPercentage)
+        .div(BigNumber.from(100));
+      const amountEachBatch = totalInterest
+        .add(amountRequested)
+        .div(totalAmountOfBatches);
 
-      const loanStatus = await this.registry.loanStatus(loanId);
-      const loanDetails = await this.registry.loanDetails(loanId);
-      const loanPayments = await this.registry.personalLoanPayments(loanId);
-      const daoApprovalRequest = await this.governance.approvalRequests(approvalRequest);
+      const newSeekerCollateralBalance =
+        await this.collateralTokenContract.balanceOf(this.seeker);
+      const newEscrowCollateralBalance =
+        await this.collateralTokenContract.balanceOf(
+          this.escrowContract.address
+        );
+      const newEscrowFundingNftBalance =
+        await this.fundingNFTContract.balanceOf(
+          this.escrowContract.address,
+          loanId
+        );
+
+      const isPaused = await this.fundingNFTContract.transfersPaused(loanId);
+
+      const loanStatus = await this.registryContract.loanStatus(loanId);
+      const loanDetails = await this.registryContract.loanDetails(loanId);
+      const loanPayments = await this.registryContract.personalLoanPayments(
+        loanId
+      );
+      const daoApprovalRequest = await this.governanceContract.approvalRequests(
+        approvalRequest
+      );
 
       // Correct Status.
-      expect(loanStatus).to.be.bignumber.equal(LoanStatus.REQUESTED);
+      expect(loanStatus.toString()).to.be.equal(LoanStatus.REQUESTED);
 
       // Correct Event.
-      expectEvent(tx.receipt, 'PersonalLoanRequested', { loanId , user: this.seeker, amount: amountRequested.toString() });
+      await expect(tx)
+        .to.emit(this.registryContract, 'PersonalLoanRequested')
+        .withArgs(loanId, this.seeker, amountRequested.toString());
 
-        // Correct Details.
-      expect(loanDetails.loanId).to.be.bignumber.equal(loanId);
-      expect(loanDetails.loanType).to.be.bignumber.equal(LoanType.PERSONAL);
-      expect(loanDetails.startingDate).to.be.bignumber.equal(new BN(0));
-      expect(loanDetails.collateralToken).to.be.equal(this.collateralToken.address);
-      expect(loanDetails.collateralAmount).to.be.bignumber.equal(amountCollateralized);
-      expect(loanDetails.lendingAmount).to.be.bignumber.equal(amountRequested);
-      expect(loanDetails.totalPartitions).to.be.bignumber.equal(totalPartitions);
-      expect(loanDetails.totalInterest).to.be.bignumber.equal(totalInterest);
+      // Correct Details.
+      expect(loanDetails.loanId.toString()).to.be.equal(loanId.toString());
+      expect(loanDetails.loanType.toString()).to.be.equal(LoanType.PERSONAL);
+      expect(loanDetails.startingDate.toString()).to.be.equal('0');
+      expect(loanDetails.collateralToken.toString()).to.be.equal(
+        this.collateralTokenContract.address
+      );
+      expect(loanDetails.collateralAmount.toString()).to.be.equal(
+        amountCollateralized.toString()
+      );
+      expect(loanDetails.lendingAmount.toString()).to.be.equal(
+        amountRequested.toString()
+      );
+      expect(loanDetails.totalPartitions).to.be.equal(totalPartitions);
+      expect(loanDetails.totalInterest).to.be.equal(totalInterest);
       expect(loanDetails.extraInfo).to.be.equal(ipfsHash);
-      expect(loanDetails.partitionsPurchased).to.be.bignumber.equal(new BN(0));
+      expect(loanDetails.partitionsPurchased).to.be.equal(BigNumber.from(0));
 
       // Correct Payments.
-      expect(loanPayments.batchesPaid).to.be.bignumber.equal(new BN(0));
-      expect(loanPayments.amountEachBatch).to.be.bignumber.equal(amountEachBatch);
-      expect(loanPayments.totalAmountOfBatches).to.be.bignumber.equal(totalAmountOfBatches);
-      expect(loanPayments.timeIntervalBetweenBatches).to.be.bignumber.equal(batchTimeInterval);
-      expect(loanPayments.batchesSkipped).to.be.bignumber.equal(new BN(0));
-      expect(loanPayments.batchStartingTimestamp).to.be.bignumber.equal(new BN(0));
-      expect(loanPayments.batchDeadlineTimestamp).to.be.bignumber.equal(new BN(0));
-      expect(loanPayments.repaymentBatchType).to.be.bignumber.equal(RepaymentBatchType.INTEREST_PLUS_NOMINAL);
+      expect(loanPayments.batchesPaid.toString()).to.be.equal('0');
+      expect(loanPayments.amountEachBatch.toString()).to.be.equal(
+        amountEachBatch.toString()
+      );
+      expect(loanPayments.totalAmountOfBatches.toString()).to.be.equal(
+        totalAmountOfBatches.toString()
+      );
+      expect(loanPayments.timeIntervalBetweenBatches.toString()).to.be.equal(
+        batchTimeInterval.toString()
+      );
+      expect(loanPayments.batchesSkipped.toString()).to.be.equal('0');
+      expect(loanPayments.batchStartingTimestamp.toString()).to.be.equal('0');
+      expect(loanPayments.batchDeadlineTimestamp.toString()).to.be.equal('0');
+      expect(loanPayments.repaymentBatchType.toString()).to.be.equal(
+        RepaymentBatchType.INTEREST_PLUS_NOMINAL
+      );
 
       // Correct Balances.
-      expect(initSeekerCollateralBalance.sub(newSeekerCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
-      expect(newEscrowCollateralBalance.sub(initEscrowCollateralBalance)).to.be.bignumber.equal(amountCollateralized);
-      expect(newEscrowFundingNftBalance.sub(initEscrowFundingNftBalance)).to.be.bignumber.equal(totalPartitions);
+      expect(
+        initSeekerCollateralBalance.sub(newSeekerCollateralBalance).toString()
+      ).to.be.equal(amountCollateralized.toString());
+      expect(
+        newEscrowCollateralBalance.sub(initEscrowCollateralBalance).toString()
+      ).to.be.equal(amountCollateralized.toString());
+      expect(
+        newEscrowFundingNftBalance.sub(initEscrowFundingNftBalance).toString()
+      ).to.be.equal(totalPartitions.toString());
 
       // Correct Nft Behavior.
       expect(isPaused).to.be.equal(true);
 
       // Correct Dao Request.
-      expect(daoApprovalRequest.loanId).to.be.bignumber.equal(loanId);
+      expect(daoApprovalRequest.loanId.toString()).to.be.equal(
+        loanId.toString()
+      );
       expect(daoApprovalRequest.isMilestone).to.be.equal(false);
-      expect(daoApprovalRequest.milestoneNumber).to.be.bignumber.equal(new BN(0));
-      expect(daoApprovalRequest.deadlineTimestamp).to.be.bignumber.equal(
-        (await getTransactionTimestamp(tx.tx)).add(new BN(DAO_LOAN_APPROVAL)));
-      expect(daoApprovalRequest.approvalsProvided).to.be.bignumber.equal(new BN(0));
+      expect(daoApprovalRequest.milestoneNumber.toString()).to.be.equal('0');
+      expect(daoApprovalRequest.deadlineTimestamp.toString()).to.be.equal(
+        (await getTransactionTimestamp(tx.hash)).add(
+          BigNumber.from(DAO_LOAN_APPROVAL)
+        )
+      );
+      expect(daoApprovalRequest.approvalsProvided.toString()).to.be.equal('0');
       expect(daoApprovalRequest.isApproved).to.be.equal(false);
     });
   });

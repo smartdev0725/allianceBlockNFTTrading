@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 
 import "../interfaces/IGovernanceStaking.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -16,10 +16,10 @@ contract StakingTypesAndStorage {
         DAO_DELEGATOR
     }
 
-    uint256 public STAKING_DURATION = 7 days;
+    uint256 public STAKING_DURATION;
 
-    uint256 public periodFinish = 0;
-    uint256 public rewardRate = 0;
+    uint256 public periodFinish;
+    uint256 public rewardRate;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
 
