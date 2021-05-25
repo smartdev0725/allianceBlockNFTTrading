@@ -6,11 +6,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {get} = deployments;
 
-  const {deployer, proxyOwner, rewardDistributor} = await getNamedAccounts();
+  const {deployer, rewardDistributor} = await getNamedAccounts();
+
+  const signers = await ethers.getSigners();
+  const deployerSigner = signers[0];
 
   const Staking = await get('Staking');
-  const Escrow = await get('Escrow');
-  const ActionVerifier = await get('ActionVerifier');
+  const rALBT = await get('rALBT');
 
   const stakingContract = await ethers.getContract('Staking');
   await stakingContract.setRewardDistribution(rewardDistributor);
@@ -18,7 +20,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const registryContract = await ethers.getContract('Registry');
   const fundingNFTContract = await ethers.getContract('FundingNFT');
-  const mainNFTContract = await ethers.getContract('MainNFT');
   const governanceContract = await ethers.getContract('Governance');
   const escrowContract = await ethers.getContract('Escrow');
   const actionVerifierContract = await ethers.getContract('ActionVerifier');
@@ -74,8 +75,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Setup registry
-
+  const totalTicketsPerRun = 100000;
+  const rAlbtPerLotteryNumber =  100;
+  const blocksLockedForReputation =  20;
+  const lotteryNumbersForImmediateTicket = 100;
+  await registryContract.connect(deployerSigner).initializeInvestment(rALBT.address, totalTicketsPerRun, rAlbtPerLotteryNumber, blocksLockedForReputation, lotteryNumbersForImmediateTicket);
 };
 export default func;
-func.runAtTheEnd = true;
 func.tags = ['Setup'];
