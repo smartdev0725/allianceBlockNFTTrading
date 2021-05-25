@@ -71,6 +71,7 @@ contract Registry is Initializable, PersonalLoan, ProjectLoan, OwnableUpgradeabl
         uint256 vestingTimeInterval_,
         uint256 fundingTimeInterval_
     ) public initializer {
+        __Ownable_init();
         escrow = IEscrow(escrowAddress);
         baseAmountForEachPartition = baseAmountForEachPartition_;
         governance = IGovernance(governanceAddress_);
@@ -103,6 +104,7 @@ contract Registry is Initializable, PersonalLoan, ProjectLoan, OwnableUpgradeabl
     external
     onlyOwner()
     {
+        // TODO this should happens only one time
         rALBT = IERC20(reputationalAlbt);
         totalTicketsPerRun = totalTicketsPerRun_;
         rAlbtPerLotteryNumber = rAlbtPerLotteryNumber_;
