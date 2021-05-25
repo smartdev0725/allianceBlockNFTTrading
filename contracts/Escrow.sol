@@ -19,34 +19,36 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param lendingToken_ The token that lenders will be able to lend.
      * @param mainNFT_ The ERC721 token contract which will represent the whole loans.
      * @param fundingNFT_ The ERC1155 token contract which will represent the lending amounts.
-     * @param actionVerifierAddress_ The actionVerifier address.
-     * @param stakingAddress_ The staking address
      */
     function initialize(
         address lendingToken_,
         address mainNFT_,
-        address fundingNFT_,
-        address actionVerifierAddress_,
-        address stakingAddress_
+        address fundingNFT_
     ) public initializer {
         __Ownable_init();
         lendingToken = IERC20(lendingToken_);
         mainNFT = IERC721Mint(mainNFT_);
         fundingNFT = IERC1155Mint(fundingNFT_);
         reputationalALBT = new rALBT();
-        actionVerifier = actionVerifierAddress_;
-        staking = stakingAddress_;
     }
 
     /**
      * @dev Initializes the contract.
      * @param registryAddress_ The registry address.
+     * @param actionVerifierAddress_ The actionVerifier address.
+     * @param stakingAddress_ The staking address
      */
-    function setRegistry(
-        address registryAddress_
+    function afterInitialize(
+        address registryAddress_,
+        address actionVerifierAddress_,
+        address stakingAddress_
     ) external onlyOwner() {
-        require(address(registry) == address(0), "Cannot initialize second time");
+        require(address(registry) == address(0), "Cannot initialize registry second time");
+        require(address(actionVerifier) == address(0), "Cannot initialize actionVerifier second time");
+        require(address(staking) == address(0), "Cannot initialize staking second time");
         registry = IRegistry(registryAddress_);
+        actionVerifier = actionVerifierAddress_;
+        staking = stakingAddress_;
     }
 
     /**

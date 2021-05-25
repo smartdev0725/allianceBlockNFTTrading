@@ -6,8 +6,9 @@ import "./libs/SignatureVerifier.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IEscrow.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
-contract ActionVerifier is OwnableUpgradeable {
+contract ActionVerifier is Initializable, OwnableUpgradeable {
     using SafeMath for uint256;
     using SignatureVerifier for SignatureVerifier.Action;
 
@@ -22,9 +23,9 @@ contract ActionVerifier is OwnableUpgradeable {
      * @param rewardPerActionProvision_ The reward that an action provider accumulates for each action provision.
      */
     function initialize(
-        address escrow_,
         uint256 rewardPerActionProvision_,
-        uint256 maxActionsPerProvision_
+        uint256 maxActionsPerProvision_,
+        address escrow_
     ) public initializer {
         __Ownable_init();
         escrow = IEscrow(escrow_);
