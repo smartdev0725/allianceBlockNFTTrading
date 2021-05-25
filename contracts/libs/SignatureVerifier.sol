@@ -50,7 +50,7 @@ library SignatureVerifier {
         Action memory action,
         bytes memory signature
     )
-        public
+        internal
         view
         returns (bool)
     {
