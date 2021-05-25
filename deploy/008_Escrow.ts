@@ -1,30 +1,29 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import '@nomiclabs/hardhat-ethers';
-import {ethers} from 'hardhat';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
   const {deploy, get} = deployments;
 
-  const ALBTContract = await get('ALBT');
-  const governanceContract = await get('Governance');
-  const {deployer, proxyOwner, rewardDistributor} = await getNamedAccounts();
+  const {deployer, proxyOwner} = await getNamedAccounts();
 
-  await deploy('Staking', {
-    contract: 'Staking',
+  const LendingToken = await get('LendingToken');
+  const MainNFT = await get('MainNFT');
+  const FundingNFT = await get('FundingNFT');
+
+  await deploy('Escrow', {
+    contract: 'Escrow',
     from: deployer,
     proxy: {
       owner: proxyOwner,
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
-    args: [ALBTContract.address, governanceContract.address, [3, 3]],
+    args: [LendingToken.address, MainNFT.address, FundingNFT.address],
     log: true,
   });
-
-  const stakingContract = await ethers.getContract('Staking');
-  await stakingContract.setRewardDistribution(rewardDistributor);
 };
 export default func;
-func.tags = ['Staking'];
+func.tags = ['Escrow'];
+func.dependencies = ['LendingToken', 'FundingNFT', 'MainNFT'];
