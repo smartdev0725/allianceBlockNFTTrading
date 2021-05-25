@@ -6,8 +6,7 @@ import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 
 export default async function suite() {
-  describe('Succeeds', async () => {
-    let loanId: BN;
+  describe.only('Succeeds', async () => {
 
     beforeEach(async function () {
       await this.stakingContract
@@ -17,7 +16,7 @@ export default async function suite() {
 
     it('when staking tokens and getting rewards', async function () {
       // Given
-      await this.stakingContract.connect(this.staker1Signer).stake();
+      await this.stakingContract.connect(this.staker1Signer).stake(0);
 
       const rewardAmount = ethers.utils.parseEther('1000');
 
@@ -46,7 +45,7 @@ export default async function suite() {
       );
 
       // When
-      await this.stakingContract.connect(this.staker2Signer).stake();
+      await this.stakingContract.connect(this.staker2Signer).stake(0);
 
       const staker2BalanceAfter = await this.stakingContract.getBalance(
         this.staker2
