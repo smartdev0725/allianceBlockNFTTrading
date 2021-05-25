@@ -5,25 +5,35 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./staking/DaoStaking.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "hardhat/console.sol";
 
-contract Staking is DaoStaking, Ownable {
+contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    constructor(
+    /**
+ * @dev Initialize of the contract.
+ */
+    function initialize(
         IERC20 albt_,
         address governance_,
         address escrow_,
         uint256[] memory stakingTypeAmounts_,
         uint256[] memory reputationalStakingTypeAmounts_
-    ) 
-    {
+    ) public initializer {
+        __Ownable_init();
         albt = albt_;
         governance = IGovernanceStaking(governance_);
         escrow = IEscrow(escrow_);
-        for (uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
+
+        // Initialize some constants
+        STAKING_DURATION = 7 days;
+        periodFinish = 0;
+        rewardRate = 0;
+
+        for(uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
             stakingTypeAmounts[i] = stakingTypeAmounts_[i];
             reputationalStakingTypeAmounts[i] = reputationalStakingTypeAmounts_[i];
         }
@@ -152,12 +162,12 @@ contract Staking is DaoStaking, Ownable {
         }
     }
 
-    function findAmount(uint256 bigIndex, uint256 smallIndex) internal view returns (uint256 amount) {        
+    function findAmount(uint256 bigIndex, uint256 smallIndex) internal view returns (uint256 amount) {
         if (bigIndex > 3) bigIndex = 3;
-        if (smallIndex == 0) {                
+        if (smallIndex == 0) {
             amount = reputationalStakingTypeAmounts[bigIndex.sub(1)];
         }
-        else {                
+        else {
             amount = reputationalStakingTypeAmounts[bigIndex.sub(1)].sub(
                 reputationalStakingTypeAmounts[smallIndex.sub(1)]);
         }

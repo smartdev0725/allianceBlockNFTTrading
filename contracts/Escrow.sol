@@ -1,53 +1,52 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155HolderUpgradeable.sol";
 import "./libs/LoanLibrary.sol";
 import "./EscrowDetails.sol";
-import "@openzeppelin/contracts/token/ERC1155/ERC1155Holder.sol";
 import "./rALBT.sol";
 
 /**
  * @title AllianceBlock Escrow contract
  * @notice Responsible for handling the funds in AllianceBlock's ecosystem.
  */
-contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
+contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable {
     /**
-     * @dev Constructor of the contract.
+     * @dev Initializes the contract.
      * @param lendingToken_ The token that lenders will be able to lend.
      * @param mainNFT_ The ERC721 token contract which will represent the whole loans.
      * @param fundingNFT_ The ERC1155 token contract which will represent the lending amounts.
+     * @param actionVerifierAddress_ The actionVerifier address.
+     * @param stakingAddress_ The staking address
      */
-    constructor(
+    function initialize(
         address lendingToken_,
         address mainNFT_,
-        address fundingNFT_
-    ) public {
+        address fundingNFT_,
+        address actionVerifierAddress_,
+        address stakingAddress_
+    ) public initializer {
+        __Ownable_init();
         lendingToken = IERC20(lendingToken_);
         mainNFT = IERC721Mint(mainNFT_);
         fundingNFT = IERC1155Mint(fundingNFT_);
-
         reputationalALBT = new rALBT();
+        actionVerifier = actionVerifierAddress_;
+        staking = stakingAddress_;
     }
 
     /**
      * @dev Initializes the contract.
      * @param registryAddress_ The registry address.
-     * @param actionVerifierAddress_ The actionVerifier address.
      */
-    function initialize(
-        address registryAddress_,
-        address actionVerifierAddress_,
-        address stakingAddress_
+    function setRegistry(
+        address registryAddress_
     ) external onlyOwner() {
-        require(
-            address(registry) == address(0),
-            "Cannot initialize second time"
-        );
+        require(address(registry) == address(0), "Cannot initialize second time");
         registry = IRegistry(registryAddress_);
-        actionVerifier = actionVerifierAddress_;
-        staking = stakingAddress_;
     }
 
     /**
@@ -61,13 +60,7 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
         uint256 partitionsPurchased,
         address receiver
     ) external onlyRegistry() {
-        fundingNFT.safeTransferFrom(
-            address(this),
-            receiver,
-            loanId,
-            partitionsPurchased,
-            ""
-        );
+        fundingNFT.safeTransferFrom(address(this), receiver, loanId, partitionsPurchased, "");
     }
 
     /**
@@ -75,10 +68,7 @@ contract Escrow is EscrowDetails, Ownable, ERC1155Holder {
      * @param seeker Seeker's address.
      * @param amount The amount of lending tokens to be sent to seeker.
      */
-    function transferLendingToken(address seeker, uint256 amount)
-        external
-        onlyRegistry()
-    {
+    function transferLendingToken(address seeker, uint256 amount) external onlyRegistry() {
         lendingToken.transfer(seeker, amount);
     }
 

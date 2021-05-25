@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 
 import "hardhat/console.sol";
 import "./DaoCronjob.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title AllianceBlock Governance contract
  * @notice Responsible for govern AllianceBlock's ecosystem
  */
-contract SuperGovernance is Ownable, DaoCronjob {
+contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
     using SafeMath for uint256;
 
-    function initialize(
+    function setRegistryAndStaking(
         address registryAddress_,
         address stakingAddress_
     )
@@ -37,7 +37,7 @@ contract SuperGovernance is Ownable, DaoCronjob {
         require(currentEpoch <= 1, "Super delegating works only till first epoch");
 
         if(approvalRequests[requestId].isMilestone) {
-            registry.decideForMilestone(approvalRequests[requestId].loanId, decision);                
+            registry.decideForMilestone(approvalRequests[requestId].loanId, decision);
         } else {
             registry.decideForLoan(approvalRequests[requestId].loanId, decision);
         }

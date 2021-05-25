@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -234,7 +234,7 @@ contract Investement is LoanDetails {
             lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender].sub(ticketsToWithdraw);
 
         lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].sub(ticketsToWithdraw);
-        
+
         uint256 amountToWithdraw = investmentTokensPerTicket[investmentId].mul(ticketsToWithdraw);
         escrow.transferCollateralToken(loanDetails[investmentId].collateralToken, msg.sender, amountToWithdraw);
     }

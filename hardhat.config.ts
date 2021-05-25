@@ -1,16 +1,17 @@
-require("dotenv").config();
+import * as dotenv from 'dotenv';
+dotenv.config({path: __dirname + '/.env'});
 
-import { HardhatUserConfig } from "hardhat/config";
+import {HardhatUserConfig} from 'hardhat/types';
+import 'hardhat-deploy';
+import '@nomiclabs/hardhat-ethers';
+import 'hardhat-gas-reporter';
+import '@typechain/hardhat';
+import 'solidity-coverage';
 
-import "@nomiclabs/hardhat-truffle5";
-import "hardhat-gas-reporter";
-import "hardhat-typechain";
-
-if (!process.env.RINKEBY_PRIVKEY) throw new Error("RINKEBY_PRIVKEY missing from .env file");
-if (!process.env.MAINNET_PRIVKEY) throw new Error("MAINNET_PRIVKEY missing from .env file");
+import {node_url, accounts} from './utils/network';
 
 const config: HardhatUserConfig = {
-  defaultNetwork: "hardhat",
+  defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
       // forking: {
@@ -19,28 +20,53 @@ const config: HardhatUserConfig = {
       // },
     },
     ganache: {
-      url: "http://localhost:8545",
+      url: node_url('localhost'),
+      live: false,
+      saveDeployments: true,
+      tags: ['local'],
+      accounts: accounts('localhost'),
     },
     rinkeby: {
-      url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
-      accounts: [process.env.RINKEBY_PRIVKEY],
+      url: node_url('rinkeby'),
+      live: true,
+      saveDeployments: true,
+      tags: ['staging'],
+      accounts: accounts('rinkeby'),
     },
-    live: {
-      url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
-      accounts: [process.env.MAINNET_PRIVKEY],
+    mainnet: {
+      url: node_url('mainnet'),
+      live: true,
+      saveDeployments: true,
+      tags: ['production'],
+      accounts: accounts('mainnet'),
     },
     fork: {
-      url: process.env.FORK_URL,
+      url: node_url('fork'),
     },
   },
+  namedAccounts: {
+    deployer: 0,
+    proxyOwner: 1,
+    delegator1: 2,
+    delegator2: 3,
+    staker1: 4,
+    staker2: 5,
+    rewardDistributor: 6,
+    lender1: 7,
+    lender2: 8,
+    lender3: 9,
+    seeker: 10,
+    superDelegator: 11,
+  },
   paths: {
-    artifacts: "./artifacts",
-    cache: "./cache",
-    sources: "./contracts",
-    tests: "./tests",
+    artifacts: './artifacts',
+    cache: './cache',
+    sources: './contracts',
+    tests: './tests',
+    deploy: './deploy',
   },
   solidity: {
-    version: "0.7.0",
+    version: '0.7.3',
     settings: {
       optimizer: {
         enabled: true,
@@ -49,14 +75,21 @@ const config: HardhatUserConfig = {
     },
   },
   gasReporter: {
-    currency: "USD",
+    currency: 'USD',
     gasPrice: 120,
-    enabled: true,
+    enabled: process.env.REPORT_GAS ? true : false,
     coinmarketcap: process.env.CMC_API_KEY,
+    excludeContracts: ['./contracts/mocks/', './contracts/libs/'],
   },
   typechain: {
-    outDir: "types/contracts",
-    target: "truffle-v5"
+    outDir: 'types/contracts',
+    target: 'ethers-v5',
+  },
+  mocha: {
+    timeout: 0,
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY || '',
   },
 };
 

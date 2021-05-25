@@ -1,25 +1,26 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 
 import "hardhat/console.sol";
 import "./governance/DaoSubscriptions.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IRegistry.sol";
 import "./interfaces/IStaking.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title AllianceBlock Governance contract
  * @notice Responsible for governing AllianceBlock's ecosystem
  */
-contract Governance is DaoSubscriptions {
+contract Governance is Initializable, DaoSubscriptions {
     using SafeMath for uint256;
     using DoubleLinkedList for DoubleLinkedList.LinkedList;
 
     /**
-     * @dev Constructor of the contract.
+     * @dev Initialize the contract.
      */
-    constructor(
+    function initialize(
         address superDelegator_,
         uint256 loanApprovalRequestDuration_,
         uint256 milestoneApprovalRequestDuration_,
@@ -28,9 +29,9 @@ contract Governance is DaoSubscriptions {
         uint256 approvalsNeededForGovernanceRequest_,
         uint256 applicationsForInvestmentDuration_,
         uint256 lateApplicationsForInvestmentDuration_
-    )
-    public
-    {
+    ) public initializer {
+        __Ownable_init();
+
         superDelegator = superDelegator_;
 
         updatableVariables[keccak256(abi.encode("loanApprovalRequestDuration"))] = loanApprovalRequestDuration_;
@@ -59,7 +60,7 @@ contract Governance is DaoSubscriptions {
             approvalRequests[totalApprovalRequests].milestoneNumber = milestoneNumber;
             approvalRequests[totalApprovalRequests].deadlineTimestamp =
                 block.timestamp.add(updatableVariables[keccak256(abi.encode("milestoneApprovalRequestDuration"))]);
-        } else {            
+        } else {
             approvalRequests[totalApprovalRequests].deadlineTimestamp =
                 block.timestamp.add(updatableVariables[keccak256(abi.encode("loanApprovalRequestDuration"))]);
         }

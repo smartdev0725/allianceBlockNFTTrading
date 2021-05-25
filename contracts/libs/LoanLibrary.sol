@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 
 library LoanLibrary {
     enum RepaymentBatchType {
@@ -24,7 +24,7 @@ library LoanLibrary {
         DEFAULT, // Status when seeker has not been able to repay the loan.
         LIQUIDATED, // Status when collateral's value was not enough, so loan got liquidated.
         REJECTED, // Status when loan has been rejected by governors.
-        // TEMPORAL: waiting for status order and to not break tests
+        // TEMPORAL: waiting for status order and to not break test
         AWAITING_MILESTONE_APPLICATION // Status when loan is waiting for milestone application by the project.
     }
 

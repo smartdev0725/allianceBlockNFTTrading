@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "./registry/PersonalLoan.sol";
 import "./registry/ProjectLoan.sol";
 import "./libs/TokenFormat.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title AllianceBlock Registry contract
  * @notice Responsible for loan transactions.
  */
-contract Registry is PersonalLoan, ProjectLoan, Ownable {
+contract Registry is Initializable, PersonalLoan, ProjectLoan, OwnableUpgradeable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 
@@ -56,7 +57,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
     /**
      * @dev Constructor of the contract.
      */
-    constructor(
+    function initialize(
         address escrowAddress,
         address governanceAddress_,
         address lendingToken_,
@@ -69,7 +70,7 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         uint256 vestingBatches_,
         uint256 vestingTimeInterval_,
         uint256 fundingTimeInterval_
-    ) {
+    ) public initializer {
         escrow = IEscrow(escrowAddress);
         baseAmountForEachPartition = baseAmountForEachPartition_;
         governance = IGovernance(governanceAddress_);
@@ -99,8 +100,8 @@ contract Registry is PersonalLoan, ProjectLoan, Ownable {
         uint256 blocksLockedForReputation_,
         uint256 lotteryNumbersForImmediateTicket_
     )
-        external
-        onlyOwner()
+    external
+    onlyOwner()
     {
         rALBT = IERC20(reputationalAlbt);
         totalTicketsPerRun = totalTicketsPerRun_;

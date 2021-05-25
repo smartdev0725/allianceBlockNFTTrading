@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./libs/SignatureVerifier.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IEscrow.sol";
 
-contract ActionVerifier is Ownable {
+contract ActionVerifier is OwnableUpgradeable {
     using SafeMath for uint256;
     using SignatureVerifier for SignatureVerifier.Action;
 
@@ -21,11 +21,12 @@ contract ActionVerifier is Ownable {
      * @dev Constructor of the ActionVerifier contract.
      * @param rewardPerActionProvision_ The reward that an action provider accumulates for each action provision.
      */
-    constructor(
+    function initialize(
         address escrow_,
         uint256 rewardPerActionProvision_,
         uint256 maxActionsPerProvision_
-    ) public {
+    ) public initializer {
+        __Ownable_init();
         escrow = IEscrow(escrow_);
         rewardPerActionProvision = rewardPerActionProvision_;
         maxActionsPerProvision = maxActionsPerProvision_;

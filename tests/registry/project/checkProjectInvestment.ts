@@ -1,114 +1,182 @@
-import BN from 'bn.js';
-import { toWei } from 'web3-utils';
-import { expect } from 'chai';
-import { ONE_DAY, BASE_AMOUNT } from "../../helpers/constants";
-import { getCurrentTimestamp, increaseTime } from "../../helpers/time";
-const { expectEvent } = require("@openzeppelin/test-helpers");
+import chai, {expect} from 'chai';
+import {ONE_DAY, BASE_AMOUNT} from '../../helpers/constants';
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import {BigNumber} from 'ethers';
+import {solidity} from 'ethereum-waffle';
+
+chai.use(solidity);
 
 export default async function suite() {
-    describe('Succeeds', async () => {
-        let loanId: BN;
-        let approvalRequest: BN;
-        let bigPartition: BN;
-        let totalPartitions: BN;
-        let totalAmountRequested: BN;
-        const totalMilestones = new BN(1); // Only 1 milestone for investments
-        const interestPercentage = new BN(20);
-        let amountRequestedPerMilestone = new Array<BN>(totalMilestones);
-        let milestoneDurations = new Array<BN>(totalMilestones);
+  describe('Check project investment', async () => {
+    let loanId: BigNumber;
+    let approvalRequest: BigNumber;
+    let bigPartition: BigNumber;
+    let totalPartitions: BigNumber;
+    let totalAmountRequested: BigNumber;
+    const totalMilestones = BigNumber.from(1); // Only 1 milestone for investments
+    const interestPercentage = BigNumber.from(20);
+    const amountRequestedPerMilestone = new Array<BigNumber>(totalMilestones);
+    const milestoneDurations = new Array<BigNumber>(totalMilestones);
 
-        beforeEach(async function () {
-            loanId = new BN(await this.registry.totalLoans());
-            approvalRequest = new BN(await this.governance.totalApprovalRequests());
+    beforeEach(async function () {
+      loanId = await this.registryContract.totalLoans();
+      approvalRequest = await this.governanceContract.totalApprovalRequests();
 
-            const amountCollateralized = new BN(toWei('100000'));
-            const projectTokenPrice = new BN(1);
-            const discountPerMillion = new BN(0); // There is no discount for investment types
-            const paymentTimeInterval = new BN(20 * ONE_DAY);
-            const ipfsHash = "QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ"
+      const amountCollateralized = ethers.utils.parseEther('100000');
+      const projectTokenPrice = BigNumber.from(1);
+      const discountPerMillion = BigNumber.from(0); // There is no discount for investment types
+      const paymentTimeInterval = BigNumber.from(20 * ONE_DAY);
+      const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-            const currentTime = await getCurrentTimestamp();
+      // The milestone duration should be 0 for investment type since there are really no milestones to deliver
+      milestoneDurations[0] = BigNumber.from(0);
+      amountRequestedPerMilestone[0] = ethers.utils.parseEther('10000');
 
-            // The milestone duration should be 0 for investment type since there are really no milestones to deliver
-            milestoneDurations[0] = new BN(0);
-            amountRequestedPerMilestone[0] = new BN(toWei('10000'));
+      await this.registryContract
+        .connect(this.seekerSigner)
+        .requestProjectLoan(
+          amountRequestedPerMilestone,
+          this.projectTokenContract.address,
+          amountCollateralized,
+          projectTokenPrice,
+          interestPercentage,
+          discountPerMillion,
+          totalMilestones,
+          milestoneDurations,
+          paymentTimeInterval,
+          ipfsHash
+        );
 
-            await this.registry.requestProjectLoan(
-                amountRequestedPerMilestone,
-                this.projectToken.address,
-                amountCollateralized.toString(),
-                projectTokenPrice,
-                interestPercentage,
-                discountPerMillion,
-                totalMilestones,
-                milestoneDurations,
-                paymentTimeInterval,
-                ipfsHash,
-                { from: this.projectOwner }
-            );
+      totalAmountRequested =
+        amountRequestedPerMilestone[0].mul(totalMilestones);
+      totalPartitions = totalAmountRequested.div(
+        ethers.utils.parseEther(BASE_AMOUNT + '')
+      );
+      bigPartition = totalPartitions.div(BigNumber.from(2));
 
-            totalAmountRequested = amountRequestedPerMilestone[0].mul(totalMilestones);
-            totalPartitions = totalAmountRequested.div(new BN(toWei(BASE_AMOUNT.toString())));
-            bigPartition = totalPartitions.div(new BN(2));
+      await this.governanceContract
+        .connect(this.superDelegatorSigner)
+        .superVoteForRequest(approvalRequest, true);
 
-            await this.governance.superVoteForRequest(approvalRequest, true, {
-                from: this.owner
-            });
+      await this.registryContract
+        .connect(this.lender1Signer)
+        .fundLoan(loanId, bigPartition);
+      await this.registryContract
+        .connect(this.lender2Signer)
+        .fundLoan(loanId, bigPartition);
+    });
 
-            await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[0] });
-            await this.registry.fundLoan(loanId, bigPartition, { from: this.lenders[1] });
-        });
+    it('when the first milestone is already approved after funding', async function () {
+      const loanPayments = await this.registryContract.projectLoanPayments(
+        loanId
+      );
 
-        it("when the first milestone is already approved after funding", async function () {
-            const loanPayments = await this.registry.projectLoanPayments(loanId);
+      expect(loanPayments.milestonesDelivered.toNumber()).to.be.equal(1);
+    });
 
-            expect(loanPayments.milestonesDelivered).to.be.bignumber.equal(new BN(1));
-        });
+    it('when all NFT can be converted after funding', async function () {
+      const convertibleAmountLender0 =
+        await this.registryContract.getAvailableFundingNFTForConversion(
+          loanId,
+          this.lender1
+        );
 
-        it("when all NFT can be converted after funding", async function () {
-            const convertibleAmountLender0 = await this.registry.getAvailableFundingNFTForConversion(loanId, this.lenders[0]);
+      expect(convertibleAmountLender0.toNumber()).to.be.equal(
+        bigPartition.toNumber()
+      );
 
-            expect(convertibleAmountLender0).to.be.bignumber.equal(bigPartition);
+      const balanceLenderBefore = await this.projectTokenContract.balanceOf(
+        this.lender1
+      );
+      const balanceEscrowBefore = await this.projectTokenContract.balanceOf(
+        this.escrowContract.address
+      );
+      const balanceNFTLenderBefore =
+        await this.registryContract.balanceOfAllFundingNFTGenerations(
+          loanId,
+          this.lender1
+        );
 
-            const balanceLenderBefore = await this.projectToken.balanceOf(this.lenders[0]);
-            const balanceEscrowBefore = await this.projectToken.balanceOf(this.escrow.address);
-            const balanceNFTLenderBefore = await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.lenders[0]);
+      // Test getter first
+      const getterProjectTokenAmount = await this.registryContract
+        .connect(this.lender1Signer)
+        .getAmountOfProjectTokensToReceive(loanId, convertibleAmountLender0);
 
-            // Test getter first
-            const getterProjectTokenAmount = await this.registry.getAmountOfProjectTokensToReceive(loanId, convertibleAmountLender0, { from: this.lenders[0] });
-            // Request to receive project tokens as repayment for all of the convertible NFT
-            const tx1 = await this.registry.receivePayment(loanId, convertibleAmountLender0, true, { from: this.lenders[0] });
+      // Request to receive project tokens as repayment for all of the convertible NFT
+      await expect(
+        this.registryContract
+          .connect(this.lender1Signer)
+          .receivePayment(loanId, convertibleAmountLender0, true)
+      )
+        .to.emit(this.registryContract, 'PaymentReceived')
+        .withArgs(
+          loanId.toString(),
+          convertibleAmountLender0.toString(),
+          '0',
+          true,
+          this.lender1
+        );
 
-            const balanceNFTLenderAfter = await this.registry.balanceOfAllFundingNFTGenerations(loanId, this.lenders[0]);
-            const balanceLenderAfter = await this.projectToken.balanceOf(this.lenders[0]);
-            const balanceEscrowAfter = await this.projectToken.balanceOf(this.escrow.address);
-            const loanPayments = await this.registry.projectLoanPayments(loanId);
-            const expectedAmountToReceive = convertibleAmountLender0.mul(new BN(toWei(BASE_AMOUNT.toString())));
-            const tokenPrice = await this.registry.getProjectTokenPrice(loanId);
-            const discountedPrice = tokenPrice.sub(
-                tokenPrice
-                    .mul(loanPayments.discountPerMillion)
-                    .div(new BN(1000000))
-            );
-            const expectedProjectTokenAmount = expectedAmountToReceive.div(discountedPrice);
-            const remainingLendingAmountToPayBack = totalAmountRequested.sub(expectedAmountToReceive);
-            const amountToBeRepaid = remainingLendingAmountToPayBack.add(remainingLendingAmountToPayBack.mul(interestPercentage).div(new BN(100)));
+      const balanceNFTLenderAfter =
+        await this.registryContract.balanceOfAllFundingNFTGenerations(
+          loanId,
+          this.lender1
+        );
+      const balanceLenderAfter = await this.projectTokenContract.balanceOf(
+        this.lender1
+      );
+      const balanceEscrowAfter = await this.projectTokenContract.balanceOf(
+        this.escrowContract.address
+      );
+      const loanPayments = await this.registryContract.projectLoanPayments(
+        loanId
+      );
+      const expectedAmountToReceive = convertibleAmountLender0.mul(
+        ethers.utils.parseEther(BASE_AMOUNT + '')
+      );
+      const tokenPrice = await this.registryContract.getProjectTokenPrice(
+        loanId
+      );
+      const discountedPrice = tokenPrice.sub(
+        tokenPrice
+          .mul(loanPayments.discountPerMillion)
+          .div(BigNumber.from(1000000))
+      );
+      const expectedProjectTokenAmount =
+        expectedAmountToReceive.div(discountedPrice);
+      const remainingLendingAmountToPayBack = totalAmountRequested.sub(
+        expectedAmountToReceive
+      );
+      const amountToBeRepaid = remainingLendingAmountToPayBack.add(
+        remainingLendingAmountToPayBack
+          .mul(interestPercentage)
+          .div(BigNumber.from(100))
+      );
 
-            // Correct balances
-            expect(getterProjectTokenAmount).to.be.bignumber.equal(expectedProjectTokenAmount);
-            expect(balanceNFTLenderBefore.sub(convertibleAmountLender0)).to.be.bignumber.equal(balanceNFTLenderAfter);
-            expect(balanceLenderBefore.add(expectedProjectTokenAmount)).to.be.bignumber.equal(balanceLenderAfter);
-            expect(balanceEscrowBefore.sub(expectedProjectTokenAmount)).to.be.bignumber.equal(balanceEscrowAfter);
-            // TODO: check balances of token from generation 1
+      // Correct balances
+      expect(getterProjectTokenAmount.toString()).to.be.equal(
+        expectedProjectTokenAmount.toString()
+      );
+      expect(
+        balanceNFTLenderBefore.sub(convertibleAmountLender0).toString()
+      ).to.be.equal(balanceNFTLenderAfter.toString());
+      expect(
+        balanceLenderBefore.add(expectedProjectTokenAmount).toString()
+      ).to.be.equal(balanceLenderAfter.toString());
+      expect(
+        balanceEscrowBefore.sub(expectedProjectTokenAmount).toString()
+      ).to.be.equal(balanceEscrowAfter.toString());
+      // TODO: check balances of token from generation 1
 
-            // Correct partitions paid in project tokens tracked and updated amount to settle the loan
-            expect(loanPayments.partitionsPaidInProjectTokens).to.be.bignumber.equal(convertibleAmountLender0);
-            expect(await this.registry.getAmountToBeRepaid(loanId)).to.be.bignumber.equal(amountToBeRepaid);
-
-            // Correct Event.
-            expectEvent(tx1.receipt, 'PaymentReceived', { loanId, amountOfTokens: convertibleAmountLender0, generation: new BN(0), onProjectTokens: true, user: this.lenders[0] });
-            expectEvent(tx1.receipt, 'ProjectTokenPaymentReceived', { loanId, user: this.lenders[0], amountOfProjectTokens: expectedProjectTokenAmount, discountedPrice });
-
-        });
-    })
-};
+      // Correct partitions paid in project tokens tracked and updated amount to settle the loan
+      expect(loanPayments.partitionsPaidInProjectTokens.toString()).to.be.equal(
+        convertibleAmountLender0.toString()
+      );
+      const amountToBeRepaidLoanId =
+        await this.registryContract.getAmountToBeRepaid(loanId);
+      expect(amountToBeRepaidLoanId.toString()).to.be.equal(
+        amountToBeRepaid.toString()
+      );
+    });
+  });
+}

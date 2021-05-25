@@ -1,55 +1,60 @@
-import BN from "bn.js";
-import { toWei } from "web3-utils";
-import { expect } from "chai";
-import { ONE_DAY } from "../helpers/constants";
-import { increaseTime } from "../helpers/time";
+import BN from 'bn.js';
+import {expect} from 'chai';
+import {ONE_DAY} from '../helpers/constants';
+import {increaseTime} from '../helpers/time';
+import {ethers} from 'hardhat';
+import {BigNumber} from 'ethers';
 
 export default async function suite() {
-  describe("Succeeds", async () => {
+  describe('Succeeds', async () => {
     let loanId: BN;
 
-    beforeEach(async function() {
-      await this.staking.notifyRewardAmount(new BN(0), {
-        from: this.rewardDistributor
-      });
+    beforeEach(async function () {
+      await this.stakingContract
+        .connect(this.rewardDistributorSigner)
+        .notifyRewardAmount(BigNumber.from(0));
     });
 
-    it("when staking tokens and getting rewards", async function() {
+    it('when staking tokens and getting rewards', async function () {
       // Given
-      const staker1 = this.stakers[0];
-      await this.staking.stake({ from: staker1 });
+      await this.stakingContract.connect(this.staker1Signer).stake();
 
-      const rewardAmount = new BN(toWei("1000"));
+      const rewardAmount = ethers.utils.parseEther('1000');
 
-      await this.staking.notifyRewardAmount(rewardAmount.toString(), {
-        from: this.rewardDistributor
-      });
+      await this.stakingContract
+        .connect(this.rewardDistributorSigner)
+        .notifyRewardAmount(rewardAmount);
 
       // When
       // Fast forward one day
-      await increaseTime(new BN(ONE_DAY));
+      await increaseTime(this.staker1Signer.provider, ONE_DAY);
 
-      const initialEarnedBal = await this.staking.earned(staker1);
-      await this.staking.getReward({ from: staker1 });
-      const postEarnedBal = await this.staking.earned(staker1);
+      const initialEarnedBal = await this.stakingContract.earned(this.staker1);
+      await this.stakingContract.connect(this.staker1Signer).getReward();
+      const postEarnedBal = await this.stakingContract.earned(this.staker1);
 
       // Then
-      expect(initialEarnedBal).to.be.bignumber.greaterThan(postEarnedBal);
+      expect(initialEarnedBal.toNumber()).to.be.greaterThan(
+        postEarnedBal.toNumber()
+      );
     });
 
-    it("staking increases staking balance", async function() {
+    it('staking increases staking balance', async function () {
       // Given
-      const staker2 = this.stakers[1];
-      const staker2BalanceBefore = await this.staking.getBalance(staker2);
+      const staker2BalanceBefore = await this.stakingContract.getBalance(
+        this.staker2
+      );
 
       // When
-      await this.staking.stake({ from: staker2 });
+      await this.stakingContract.connect(this.staker2Signer).stake();
 
-      const staker2BalanceAfter = await this.staking.getBalance(staker2);
+      const staker2BalanceAfter = await this.stakingContract.getBalance(
+        this.staker2
+      );
 
       // Then
-      expect(staker2BalanceAfter).to.be.bignumber.greaterThan(
-        staker2BalanceBefore
+      expect(staker2BalanceAfter.toNumber()).to.be.greaterThan(
+        staker2BalanceBefore.toNumber()
       );
     });
   });

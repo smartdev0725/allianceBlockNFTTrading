@@ -5,9 +5,9 @@ require('ts-node').register({
 module.exports = {
   networks: {
     development: {
-      host: "127.0.0.1",
+      host: '127.0.0.1',
       port: 8545,
-      network_id: "*",
+      network_id: '*',
       gasPrice: 100e9,
     },
   },
@@ -15,10 +15,10 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.7.0",
+      version: '^0.7.0',
       settings: {
         optimizer: {
-          enabled: false,
+          enabled: true,
           runs: 200,
         },
       },
