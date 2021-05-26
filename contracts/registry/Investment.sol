@@ -9,7 +9,7 @@ import "../libs/TokenFormat.sol";
 /**
  * @title AllianceBlock Investment contract
  * @notice Functionality for Investment.
- */
+*/
 contract Investement is LoanDetails {
     using SafeMath for uint256;
     using TokenFormat for uint256;
@@ -17,12 +17,14 @@ contract Investement is LoanDetails {
     // TODO - EVENTS
 
     /**
+     * @notice Requests investment
      * @dev This function is used for projects to request investment in exchange for project tokens.
+     * @dev require valid amount
      * @param investmentToken The token that will be purchased by investors.
      * @param amountOfInvestmentTokens The amount of investment tokens to be purchased.
      * @param totalAmountRequested_ The total amount requested so as all investment tokens to be sold.
      * @param extraInfo The ipfs hash where more specific details for loan request are stored.
-     */
+    */
     function requestInvestment(
         address investmentToken,
         uint256 amountOfInvestmentTokens,
@@ -72,10 +74,12 @@ contract Investement is LoanDetails {
     }
 
     /**
+     * @notice user show interest for investment
      * @dev This function is called by the investors who are interested to invest in a specific project.
+     * @dev require Approval state and valid partition
      * @param investmentId The id of the investment.
      * @param amountOfPartitions The amount of partitions this specific investor wanna invest in.
-     */
+    */
     function showInterestForInvestment(uint256 investmentId, uint256 amountOfPartitions)
         external
     {
@@ -130,9 +134,11 @@ contract Investement is LoanDetails {
     }
 
     /**
+     * @notice Executes lottery run
      * @dev This function is called by any investor interested in a project to run part of the lottery.
+     * @dev requires Started state and available tickets
      * @param investmentId The id of the investment.
-     */
+    */
     function executeLotteryRun(uint256 investmentId)
         external
     {
@@ -173,11 +179,13 @@ contract Investement is LoanDetails {
     }
 
     /**
+     * @notice Withdraw Investment Tickets
      * @dev This function is called by an investor to withdraw his tickets.
+     * @dev require Settled state and enough tickets won
      * @param investmentId The id of the investment.
      * @param ticketsToLock The amount of won tickets to be locked, so as to get more rALBT.
      * @param ticketsToWithdraw The amount of won tickets to be withdrawn instantly.
-     */
+    */
     function withdrawInvestmentTickets(uint256 investmentId, uint256 ticketsToLock, uint256 ticketsToWithdraw)
         external
     {
@@ -215,10 +223,12 @@ contract Investement is LoanDetails {
     // TODO - Just withdraw non-won tickets
 
     /**
+     * @notice Withdraw locked investment ticket
      * @dev This function is called by an investor to withdraw his locked tickets.
+     * @dev requires Settled state and available tickets
      * @param investmentId The id of the investment.
      * @param ticketsToWithdraw The amount of locked tickets to be withdrawn.
-     */
+    */
     function withdrawLockedInvestmentTickets(uint256 investmentId, uint256 ticketsToWithdraw)
         external
     {
@@ -240,15 +250,21 @@ contract Investement is LoanDetails {
     }
 
     /**
-     * @dev This function returns true if investors have shown interest for equal or more than the total
-     *      tickets.
+     * @notice Gets Requesting status
+     * @dev Returns true if investors have shown interest for equal or more than the total tickets.
      * @param investmentId The id of the investment type to be checked.
-     */
+    */
     function getRequestingInterestStatus(uint256 investmentId) external view returns (bool) {
         return loanDetails[investmentId].totalPartitions <= loanDetails[investmentId].partitionsPurchased;
     }
 
-    function getRandomNumber(uint256 maxNumber) internal view returns (uint256 randomNumber) {
+    /**
+     * @notice Generates Random Number
+     * @dev This function generates a random number
+     * @param maxNumber the max number possible
+     * @return the random number generated
+    */
+     function getRandomNumber(uint256 maxNumber) internal view returns (uint256 randomNumber) {
         randomNumber = uint256(keccak256(abi.encodePacked(
                 block.difficulty,
                 block.timestamp,
@@ -258,6 +274,11 @@ contract Investement is LoanDetails {
             ))).mod(maxNumber);
     }
 
+    /**
+     * @notice Updates reputation balance
+     * @dev updates balance of reputation for locked tokens
+     * @return the reputation balance of msg.sender
+    */
     function _updateReputationalBalanceForPreviouslyLockedTokens() internal returns (uint256) {
         if (lockedTicketsPerAddress[msg.sender] > 0) {
             uint256 amountOfReputationalAlbtPerTicket = (block.number.sub(

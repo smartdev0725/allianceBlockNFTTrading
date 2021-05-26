@@ -22,7 +22,9 @@ contract PersonalLoan is LoanDetails {
     );
 
     /**
+     * @notice Request Personal Loan
      * @dev This function is used for potential seekers to request a personal loan.
+     * @dev require amount to be a multiplier of the base amount
      * @param amountRequested The lending amount seeker is looking to get.
      * @param collateralToken The token that will be used by the seeker as collateral.
      * @param collateralAmount The amount of tokens that will be used by the seeker as collateral.
@@ -88,6 +90,12 @@ contract PersonalLoan is LoanDetails {
         totalLoans = totalLoans.add(1);
     }
 
+    /**
+     * @notice Store Personal Loan Payments
+     * @param totalAmountOfBatches_ The amount of batches to paid
+     * @param batchTimeInterval_ The time bewteen batch intervals
+     * @param repaymentBatchType_ the type of batch repayment
+    */
     function _storePersonalLoanPayments(
         uint256 totalAmountOfBatches_,
         uint256 batchTimeInterval_,
@@ -119,6 +127,10 @@ contract PersonalLoan is LoanDetails {
             .repaymentBatchType = repaymentBatchType_;
     }
 
+    /**
+     * @notice Starts a Personal Loan
+     * @param loanId_ the id of the loan to start
+    */
     function _startPersonalLoan(uint256 loanId_) internal {
         personalLoanPayments[loanId_].batchStartingTimestamp = block.timestamp;
         personalLoanPayments[loanId_].batchDeadlineTimestamp = block
@@ -131,6 +143,10 @@ contract PersonalLoan is LoanDetails {
         );
     }
 
+    /**
+     * @notice Challenge a Personal Loan
+     * @param loanId_ the id of the loan to challenge
+    */
     function _challengePersonalLoan(uint256 loanId_) internal {
         personalLoanPayments[loanId_].batchesSkipped = personalLoanPayments[
             loanId_
@@ -149,6 +165,10 @@ contract PersonalLoan is LoanDetails {
         }
     }
 
+    /**
+     * @notice Execute a Personal Loan Payment
+     * @param loanId_ the id of the loan to pay
+    */
     function _executePersonalLoanPayment(uint256 loanId_)
         internal
         onlyBetweenBatchTimeframe(loanId_)
@@ -169,6 +189,10 @@ contract PersonalLoan is LoanDetails {
         }
     }
 
+    /**
+     * @notice Execute a Personal Loan Interest Payment
+     * @param loanId_ the id of the loan to pay it's interests
+    */
     function _executePersonalLoanInterestOnlyPayment(uint256 loanId_) internal {
         uint256 amount;
         //if last batch
@@ -186,6 +210,11 @@ contract PersonalLoan is LoanDetails {
         _transferPersonalLoanPayment(loanId_, amount);
     }
 
+    /**
+     * @notice Transfer a Personal Loan Payment
+     * @param loanId_ the id of the loan to transfer the payment
+     * @param amount the amount to transfer
+    */
     function _transferPersonalLoanPayment(uint256 loanId_, uint256 amount)
         internal
     {
@@ -218,6 +247,13 @@ contract PersonalLoan is LoanDetails {
         }
     }
 
+    /**
+     * @notice Receive a Personal Loan Payment
+     * @dev requires elligibility
+     * @param loanId_ the id of the loan
+     * @param generation_ the generation of the tokens
+     * @param amountOfTokens_ the amount of tokens to receive
+    */
     function _receivePersonalLoanPayment(
         uint256 loanId_,
         uint256 generation_,

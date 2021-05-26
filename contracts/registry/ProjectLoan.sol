@@ -33,7 +33,9 @@ contract ProjectLoan is LoanDetails {
     );
 
     /**
+     * @notice Request Project Loan
      * @dev This function is used for potential borrowing project to request a loan.
+     * @dev requires Total milestones should coincide with requested amounts and durations
      * @param amountRequestedPerMilestone The lending amounts project is looking to get for each milestone.
      * @param collateralToken The token that will be used by the proect as collateral.
      * @param collateralAmount The amount of tokens that will be used by the project as collateral.
@@ -112,6 +114,7 @@ contract ProjectLoan is LoanDetails {
     }
 
     /**
+     * @notice Apply Milestone
      * @dev This function is used by the project to apply a milestone for a specific loan.
      * @param loanId The id of the loan.
      */
@@ -136,6 +139,7 @@ contract ProjectLoan is LoanDetails {
     }
 
     /**
+     * @notice Decide For Loan
      * @dev This function is called by governance to approve or reject an applied milestone's request.
      * @param loanId The id of the loan.
      * @param decision The decision of the governance. [true -> approved] [false -> rejected]
@@ -152,6 +156,10 @@ contract ProjectLoan is LoanDetails {
         emit ProjectLoanMilestoneDecided(loanId, decision);
     }
 
+    /**
+     * @notice Approve Milestone
+     * @param loanId The id of the loan.
+    */
     function _approveMilestone(uint256 loanId_) internal {
         projectLoanPayments[loanId_].milestonesDelivered = projectLoanPayments[
             loanId_
@@ -193,7 +201,11 @@ contract ProjectLoan is LoanDetails {
         }
     }
 
-    function _rejectMilestone(uint256 loanId_) internal {
+    /**
+     * @notice Reject Milestone
+     * @param loanId The id of the loan.
+     */
+     function _rejectMilestone(uint256 loanId_) internal {
         loanStatus[loanId_] == LoanLibrary.LoanStatus.STARTED;
         if (
             projectLoanPayments[loanId_].currentMilestoneDeadlineTimestamp <=
@@ -203,7 +215,14 @@ contract ProjectLoan is LoanDetails {
         }
     }
 
-    function _storeProjectLoanPayments(
+    /**
+     * @notice Store Project Loan Payments
+     * @param discountPerMillion_ The discount per million
+     * @param projectTokenPrice_ the project's token price
+     * @param totalMilestones_ the number of milestones
+     * @param paymentTimeInterval_ the interval between payments
+     */
+     function _storeProjectLoanPayments(
         uint256 discountPerMillion_,
         uint256 projectTokenPrice_,
         uint256 totalMilestones_,
@@ -219,6 +238,12 @@ contract ProjectLoan is LoanDetails {
             .paymentTimeInterval = paymentTimeInterval_;
     }
 
+    /**
+     * @notice Store Project Loan Payments
+     * @param amountRequestedPerMilestone the amount requested per milestone
+     * @param milestoneDurations the duration of each milestone
+     * @param totalMilestones_ the number of milestones
+    */
     function _storeMilestoneDetailsAndGetTotalAmount(
         uint256[] memory amountRequestedPerMilestone,
         uint256[] memory milestoneDurations,
@@ -244,6 +269,10 @@ contract ProjectLoan is LoanDetails {
         }
     }
 
+    /**
+     * @notice Starts a Project Loan
+     * @param loanId_ the id of the loan to start
+    */
     function _startProjectLoan(uint256 loanId_) internal {
         projectLoanPayments[loanId_].currentMilestoneStartingTimestamp = block
             .timestamp;
@@ -266,6 +295,11 @@ contract ProjectLoan is LoanDetails {
         );
     }
 
+    /**
+     * @notice Generates a mocked price for a milestone
+     * @param milestone the milestone
+     * @return the mocked price
+    */
     function _getMockedPriceForMilestone(uint256 milestone)
         internal
         returns (uint256 price)
@@ -273,6 +307,10 @@ contract ProjectLoan is LoanDetails {
         price = milestone.add(1);
     }
 
+    /**
+     * @notice Challenges a Project Loan
+     * @param loanId_ the id of the loan
+    */
     function _challengeProjectLoan(uint256 loanId_) internal {
         projectLoanPayments[loanId_].milestonesExtended = projectLoanPayments[
             loanId_
@@ -293,6 +331,12 @@ contract ProjectLoan is LoanDetails {
         }
     }
 
+    /**
+     * @notice Transfers FundingNFT to Project Funder
+     * @param loanId_ the id of the loan
+     * @param partitionsFunded_ the number of partitions to be funded
+     * @param funder_ the address of the funder
+    */
     function _transferFundingNFTToProjectFunder(
         uint256 loanId_,
         uint256 partitionsFunded_,
@@ -322,6 +366,10 @@ contract ProjectLoan is LoanDetails {
         }
     }
 
+    /**
+     * @notice Executes Project Loan Payment
+     * @param loanId_ the id of the loan
+    */
     function _executeProjectLoanPayment(uint256 loanId_)
         internal
         onlyOnProjectRepayment(loanId_)
@@ -339,6 +387,13 @@ contract ProjectLoan is LoanDetails {
         );
     }
 
+    /**
+     * @notice Receives a Project Loan Payment
+     * @param loanId_ the id of the loan
+     * @param generation_ the generation of the lending token
+     * @param amountOfTokens_ the amount of lending tokens
+     * @param onProjectTokens_ whether or not it is on projectTokens or other kind
+    */
     function _receiveProjectLoanPayment(
         uint256 loanId_,
         uint256 generation_,
@@ -352,6 +407,13 @@ contract ProjectLoan is LoanDetails {
         }
     }
 
+    /**
+     * @notice Receive a Lending Token Payment
+     * @dev requires available Loan NFT balance
+     * @param loanId_ the id of the loan
+     * @param generation_ the generation of the lending token
+     * @param amountOfTokens_ the amount of lending tokens
+    */
     function _receiveLendingTokenPayment(
         uint256 loanId_,
         uint256 generation_,
@@ -373,6 +435,12 @@ contract ProjectLoan is LoanDetails {
         escrow.transferLendingToken(msg.sender, amountToReceive);
     }
 
+    /**
+     * @notice Receive a Project Token Payment
+     * @dev requires available Funding NFT
+     * @param loanId_ the id of the loan
+     * @param amountFundingNFT_ the amount of FundingNFT tokens
+    */
     function _receiveProjectTokenPayment(
         uint256 loanId_,
         uint256 amountFundingNFT_
@@ -410,6 +478,11 @@ contract ProjectLoan is LoanDetails {
         );
     }
 
+    /**
+     * @notice Burns Funding NFT amount over Generations
+     * @param loanId_ the id of the loan
+     * @param amountFundingNFT_ the amount of Funding NFTs
+    */
     function _burnFundingNFTAmountOverGenerations(
         uint256 loanId_,
         uint256 amountFundingNFT_
@@ -438,7 +511,13 @@ contract ProjectLoan is LoanDetails {
         }
     }
 
-    // GETTERS
+    /////// GETTERS
+
+    /**
+     * @notice Retrieve Milestone info
+     * @param loanId_ the id of the loan
+     * @param milestone_ the number of milestone
+    */
     function getMilestonesInfo(uint256 loanId_, uint256 milestone_)
         public
         view
@@ -451,6 +530,7 @@ contract ProjectLoan is LoanDetails {
     }
 
     /**
+     * @notice Retrieves the amount to be repaid to fulfill a loan
      * @dev getAmountToBeRepaid is a function to obtain the amount that should be paid to settle the loan
      * taking into account the amount paid back with project tokens and the interest percentage.
      * @param loanId The id of the loan to get the amount to be repaid from.
@@ -477,6 +557,7 @@ contract ProjectLoan is LoanDetails {
     }
 
     /**
+     * @notice Retrieves the total interest
      * @dev getTotalInterest is a function to obtain the total amount of interest to pay back
      * taking into account the interest free amount paid back with project tokens and the interest percentage set for the loan.
      * @param loanId The id of the loan to get the interest percentage from.
@@ -500,6 +581,12 @@ contract ProjectLoan is LoanDetails {
             .div(100);
     }
 
+    /**
+     * @notice Balance of all Funding NFT over Generations
+     * @param loanId_ the id of the loan
+     * @param funder the address of the funder
+     * @return the accrued balance across milestones and generations of Funding NFTs
+    */
     function balanceOfAllFundingNFTGenerations(uint256 loanId, address funder)
         public
         view
@@ -516,6 +603,13 @@ contract ProjectLoan is LoanDetails {
         }
     }
 
+    /**
+     * @notice Balance of all Funding NFT per Generation
+     * @param loanId_ the id of the loan
+     * @param generation the generation
+     * @param funder the address of the funder
+     * @return the accrued balance across milestones for this generation
+    */
     function balanceOfFundingNFTGeneration(
         uint256 loanId,
         uint256 generation,
@@ -524,6 +618,11 @@ contract ProjectLoan is LoanDetails {
         balance = fundingNFT.balanceOf(funder, generation.getTokenId(loanId));
     }
 
+    /**
+     * @notice Retrieves the Project Token Price
+     * @param loanId_ the id of the loan
+     * @return returns the price a Project Token can be reclaimed for
+    */
     function getProjectTokenPrice(uint256 loanId)
         public
         view
@@ -539,6 +638,11 @@ contract ProjectLoan is LoanDetails {
         ];
     }
 
+    /**
+     * @notice Calculates the Discounted Project Token price
+     * @param loanId_ the id of the loan
+     * @return the discounted price for a Project Token
+    */
     function getDiscountedProjectTokenPrice(uint256 loanId)
         public
         view
@@ -552,6 +656,12 @@ contract ProjectLoan is LoanDetails {
         );
     }
 
+    /**
+     * @notice Calculates the available Funding NFT for conversion
+     * @param loanId_ the id of the loan
+     * @param funder the address of the funder
+     * @return the number of Funding NFTs available for conversion
+    */
     function getAvailableFundingNFTForConversion(uint256 loanId, address funder)
         public
         view
@@ -573,6 +683,12 @@ contract ProjectLoan is LoanDetails {
         }
     }
 
+    /**
+     * @notice Calculates the amount of Project Tokens to receive
+     * @param loanId_ the id of the loan
+     * @param amountFundingNFT the amount of Funding NFT provided
+     * @return the number of Project Tokens a user would be able to claim
+    */
     function getAmountOfProjectTokensToReceive(
         uint256 loanId,
         uint256 amountFundingNFT
