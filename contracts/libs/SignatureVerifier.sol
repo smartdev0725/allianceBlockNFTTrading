@@ -45,7 +45,7 @@ library SignatureVerifier {
     /**
      * @notice Gets Actions typed data hash
      * @param action the Action to retrieve
-     * @return the keccak Action hash
+     * @return actionHash actionHash the keccak Action hash
     */
     function getActionTypedDataHash(Action memory action) internal view returns (bytes32 actionHash) {
         actionHash = keccak256(abi.encodePacked(

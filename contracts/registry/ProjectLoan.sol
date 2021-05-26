@@ -158,7 +158,7 @@ contract ProjectLoan is LoanDetails {
 
     /**
      * @notice Approve Milestone
-     * @param loanId The id of the loan.
+     * @param loanId_ The id of the loan.
     */
     function _approveMilestone(uint256 loanId_) internal {
         projectLoanPayments[loanId_].milestonesDelivered = projectLoanPayments[
@@ -203,7 +203,7 @@ contract ProjectLoan is LoanDetails {
 
     /**
      * @notice Reject Milestone
-     * @param loanId The id of the loan.
+     * @param loanId_ The id of the loan.
      */
      function _rejectMilestone(uint256 loanId_) internal {
         loanStatus[loanId_] == LoanLibrary.LoanStatus.STARTED;
@@ -242,7 +242,7 @@ contract ProjectLoan is LoanDetails {
      * @notice Store Project Loan Payments
      * @param amountRequestedPerMilestone the amount requested per milestone
      * @param milestoneDurations the duration of each milestone
-     * @param totalMilestones_ the number of milestones
+     * @param totalMilestones the number of milestones
     */
     function _storeMilestoneDetailsAndGetTotalAmount(
         uint256[] memory amountRequestedPerMilestone,
@@ -298,7 +298,7 @@ contract ProjectLoan is LoanDetails {
     /**
      * @notice Generates a mocked price for a milestone
      * @param milestone the milestone
-     * @return the mocked price
+     * @return price the mocked price
     */
     function _getMockedPriceForMilestone(uint256 milestone)
         internal
@@ -583,9 +583,9 @@ contract ProjectLoan is LoanDetails {
 
     /**
      * @notice Balance of all Funding NFT over Generations
-     * @param loanId_ the id of the loan
+     * @param loanId the id of the loan
      * @param funder the address of the funder
-     * @return the accrued balance across milestones and generations of Funding NFTs
+     * @return balance the accrued balance across milestones and generations of Funding NFTs
     */
     function balanceOfAllFundingNFTGenerations(uint256 loanId, address funder)
         public
@@ -605,10 +605,10 @@ contract ProjectLoan is LoanDetails {
 
     /**
      * @notice Balance of all Funding NFT per Generation
-     * @param loanId_ the id of the loan
+     * @param loanId the id of the loan
      * @param generation the generation
      * @param funder the address of the funder
-     * @return the accrued balance across milestones for this generation
+     * @return balance the accrued balance across milestones for this generation
     */
     function balanceOfFundingNFTGeneration(
         uint256 loanId,
@@ -620,8 +620,8 @@ contract ProjectLoan is LoanDetails {
 
     /**
      * @notice Retrieves the Project Token Price
-     * @param loanId_ the id of the loan
-     * @return returns the price a Project Token can be reclaimed for
+     * @param loanId the id of the loan
+     * @return price returns the price a Project Token can be reclaimed for
     */
     function getProjectTokenPrice(uint256 loanId)
         public
@@ -640,8 +640,8 @@ contract ProjectLoan is LoanDetails {
 
     /**
      * @notice Calculates the Discounted Project Token price
-     * @param loanId_ the id of the loan
-     * @return the discounted price for a Project Token
+     * @param loanId the id of the loan
+     * @return price the discounted price for a Project Token
     */
     function getDiscountedProjectTokenPrice(uint256 loanId)
         public
@@ -658,9 +658,9 @@ contract ProjectLoan is LoanDetails {
 
     /**
      * @notice Calculates the available Funding NFT for conversion
-     * @param loanId_ the id of the loan
+     * @param loanId the id of the loan
      * @param funder the address of the funder
-     * @return the number of Funding NFTs available for conversion
+     * @return balance the number of Funding NFTs available for conversion
     */
     function getAvailableFundingNFTForConversion(uint256 loanId, address funder)
         public
@@ -685,9 +685,9 @@ contract ProjectLoan is LoanDetails {
 
     /**
      * @notice Calculates the amount of Project Tokens to receive
-     * @param loanId_ the id of the loan
+     * @param loanId the id of the loan
      * @param amountFundingNFT the amount of Funding NFT provided
-     * @return the number of Project Tokens a user would be able to claim
+     * @return amount the number of Project Tokens a user would be able to claim
     */
     function getAmountOfProjectTokensToReceive(
         uint256 loanId,

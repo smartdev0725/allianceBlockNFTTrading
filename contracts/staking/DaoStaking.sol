@@ -73,7 +73,7 @@ contract DaoStaking is StakingTypesAndStorage {
      * @notice Withdraw Rewards for DAO Epoch
      * @dev requires epoch to be valid
      * @dev requires msg.sender to be a part of the DAO and not already withdrawn
-     * @param staker the address of the staker
+     * @param epoch the address of the staker
     */
     function withdrawRewardsForDaoEpoch(uint256 epoch) external {
         require(epoch < currentEpoch, "Can withdraw only for previous epoch");
@@ -98,7 +98,7 @@ contract DaoStaking is StakingTypesAndStorage {
 
     /**
      * @notice Unstake DAO Delegator
-     * @param staker the address of the staker
+     * @param staker_ the address of the staker
     */
     function _unstakeDaoDelegator(address staker_) internal {
         uint256 amount = stakingTypeAmounts[uint256(StakingType.DAO_DELEGATOR)].sub(
@@ -109,8 +109,8 @@ contract DaoStaking is StakingTypesAndStorage {
 
     /**
      * @notice Withdraw
-     * @param staker the address of the staker
-     * @param amount the amount of ALBT to withdraw
+     * @param staker_ the address of the staker
+     * @param amount_ the amount of ALBT to withdraw
     */
     function _withdraw(address staker_, uint256 amount_) internal {
         totalSupply = totalSupply.sub(amount_);
@@ -120,8 +120,8 @@ contract DaoStaking is StakingTypesAndStorage {
 
     /**
      * @notice Stake
-     * @param staker the address of the staker
-     * @param amount the amount of ALBT to withdraw
+     * @param staker_ the address of the staker
+     * @param amount_ the amount of ALBT to withdraw
     */
     function _stake(address staker_, uint256 amount_) internal {
         albt.transferFrom(staker_, address(this), amount_);
@@ -132,7 +132,7 @@ contract DaoStaking is StakingTypesAndStorage {
     /**
      * @notice Get Balance
      * @dev Retrieves the staked balance for a given user
-     * @param staker the address of the staker
+     * @param staker_ the address of the staker
     */
     function getBalance(address staker_) external view returns (uint256) {
         return balance[staker_];
@@ -140,7 +140,10 @@ contract DaoStaking is StakingTypesAndStorage {
 
     /**
      * @notice Get Amounts to Stake
-     * @return staker required amount per staking level
+     * @return stakerLvl1Amount Staker lvl 1 Amount
+     * @return stakerLvl2Amount Staker lvl 2 Amount
+     * @return stakerLvl3orDaoMemberAmount Staker lvl 3 Amount Dao Member
+     * @return daoDelegatorAmount Staker lvl 4 Amount (DAO Delegator)
     */
     function getAmountsToStake() external view returns (
         uint256 stakerLvl1Amount,

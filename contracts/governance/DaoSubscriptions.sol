@@ -84,7 +84,6 @@ contract DaoSubscriptions is SuperGovernance {
      * @notice Claim DAO Membership to become Active DAO Member
      * @dev Executes cronJob()
      * @dev requires msg.sender open DAO Membership and elligible DAO Member
-     * @param daoSubscriberToVoteFor The address of the voted DAO Member Subscriber
     */
     function claimDaoMembership()
     external
@@ -161,7 +160,7 @@ contract DaoSubscriptions is SuperGovernance {
      * @dev msg.sender to send the right password and only one vote per epoch
      * @dev vote to be casted for Active DAO Member
      * @param password password for the secret vote
-     * @param daoDelegatorToVoteFor
+     * @param daoDelegatorToVoteFor the delegator to vote for
     */
     function approveVoteForDaoDelegator(string calldata password, address daoDelegatorToVoteFor)
     external

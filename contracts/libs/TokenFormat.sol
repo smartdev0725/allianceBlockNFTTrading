@@ -12,8 +12,9 @@ library TokenFormat {
 
     /**
      * @notice Format tokenId into generation and index
-     * @param tokenid The Id of the token
-     * @return (the generation of the token, the loan ID)
+     * @param tokenId The Id of the token
+     * @return generation
+     * @return loanId
      */
     function formatTokenId(uint tokenId) internal pure returns(uint generation, uint loanId) {
         generation = tokenId >> 128;
@@ -23,8 +24,8 @@ library TokenFormat {
     /**
      * @notice get tokenId from generation and loanId
      * @param gen the generation
-     * @param loanid the loanID
-     * @return the token id
+     * @param loanId the loanID
+     * @return tokenId the token id
      */
     function getTokenId(uint gen, uint loanId) internal pure returns(uint tokenId) {
         return (gen << 128) | loanId;

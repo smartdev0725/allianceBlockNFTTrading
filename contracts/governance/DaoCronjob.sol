@@ -84,9 +84,9 @@ contract DaoCronjob is GovernanceTypesAndStorage {
     }
 
     /**
-     * @notice Removes a cronJob to the queue
+     * @notice Removes a cronJob from the queue
      * @dev Removes a node from the cronjobList (ValuedDoubleLinkedList)
-     * @param cronjobType The type of cronJob
+     * @param cronjobId The cronJob ID
     */
     function removeCronjob(uint256 cronjobId) internal {
         cronjobList.removeNode(cronjobId);

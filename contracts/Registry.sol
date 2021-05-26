@@ -270,7 +270,7 @@ contract Registry is Initializable, PersonalLoan, ProjectLoan, OwnableUpgradeabl
 
      /**
      * @notice Approve Loan
-     * @param loanId The id of the loan.
+     * @param loanId_ The id of the loan.
      */
      function _approveLoan(uint256 loanId_) internal {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.APPROVED;
@@ -285,7 +285,7 @@ contract Registry is Initializable, PersonalLoan, ProjectLoan, OwnableUpgradeabl
 
      /**
      * @notice Reject Loan
-     * @param loanId The id of the loan.
+     * @param loanId_ The id of the loan.
      */
      function _rejectLoan(uint256 loanId_) internal {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.REJECTED;
@@ -299,7 +299,7 @@ contract Registry is Initializable, PersonalLoan, ProjectLoan, OwnableUpgradeabl
 
      /**
      * @notice Start Loan
-     * @param loanId The id of the loan.
+     * @param loanId_ The id of the loan.
      */
      function _startLoan(uint256 loanId_) internal {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.STARTED;
@@ -316,7 +316,7 @@ contract Registry is Initializable, PersonalLoan, ProjectLoan, OwnableUpgradeabl
      * @notice Get Loan Metadata
      * @dev This helper function provides a single point for querying the Loan metadata
      * @param loanId The id of the loan.
-     * @return Loan Details, Loan Status, Loan Seeker Address and Repayment Batch Type
+     * @dev returns Loan Details, Loan Status, Loan Seeker Address and Repayment Batch Type
      */
     function getLoanMetadata(uint256 loanId)
         public

@@ -262,7 +262,7 @@ contract Investement is LoanDetails {
      * @notice Generates Random Number
      * @dev This function generates a random number
      * @param maxNumber the max number possible
-     * @return the random number generated
+     * @return randomNumber the random number generated
     */
      function getRandomNumber(uint256 maxNumber) internal view returns (uint256 randomNumber) {
         randomNumber = uint256(keccak256(abi.encodePacked(

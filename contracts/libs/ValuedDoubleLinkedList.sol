@@ -181,7 +181,7 @@ library ValuedDoubleLinkedList {
     /**
      * @notice Pops the head of the list
      * @param self the LinkedList
-     * @return the first item of the list
+     * @return head the first item of the list
     */
     function popHead(LinkedList storage self) internal returns(uint256 head) {
         head = self.head;
@@ -201,7 +201,8 @@ library ValuedDoubleLinkedList {
     /**
      * @notice Pops the head and value of the list
      * @param self the LinkedList
-     * @return the first item of the list and its value
+     * @return head 
+     * @return value
     */
     function popHeadAndValue(LinkedList storage self) internal returns(uint256 head, uint256 value) {
         head = self.head;

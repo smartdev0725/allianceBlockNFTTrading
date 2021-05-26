@@ -81,7 +81,7 @@ import "hardhat/console.sol";
 
     /**
      * @notice Calculate Rewards per Token
-     * @return the rewards
+     * @dev returns the calculated reward
     */
     function rewardPerToken() public view returns (uint256) {
         if (totalSupply == 0) {
@@ -225,7 +225,7 @@ import "hardhat/console.sol";
      * @notice Find Amount
      * @param bigIndex ???
      * @param smallIndex ???
-     * @return the amount of reputation
+     * @return amount of reputation
     */
     function findAmount(uint256 bigIndex, uint256 smallIndex) internal view returns (uint256 amount) {
         if (bigIndex > 3) bigIndex = 3;

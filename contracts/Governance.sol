@@ -22,12 +22,12 @@ contract Governance is Initializable, DaoSubscriptions {
      * @notice Initialize the contract.
      * @param superDelegator_ The address of the admin in charge during the first epoch
      * @param loanApprovalRequestDuration_ The duration of the Loan
-     * @param milestoneApprovalRequestDuration_ 
-     * @param daoUpdateRequestDuration_ 
-     * @param approvalsNeededForRegistryRequest_ 
-     * @param approvalsNeededForGovernanceRequest_ 
-     * @param applicationsForInvestmentDuration_ 
-     * @param lateApplicationsForInvestmentDuration_ 
+     * @param milestoneApprovalRequestDuration_ Milestone approval request duration
+     * @param daoUpdateRequestDuration_ DAO update request duration
+     * @param approvalsNeededForRegistryRequest_ approvals needed for registry request
+     * @param approvalsNeededForGovernanceRequest_ approvals needed for governance request
+     * @param applicationsForInvestmentDuration_ duration for applications for investment
+     * @param lateApplicationsForInvestmentDuration_ duration forlate applications for investment 
      */
     function initialize(
         address superDelegator_,
@@ -147,7 +147,7 @@ contract Governance is Initializable, DaoSubscriptions {
 
     /**
      * @notice Helper function for querying Governance variables
-     * @return internal Governance uint variables
+     * @dev returns internal Governance uint variables
     */
     function getDaoData() public view returns (uint256, uint256, uint256, uint256, uint256){
         (, uint256 amountToStakeForDaoMember, ) = staking.getAmountsToStake();

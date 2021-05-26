@@ -88,7 +88,7 @@ library DoubleLinkedList {
     /**
      * @notice Pops the head of the list
      * @param self the LinkedList
-     * @return the first item of the list
+     * @return head the first item of the list
     */
     function popHead(LinkedList storage self) internal returns(uint256 head) {
         head = self.head;
@@ -109,7 +109,7 @@ library DoubleLinkedList {
      * @notice Get id by index
      * @param self the LinkedList
      * @param index the id of the index
-     * @return the item in index position
+     * @return id the item in index position
     */
     function getIndexedId(LinkedList storage self, uint256 index) internal returns(uint256 id) {
         id = self.head;
