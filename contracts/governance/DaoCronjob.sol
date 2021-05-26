@@ -9,6 +9,7 @@ import "../interfaces/IRegistry.sol";
 
 /**
  * @title AllianceBlock Governance contract
+ * @dev Extends GovernanceTypesAndStorage
  * @notice Responsible for governing AllianceBlock's ecosystem
  */
 contract DaoCronjob is GovernanceTypesAndStorage {

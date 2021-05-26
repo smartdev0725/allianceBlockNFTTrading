@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 
 /**
  * @title AllianceBlock DaoSubscriptions contract
+ * @dev Extends SuperGovernance
  * @notice Responsible for all dao subscriptions on AllianceBlock's ecosystem
  */
 contract DaoSubscriptions is SuperGovernance {
@@ -15,6 +16,11 @@ contract DaoSubscriptions is SuperGovernance {
     using ValuedDoubleLinkedList for ValuedDoubleLinkedList.LinkedList;
     using DoubleLinkedList for DoubleLinkedList.LinkedList;
 
+    /**
+     * @notice Subscribe to become DAO Member Subscriber
+     * @dev Executes cronJob()
+     * @dev requires closed subscription
+    */
     function subscribeForDaoMembership()
     external
     checkCronjob()
@@ -31,6 +37,11 @@ contract DaoSubscriptions is SuperGovernance {
         }
     }
 
+    /**
+     * @notice Unsubscribe from become DAO Member Subscription
+     * @dev Executes cronJob()
+     * @dev requires msg.sender not being Active DAO Member
+    */
     function unsubscribeDaoMembership()
     external
     checkCronjob()
@@ -41,6 +52,14 @@ contract DaoSubscriptions is SuperGovernance {
         staking.unstakeDao(msg.sender, true);
     }
 
+    /**
+     * @notice Vote from becoming DAO Member
+     * @dev Executes cronJob()
+     * @dev requires open Membership voting
+     * @dev requires msg.sender to be staker and DAO Membership Subscriber
+     * @dev requires single vote per epoch
+     * @param daoSubscriberToVoteFor The address of the voted DAO Member Subscriber
+    */
     function voteForDaoMember(address daoSubscriberToVoteFor)
     external
     checkCronjob()
@@ -61,6 +80,12 @@ contract DaoSubscriptions is SuperGovernance {
         daoMembersListForUpcomingEpoch.addNodeDecrement(votesForSubscriber.add(1), addressToId[daoSubscriberToVoteFor]);
     }
 
+    /**
+     * @notice Claim DAO Membership to become Active DAO Member
+     * @dev Executes cronJob()
+     * @dev requires msg.sender open DAO Membership and elligible DAO Member
+     * @param daoSubscriberToVoteFor The address of the voted DAO Member Subscriber
+    */
     function claimDaoMembership()
     external
     checkCronjob()
@@ -79,6 +104,11 @@ contract DaoSubscriptions is SuperGovernance {
         epochDaoMembers[currentEpoch.add(1)].addNode(addressToId[msg.sender]);
     }
 
+    /**
+     * @notice Subscribe to become DAO Delegator Subscriptor
+     * @dev Executes cronJob()
+     * @dev requires msg.sender to be DAO Member
+    */
     function subscribeForDaoDelegator()
     external
     checkCronjob()
@@ -89,6 +119,11 @@ contract DaoSubscriptions is SuperGovernance {
         subscribedForDaoDelegator[msg.sender] = true;
     }
 
+    /**
+     * @notice Unsubscribe from DAO Delegator Subscription
+     * @dev Executes cronJob()
+     * @dev requires msg.sender not to be Active DAO Delegator
+    */
     function unsubscribeDaoDelegation()
     external
     checkCronjob()
@@ -99,6 +134,13 @@ contract DaoSubscriptions is SuperGovernance {
         staking.unstakeDao(msg.sender, false);
     }
 
+    /**
+     * @notice Vote from becoming a DAO Delegator Subscription
+     * @dev Executes cronJob()
+     * @dev requires open voting for DAO Delegators
+     * @dev requires msg.sender to be Active DAO Member and only vote once per epoch
+     * @param votingHash the actual vote casted
+    */
     function voteForDaoDelegator(bytes32 votingHash)
     external
     checkCronjob()
@@ -112,6 +154,15 @@ contract DaoSubscriptions is SuperGovernance {
         votingHashOfDaoMembersPerEpoch[msg.sender][currentEpoch] = votingHash;
     }
 
+    /**
+     * @notice Approves vote for DAO Delegator
+     * @dev Executes cronJob()
+     * @dev requires voting approval to be open
+     * @dev msg.sender to send the right password and only one vote per epoch
+     * @dev vote to be casted for Active DAO Member
+     * @param password password for the secret vote
+     * @param daoDelegatorToVoteFor
+    */
     function approveVoteForDaoDelegator(string calldata password, address daoDelegatorToVoteFor)
     external
     checkCronjob()
@@ -136,6 +187,12 @@ contract DaoSubscriptions is SuperGovernance {
         }
     }
 
+    /**
+     * @notice Claim DAO Delegator
+     * @dev Executes cronJob()
+     * @dev requires Claiming DAO Delegation to be open
+     * @dev requires to be the next in line for becoming DAO Delegator
+    */
     function claimDaoDelegation()
     external
     checkCronjob()
@@ -155,6 +212,12 @@ contract DaoSubscriptions is SuperGovernance {
         epochDaoDelegators[currentEpoch.add(1)].addNode(addressToId[msg.sender]);
     }
 
+    /**
+     * @notice Claim DAO Substitute Delegator
+     * @dev Executes cronJob()
+     * @dev requires DAO Substitute Delegators to be requested
+     * @dev requires to be the next in line for becoming substitute
+    */
     function claimDaoSubstituteDelegation()
     external
     checkCronjob()
@@ -172,6 +235,13 @@ contract DaoSubscriptions is SuperGovernance {
         addSubstituteToAllActiveRequests(addressToId[msg.sender], currentEpoch);
     }
 
+    /**
+     * @notice check DAO Associated values
+     * @dev used to check pertenence of member to DAO
+     * @param account the account to check
+     * @param epoch the epoch to check
+     * @return (isDaoMember?, isDaoDelegator?,epoch of Dao Member, epoch of Dao Delegator)
+    */
     function isDaoAssociated(address account, uint256 epoch)
     external
     view

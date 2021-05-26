@@ -11,6 +11,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title AllianceBlock Governance contract
+ * @dev Extends Initializable, DaoSubscriptions
  * @notice Responsible for governing AllianceBlock's ecosystem
  */
 contract Governance is Initializable, DaoSubscriptions {
@@ -57,7 +58,7 @@ contract Governance is Initializable, DaoSubscriptions {
      * @param loanId The id of the loan or investment to approve
      * @param isMilestone Whether or not this is a milestone approval request
      * @param milestoneNumber The number of milestone to approve
-     */
+    */
     function requestApproval(
     	uint256 loanId,
         bool isMilestone,
@@ -109,7 +110,7 @@ contract Governance is Initializable, DaoSubscriptions {
      * @dev Executes cronjob()
      * @param requestId The id of the Request to vote on
      * @param decision The casted vote (0 or 1)
-     */
+    */
     function voteForRequest(
         uint256 requestId,
         bool decision
@@ -132,7 +133,7 @@ contract Governance is Initializable, DaoSubscriptions {
      * @notice Stores Investment Duration
      * @dev Adds cronJob
      * @param investmentId The id of the investment to store
-     */
+    */
     function storeInvestmentTriggering(
         uint256 investmentId
     )
@@ -145,8 +146,8 @@ contract Governance is Initializable, DaoSubscriptions {
     }
 
     /**
-    * @notice Helper function for querying Governance variables
-    * @return internal Governance uint variables
+     * @notice Helper function for querying Governance variables
+     * @return internal Governance uint variables
     */
     function getDaoData() public view returns (uint256, uint256, uint256, uint256, uint256){
         (, uint256 amountToStakeForDaoMember, ) = staking.getAmountsToStake();

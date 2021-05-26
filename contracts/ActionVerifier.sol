@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 /**
  * @title AllianceBlock ActionVerifier contract
+ * @dev Extends Initializable, OwnableUpgradeable
  * @notice Handles user's Actions and Rewards within the protocol
  */
  contract ActionVerifier is Initializable, OwnableUpgradeable {
