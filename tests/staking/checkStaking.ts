@@ -1,4 +1,3 @@
-import BN from 'bn.js';
 import {expect} from 'chai';
 import {ONE_DAY} from '../helpers/constants';
 import {increaseTime} from '../helpers/time';
@@ -6,7 +5,7 @@ import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 
 export default async function suite() {
-  describe.only('Succeeds', async () => {
+  describe('Succeeds', async () => {
 
     beforeEach(async function () {
       await this.stakingContract
