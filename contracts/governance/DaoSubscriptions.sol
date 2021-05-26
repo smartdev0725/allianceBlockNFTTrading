@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
  * @title AllianceBlock DaoSubscriptions contract
  * @dev Extends SuperGovernance
  * @notice Responsible for all dao subscriptions on AllianceBlock's ecosystem
- */
+*/
 contract DaoSubscriptions is SuperGovernance {
     using SafeMath for uint256;
     using ValuedDoubleLinkedList for ValuedDoubleLinkedList.LinkedList;

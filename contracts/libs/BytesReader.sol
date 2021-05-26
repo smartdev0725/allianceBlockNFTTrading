@@ -3,10 +3,12 @@ pragma solidity ^0.7.0;
 
 library BytesReader {
 
-    /// @dev Reads a bytes32 value from a position in a byte array.
-    /// @param b Byte array containing a bytes32 value.
-    /// @param index Index in byte array of bytes32 value.
-    /// @return result bytes32 value from byte array.
+    /**
+     * @title Reads a bytes32 value from a position in a byte array.
+     * @param b Byte array containing a bytes32 value.
+     * @param index Index in byte array of bytes32 value.
+     * @return result bytes32 value from byte array.
+    */
     function readBytes32(bytes memory b, uint256 index) internal pure returns (bytes32 result) {
         if (b.length < index + 32) {
             return bytes32(0);

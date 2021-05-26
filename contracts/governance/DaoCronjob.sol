@@ -11,7 +11,7 @@ import "../interfaces/IRegistry.sol";
  * @title AllianceBlock Governance contract
  * @dev Extends GovernanceTypesAndStorage
  * @notice Responsible for governing AllianceBlock's ecosystem
- */
+*/
 contract DaoCronjob is GovernanceTypesAndStorage {
     using SafeMath for uint256;
     using ValuedDoubleLinkedList for ValuedDoubleLinkedList.LinkedList;
@@ -25,7 +25,7 @@ contract DaoCronjob is GovernanceTypesAndStorage {
     /**
      * @notice Checks if needs to execute a DAO cronJob
      * @dev Calls executeCronjob() at the most 1 cronJob per tx
-     */
+    */
     function checkCronjobs() public returns (bool) {
         uint256 mostRecentCronjobTimestamp = cronjobList.getHeadValue();
         if (mostRecentCronjobTimestamp == 0 || block.timestamp < mostRecentCronjobTimestamp) return false;
