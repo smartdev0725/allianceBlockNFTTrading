@@ -9,6 +9,7 @@ import "../libs/TokenFormat.sol";
 /**
  * @title AllianceBlock LoanDetails contract
  * @notice Functionality for storing loan details and modifiers.
+ * @dev Extends Storage
  */
 contract LoanDetails is Storage {
     using SafeMath for uint256;

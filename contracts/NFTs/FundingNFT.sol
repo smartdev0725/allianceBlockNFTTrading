@@ -12,6 +12,7 @@ import "../libs/TokenFormat.sol";
 /**
  * @title Alliance Block Funding NFTs
  * @notice NFTs that will be held by users
+ * @dev Extends Initializable, ContextUpgradeable, AccessControlUpgradeable, ERC1155Upgradeable
 */
 contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeable, ERC1155Upgradeable {
     using TokenFormat for uint256;

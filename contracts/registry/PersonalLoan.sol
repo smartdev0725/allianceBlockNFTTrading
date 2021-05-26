@@ -9,6 +9,7 @@ import "../libs/TokenFormat.sol";
 /**
  * @title AllianceBlock PersonalLoan contract
  * @notice Functionality for Personal Loan.
+ * @dev Extends LoanDetails
  */
 contract PersonalLoan is LoanDetails {
     using SafeMath for uint256;

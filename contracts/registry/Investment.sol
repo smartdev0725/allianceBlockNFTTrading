@@ -10,7 +10,7 @@ import "../libs/TokenFormat.sol";
  * @title AllianceBlock Investment contract
  * @notice Functionality for Investment.
  * @dev Extends LoanDetails
- */
+*/
 contract Investment is LoanDetails {
     using SafeMath for uint256;
     using TokenFormat for uint256;
