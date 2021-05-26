@@ -8,7 +8,11 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IEscrow.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
-contract ActionVerifier is Initializable, OwnableUpgradeable {
+/**
+ * @title AllianceBlock ActionVerifier contract
+ * @notice Handles user's Actions and Rewards within the protocol
+ */
+ contract ActionVerifier is Initializable, OwnableUpgradeable {
     using SafeMath for uint256;
     using SignatureVerifier for SignatureVerifier.Action;
 

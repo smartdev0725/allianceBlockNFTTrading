@@ -21,6 +21,10 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         _;
     }
 
+    /**
+     * @notice Checks if needs to execute a DAO cronJob
+     * @dev Calls executeCronjob() at the most 1 cronJob per tx
+     */
     function checkCronjobs() public returns (bool) {
         uint256 mostRecentCronjobTimestamp = cronjobList.getHeadValue();
         if (mostRecentCronjobTimestamp == 0 || block.timestamp < mostRecentCronjobTimestamp) return false;
@@ -32,6 +36,11 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         return true;
     }
 
+    /**
+     * @notice Executes the next DAO cronJob
+     * @param cronjobId The cronJob id to be executed.
+     * @param timestamp The current block height
+    */
     function executeCronjob(uint256 cronjobId, uint256 timestamp) internal {
         if (cronjobs[cronjobId].cronjobType == CronjobType.DAO_APPROVAL) {
             executeDaoApproval(cronjobs[cronjobId].externalId);
@@ -60,16 +69,34 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         }
     }
 
-    function addCronjob(CronjobType cronjobType, uint256 timestamp, uint256 externalId) internal {
+    /**
+     * @notice Adds a cronJob to the queue
+     * @dev Adds a node to the cronjobList (ValuedDoubleLinkedList)
+     * @param cronjobType The type of cronJob
+     * @param timestamp The current block height
+     * @param externalId Id of the request in case of dao approval, change voting request or investment
+    */
+     function addCronjob(CronjobType cronjobType, uint256 timestamp, uint256 externalId) internal {
         totalCronjobs = totalCronjobs.add(1);
         cronjobs[totalCronjobs] = Cronjob(cronjobType, externalId);
         cronjobList.addNodeIncrement(timestamp, totalCronjobs);
     }
 
+    /**
+     * @notice Removes a cronJob to the queue
+     * @dev Removes a node from the cronjobList (ValuedDoubleLinkedList)
+     * @param cronjobType The type of cronJob
+    */
     function removeCronjob(uint256 cronjobId) internal {
         cronjobList.removeNode(cronjobId);
     }
 
+    /**
+     * @notice Updates an investment
+     * @dev checks if lottery should start or adds cronJob for late application
+     * @param investmentId The id of the investment to update
+     * @param timestamp the current block height
+    */
     function updateInvestment(uint256 investmentId, uint256 timestamp) internal {
         if (registry.getRequestingInterestStatus(investmentId)) {
             registry.startLotteryPhase(investmentId);
@@ -81,6 +108,11 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         }
     }
 
+    /**
+     * @notice Updates Dao Membership Voting
+     * @dev run by the cronJob update
+     * @param timestamp The current block height
+    */
     function updateDaoMembershipVotingState(uint256 timestamp) internal {
         uint256 nextCronjobTimestamp;
 
@@ -114,6 +146,11 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         }
     }
 
+    /**
+     * @notice Updates Dao Delegator Voting
+     * @dev run by the cronJob update
+     * @param timestamp The current block height
+    */
     function updateDaoDelegationVotingState(uint256 timestamp) internal {
         uint256 nextCronjobTimestamp;
 
@@ -149,6 +186,12 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         addCronjob(CronjobType.DAO_DELEGATORS_VOTING, nextCronjobTimestamp, 0);
     }
 
+    /**
+     * @notice Updates current protocol epoch
+     * @dev run by the cronJob update
+     * @param timestamp The current block height
+     * @return the next cronJob's block height
+    */
     function changeEpoch(uint256 timestamp) internal returns (uint256) {
         daoDelegatorsListForUpcomingEpoch.cloneList(daoSubstituteDelegatorsListForCurrentEpoch);
 
@@ -182,6 +225,11 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         return nextCronjobTimestamp;
     }
 
+    /**
+     * @notice Executes DAO Approval
+     * @dev run by the cronJob update
+     * @param requestId The id of the request to be approved by DAO
+    */
     function executeDaoApproval(uint256 requestId) internal {
         uint256 approvalsNeeded = updatableVariables[keccak256(abi.encode("approvalsNeededForRegistryRequest"))];
         requestsPerEpoch[approvalRequests[requestId].epochSubmitted].removeNode(requestId);
@@ -203,6 +251,12 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         }
     }
 
+    /**
+     * @notice Checks timestamp for latest request for current epoch
+     * @dev run by the cronJob update
+     * @param requestsRemaining The number of requests remaining
+     * @return The latest request block height deadline
+    */
     function checkTimestampOfLastRequestForCurrentEpoch(uint256 requestsRemaining) internal returns (uint256) {
         uint256 latestRequestDeadlineTimestamp;
 
@@ -217,6 +271,13 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         return latestRequestDeadlineTimestamp;
     }
 
+    /**
+     * @notice Penalizes Active Delegators for not voting
+     * @dev run by the cronJob update
+     * @param amountOfPenaltizedDelegators the amount of active delegators to penalize
+     * @param epochOfRequest the epoch of the request they didn't vote in
+     * @param requestId the ID of the request they didn't vote in
+    */
     function penaltizeDelegatorsForNonVoting(
         uint256 amountOfPenaltizedDelegators,
         uint256 epochOfRequest,
@@ -261,6 +322,12 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         if (amountOfSubstitutes > 0) requestSubstitutes(amountOfSubstitutes);
     }
 
+    /**
+     * @notice Remove penalized Delegators from Active duty
+     * @dev run by the cronJob update
+     * @param delegatorId The Id of the Active Delegator to be removed
+     * @param epoch the current epoch
+    */
     function removePenaltizedDelegatorFromActiveRequests(uint256 delegatorId, uint256 epoch) internal {
         uint256 requestsRemaining = requestsPerEpoch[epoch].getSize();
 
@@ -273,6 +340,12 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         }
     }
 
+    /**
+     * @notice Adds substitutes to all Active Requests
+     * @dev run by the cronJob update
+     * @param delegatorId The Id of the Active Delegator to be removed
+     * @param epoch the current epoch
+    */
     function addSubstituteToAllActiveRequests(uint256 delegatorId, uint256 epoch) internal {
         uint256 requestsRemaining = requestsPerEpoch[epoch].getSize();
 
@@ -285,6 +358,10 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         }
     }
 
+    /**
+     * @notice Updates Delegator substitutes
+     * @dev run by the cronJob update
+    */
     function updateSubstitutes() internal {
         if (amountOfSubstitutesRequested[currentEpoch] > 0) {
             for (uint256 i = 0; i < amountOfSubstitutesRequested[currentEpoch]; i++) {
@@ -299,6 +376,11 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         }
     }
 
+    /**
+     * @notice Requests substitutes for DAO Delegator
+     * @dev run by the cronJob update
+     * @param amountOfSubstitutes the amount of subs positions to fill
+    */
     function requestSubstitutes(uint256 amountOfSubstitutes) internal {
         amountOfSubstitutesRequested[currentEpoch] = amountOfSubstitutes;
 
