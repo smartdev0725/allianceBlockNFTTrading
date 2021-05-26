@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
+/**
+ * @title Bytes Reader Library
+*/
 library BytesReader {
 
     /**
-     * @title Reads a bytes32 value from a position in a byte array.
+     * @notice Reads a bytes32 value from a position in a byte array.
      * @param b Byte array containing a bytes32 value.
      * @param index Index in byte array of bytes32 value.
      * @return result bytes32 value from byte array.

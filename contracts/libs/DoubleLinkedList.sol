@@ -29,7 +29,8 @@ library DoubleLinkedList {
      * @notice Get list size
      * @param self the LinkedList
      * @return the size of the list
-    */function getSize(LinkedList storage self) internal view returns (uint256) {
+    */
+    function getSize(LinkedList storage self) internal view returns (uint256) {
         return self.size;
     }
 
