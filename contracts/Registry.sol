@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "./registry/PersonalLoan.sol";
 import "./registry/ProjectLoan.sol";
+import "./registry/Investment.sol";
 import "./libs/TokenFormat.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
@@ -15,7 +16,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
  * @notice Responsible for loan transactions.
  * @dev Extends Initializable, PersonalLoan, ProjectLoan, OwnableUpgradeable
  */
-contract Registry is Initializable, PersonalLoan, ProjectLoan, OwnableUpgradeable {
+contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, OwnableUpgradeable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 
