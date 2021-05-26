@@ -8,7 +8,7 @@ import {
   DAO_MILESTONE_APPROVAL_REQUEST_DURATION,
   DAO_UPDATE_REQUEST_DURATION,
   APPLICATION_FOR_INVESTMENT_DURATION,
-  LATE_APPLICATION_FRO_INVESTMENT_DURATION,
+  LATE_APPLICATION_FOR_INVESTMENT_DURATION,
 } from '../utils/constants';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
@@ -33,7 +33,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       2,
       2,
       APPLICATION_FOR_INVESTMENT_DURATION,
-      LATE_APPLICATION_FRO_INVESTMENT_DURATION,
+      LATE_APPLICATION_FOR_INVESTMENT_DURATION,
     ],
     log: true,
   });
