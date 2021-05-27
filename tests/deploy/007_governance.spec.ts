@@ -3,7 +3,7 @@ import {expect} from 'chai';
 import {
   DAO_LOAN_APPROVAL_REQUEST_DURATION,
   DAO_MILESTONE_APPROVAL_REQUEST_DURATION,
-} from '../../utils/constants';
+} from '../helpers/constants';
 
 describe('Contract Governance', () => {
   beforeEach(async () => {

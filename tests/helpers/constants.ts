@@ -1,5 +1,5 @@
-export const DAO_LOAN_APPROVAL = 2 * 24 * 60 * 60; // Two days
-export const DAO_MILESTONE_APPROVAL = 24 * 60 * 60; // One day
+export const DAO_LOAN_APPROVAL_REQUEST_DURATION = 2 * 24 * 60 * 60; // Two days
+export const DAO_MILESTONE_APPROVAL_REQUEST_DURATION = 24 * 60 * 60; // One day
 export const DAO_UPDATE_REQUEST_DURATION = 24 * 60 * 60; // One day
 export const DAO_APPROVALS_NEEDED_FOR_REGISTRY_REQUEST = 1;
 export const DAO_APPROVALS_NEEDED_FOR_GOVERNANCE_REQUEST = 1;
@@ -13,3 +13,5 @@ export const MILESTONE_EXTENSION = 15 * 24 * 60 * 60; // Half month
 export const ONE_DAY = 24 * 60 * 60; // ONE DAY
 export const AMOUNT_FOR_DAO_MEMBERSHIP = 10000; // 10000 tokens
 export const FUNDING_TIME_INTERVAL = 2 * 24 * 60 * 60; // Two days
+export const APPLICATION_FOR_INVESTMENT_DURATION = 24 * 60 * 60; // ONE DAY
+export const LATE_APPLICATION_FOR_INVESTMENT_DURATION = 24 * 60 * 60; // ONE DAY

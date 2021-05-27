@@ -4,7 +4,7 @@ import {
   LoanType,
   LoanStatus,
 } from '../../helpers/registryEnums';
-import {ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL} from '../../helpers/constants';
+import {ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL_REQUEST_DURATION} from '../../helpers/constants';
 import {getTransactionTimestamp} from '../../helpers/time';
 import {deployments, getNamedAccounts, ethers} from 'hardhat';
 const {expectEvent} = require('@openzeppelin/test-helpers');
@@ -151,7 +151,7 @@ export default async function suite() {
       expect(daoApprovalRequest.milestoneNumber.toString()).to.be.equal('0');
       expect(daoApprovalRequest.deadlineTimestamp.toString()).to.be.equal(
         (await getTransactionTimestamp(tx.hash)).add(
-          BigNumber.from(DAO_LOAN_APPROVAL)
+          BigNumber.from(DAO_LOAN_APPROVAL_REQUEST_DURATION)
         )
       );
       expect(daoApprovalRequest.approvalsProvided.toString()).to.be.equal('0');
@@ -292,7 +292,7 @@ export default async function suite() {
       expect(daoApprovalRequest.milestoneNumber.toString()).to.be.equal('0');
       expect(daoApprovalRequest.deadlineTimestamp.toString()).to.be.equal(
         (await getTransactionTimestamp(tx.hash)).add(
-          BigNumber.from(DAO_LOAN_APPROVAL)
+          BigNumber.from(DAO_LOAN_APPROVAL_REQUEST_DURATION)
         )
       );
       expect(daoApprovalRequest.approvalsProvided.toString()).to.be.equal('0');
