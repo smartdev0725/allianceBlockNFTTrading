@@ -208,10 +208,8 @@ contract Investment is LoanDetails {
     }
 
     /**
-     * @dev This function is called by an investor to withdraw his tickets.
+     * @dev This function is called by an investor to withdraw lending tokens provided for non-won tickets.
      * @param investmentId The id of the investment.
-     * @param ticketsToLock The amount of won tickets to be locked, so as to get more rALBT.
-     * @param ticketsToWithdraw The amount of won tickets to be withdrawn instantly.
      */
     function withdrawAmountProvidedForNonWonTickets(uint256 investmentId)
         external
