@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {ethers} from "hardhat";
+import {ethers} from 'hardhat';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -17,7 +17,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const stakingContract = await ethers.getContract('Staking');
   await stakingContract.setRewardDistribution(rewardDistributor);
 
-
   const registryContract = await ethers.getContract('Registry');
   const fundingNFTContract = await ethers.getContract('FundingNFT');
   const governanceContract = await ethers.getContract('Governance');
@@ -28,11 +27,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const escrowRegistryAddress = await escrowContract.registry();
   const escrowActionVerifierAddress = await escrowContract.actionVerifier();
   const escrowStakingAddress = await escrowContract.staking();
-  if (escrowRegistryAddress === ethers.constants.AddressZero &&
+  if (
+    escrowRegistryAddress === ethers.constants.AddressZero &&
     escrowActionVerifierAddress === ethers.constants.AddressZero &&
     escrowStakingAddress === ethers.constants.AddressZero
   ) {
-    await escrowContract.afterInitialize(registryContract.address, actionVerifierContract.address, stakingContract.address);
+    await escrowContract.afterInitialize(
+      registryContract.address,
+      actionVerifierContract.address,
+      stakingContract.address
+    );
   }
 
   // Setup governance
@@ -76,10 +80,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Setup registry
   const totalTicketsPerRun = 100000;
-  const rAlbtPerLotteryNumber =  100;
-  const blocksLockedForReputation =  20;
+  const rAlbtPerLotteryNumber = 100;
+  const blocksLockedForReputation = 20;
   const lotteryNumbersForImmediateTicket = 100;
-  await registryContract.connect(deployerSigner).initializeInvestment(rALBT.address, totalTicketsPerRun, rAlbtPerLotteryNumber, blocksLockedForReputation, lotteryNumbersForImmediateTicket);
+  await registryContract
+    .connect(deployerSigner)
+    .initializeInvestment(
+      rALBT.address,
+      totalTicketsPerRun,
+      rAlbtPerLotteryNumber,
+      blocksLockedForReputation,
+      lotteryNumbersForImmediateTicket
+    );
 };
 export default func;
 func.tags = ['Setup'];

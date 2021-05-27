@@ -1,7 +1,7 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
-import {expect} from "chai";
-import {BigNumber} from "ethers";
-import {getSigners, initializeTransfers} from "../helpers/utils";
+import {expect} from 'chai';
+import {BigNumber} from 'ethers';
+import {getSigners, initializeTransfers} from '../helpers/utils';
 
 describe('Registry upgrade test', () => {
   let approvalRequest: BigNumber;
@@ -12,10 +12,14 @@ describe('Registry upgrade test', () => {
   beforeEach(async () => {
     await deployments.fixture();
 
-    const { seekerSigner, superDelegatorSigner,         deployerSigner,
+    const {
+      seekerSigner,
+      superDelegatorSigner,
+      deployerSigner,
       lender1Signer,
       lender2Signer,
-      lender3Signer, } = await getSigners();
+      lender3Signer,
+    } = await getSigners();
     const {deployer, seeker, lender1, lender2, lender3, superDelegator} =
       await getNamedAccounts();
 
@@ -52,23 +56,22 @@ describe('Registry upgrade test', () => {
     const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
     await registryContract
-        .connect(seekerSigner)
-        .requestInvestment(
-          projectTokenContract.address,
-          amountOfInvestmentTokens,
-          amountRequested,
-          ipfsHash
-        );
+      .connect(seekerSigner)
+      .requestInvestment(
+        projectTokenContract.address,
+        amountOfInvestmentTokens,
+        amountRequested,
+        ipfsHash
+      );
 
     await governanceContract
-        .connect(superDelegatorSigner)
-        .superVoteForRequest(approvalRequest, true);
+      .connect(superDelegatorSigner)
+      .superVoteForRequest(approvalRequest, true);
 
     loanIdAfter = await registryContract.totalLoans();
   });
 
-
-  it("Investment should be ok", async function() {
+  it('Investment should be ok', async function () {
     // Given
     const registryContract = await ethers.getContract('Registry');
 
@@ -78,11 +81,19 @@ describe('Registry upgrade test', () => {
     // Then
     expect(loanDetails.loanId.toNumber()).to.equal(loanIdBefore.toNumber());
     expect(loanDetails.loanType).to.equal(2);
-    expect(amountOfInvestmentTokens.toString()).to.equal(loanDetails.collateralAmount.toString());
+    expect(amountOfInvestmentTokens.toString()).to.equal(
+      loanDetails.collateralAmount.toString()
+    );
     // Check new method don't exist
-    expect(() => registryContract.getSomething2()).to.throw('registryContract.getSomething2 is not a function');
-    expect(() => registryContract.foo()).to.throw('registryContract.foo is not a function');
-    expect(() => registryContract.bar()).to.throw('registryContract.bar is not a function');
+    expect(() => registryContract.getSomething2()).to.throw(
+      'registryContract.getSomething2 is not a function'
+    );
+    expect(() => registryContract.foo()).to.throw(
+      'registryContract.foo is not a function'
+    );
+    expect(() => registryContract.bar()).to.throw(
+      'registryContract.bar is not a function'
+    );
 
     // Given
     const {proxyOwner} = await getNamedAccounts();
@@ -109,9 +120,15 @@ describe('Registry upgrade test', () => {
     expect(something1.toNumber()).to.equal(1);
     expect(something2.toNumber()).to.equal(2);
 
-    const loanDetailsAfterUpdate = await registryContract.loanDetails(loanIdBefore);
-    expect(loanDetailsAfterUpdate.loanId.toNumber()).to.equal(loanIdBefore.toNumber());
+    const loanDetailsAfterUpdate = await registryContract.loanDetails(
+      loanIdBefore
+    );
+    expect(loanDetailsAfterUpdate.loanId.toNumber()).to.equal(
+      loanIdBefore.toNumber()
+    );
     expect(loanDetailsAfterUpdate.loanType).to.equal(2);
-    expect(amountOfInvestmentTokens.toString()).to.equal(loanDetailsAfterUpdate.collateralAmount.toString());
-  })
+    expect(amountOfInvestmentTokens.toString()).to.equal(
+      loanDetailsAfterUpdate.collateralAmount.toString()
+    );
+  });
 });

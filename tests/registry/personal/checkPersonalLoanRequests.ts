@@ -4,7 +4,11 @@ import {
   LoanType,
   LoanStatus,
 } from '../../helpers/registryEnums';
-import {ONE_DAY, BASE_AMOUNT, DAO_LOAN_APPROVAL_REQUEST_DURATION} from '../../helpers/constants';
+import {
+  ONE_DAY,
+  BASE_AMOUNT,
+  DAO_LOAN_APPROVAL_REQUEST_DURATION,
+} from '../../helpers/constants';
 import {getTransactionTimestamp} from '../../helpers/time';
 import {deployments, getNamedAccounts, ethers} from 'hardhat';
 const {expectEvent} = require('@openzeppelin/test-helpers');

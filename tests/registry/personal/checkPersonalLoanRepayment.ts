@@ -1,9 +1,9 @@
-import { expect } from 'chai';
-import { RepaymentBatchType, LoanStatus } from '../../helpers/registryEnums';
-import { increaseTime } from '../../helpers/time';
-import { BASE_AMOUNT } from '../../helpers/constants';
-import { ethers } from 'hardhat';
-import { BigNumber } from 'ethers';
+import {expect} from 'chai';
+import {RepaymentBatchType, LoanStatus} from '../../helpers/registryEnums';
+import {increaseTime} from '../../helpers/time';
+import {BASE_AMOUNT} from '../../helpers/constants';
+import {ethers} from 'hardhat';
+import {BigNumber} from 'ethers';
 
 const repaymentBatchTypeVariations = [
   RepaymentBatchType.ONLY_INTEREST,
@@ -20,7 +20,8 @@ export default async function suite() {
       let firstBatchEndingTimestamp: BigNumber;
 
       beforeEach(async function () {
-        const approvalRequest = await this.governanceContract.totalApprovalRequests();
+        const approvalRequest =
+          await this.governanceContract.totalApprovalRequests();
         this.loanId = await this.registryContract.totalLoans();
         const amountRequested = this.totalPartitions.mul(
           ethers.utils.parseEther(BASE_AMOUNT + '')
@@ -61,112 +62,114 @@ export default async function suite() {
           this.loanId
         );
 
-        startingSeekerLendingBalance = await this.lendingTokenContract.balanceOf(this.seeker);
+        startingSeekerLendingBalance =
+          await this.lendingTokenContract.balanceOf(this.seeker);
         amountEachBatch = loanPayments.amountEachBatch;
         lendingAmount = loanDetails.lendingAmount;
         timeInterval = loanPayments.timeIntervalBetweenBatches;
         firstBatchEndingTimestamp = loanPayments.batchDeadlineTimestamp;
       });
 
-      it(`when repaying a loan which is ${repaymentBatchType == RepaymentBatchType.ONLY_INTEREST
-        ? 'only interest'
-        : 'interest plus nominal'
-        }`, async function () {
-          let initSeekerLendingBalance =
-            await this.lendingTokenContract.balanceOf(this.seeker);
-          let initEscrowLendingBalance =
-            await this.lendingTokenContract.balanceOf(
-              this.escrowContract.address
-            );
-          const initCollateralBalance =
-            await this.collateralTokenContract.balanceOf(this.seeker);
-          const loanDetails = await this.registryContract.loanDetails(
-            this.loanId
-          );
-
-          await this.registryContract
-            .connect(this.seekerSigner)
-            .executePayment(this.loanId);
-
-          let newSeekerLendingBalance = await this.lendingTokenContract.balanceOf(
-            this.seeker
-          );
-          let newEscrowLendingBalance = await this.lendingTokenContract.balanceOf(
+      it(`when repaying a loan which is ${
+        repaymentBatchType == RepaymentBatchType.ONLY_INTEREST
+          ? 'only interest'
+          : 'interest plus nominal'
+      }`, async function () {
+        let initSeekerLendingBalance =
+          await this.lendingTokenContract.balanceOf(this.seeker);
+        let initEscrowLendingBalance =
+          await this.lendingTokenContract.balanceOf(
             this.escrowContract.address
           );
+        const initCollateralBalance =
+          await this.collateralTokenContract.balanceOf(this.seeker);
+        const loanDetails = await this.registryContract.loanDetails(
+          this.loanId
+        );
 
-          let loanPayments = await this.registryContract.personalLoanPayments(
-            this.loanId
-          );
+        await this.registryContract
+          .connect(this.seekerSigner)
+          .executePayment(this.loanId);
 
-          // Correct Balances.
-          expect(
-            initSeekerLendingBalance.sub(newSeekerLendingBalance).toString()
-          ).to.be.equal(amountEachBatch.toString());
-          expect(
-            newEscrowLendingBalance.sub(initEscrowLendingBalance).toString()
-          ).to.be.equal(amountEachBatch.toString());
+        let newSeekerLendingBalance = await this.lendingTokenContract.balanceOf(
+          this.seeker
+        );
+        let newEscrowLendingBalance = await this.lendingTokenContract.balanceOf(
+          this.escrowContract.address
+        );
 
-          // Correct Payments.
-          expect(loanPayments.batchesPaid.toString()).to.be.equal('1');
-          expect(loanPayments.batchStartingTimestamp.toString()).to.be.equal(
-            firstBatchEndingTimestamp.toString()
-          );
-          expect(loanPayments.batchDeadlineTimestamp.toString()).to.be.equal(
-            firstBatchEndingTimestamp.add(timeInterval).toString()
-          );
+        let loanPayments = await this.registryContract.personalLoanPayments(
+          this.loanId
+        );
 
-          initSeekerLendingBalance = await this.lendingTokenContract.balanceOf(
-            this.seeker
-          );
-          initEscrowLendingBalance = await this.lendingTokenContract.balanceOf(
-            this.escrowContract.address
-          );
+        // Correct Balances.
+        expect(
+          initSeekerLendingBalance.sub(newSeekerLendingBalance).toString()
+        ).to.be.equal(amountEachBatch.toString());
+        expect(
+          newEscrowLendingBalance.sub(initEscrowLendingBalance).toString()
+        ).to.be.equal(amountEachBatch.toString());
 
-          await increaseTime(this.deployerSigner.provider, 30 * 24 * 60 * 60);
+        // Correct Payments.
+        expect(loanPayments.batchesPaid.toString()).to.be.equal('1');
+        expect(loanPayments.batchStartingTimestamp.toString()).to.be.equal(
+          firstBatchEndingTimestamp.toString()
+        );
+        expect(loanPayments.batchDeadlineTimestamp.toString()).to.be.equal(
+          firstBatchEndingTimestamp.add(timeInterval).toString()
+        );
 
-          await this.registryContract
-            .connect(this.seekerSigner)
-            .executePayment(this.loanId);
+        initSeekerLendingBalance = await this.lendingTokenContract.balanceOf(
+          this.seeker
+        );
+        initEscrowLendingBalance = await this.lendingTokenContract.balanceOf(
+          this.escrowContract.address
+        );
 
-          newSeekerLendingBalance = await this.lendingTokenContract.balanceOf(
-            this.seeker
-          );
-          newEscrowLendingBalance = await this.lendingTokenContract.balanceOf(
-            this.escrowContract.address
-          );
+        await increaseTime(this.deployerSigner.provider, 30 * 24 * 60 * 60);
 
-          loanPayments = await this.registryContract.personalLoanPayments(
-            this.loanId
-          );
-          const loanStatus = await this.registryContract.loanStatus(this.loanId);
+        await this.registryContract
+          .connect(this.seekerSigner)
+          .executePayment(this.loanId);
 
-          const amountLastBatch =
-            repaymentBatchType === RepaymentBatchType.ONLY_INTEREST
-              ? amountEachBatch.add(lendingAmount)
-              : amountEachBatch;
-          const newCollateralBalance =
-            await this.collateralTokenContract.balanceOf(this.seeker);
+        newSeekerLendingBalance = await this.lendingTokenContract.balanceOf(
+          this.seeker
+        );
+        newEscrowLendingBalance = await this.lendingTokenContract.balanceOf(
+          this.escrowContract.address
+        );
 
-          // Correct Status.
-          expect(loanStatus.toString()).to.be.equal(LoanStatus.SETTLED);
+        loanPayments = await this.registryContract.personalLoanPayments(
+          this.loanId
+        );
+        const loanStatus = await this.registryContract.loanStatus(this.loanId);
 
-          // Correct Balances.
-          expect(
-            initSeekerLendingBalance.sub(newSeekerLendingBalance).toString()
-          ).to.be.equal(amountLastBatch.toString());
-          expect(
-            newEscrowLendingBalance.sub(initEscrowLendingBalance).toString()
-          ).to.be.equal(amountLastBatch.toString());
+        const amountLastBatch =
+          repaymentBatchType === RepaymentBatchType.ONLY_INTEREST
+            ? amountEachBatch.add(lendingAmount)
+            : amountEachBatch;
+        const newCollateralBalance =
+          await this.collateralTokenContract.balanceOf(this.seeker);
 
-          // Correct Payments.
-          expect(loanPayments.batchesPaid.toString()).to.be.equal('2');
+        // Correct Status.
+        expect(loanStatus.toString()).to.be.equal(LoanStatus.SETTLED);
 
-          // Correct Collateral amount
-          expect(
-            newCollateralBalance.sub(initCollateralBalance).toString()
-          ).to.be.equal(loanDetails.collateralAmount.toString());
-        });
+        // Correct Balances.
+        expect(
+          initSeekerLendingBalance.sub(newSeekerLendingBalance).toString()
+        ).to.be.equal(amountLastBatch.toString());
+        expect(
+          newEscrowLendingBalance.sub(initEscrowLendingBalance).toString()
+        ).to.be.equal(amountLastBatch.toString());
+
+        // Correct Payments.
+        expect(loanPayments.batchesPaid.toString()).to.be.equal('2');
+
+        // Correct Collateral amount
+        expect(
+          newCollateralBalance.sub(initCollateralBalance).toString()
+        ).to.be.equal(loanDetails.collateralAmount.toString());
+      });
     });
   }
 }

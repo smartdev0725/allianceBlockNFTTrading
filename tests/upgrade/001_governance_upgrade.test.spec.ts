@@ -1,17 +1,16 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {
   DAO_LOAN_APPROVAL_REQUEST_DURATION,
-  DAO_MILESTONE_APPROVAL_REQUEST_DURATION
-} from "../../utils/constants";
-import {expect} from "chai";
+  DAO_MILESTONE_APPROVAL_REQUEST_DURATION,
+} from '../../utils/constants';
+import {expect} from 'chai';
 
 describe('Governance upgrade test', () => {
-
   beforeEach(async () => {
     await deployments.fixture();
   });
 
-  it("Governance should be deployed", async function() {
+  it('Governance should be deployed', async function () {
     // Given
     const governanceContract = await ethers.getContract('Governance');
 
@@ -24,7 +23,6 @@ describe('Governance upgrade test', () => {
       amountToStakeForDaoMember,
     ] = await governanceContract.getDaoData();
 
-
     // Then
     expect(loanApprovalRequestDuration.toNumber()).to.equal(
       DAO_LOAN_APPROVAL_REQUEST_DURATION
@@ -32,10 +30,14 @@ describe('Governance upgrade test', () => {
     expect(milestoneApprovalRequestDuration.toNumber()).to.equal(
       DAO_MILESTONE_APPROVAL_REQUEST_DURATION
     );
-    expect(amountToStakeForDaoMember.toString()).to.equal(ethers.utils.parseEther('20000').toString());
+    expect(amountToStakeForDaoMember.toString()).to.equal(
+      ethers.utils.parseEther('20000').toString()
+    );
 
     // Check new method don't exist
-    expect(() => governanceContract.getSomething2()).to.throw('governanceContract.getSomething2 is not a function');
+    expect(() => governanceContract.getSomething2()).to.throw(
+      'governanceContract.getSomething2 is not a function'
+    );
 
     // Given
     const {proxyOwner} = await getNamedAccounts();
@@ -66,12 +68,14 @@ describe('Governance upgrade test', () => {
     expect(milestoneApprovalRequestDuration.toNumber()).to.equal(
       DAO_MILESTONE_APPROVAL_REQUEST_DURATION
     );
-    expect(amountToStakeForDaoMember.toString()).to.equal(ethers.utils.parseEther('20000').toString());
+    expect(amountToStakeForDaoMember.toString()).to.equal(
+      ethers.utils.parseEther('20000').toString()
+    );
 
     // Check new Governance variables exist
     expect(foo.toNumber()).to.equal(0);
     expect(bar.toNumber()).to.equal(0);
     expect(something1.toNumber()).to.equal(1);
     expect(something2.toNumber()).to.equal(2);
-  })
+  });
 });

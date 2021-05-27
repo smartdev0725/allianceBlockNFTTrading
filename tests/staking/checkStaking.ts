@@ -1,13 +1,12 @@
-import { expect } from 'chai';
-import { ONE_DAY } from '../helpers/constants';
-import { increaseTime } from '../helpers/time';
-import { ethers } from 'hardhat';
-import { BigNumber } from 'ethers';
-import { StakingType } from '../helpers/registryEnums';
+import {expect} from 'chai';
+import {ONE_DAY} from '../helpers/constants';
+import {increaseTime} from '../helpers/time';
+import {ethers} from 'hardhat';
+import {BigNumber} from 'ethers';
+import {StakingType} from '../helpers/registryEnums';
 
 export default async function suite() {
   describe('Succeeds', async () => {
-
     beforeEach(async function () {
       await this.stakingContract
         .connect(this.rewardDistributorSigner)
@@ -16,7 +15,9 @@ export default async function suite() {
 
     it('when staking tokens and getting rewards', async function () {
       // Given
-      await this.stakingContract.connect(this.staker1Signer).stake(StakingType.STAKER_LVL_1);
+      await this.stakingContract
+        .connect(this.staker1Signer)
+        .stake(StakingType.STAKER_LVL_1);
 
       const rewardAmount = ethers.utils.parseEther('1000');
 
@@ -45,7 +46,9 @@ export default async function suite() {
       );
 
       // When
-      await this.stakingContract.connect(this.staker2Signer).stake(StakingType.STAKER_LVL_1);
+      await this.stakingContract
+        .connect(this.staker2Signer)
+        .stake(StakingType.STAKER_LVL_1);
 
       const staker2BalanceAfter = await this.stakingContract.getBalance(
         this.staker2

@@ -30,6 +30,8 @@ describe('Contract Governance', () => {
     expect(milestoneApprovalRequestDuration.toNumber()).to.equal(
       DAO_MILESTONE_APPROVAL_REQUEST_DURATION
     );
-    expect(amountToStakeForDaoMember.toString()).to.equal(ethers.utils.parseEther('20000').toString());
+    expect(amountToStakeForDaoMember.toString()).to.equal(
+      ethers.utils.parseEther('20000').toString()
+    );
   });
 });
