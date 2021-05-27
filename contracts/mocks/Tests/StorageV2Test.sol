@@ -1,0 +1,82 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.7.0;
+
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../../libs/LoanLibrary.sol";
+import "../../interfaces/IERC1155Mint.sol";
+import "../../interfaces/IERC721Mint.sol";
+import "../../interfaces/IGovernance.sol";
+import "../../interfaces/IEscrow.sol";
+
+/**
+ * @title AllianceBlock Storage contract
+ * @notice Responsible for loan storage
+ */
+contract StorageV2Test {
+    uint256 public totalLoans; // The total amount of loan requests.
+
+    // Mapping from loan id -> details for each and every loan.
+    mapping(uint256 => LoanLibrary.LoanDetails) public loanDetails;
+    // Mapping from loan id -> details for personal loans.
+    mapping(uint256 => LoanLibrary.PersonalLoanPayments) public personalLoanPayments;
+    // Mapping from loan id -> details for project loans.
+    mapping(uint256 => LoanLibrary.ProjectLoanPayments) public projectLoanPayments;
+    // Mapping from loan id -> loan status.
+    mapping(uint256 => LoanLibrary.LoanStatus) public loanStatus;
+    // Mapping from loan id -> loan seeker's address.
+    mapping(uint256 => address) public loanSeeker;
+    // The amount of investment tokens each ticket contains. (Only for INVESTMENT type)
+    mapping(uint256 => uint256) public investmentTokensPerTicket;
+    // The amount of tickets remaining to be allocated to investors. (Only for INVESTMENT type)
+    mapping(uint256 => uint256) public ticketsRemaining;
+    // The number lottery numbers allocated from all investors for a specific investment.
+    mapping(uint256 => uint256) public totalLotteryNumbersPerInvestment;
+    // The address of the investor that has allocated a specific lottery number on a specific investment.
+    mapping(uint256 => mapping(uint256 => address)) public addressOfLotteryNumber;
+    // The amount of tickets that an investor requested that are still not allocated.
+    mapping(uint256 => mapping(address => uint256)) public remainingTicketsPerAddress;
+    // The amount of tickets that an investor requested that have been won already.
+    mapping(uint256 => mapping(address => uint256)) public ticketsWonPerAddress;
+    // The amount of tickets that an investor locked for a specific investment.
+    mapping(uint256 => mapping(address => uint256)) public lockedTicketsForSpecificInvestmentPerAddress;
+    // The amount of tickets that an investor locked from all investments.
+    mapping(address => uint256) public lockedTicketsPerAddress;
+    // The last block checked for rewards for the tickets locked per address.
+    mapping(address => uint256) public lastBlockCheckedForLockedTicketsPerAddress;
+
+    IGovernance public governance; // Governance's contract address.
+    IERC20 public lendingToken; // Lending token's contract address.
+    IERC721Mint public mainNFT; // Main nft's contract address.
+    IERC1155Mint public fundingNFT; // Funding nft's contract address.
+    IEscrow public escrow; // Escrow's contract address.
+    IERC20 public rALBT; // rALBT's contract address.
+
+    // This variable represents the base amount in which every loan amount is divided to. (also the starting value for each ERC1155)
+    uint256 public baseAmountForEachPartition;
+    // This variable represents the minimum interest percentage that each loan should have.
+    uint256 public minimumInterestPercentage;
+    // This variable represents the maximum number of milestones a project loan can contain.
+    uint256 public maxMilestones;
+    // If milestone is rejected, this time interval is provided for the project to deliver.
+    uint256 public milestoneExtensionInterval;
+    // The amount of vesting batches when a lender decides to get project tokens.
+    uint256 public vestingBatches;
+    // The time interval between vesting batches when a lender decides to get project tokens.
+    uint256 public vestingTimeInterval;
+    // The time interval for adding funds.
+    uint256 public fundingTimeInterval;
+    // The amount of tickets to be provided by each run of the lottery.
+    uint256 public totalTicketsPerRun;
+    // The amount of rALBT needed to allocate one lottery number.
+    uint256 public rAlbtPerLotteryNumber;
+    // The amount of blocks needed for a ticket to be locked, so as the investor to get 1 rALBT.
+    uint256 public blocksLockedForReputation;
+    // The amount of lottery numbers, that if investor has after number allocation he gets one ticket without lottery.
+    uint256 public lotteryNumbersForImmediateTicket;
+    // The nonce for the lottery numbers.
+    uint256 internal lotteryNonce;
+
+    // Only for test upgrade
+    uint256 public foo;
+    uint256 public bar;
+}

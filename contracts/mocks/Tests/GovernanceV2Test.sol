@@ -2,11 +2,11 @@
 pragma solidity ^0.7.0;
 
 import "hardhat/console.sol";
-import "../governance/DaoSubscriptions.sol";
+import "../../governance/DaoSubscriptions.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "../interfaces/IRegistry.sol";
-import "../interfaces/IStaking.sol";
+import "../../interfaces/IRegistry.sol";
+import "../../interfaces/IStaking.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
@@ -14,7 +14,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
  * @dev WARNING Only for testing purposes, we added a couple of new methods and storage variables to check contract upgrade works fine
  * @notice Responsible for governing AllianceBlock's ecosystem
  */
-contract GovernanceV2 is Initializable, DaoSubscriptions {
+contract GovernanceV2Test is Initializable, DaoSubscriptions {
     using SafeMath for uint256;
     using DoubleLinkedList for DoubleLinkedList.LinkedList;
 
