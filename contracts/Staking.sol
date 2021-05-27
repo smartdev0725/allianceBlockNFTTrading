@@ -35,6 +35,9 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
 
         for(uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
             stakingTypeAmounts[i] = stakingTypeAmounts_[i];
+        }
+
+        for(uint256 i = 0; i < reputationalStakingTypeAmounts_.length; i++) {
             reputationalStakingTypeAmounts[i] = reputationalStakingTypeAmounts_[i];
         }
     }
