@@ -123,7 +123,7 @@ contract DaoCronjob is GovernanceTypesAndStorage {
             nextCronjobTimestamp = timestamp.add(updatableVariables[keccak256(abi.encode("daoDelegationApprovalDuration"))]);
         }
         else if (votingStatusForDaoDelegators == VotingStatusDelegators.APPROVE_VOTING) {
-            // TODO_MAYBE - Check DAO_MEMBERS not voted
+            // TODO_MAYBE - Check DAO_MEMBERS not voted - Better provide rALBT to them for voting.
             amountOfEpochDaoDelegatorsNeededPerEpoch[currentEpoch.add(1)] = updatableVariables[keccak256(abi.encode("amountOfDaoDelegators"))];
             votingStatusForDaoDelegators = VotingStatusDelegators.CLAIM_DELEGATION;
 

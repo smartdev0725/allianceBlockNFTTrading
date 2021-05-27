@@ -10,7 +10,7 @@ import "../libs/TokenFormat.sol";
  * @title AllianceBlock Investment contract
  * @notice Functionality for Investment.
  */
-contract Investement is LoanDetails {
+contract Investment is LoanDetails {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 
@@ -29,9 +29,7 @@ contract Investement is LoanDetails {
         uint256 totalAmountRequested_,
         string memory extraInfo
     ) external {
-        // Change 10 ** 18 to decimals if needed.
-
-        // TODO - CHECK - Are we handling the case where price of one token is more expensive than baseAmount?
+        // TODO - Change 10 ** 18 to decimals if needed.
         require(
             totalAmountRequested_.mod(baseAmountForEachPartition) == 0 &&
             totalAmountRequested_.mul(10**18).mod(amountOfInvestmentTokens) == 0,
@@ -204,15 +202,23 @@ contract Investement is LoanDetails {
             escrow.transferCollateralToken(loanDetails[investmentId].collateralToken ,msg.sender, amountToWithdraw);
         }
 
-        uint256 amountToReturnForNonWonTickets = remainingTicketsPerAddress[investmentId][msg.sender].mul(
-            baseAmountForEachPartition);
-        remainingTicketsPerAddress[investmentId][msg.sender] = 0;
-
-        if (amountToReturnForNonWonTickets > 0)
-            escrow.transferLendingToken(msg.sender, amountToReturnForNonWonTickets);
+        if (remainingTicketsPerAddress[investmentId][msg.sender] > 0) {
+            _withdrawAmountProvidedForNonWonTickets(investmentId);
+        }
     }
 
-    // TODO - Just withdraw non-won tickets
+    /**
+     * @dev This function is called by an investor to withdraw lending tokens provided for non-won tickets.
+     * @param investmentId The id of the investment.
+     */
+    function withdrawAmountProvidedForNonWonTickets(uint256 investmentId)
+        external
+    {
+        require(loanStatus[investmentId] == LoanLibrary.LoanStatus.SETTLED, "Can withdraw only in Settled state");
+        require(remainingTicketsPerAddress[investmentId][msg.sender] > 0, "No non-won tickets to withdraw");
+
+        _withdrawAmountProvidedForNonWonTickets(investmentId);
+    }
 
     /**
      * @dev This function is called by an investor to withdraw his locked tickets.
@@ -273,5 +279,15 @@ contract Investement is LoanDetails {
         }
 
         return rALBT.balanceOf(msg.sender);
+    }
+
+    function _withdrawAmountProvidedForNonWonTickets(uint256 investmentId_)
+        internal
+    {
+        uint256 amountToReturnForNonWonTickets = remainingTicketsPerAddress[investmentId_][msg.sender].mul(
+            baseAmountForEachPartition);
+        remainingTicketsPerAddress[investmentId_][msg.sender] = 0;
+
+        escrow.transferLendingToken(msg.sender, amountToReturnForNonWonTickets);
     }
 }

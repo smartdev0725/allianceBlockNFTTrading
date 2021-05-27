@@ -16,8 +16,8 @@ describe('Contract Governance', () => {
 
     // When
     const [
-      totalApprovalRequests,
-      approvalsNeededForRegistryRequest,
+      totalApprovalRequests, // Don't remove this
+      approvalsNeededForRegistryRequest, // Don't remove this
       loanApprovalRequestDuration,
       milestoneApprovalRequestDuration,
       amountToStakeForDaoMember,

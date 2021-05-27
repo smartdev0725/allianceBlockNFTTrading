@@ -5,7 +5,7 @@ import { ethers } from 'hardhat';
 import { BigNumber } from 'ethers';
 
 export default async function suite() {
-  describe.only('Succeeds', async () => {
+  describe('Succeeds', async () => {
 
     beforeEach(async function () {
       await this.stakingContract
