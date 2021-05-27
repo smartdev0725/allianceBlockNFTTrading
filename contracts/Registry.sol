@@ -105,7 +105,7 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
     external
     onlyOwner()
     {
-        // TODO this should happens only one time
+        require(totalTicketsPerRun == 0, "Cannot initialize twice");
         rALBT = IERC20(reputationalAlbt);
         totalTicketsPerRun = totalTicketsPerRun_;
         rAlbtPerLotteryNumber = rAlbtPerLotteryNumber_;
