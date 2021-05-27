@@ -43,7 +43,7 @@ describe('Governance upgrade test', () => {
 
     // When
     await deploy('Governance', {
-      contract: 'GovernanceV2',
+      contract: 'GovernanceV2Test',
       from: proxyOwner,
       proxy: {
         owner: proxyOwner,
@@ -68,7 +68,7 @@ describe('Governance upgrade test', () => {
     );
     expect(amountToStakeForDaoMember.toNumber()).to.equal(3);
 
-    // New Governance variables
+    // Check new Governance variables exist
     expect(foo.toNumber()).to.equal(0);
     expect(bar.toNumber()).to.equal(0);
     expect(something1.toNumber()).to.equal(1);
