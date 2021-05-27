@@ -58,6 +58,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
         onlyOwner()
     {
         require(actions.length == signatures.length, "Invalid length");
+        require(actions.length <= maxActionsPerProvision, "Too many actions");
         // TODO - Rachid specifies the require to add here.
 
         address[] memory accounts = new address[](actions.length.add(1));
@@ -86,5 +87,14 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
         rewards[actions.length] = rewardForCaller;
 
         escrow.multiMintReputationalToken(accounts, rewards);
+    }
+
+    /**
+     * @notice Check Action
+     * @dev checks if given action has a reward
+     * @return exist boolean represents checks if action has a reward associated
+    */
+    function checkAction(string memory action) public view returns (bool exist){
+         return rewardPerAction[keccak256(abi.encodePacked(action))] > 0;
     }
 }
