@@ -59,7 +59,7 @@ contract DaoStaking is StakingTypesAndStorage {
 
         if(isDaoMember) {
             amountToWithdraw = rewardsPerEpochForDaoMembers[epoch].div(amountOfDaoMembers);
-        } else {            
+        } else {
             amountToWithdraw = rewardsPerEpochForDaoDelegators[epoch].div(amountOfDaoDelegators);
         }
 

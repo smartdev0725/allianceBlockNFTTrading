@@ -152,12 +152,10 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
     {
         if (previousLevelIndex < newLevelIndex) {
             uint256 amountToMint = findAmount(newLevelIndex, previousLevelIndex);
-
             escrow.mintReputationalToken(account, amountToMint);
         }
         else {
             uint256 amountToBurn = findAmount(previousLevelIndex, newLevelIndex);
-
             escrow.burnReputationalToken(account, amountToBurn);
         }
     }
