@@ -3,7 +3,7 @@ import {expect} from "chai";
 import {BigNumber} from "ethers";
 import {getSigners, initializeTransfers} from "../helpers/utils";
 
-describe.only('Registry upgrade test', () => {
+describe('Registry upgrade test', () => {
   let approvalRequest: BigNumber;
   let loanIdBefore: BigNumber;
   let loanIdAfter: BigNumber;
