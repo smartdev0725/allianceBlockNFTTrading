@@ -32,7 +32,7 @@ describe('Governance upgrade test', () => {
     expect(milestoneApprovalRequestDuration.toNumber()).to.equal(
       DAO_MILESTONE_APPROVAL_REQUEST_DURATION
     );
-    expect(amountToStakeForDaoMember.toNumber()).to.equal(3);
+    expect(amountToStakeForDaoMember.toString()).to.equal(ethers.utils.parseEther('20000').toString());
 
     // Check new method don't exist
     expect(() => governanceContract.getSomething2()).to.throw('governanceContract.getSomething2 is not a function');
@@ -66,7 +66,7 @@ describe('Governance upgrade test', () => {
     expect(milestoneApprovalRequestDuration.toNumber()).to.equal(
       DAO_MILESTONE_APPROVAL_REQUEST_DURATION
     );
-    expect(amountToStakeForDaoMember.toNumber()).to.equal(3);
+    expect(amountToStakeForDaoMember.toString()).to.equal(ethers.utils.parseEther('20000').toString());
 
     // Check new Governance variables exist
     expect(foo.toNumber()).to.equal(0);
