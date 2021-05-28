@@ -11,7 +11,10 @@ import {
   VESTING_BATCHES,
   VESTING_TIME_INTERVAL,
   FUNDING_TIME_INTERVAL,
-} from '../utils/constants';
+} from '../../utils/constants';
+
+const version = 'v0.1.0';
+const contractName = 'Registry';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
@@ -19,14 +22,14 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const {deployer, proxyOwner} = await getNamedAccounts();
 
-  const Escrow = await get('Escrow');
-  const Governance = await get('Governance');
-  const LendingToken = await get('LendingToken');
-  const MainNFT = await get('MainNFT');
-  const FundingNFT = await get('FundingNFT');
+  const escrowAddress = (await get('Escrow')).address;
+  const governanceAddress = (await get('Governance')).address;
+  const lendingTokenAddress = process.env.LENDING_TOKEN_ADDRESS ? process.env.LENDING_TOKEN_ADDRESS: (await get('LendingToken')).address;
+  const mainNFTAddress = (await get('MainNFT')).address;
+  const fundingNFTAddress = (await get('FundingNFT')).address;
 
-  await deploy('Registry', {
-    contract: 'Registry',
+  await deploy(contractName, {
+    contract: contractName,
     from: deployer,
     proxy: {
       owner: proxyOwner,
@@ -34,11 +37,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
     args: [
-      Escrow.address,
-      Governance.address,
-      LendingToken.address,
-      MainNFT.address,
-      FundingNFT.address,
+      escrowAddress,
+      governanceAddress,
+      lendingTokenAddress,
+      mainNFTAddress,
+      fundingNFTAddress,
       ethers.utils.parseEther(BASE_AMOUNT + '').toString(), // Same as toWei in web3
       MINIMUM_INTEREST_PERCENTAGE,
       MAX_MILESTONES,
@@ -49,9 +52,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     ],
     log: true,
   });
+  return true;
 };
+
+const id = contractName + version;
+
 export default func;
-func.tags = ['Registry'];
+func.tags = [id, version];
 func.dependencies = [
   'FundingNFT',
   'MainNFT',
@@ -59,3 +66,4 @@ func.dependencies = [
   'Governance',
   'Escrow',
 ];
+func.id = id;
