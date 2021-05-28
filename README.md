@@ -19,7 +19,7 @@ Smart contracts for the AllianceBlock Protocol.
 This repository requires some knowledge of:
 
 * [Solidity](https://solidity.readthedocs.io/en/latest/)
-* [npm](https://docs.npmjs.com/)
+* [yarn](https://yarnpkg.com/getting-started)
 * [TypeScript](https://www.typescriptlang.org/) (for tests)
 * [hardhat](https://hardhat.org/)
 
