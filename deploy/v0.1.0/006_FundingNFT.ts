@@ -1,27 +1,31 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import '@nomiclabs/hardhat-ethers';
-import {ethers} from 'hardhat';
+
+const version = 'v0.1.0';
+const contractName = 'FundingNFT';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy, get} = deployments;
+  const {deploy} = deployments;
 
   const {deployer, proxyOwner} = await getNamedAccounts();
 
-  const Escrow = await get('Escrow');
-
-  await deploy('ActionVerifier', {
-    contract: 'ActionVerifier',
+  await deploy(contractName, {
+    contract: contractName,
     from: deployer,
     proxy: {
       owner: proxyOwner,
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
-    args: [10, 10, Escrow.address],
+    args: ['ipfs://', 'https://allianceblock.io/'],
     log: true,
   });
+  return true;
 };
+
+const id = contractName + version;
+
 export default func;
-func.tags = ['ActionVerifier'];
+func.tags = [id, version];
+func.id = id;

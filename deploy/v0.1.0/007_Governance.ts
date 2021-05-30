@@ -9,7 +9,10 @@ import {
   DAO_UPDATE_REQUEST_DURATION,
   APPLICATION_FOR_INVESTMENT_DURATION,
   LATE_APPLICATION_FOR_INVESTMENT_DURATION,
-} from '../utils/constants';
+} from '../../utils/constants';
+
+const version = 'v0.1.0';
+const contractName = 'Governance';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
@@ -17,8 +20,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const {deployer, proxyOwner, superDelegator} = await getNamedAccounts();
 
-  await deploy('Governance', {
-    contract: 'Governance',
+  await deploy(contractName, {
+    contract: contractName,
     from: deployer,
     proxy: {
       owner: proxyOwner,
@@ -37,6 +40,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     ],
     log: true,
   });
+  return true;
 };
+
+const id = contractName + version;
+
 export default func;
-func.tags = ['Governance'];
+func.tags = [id, version];
+func.id = id;

@@ -2,6 +2,8 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {ethers} from 'hardhat';
 
+const version = 'v0.1.0';
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {get} = deployments;
@@ -92,6 +94,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       blocksLockedForReputation,
       lotteryNumbersForImmediateTicket
     );
+  return true;
 };
+
+const id = 'Setup' + version;
+
 export default func;
-func.tags = ['Setup'];
+func.tags = [id, version];
+func.id = id;
