@@ -1,6 +1,10 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import '@nomiclabs/hardhat-ethers';
+import {ethers} from 'hardhat';
+
+const version = 'v0.1.0';
+const contractName = 'ActionVerifier';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
@@ -8,22 +12,25 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const {deployer, proxyOwner} = await getNamedAccounts();
 
-  const LendingToken = await get('LendingToken');
-  const MainNFT = await get('MainNFT');
-  const FundingNFT = await get('FundingNFT');
+  const escrowContractAddress = (await get('Escrow')).address;
 
-  await deploy('Escrow', {
-    contract: 'Escrow',
+  await deploy(contractName, {
+    contract: contractName,
     from: deployer,
     proxy: {
       owner: proxyOwner,
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
-    args: [LendingToken.address, MainNFT.address, FundingNFT.address],
+    args: [10, 10, escrowContractAddress],
     log: true,
   });
+  return true;
 };
+
+const id = contractName + version;
+
 export default func;
-func.tags = ['Escrow'];
-func.dependencies = ['LendingToken', 'FundingNFT', 'MainNFT'];
+func.tags = [id, version];
+func.dependencies = ['Escrow'];
+func.id = id;

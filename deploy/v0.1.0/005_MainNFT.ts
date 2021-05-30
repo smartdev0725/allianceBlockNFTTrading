@@ -1,14 +1,17 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
+const version = 'v0.1.0';
+const contractName = 'MainNFT';
+
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
   const {deployer, proxyOwner} = await getNamedAccounts();
 
-  await deploy('MainNFT', {
-    contract: 'MainNFT',
+  await deploy(contractName, {
+    contract: contractName,
     from: deployer,
     proxy: {
       owner: proxyOwner,
@@ -18,6 +21,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     args: ['Alliance Block Custody NFT', 'bNFT'],
     log: true,
   });
+  return true;
 };
+
+const id = contractName + version;
+
 export default func;
-func.tags = ['MainNFT'];
+func.tags = [id, version];
+func.id = id;

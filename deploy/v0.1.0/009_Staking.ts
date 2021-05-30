@@ -3,14 +3,18 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import '@nomiclabs/hardhat-ethers';
 import {ethers} from 'hardhat';
 
+const version = 'v0.1.0';
+const contractName = 'Staking';
+
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
   const {deploy, get} = deployments;
 
-  const ALBTContract = await get('ALBT');
-  const governanceContract = await get('Governance');
-  const escrowContract = await get('Escrow');
+  const albtContractAddress = process.env.ALBT_TOKEN_ADDRESS ? process.env.ALBT_TOKEN_ADDRESS: (await get('ALBT')).address;
+  const governanceContractAddress = (await get('Governance')).address;
+  const escrowContractAddress = (await get('Escrow')).address;
   const {deployer, proxyOwner} = await getNamedAccounts();
+
   const stakingTypeAmounts = [
     ethers.utils.parseEther('5000'),
     ethers.utils.parseEther('20000'),
@@ -23,8 +27,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     ethers.utils.parseEther('13000'),
   ];
 
-  await deploy('Staking', {
-    contract: 'Staking',
+  await deploy(contractName, {
+    contract: contractName,
     from: deployer,
     proxy: {
       owner: proxyOwner,
@@ -32,14 +36,20 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
     args: [
-      ALBTContract.address,
-      governanceContract.address,
-      escrowContract.address,
+      albtContractAddress,
+      governanceContractAddress,
+      escrowContractAddress,
       stakingTypeAmounts,
       reputationalStakingTypeAmounts,
     ],
     log: true,
   });
+  return true;
 };
+
+const id = contractName + version;
+
 export default func;
-func.tags = ['Staking'];
+func.tags = [id, version];
+func.dependencies = ['Governance', 'Escrow'];
+func.id = id;
