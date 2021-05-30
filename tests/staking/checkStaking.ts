@@ -1,16 +1,25 @@
-import {expect} from 'chai';
-import {ONE_DAY} from '../helpers/constants';
-import {increaseTime} from '../helpers/time';
-import {ethers} from 'hardhat';
-import {BigNumber} from 'ethers';
-import {StakingType} from '../helpers/registryEnums';
+import { expect } from 'chai';
+import { ONE_DAY } from '../helpers/constants';
+import { increaseTime } from '../helpers/time';
+import { ethers } from 'hardhat';
+import { BigNumber } from 'ethers';
+import { StakingType } from '../helpers/registryEnums';
+const { expectRevert } = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
-  describe('Succeeds', async () => {
+  describe.only('Succeeds', async () => {
     beforeEach(async function () {
       await this.stakingContract
         .connect(this.rewardDistributorSigner)
         .notifyRewardAmount(BigNumber.from(0));
+    });
+
+    it('when the reward distributor is correctly said', async function () {
+      expect(await this.stakingContract.rewardDistribution()).to.be.equal(this.rewardDistributor);
+    });
+
+    it('when only reward distributor can notifyRewardAmount', async function () {
+      await expectRevert(this.stakingContract.connect(this.staker1Signer).notifyRewardAmount(BigNumber.from(0)), "Caller is not reward distribution");
     });
 
     it('when staking tokens and getting rewards', async function () {
@@ -59,5 +68,9 @@ export default async function suite() {
         Number(staker2BalanceBefore)
       );
     });
+
+    it('staking affects reputation', async function () {
+
+    })
   });
 }
