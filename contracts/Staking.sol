@@ -87,6 +87,8 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
 
     function stake(StakingType stakingType) public updateReward(msg.sender) {
         require(uint256(stakingType) < 3, "Delegator type stake only via Governance");
+        console.log("balance staking", balance[msg.sender]);
+        console.log("amount for type", stakingTypeAmounts[uint256(stakingType)]);
         require(balance[msg.sender] < stakingTypeAmounts[uint256(stakingType)], "Cannot stake for same type again");
         uint256 amount = stakingTypeAmounts[uint256(stakingType)];
 
@@ -94,8 +96,9 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
 
         _applyReputation(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
 
-        _stake(msg.sender, amount.sub(balance[msg.sender]));
-        emit Staked(msg.sender, amount.sub(balance[msg.sender]));
+        uint256 amountToStake = amount.sub(balance[msg.sender]);
+        _stake(msg.sender, amountToStake);
+        emit Staked(msg.sender, amountToStake);
     }
 
     // TODO - Add way to unstake only partially (drop levels)
@@ -113,6 +116,7 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
     function getReward() public updateReward(msg.sender) {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
+            console.log("reward", reward);
             rewards[msg.sender] = 0;
             albt.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
@@ -154,16 +158,16 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
         internal
     {
         if (previousLevelIndex < newLevelIndex) {
-            uint256 amountToMint = findAmount(newLevelIndex, previousLevelIndex);
+            uint256 amountToMint = _findAmount(newLevelIndex, previousLevelIndex);
             escrow.mintReputationalToken(account, amountToMint);
         }
         else {
-            uint256 amountToBurn = findAmount(previousLevelIndex, newLevelIndex);
+            uint256 amountToBurn = _findAmount(previousLevelIndex, newLevelIndex);
             escrow.burnReputationalToken(account, amountToBurn);
         }
     }
 
-    function findAmount(uint256 bigIndex, uint256 smallIndex) internal view returns (uint256 amount) {
+    function _findAmount(uint256 bigIndex, uint256 smallIndex) internal view returns (uint256 amount) {
         if (bigIndex > 3) bigIndex = 3;
         if (smallIndex == 0) {
             amount = reputationalStakingTypeAmounts[bigIndex.sub(1)];
