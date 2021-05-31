@@ -3,7 +3,7 @@ import checkEscrow from './checkEscrow';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
 describe('Escrow', function () {
-  before(async function () {
+  beforeEach(async function () {
     // Deploy fixtures
     const {deploy, fixture, get} = deployments
     await fixture();
@@ -29,6 +29,7 @@ describe('Escrow', function () {
 
     this.escrowContract = await ethers.getContract('Escrow2');
     this.fundingNFTContract = await ethers.getContract('FundingNFT');
+    this.collateralTokenContract = await ethers.getContract('CollateralToken');
 
     const actionVerifierContract = await get('ActionVerifier');
     const stakingContract = await get('Staking');
