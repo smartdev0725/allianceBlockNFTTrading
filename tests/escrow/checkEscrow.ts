@@ -150,4 +150,53 @@ export default async function suite() {
     });
 
   });
+
+  describe('Lending Token', async() => {
+    it('when transfer lending token', async function () {
+      // Given
+      const {seeker} = await getNamedAccounts();
+      const { deployerSigner } = await getSigners();
+      const amount = ethers.utils.parseEther('1');
+
+      // When
+      await this.lendingTokenContract.mint(this.escrowContract.address, amount);
+      await this.escrowContract.connect(deployerSigner).transferLendingToken(seeker, amount);
+
+      // Then
+      const escrowBalance = await this.lendingTokenContract.balanceOf(this.escrowContract.address);
+      const seekerBalance = await this.lendingTokenContract.balanceOf(seeker);
+      expect(escrowBalance.toNumber()).to.be.equal(0);
+      expect(seekerBalance.toString()).to.be.equal(amount.toString());
+    });
+
+
+    it('when transfer lending token without balance should revert', async function () {
+      // Given
+      const {seeker} = await getNamedAccounts();
+      const amount = ethers.utils.parseEther('1');
+
+      // When and Then
+      await expectRevert(
+        this.escrowContract.transferLendingToken(seeker, amount),
+        'ERC20: transfer amount exceeds balance'
+      );
+    });
+
+    it('when transfer lending token from another account not allowed should revert', async function () {
+      // Given
+      const {seeker} = await getNamedAccounts();
+      const {seekerSigner} = await getSigners();
+
+      const amount = ethers.utils.parseEther('1');
+
+      // When and Then
+      await this.lendingTokenContract.mint(this.escrowContract.address, amount);
+
+      await expectRevert(
+        this.escrowContract.connect(seekerSigner).transferLendingToken(seeker, amount),
+        'Only Registry'
+      );
+    });
+
+  });
 }

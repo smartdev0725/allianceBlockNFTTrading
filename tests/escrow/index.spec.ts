@@ -30,6 +30,7 @@ describe('Escrow', function () {
     this.escrowContract = await ethers.getContract('Escrow2');
     this.fundingNFTContract = await ethers.getContract('FundingNFT');
     this.collateralTokenContract = await ethers.getContract('CollateralToken');
+    this.lendingTokenContract = await ethers.getContract('LendingToken');
 
     const actionVerifierContract = await get('ActionVerifier');
     const stakingContract = await get('Staking');
