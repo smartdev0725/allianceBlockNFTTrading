@@ -4,7 +4,7 @@ import {getSigners} from "../helpers/utils";
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
-  describe('Succeeds', async () => {
+  describe.only('Succeeds', async () => {
     it('when transfer funding nft', async function () {
       // Given
       const {seeker} = await getNamedAccounts();
@@ -73,6 +73,27 @@ export default async function suite() {
         this.escrowContract.connect(seekerSigner).transferFundingNFT(loanId, partitionsToPurchase, seeker),
         'Only Registry'
       );
+    });
+
+    it('when change registry from another account not allowed should revert', async function () {
+      // Get signers
+      const { seekerSigner } = await getSigners();
+      await expectRevert(
+        this.escrowContract.connect(seekerSigner).changeRegistry(ethers.constants.AddressZero),
+        'Ownable: caller is not the owner'
+      );
+    });
+
+    it('when change registry from owner account should not revert', async function () {
+      // Given
+      const { deployerSigner } = await getSigners();
+
+      // When
+      await this.escrowContract.connect(deployerSigner).changeRegistry(ethers.constants.AddressZero)
+
+      // Then
+      const registryAddress = await this.escrowContract.registry();
+      expect(registryAddress).to.be.equal(ethers.constants.AddressZero);
     });
   });
 }
