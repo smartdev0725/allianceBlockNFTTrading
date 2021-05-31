@@ -19,7 +19,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
     IEscrow public escrow;
 
     /**
-     * @dev Constructor of the ActionVerifier contract.
+     * @dev Initializer of the ActionVerifier contract.
      * @param rewardPerActionProvision_ The reward that an action provider accumulates for each action provision.
      */
     function initialize(
