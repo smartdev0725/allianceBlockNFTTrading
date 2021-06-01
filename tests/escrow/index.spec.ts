@@ -9,7 +9,7 @@ describe('Escrow', function () {
     await fixture();
 
     // Get accounts
-    const {deployer, proxyOwner} = await getNamedAccounts();
+    const {deployer, staker1, staker2, proxyOwner} = await getNamedAccounts();
 
     const fundingNFTContract = await get('FundingNFT');
     const mainNFTContract = await get('MainNFT');
@@ -32,16 +32,16 @@ describe('Escrow', function () {
     this.collateralTokenContract = await ethers.getContract('CollateralToken');
     this.lendingTokenContract = await ethers.getContract('LendingToken');
 
-    const actionVerifierContract = await get('ActionVerifier');
-    const stakingContract = await get('Staking');
+    const rALBTAddress = await this.escrowContract.reputationalALBT();
+    this.rALBTContract = await ethers.getContractAt("rALBT", rALBTAddress);
 
     // Setup escrow
     await this.escrowContract.afterInitialize(
-      deployer,
-      actionVerifierContract.address,
-      stakingContract.address
+      deployer, // Act as registry contract
+      staker1, // Act as actionVerifier contract
+      staker2 // Act as staking contract
     );
   });
 
-  describe('When checking escrow functionalities', checkEscrow.bind(this));
+  describe.only('When checking escrow functionalities', checkEscrow.bind(this));
 });

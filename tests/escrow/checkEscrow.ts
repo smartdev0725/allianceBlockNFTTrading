@@ -235,5 +235,23 @@ export default async function suite() {
         'Invalid length of to or amounts'
       );
     });
+
+    it('when mint reputational tokens should success', async function () {
+      // Given
+      const {lender1, lender2} = await getNamedAccounts();
+      const {staker1Signer} = await getSigners();
+      const amount = ethers.utils.parseEther('1');
+
+      // When
+      await this.escrowContract.connect(staker1Signer).multiMintReputationalToken([lender1, lender2], [amount, amount]);
+
+      // Then
+      const balanceLender1 = await this.rALBTContract.balanceOf(lender1);
+      const balanceLender2 = await this.rALBTContract.balanceOf(lender2);
+
+      expect(balanceLender1.toString()).to.be.equal(amount.toString());
+      expect(balanceLender2.toString()).to.be.equal(amount.toString());
+
+    });
   })
 }
