@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {get} = deployments;
 
-  const {deployer, rewardDistributor} = await getNamedAccounts();
+  const {rewardDistributor} = await getNamedAccounts();
 
   const signers = await ethers.getSigners();
   const deployerSigner = signers[0];
@@ -56,27 +56,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Setup FundingNFT
   const hasRoleMinter = await fundingNFTContract.hasRole(
-    ethers.utils.keccak256(ethers.utils.toUtf8Bytes('MINTER_ROLE')),
+    ethers.utils.solidityKeccak256([ "string", ], [ "MINTER_ROLE" ]),
     registryContract.address,
-    {from: deployer}
   );
   if (!hasRoleMinter) {
-    await fundingNFTContract.grantRole(
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes('MINTER_ROLE')),
+    await fundingNFTContract.connect(deployerSigner).grantRole(
+      ethers.utils.solidityKeccak256([ "string", ], [ "MINTER_ROLE" ]),
       registryContract.address,
-      {from: deployer}
     );
   }
   const hasRolePauser = await fundingNFTContract.hasRole(
-    ethers.utils.keccak256(ethers.utils.toUtf8Bytes('PAUSER_ROLE')),
+    ethers.utils.solidityKeccak256([ "string", ], [ "PAUSER_ROLE" ]),
     registryContract.address,
-    {from: deployer}
   );
   if (!hasRolePauser) {
-    await fundingNFTContract.grantRole(
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes('PAUSER_ROLE')),
-      registryContract.address,
-      {from: deployer}
+    await fundingNFTContract.connect(deployerSigner).grantRole(
+      ethers.utils.solidityKeccak256([ "string", ], [ "PAUSER_ROLE" ]),
+      registryContract.address
     );
   }
 
