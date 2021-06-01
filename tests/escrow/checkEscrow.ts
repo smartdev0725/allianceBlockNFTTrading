@@ -253,5 +253,69 @@ export default async function suite() {
       expect(balanceLender2.toString()).to.be.equal(amount.toString());
 
     });
+  });
+
+  describe('mintReputationalToken', async() => {
+    it('when mint reputational tokens with an invalid user should revert', async function () {
+      // Given
+      const {lender1} = await getNamedAccounts();
+      const {seekerSigner} = await getSigners();
+      const amount = ethers.utils.parseEther('1');
+
+      // When and Then
+      await expectRevert(
+        this.escrowContract.connect(seekerSigner).mintReputationalToken(lender1, amount),
+        'Only Registry or Staking'
+      );
+    });
+
+    it('when mint reputational tokens should success', async function () {
+      // Given
+      const {lender1} = await getNamedAccounts();
+      const {staker2Signer} = await getSigners();
+      const amount = ethers.utils.parseEther('1');
+
+      // When
+      await this.escrowContract.connect(staker2Signer).mintReputationalToken(lender1, amount);
+
+      // Then
+      const balanceLender1 = await this.rALBTContract.balanceOf(lender1);
+      expect(balanceLender1.toString()).to.be.equal(amount.toString());
+
+    });
+  });
+
+  describe('burnReputationalToken', async() => {
+    it('when burn reputational tokens with an invalid user should revert', async function () {
+      // Given
+      const {lender1} = await getNamedAccounts();
+      const {seekerSigner} = await getSigners();
+      const amount = ethers.utils.parseEther('1');
+
+      // When and Then
+      await expectRevert(
+        this.escrowContract.connect(seekerSigner).burnReputationalToken(lender1, amount),
+        'Only Staking'
+      );
+    });
+
+    it('when burn reputational tokens should success', async function () {
+      // Given
+      const {lender1} = await getNamedAccounts();
+      const {staker2Signer} = await getSigners();
+      const amount = ethers.utils.parseEther('1');
+
+      // When
+      await this.escrowContract.connect(staker2Signer).mintReputationalToken(lender1, amount);
+
+      // Then
+      const balanceLender1 = await this.rALBTContract.balanceOf(lender1);
+      expect(balanceLender1.toString()).to.be.equal(amount.toString());
+
+      await this.escrowContract.connect(staker2Signer).burnReputationalToken(lender1, amount);
+      const balanceLender1AfterBurn = await this.rALBTContract.balanceOf(lender1);
+      expect(balanceLender1AfterBurn.toNumber()).to.be.equal(0);
+
+    });
   })
 }
