@@ -3,7 +3,7 @@
 pragma solidity >=0.6.0 <0.8.0;
 
 /**
- * @dev Interface of the IERC1155 mint function.
+ * @title Interface of the IERC1155 mint function.
  */
 interface IERC1155Mint {
     function mintGen0(address to, uint256 amount, uint256 loanId) external;

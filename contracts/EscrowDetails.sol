@@ -11,7 +11,7 @@ import "./rALBT.sol";
 
 /**
  * @title AllianceBlock EscrowDetails contract
- * @notice Functionality, storage and modifiers for escrow
+ * @notice Functionality, storage and modifiers for Escrow
  */
 contract EscrowDetails {
     IRegistry public registry;

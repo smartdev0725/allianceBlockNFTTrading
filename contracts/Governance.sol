@@ -11,6 +11,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title AllianceBlock Governance contract
+ * @dev Extends Initializable, DaoSubscriptions
  * @notice Responsible for governing AllianceBlock's ecosystem
  */
 contract Governance is Initializable, DaoSubscriptions {
@@ -18,7 +19,15 @@ contract Governance is Initializable, DaoSubscriptions {
     using DoubleLinkedList for DoubleLinkedList.LinkedList;
 
     /**
-     * @dev Initialize the contract.
+     * @notice Initialize the contract.
+     * @param superDelegator_ The address of the admin in charge during the first epoch
+     * @param loanApprovalRequestDuration_ The duration of the Loan
+     * @param milestoneApprovalRequestDuration_ Milestone approval request duration
+     * @param daoUpdateRequestDuration_ DAO update request duration
+     * @param approvalsNeededForRegistryRequest_ approvals needed for registry request
+     * @param approvalsNeededForGovernanceRequest_ approvals needed for governance request
+     * @param applicationsForInvestmentDuration_ duration for applications for investment
+     * @param lateApplicationsForInvestmentDuration_ duration forlate applications for investment 
      */
     function initialize(
         address superDelegator_,
@@ -43,6 +52,13 @@ contract Governance is Initializable, DaoSubscriptions {
         updatableVariables[keccak256(abi.encode("lateApplicationsForInvestmentDuration"))] = lateApplicationsForInvestmentDuration_;
     }
 
+    /**
+     * @notice Request a loan or investment approval
+     * @dev Executes cronJob()
+     * @param loanId The id of the loan or investment to approve
+     * @param isMilestone Whether or not this is a milestone approval request
+     * @param milestoneNumber The number of milestone to approve
+    */
     function requestApproval(
     	uint256 loanId,
         bool isMilestone,
@@ -89,6 +105,12 @@ contract Governance is Initializable, DaoSubscriptions {
         totalApprovalRequests = totalApprovalRequests.add(1);
     }
 
+    /**
+     * @notice Used for voting on a Request
+     * @dev Executes cronjob()
+     * @param requestId The id of the Request to vote on
+     * @param decision The casted vote (0 or 1)
+    */
     function voteForRequest(
         uint256 requestId,
         bool decision
@@ -107,6 +129,11 @@ contract Governance is Initializable, DaoSubscriptions {
         emit VotedForRequest(approvalRequests[requestId].loanId, requestId, decision, msg.sender);
     }
 
+    /**
+     * @notice Stores Investment Duration
+     * @dev Adds cronJob
+     * @param investmentId The id of the investment to store
+    */
     function storeInvestmentTriggering(
         uint256 investmentId
     )
@@ -119,8 +146,8 @@ contract Governance is Initializable, DaoSubscriptions {
     }
 
     /**
-    * @dev Helper function for querying Governance variables
-    * @return internal Governance uint variables
+     * @notice Helper function for querying Governance variables
+     * @dev returns internal Governance uint variables
     */
     function getDaoData() public view returns (uint256, uint256, uint256, uint256, uint256){
         (, uint256 amountToStakeForDaoMember, ) = staking.getAmountsToStake();

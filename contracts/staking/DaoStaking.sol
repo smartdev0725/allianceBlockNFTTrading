@@ -4,9 +4,17 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./StakingTypesAndStorage.sol";
 import "hardhat/console.sol";
 
+/**
+ * @title Alliance Block DAO Staking Contract
+ * @dev Extends StakingTypesAndStorage
+*/
 contract DaoStaking is StakingTypesAndStorage {
     using SafeMath for uint256;
 
+    /**
+     * @notice Provide Staking for DAO Membership
+     * @param staker the address of the staker
+    */
     function provideStakingForDaoMembership(address staker) external onlyGovernance() {
         uint256 amount = stakingTypeAmounts[uint256(StakingType.STAKER_LVL_3_OR_DAO_MEMBER)].sub(balance[staker]);
 
@@ -15,6 +23,11 @@ contract DaoStaking is StakingTypesAndStorage {
         _stake(staker, amount);
     }
 
+    /**
+     * @notice Provide Staking for DAO Delegators
+     * @dev requires staker to be a DAO Member Subscriber
+     * @param staker the address of the staker
+    */
     function provideStakingForDaoDelegator(address staker) external onlyGovernance() {
         require(balance[staker] == stakingTypeAmounts[uint256(StakingType.STAKER_LVL_3_OR_DAO_MEMBER)],
             "Must be already a dao member subscriber");
@@ -25,12 +38,23 @@ contract DaoStaking is StakingTypesAndStorage {
         _stake(staker, amount);
     }
 
+    /**
+     * @notice Unstake DAO
+     * @param staker the address of the staker
+     * @param isDaoMember whether or not the staker is a DAO Member
+    */
     function unstakeDao(address staker, bool isDaoMember) external onlyGovernance() {
         freezed[staker] = false;
 
         if (!isDaoMember) _unstakeDaoDelegator(staker);
     }
 
+    /**
+     * @notice Provide Rewards
+     * @param amountForDaoMembers the rewards for DAO Members
+     * @param amountForDaoDelegators the rewards for DAO Delegators
+     * @param epoch the current epoch
+    */
     function provideRewards(
         uint256 amountForDaoMembers,
         uint256 amountForDaoDelegators,
@@ -45,6 +69,12 @@ contract DaoStaking is StakingTypesAndStorage {
         currentEpoch = epoch.add(1);
     }
 
+    /**
+     * @notice Withdraw Rewards for DAO Epoch
+     * @dev requires epoch to be valid
+     * @dev requires msg.sender to be a part of the DAO and not already withdrawn
+     * @param epoch the address of the staker
+    */
     function withdrawRewardsForDaoEpoch(uint256 epoch) external {
         require(epoch < currentEpoch, "Can withdraw only for previous epoch");
 
@@ -66,6 +96,10 @@ contract DaoStaking is StakingTypesAndStorage {
         _withdraw(msg.sender, amountToWithdraw);
     }
 
+    /**
+     * @notice Unstake DAO Delegator
+     * @param staker_ the address of the staker
+    */
     function _unstakeDaoDelegator(address staker_) internal {
         uint256 amount = stakingTypeAmounts[uint256(StakingType.DAO_DELEGATOR)].sub(
             stakingTypeAmounts[uint256(StakingType.STAKER_LVL_3_OR_DAO_MEMBER)]);
@@ -73,22 +107,44 @@ contract DaoStaking is StakingTypesAndStorage {
         _withdraw(staker_, amount);
     }
 
+    /**
+     * @notice Withdraw
+     * @param staker_ the address of the staker
+     * @param amount_ the amount of ALBT to withdraw
+    */
     function _withdraw(address staker_, uint256 amount_) internal {
         totalSupply = totalSupply.sub(amount_);
         balance[staker_] = balance[staker_].sub(amount_);
         albt.transfer(staker_, amount_);
     }
 
+    /**
+     * @notice Stake
+     * @param staker_ the address of the staker
+     * @param amount_ the amount of ALBT to withdraw
+    */
     function _stake(address staker_, uint256 amount_) internal {
         albt.transferFrom(staker_, address(this), amount_);
         totalSupply = totalSupply.add(amount_);
         balance[staker_] = balance[staker_].add(amount_);
     }
 
+    /**
+     * @notice Get Balance
+     * @dev Retrieves the staked balance for a given user
+     * @param staker_ the address of the staker
+    */
     function getBalance(address staker_) external view returns (uint256) {
         return balance[staker_];
     }
 
+    /**
+     * @notice Get Amounts to Stake
+     * @return stakerLvl1Amount Staker lvl 1 Amount
+     * @return stakerLvl2Amount Staker lvl 2 Amount
+     * @return stakerLvl3orDaoMemberAmount Staker lvl 3 Amount Dao Member
+     * @return daoDelegatorAmount Staker lvl 4 Amount (DAO Delegator)
+    */
     function getAmountsToStake() external view returns (
         uint256 stakerLvl1Amount,
         uint256 stakerLvl2Amount,

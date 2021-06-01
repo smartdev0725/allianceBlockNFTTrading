@@ -9,13 +9,24 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "hardhat/console.sol";
 
-contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
+/**
+ * @title AllianceBlock Staking contract
+ * @notice Responsible for ALBT Staking
+ * @dev Extends  Initializable, DaoStaking, OwnableUpgradeable
+ */
+ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     /**
- * @dev Initialize of the contract.
- */
+     * @notice Initialize
+     * @dev Initialize of the contract.
+     * @param albt_ the albt IERC20 token
+     * @param governance_ the DAO address
+     * @param escrow_ the escrow address
+     * @param stakingTypeAmounts_ the array of Staking Type Amounts
+     * @param reputationalStakingTypeAmounts_ the array of Reputation Staking Type Amounts
+    */
     function initialize(
         IERC20 albt_,
         address governance_,
@@ -52,6 +63,10 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
         _;
     }
 
+    /**
+     * @notice Set Reward Distribution
+     * @param _rewardDistribution the address for distribute the rewards to
+    */
     function setRewardDistribution(address _rewardDistribution)
         external
         onlyOwner
@@ -59,10 +74,18 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
         rewardDistribution = _rewardDistribution;
     }
 
+    /**
+     * @notice Last Time Reward Applicable
+     * @dev checks if the staking period is positive
+    */
     function lastTimeRewardApplicable() public view returns (uint256) {
         return Math.min(block.timestamp, periodFinish);
     }
 
+    /**
+     * @notice Calculate Rewards per Token
+     * @dev returns the calculated reward
+    */
     function rewardPerToken() public view returns (uint256) {
         if (totalSupply == 0) {
             return rewardPerTokenStored;
@@ -77,6 +100,11 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
             );
     }
 
+    /**
+     * @notice Earned
+     * @param account the address
+     * @return the staked earnings for the account
+    */
     function earned(address account) public view returns (uint256) {
         return
             balance[account]
@@ -85,6 +113,11 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
                 .add(rewards[account]);
     }
 
+    /**
+     * @notice Stake
+     * @param stakingType The staking type
+     * @dev requires not Delegator and cannot repeat staking type
+    */
     function stake(StakingType stakingType) public updateReward(msg.sender) {
         require(uint256(stakingType) < 3, "Delegator type stake only via Governance");
         require(balance[msg.sender] < stakingTypeAmounts[uint256(stakingType)], "Cannot stake for same type again");
@@ -99,6 +132,13 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
     }
 
     // TODO - Add way to unstake only partially (drop levels)
+
+
+    /**
+     * @notice Exit
+     * @dev msg.sender withdraws and exits
+     * @dev requires msg.sender not subscribed
+    */
     function exit() external {
         require(!freezed[msg.sender], "Unsubscribe to exit");
 
@@ -110,6 +150,10 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
         getReward();
     }
 
+    /**
+     * @notice Get Rewards
+     * @dev accrues rewards to msg.sender
+    */
     function getReward() public updateReward(msg.sender) {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
@@ -119,6 +163,10 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
         }
     }
 
+    /**
+     * @notice Notify Reward Amount
+     * @param reward the reward amount
+    */
     function notifyRewardAmount(uint256 reward)
         external
         onlyRewardDistribution
@@ -136,6 +184,11 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
         emit RewardAdded(reward);
     }
 
+    /**
+     * @notice Get Staking Type
+     * @param account the address
+     * @return the staking type
+    */
     function _getStakingType(address account) internal view returns (uint256) {
         for (uint256 i = 0; i < 4; i++) {
             if (balance[account] == stakingTypeAmounts[i]) {
@@ -146,6 +199,12 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
         return 0;
     }
 
+    /**
+     * @notice Apply Reputation
+     * @param account the address
+     * @param previousLevelIndex The index of the previous level
+     * @param newLevelIndex the index for the new level
+    */
     function _applyReputation(
         address account,
         uint256 previousLevelIndex,
@@ -163,6 +222,12 @@ contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
         }
     }
 
+    /**
+     * @notice Find Amount
+     * @param bigIndex ???
+     * @param smallIndex ???
+     * @return amount of reputation
+    */
     function findAmount(uint256 bigIndex, uint256 smallIndex) internal view returns (uint256 amount) {
         if (bigIndex > 3) bigIndex = 3;
         if (smallIndex == 0) {

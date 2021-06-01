@@ -4,7 +4,11 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-contract rALBT is Ownable {
+/**
+ * @title AllianceBlock Reputation Token contract
+ * @dev Extends Ownable
+ */
+ contract rALBT is Ownable {
 	using SafeMath for uint256;
 
     /**
@@ -22,7 +26,9 @@ contract rALBT is Ownable {
     mapping (address => uint256) private _balances;
 
     /**
+     * @notice Multi Mint To
      * @dev Multimints tokens.
+     * @dev Requires valid lists
      * @param to The addresses that will be minted tokens.
      * @param amounts The amounts of tokens to be minted.
      */
@@ -35,6 +41,7 @@ contract rALBT is Ownable {
     }
 
     /**
+     * @notice Mint To
      * @dev Mints amountToMint tokens to the sender
      * @param amountToMint The amount of tokens to be minted
      */
@@ -43,6 +50,7 @@ contract rALBT is Ownable {
     }
 
     /**
+     * @notice Burn From
      * @dev Burns amountToBurn tokens from the sender
      * @param amountToBurn The amount of tokens to be burnt
      */
@@ -51,6 +59,7 @@ contract rALBT is Ownable {
     }
 
     /**
+     * @notice Name
      * @dev Returns the name of the token.
      */
     function name() public view returns (string memory) {
@@ -58,6 +67,7 @@ contract rALBT is Ownable {
     }
 
     /**
+     * @notice Symbol
      * @dev Returns the symbol of the token, usually a shorter version of the
      * name.
      */
@@ -66,6 +76,7 @@ contract rALBT is Ownable {
     }
 
     /**
+     * @notice Decimals
      * @dev Returns the number of decimals used to get its user representation.
      * For example, if `decimals` equals `2`, a balance of `505` tokens should
      * be displayed to a user as `5,05` (`505 / 10 ** 2`).
@@ -83,6 +94,7 @@ contract rALBT is Ownable {
     }
 
     /**
+     * @notice Total Supply
      * @dev See {IERC20-totalSupply}.
      */
     function totalSupply() public view returns (uint256) {
@@ -90,13 +102,17 @@ contract rALBT is Ownable {
     }
 
     /**
+     * @notice Balance Of
      * @dev See {IERC20-balanceOf}.
      */
     function balanceOf(address account) public view returns (uint256) {
         return _balances[account];
     }
 
-    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
+    /**
+     * @notice Mint
+     * @dev requires not to zero address
+     * @dev Creates `amount` tokens and assigns them to `account`, increasing
      * the total supply.
      *
      * Emits a {Transfer} event with `from` set to the zero address.
@@ -114,6 +130,8 @@ contract rALBT is Ownable {
     }
 
     /**
+     * @notice Burn
+     * @dev requires not from zero address
      * @dev Destroys `amount` tokens from `account`, reducing the
      * total supply.
      *
