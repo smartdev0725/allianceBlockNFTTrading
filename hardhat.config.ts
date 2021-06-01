@@ -67,7 +67,7 @@ const config: HardhatUserConfig = {
     deploy: './deploy',
   },
   solidity: {
-    version: '0.7.3',
+    version: '0.7.6',
     settings: {
       optimizer: {
         enabled: true,
