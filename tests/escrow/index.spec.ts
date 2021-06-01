@@ -43,5 +43,5 @@ describe('Escrow', function () {
     );
   });
 
-  describe.only('When checking escrow functionalities', checkEscrow.bind(this));
+  describe('When checking escrow functionalities', checkEscrow.bind(this));
 });
