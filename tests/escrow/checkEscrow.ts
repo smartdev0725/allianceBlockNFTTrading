@@ -199,4 +199,41 @@ export default async function suite() {
     });
 
   });
+
+  describe('multiMintReputationalToken', async() => {
+    it('when mint reputational tokens with an invalid user should revert', async function () {
+      // Given
+      const {seekerSigner} = await getSigners();
+
+      // When and Then
+      await expectRevert(
+        this.escrowContract.connect(seekerSigner).multiMintReputationalToken([], []),
+        'Action Verifier'
+      );
+    });
+
+    it('when mint reputational tokens with an invalid parameters should revert', async function () {
+      // Given
+      const {staker1Signer} = await getSigners();
+
+      // When and Then
+      await expectRevert(
+        this.escrowContract.connect(staker1Signer).multiMintReputationalToken([1,2], [1, 1]),
+        'invalid ENS name'
+      );
+    });
+
+    it('when mint reputational tokens with an invalid parameters should revert', async function () {
+      // Given
+      const {lender1, lender2} = await getNamedAccounts();
+      const {staker1Signer} = await getSigners();
+      const amount = ethers.utils.parseEther('1');
+
+      // When and Then
+      await expectRevert(
+        this.escrowContract.connect(staker1Signer).multiMintReputationalToken([lender1, lender2], [amount]),
+        'Invalid length of to or amounts'
+      );
+    });
+  })
 }
