@@ -21,6 +21,8 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
     /**
      * @dev Constructor of the ActionVerifier contract.
      * @param rewardPerActionProvision_ The reward that an action provider accumulates for each action provision.
+     * @param maxActionsPerProvision_ The max actions that an account can take rewards for in one function call.
+     * @param escrow_ The address of the escrow.
      */
     function initialize(
         uint256 rewardPerActionProvision_,
@@ -34,6 +36,19 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
     }
 
     /**
+     * @dev This function is used by the owner to update variables.
+     * @param rewardPerActionProvision_ The reward that an action provider accumulates for each action provision.
+     * @param maxActionsPerProvision_ The max actions that an account can take rewards for in one function call.
+     */
+    function updateVariables(uint256 rewardPerActionProvision_, uint256 maxActionsPerProvision_)
+        external
+        onlyOwner()
+    {
+        rewardPerActionProvision = rewardPerActionProvision_;
+        maxActionsPerProvision = maxActionsPerProvision_;
+    }
+
+    /**
      * @dev This function is used by the owner to add more actions.
      * @param action The name of the action.
      * @param reputationalAlbtReward The reputational albt reward for this action.
@@ -42,6 +57,19 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
         external
         onlyOwner()
     {
+        rewardPerAction[keccak256(abi.encodePacked(action))] = reputationalAlbtReward;
+    }
+
+    /**
+     * @dev This function is used by the owner to update actions.
+     * @param action The name of the action.
+     * @param reputationalAlbtReward The reputational albt reward for this action.
+     */
+    function updateAction(string memory action, uint256 reputationalAlbtReward)
+        external
+        onlyOwner()
+    {
+        require(rewardPerAction[keccak256(abi.encodePacked(action))] > 0, "Action should already exist");
         rewardPerAction[keccak256(abi.encodePacked(action))] = reputationalAlbtReward;
     }
 
