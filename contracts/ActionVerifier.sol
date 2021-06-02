@@ -6,6 +6,7 @@ import "./libs/SignatureVerifier.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IEscrow.sol";
+import "./interfaces/IStaking.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 /**
@@ -22,6 +23,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
     uint256 public maxActionsPerProvision;
 
     IEscrow public escrow;
+    IStaking public staking;
 
     /**
      * @dev Constructor of the ActionVerifier contract.
@@ -32,10 +34,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
     function initialize(
         uint256 rewardPerActionProvision_,
         uint256 maxActionsPerProvision_,
-        address escrow_
+        address escrow_,
+        address staking_
     ) public initializer {
         __Ownable_init();
         escrow = IEscrow(escrow_);
+        staking = IStaking(staking_);
         rewardPerActionProvision = rewardPerActionProvision_;
         maxActionsPerProvision = maxActionsPerProvision_;
     }
@@ -88,11 +92,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
         bytes[] memory signatures
     )
         external
-        onlyOwner()
     {
+        require(staking.getEligibilityForActionProvision(msg.sender), "Must be at least lvl2 staker");
         require(actions.length == signatures.length, "Invalid length");
         require(actions.length <= maxActionsPerProvision, "Too many actions");
-        // TODO - Rachid specifies the require to add here.
 
         address[] memory accounts = new address[](actions.length.add(1));
         uint256[] memory rewards = new uint256[](actions.length.add(1));
