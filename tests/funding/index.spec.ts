@@ -58,6 +58,11 @@ describe('Funding', function () {
       seeker,
     );
 
+    await this.fundingNFTContract.grantRole(
+      ethers.utils.solidityKeccak256([ "string", ], [ "PAUSER_ROLE" ]),
+      staker1,
+    );
+
   });
 
   describe.only('When checking funding', checkFunding.bind(this));

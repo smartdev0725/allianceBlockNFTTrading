@@ -122,37 +122,54 @@ export default async function suite() {
 
       });
 
-      //
-      // it('should be able to increase loan generation', async function () {
-      //   const tx = await this.fundingNFTContract.connect(this.seekerSigner).increaseGeneration(3, this.lender1, 10);
-      //
-      //   // Correct Event. Tokens burned
-      //   await expect(tx)
-      //     .to.emit(this.fundingNFTContract, 'TransferSingle')
-      //     .withArgs(this.seeker, this.seeker, ethers.constants.AddressZero, 3, 10);
-      //
-      //   // Correct Event. New Gen Tokens minted
-      //   await expect(tx)
-      //     .to.emit(this.fundingNFTContract, 'TransferSingle')
-      //     .withArgs(this.seeker, ethers.constants.AddressZero, this.seeker, 3, 10);
-      //
-      //   // const newTokenId = String(tx.logs[1].args.id);
-      //   // const {generation, loanId} = await fundingNFT.formatTokenId(newTokenId);
-      //   //
-      //   // assert.equal(generation, 1);
-      //   // assert.equal(loanId, 3);
-      //
-      // });
-      //
-      // it('should get correct balance for alice', async function () {
-      //   const balanceGen0 = await fundingNFT.balanceOf(alice, 3);
-      //
-      //   const tokenId = await fundingNFT.getTokenId(1, 3);
-      //   const balanceGen1 = await fundingNFT.balanceOf(alice, tokenId);
-      //
-      //   assert.equal(balanceGen0, 0);
-      //   assert.equal(balanceGen1, 10);
-      // });
+      it('should be able to increase loan generation', async function () {
+        await this.fundingNFTContract.connect(this.seekerSigner).mintGen0(this.lender1, 15, 3);
+        const tx = await this.fundingNFTContract.connect(this.seekerSigner).increaseGeneration(3, this.lender1, 10);
+
+        // Correct Event. Generation increased
+        await expect(tx)
+          .to.emit(this.fundingNFTContract, 'GenerationIncreased')
+          .withArgs("3", this.lender1, "1");
+      });
+    });
+
+    describe('Token Pausing', function () {
+      it('only pauser role should be able to pause token transfers', async function () {
+        await expectRevert(
+          this.fundingNFTContract.connect(this.lender1Signer).pauseTokenTransfer(3),
+          'Must have pauser role'
+        );
+      });
+
+      it('should revert when transfering a paused token', async function () {
+        await this.fundingNFTContract.connect(this.seekerSigner).mintGen0(this.lender1, 15, 3);
+        await this.fundingNFTContract.connect(this.staker1Signer).pauseTokenTransfer(3);
+
+        await expectRevert(
+          this.fundingNFTContract.connect(this.lender1Signer).safeTransferFrom(this.lender1, this.lender2, 3, 10, '0x'),
+          'Transfers paused'
+        );
+      });
+
+      it('should revert when increasing token generation of paused token', async function () {
+        await this.fundingNFTContract.connect(this.seekerSigner).mintGen0(this.lender1, 15, 3);
+        await this.fundingNFTContract.connect(this.staker1Signer).pauseTokenTransfer(3);
+
+        await expectRevert(
+          this.fundingNFTContract.connect(this.seekerSigner).increaseGeneration(3, this.lender1, 10),
+          'Transfers paused'
+        );
+      });
+
+      it('should revert when user tries to burn a paused token', async function () {
+        await this.fundingNFTContract.connect(this.seekerSigner).mintGen0(this.lender1, 15, 3);
+        await this.fundingNFTContract.connect(this.staker1Signer).pauseTokenTransfer(3);
+
+        await expectRevert(
+          this.fundingNFTContract.connect(this.seekerSigner).burn(this.lender1, 3, 10),
+          'Transfers paused'
+        );
+      });
     });
   });
 }
