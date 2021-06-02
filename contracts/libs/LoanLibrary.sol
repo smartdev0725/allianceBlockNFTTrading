@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.7.0;
 
+/**
+ * @title Loan Library
+*/
 library LoanLibrary {
     enum RepaymentBatchType {
         ONLY_INTEREST, // The interest is repaid in each batch and at the last batch nominal is also repaid.

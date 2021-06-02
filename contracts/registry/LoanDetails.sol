@@ -9,6 +9,7 @@ import "../libs/TokenFormat.sol";
 /**
  * @title AllianceBlock LoanDetails contract
  * @notice Functionality for storing loan details and modifiers.
+ * @dev Extends Storage
  */
 contract LoanDetails is Storage {
     using SafeMath for uint256;
@@ -160,6 +161,16 @@ contract LoanDetails is Storage {
         _;
     }
 
+    /**
+     * @notice Stores Loan Details
+     * @dev require a valid interest percentage
+     * @param loanType_ the type of loan or investment
+     * @param lendingAmountRequested_ the amount requested
+     * @param collateralToken_ the token provided as collateral
+     * @param collateralAmount_ the amount of collateral provided
+     * @param interestPercentage_ the interest percentage
+     * @param extraInfo_ the IPFS hard data provided
+    */
     function _storeLoanDetails(
         LoanLibrary.LoanType loanType_,
         uint256 lendingAmountRequested_,

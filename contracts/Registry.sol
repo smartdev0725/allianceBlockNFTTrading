@@ -14,6 +14,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 /**
  * @title AllianceBlock Registry contract
  * @notice Responsible for loan transactions.
+ * @dev Extends Initializable, PersonalLoan, ProjectLoan, OwnableUpgradeable
  */
 contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, OwnableUpgradeable {
     using SafeMath for uint256;
@@ -56,7 +57,20 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
     );
 
     /**
+     * @notice Initialize
      * @dev Constructor of the contract.
+     * @param escrowAddress address of the escrow contract
+     * @param governanceAddress_ address of the DAO contract
+     * @param lendingToken_ address of the Lending Token
+     * @param mainNFT_ TODO DELETE THIS FOR MVP
+     * @param fundingNFT_ address of the Funding NFT
+     * @param baseAmountForEachPartition_ The base amount for each partition
+     * @param minimumInterestPercentage_ the minimum interest percentage
+     * @param maxMilestones_ the max number of milestones
+     * @param milestoneExtensionInterval_ the extension interval for milestones
+     * @param vestingBatches_ the vesting batches
+     * @param vestingTimeInterval_ vesting time interval
+     * @param fundingTimeInterval_ funding time interval
      */
     function initialize(
         address escrowAddress,
@@ -88,6 +102,7 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
     }
 
     /**
+     * @notice Initialize Investment
      * @dev This function is called by the owner to initialize the investment type.
      * @param reputationalAlbt The address of the rALBT contract.
      * @param totalTicketsPerRun_ The amount of tickets that will be provided from each run of the lottery.
@@ -114,6 +129,7 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
     }
 
     /**
+     * @notice Decide For Loan
      * @dev This function is called by governance to approve or reject a loan request.
      * @param loanId The id of the loan.
      * @param decision The decision of the governance. [true -> approved] [false -> rejected]
@@ -127,7 +143,9 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
     }
 
     /**
+     * @notice Fund Loan
      * @dev This function is called by the lenders to fund a loan.
+     * @dev requires enough purchasable partitions
      * @param loanId The id of the loan.
      * @param partitionsToPurchase The amount of ERC1155 tokens (which represent partitions of the loan) to be purchased.
      */
@@ -177,6 +195,7 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
     }
 
     /**
+     * @notice Execute Payment
      * @dev This function is called by the seeker to return part of or whole owed amount for a loan (depending on agreement).
      * @param loanId The id of the loan.
      */
@@ -190,6 +209,7 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
     }
 
     /**
+     * @notice Receive Payment
      * @dev This function is called by ERC1155 holders to receive a payment (after seeker has repaid part of loan).
      * @param tokenId The token id of the ERC1155 tokens, which is eligible for the payment.
      * @param amountOfTokens The amount of NFT tokens to receive payment for.
@@ -221,6 +241,7 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
     }
 
     /**
+     * @notice Start Lottery Phase
      * @dev This function is called by governance to start the lottery phase for an investment.
      * @param investmentId The id of the investment.
      */
@@ -232,6 +253,7 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
     }
 
     /**
+     * @notice Challenge Loan
      * @dev Through this function any address can challenge a loan in case of rules breaking by the borrower.
             If challenging succeeds it can end up to either small penalty or whole collateral loss.
      * @param loanId The id of the loan.
@@ -247,7 +269,11 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
         emit LoanChallenged(loanId, loanDetails[loanId].loanType, msg.sender);
     }
 
-    function _approveLoan(uint256 loanId_) internal {
+     /**
+     * @notice Approve Loan
+     * @param loanId_ The id of the loan.
+     */
+     function _approveLoan(uint256 loanId_) internal {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.APPROVED;
         loanDetails[loanId_].approvalDate = block.timestamp;
         fundingNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
@@ -258,7 +284,11 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
         emit LoanApproved(loanId_, loanDetails[loanId_].loanType);
     }
 
-    function _rejectLoan(uint256 loanId_) internal {
+     /**
+     * @notice Reject Loan
+     * @param loanId_ The id of the loan.
+     */
+     function _rejectLoan(uint256 loanId_) internal {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.REJECTED;
         escrow.transferCollateralToken(
             loanDetails[loanId_].collateralToken,
@@ -268,7 +298,11 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
         emit LoanRejected(loanId_, loanDetails[loanId_].loanType);
     }
 
-    function _startLoan(uint256 loanId_) internal {
+     /**
+     * @notice Start Loan
+     * @param loanId_ The id of the loan.
+     */
+     function _startLoan(uint256 loanId_) internal {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.STARTED;
         loanDetails[loanId_].startingDate = block.timestamp;
 
@@ -280,8 +314,10 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
     }
 
     /**
+     * @notice Get Loan Metadata
      * @dev This helper function provides a single point for querying the Loan metadata
      * @param loanId The id of the loan.
+     * @dev returns Loan Details, Loan Status, Loan Seeker Address and Repayment Batch Type
      */
     function getLoanMetadata(uint256 loanId)
         public

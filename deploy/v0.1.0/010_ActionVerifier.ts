@@ -13,6 +13,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployer, proxyOwner} = await getNamedAccounts();
 
   const escrowContractAddress = (await get('Escrow')).address;
+  const stakingContractAddress = (await get('Staking')).address;
 
   await deploy(contractName, {
     contract: contractName,
@@ -22,7 +23,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
-    args: [10, 10, escrowContractAddress],
+    args: [10, 10, escrowContractAddress, stakingContractAddress],
     log: true,
   });
   return true;
@@ -32,5 +33,5 @@ const id = contractName + version;
 
 export default func;
 func.tags = [id, version];
-func.dependencies = ['Escrow'];
+func.dependencies = ['Escrow', 'Staking'];
 func.id = id;

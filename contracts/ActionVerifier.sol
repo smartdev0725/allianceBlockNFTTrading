@@ -6,9 +6,15 @@ import "./libs/SignatureVerifier.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IEscrow.sol";
+import "./interfaces/IStaking.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
-contract ActionVerifier is Initializable, OwnableUpgradeable {
+/**
+ * @title AllianceBlock ActionVerifier contract
+ * @dev Extends Initializable, OwnableUpgradeable
+ * @notice Handles user's Actions and Rewards within the protocol
+ */
+ contract ActionVerifier is Initializable, OwnableUpgradeable {
     using SafeMath for uint256;
     using SignatureVerifier for SignatureVerifier.Action;
 
@@ -17,18 +23,36 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
     uint256 public maxActionsPerProvision;
 
     IEscrow public escrow;
+    IStaking public staking;
 
     /**
      * @dev Constructor of the ActionVerifier contract.
      * @param rewardPerActionProvision_ The reward that an action provider accumulates for each action provision.
+     * @param maxActionsPerProvision_ The max actions that an account can take rewards for in one function call.
+     * @param escrow_ The address of the escrow.
      */
     function initialize(
         uint256 rewardPerActionProvision_,
         uint256 maxActionsPerProvision_,
-        address escrow_
+        address escrow_,
+        address staking_
     ) public initializer {
         __Ownable_init();
         escrow = IEscrow(escrow_);
+        staking = IStaking(staking_);
+        rewardPerActionProvision = rewardPerActionProvision_;
+        maxActionsPerProvision = maxActionsPerProvision_;
+    }
+
+    /**
+     * @dev This function is used by the owner to update variables.
+     * @param rewardPerActionProvision_ The reward that an action provider accumulates for each action provision.
+     * @param maxActionsPerProvision_ The max actions that an account can take rewards for in one function call.
+     */
+    function updateVariables(uint256 rewardPerActionProvision_, uint256 maxActionsPerProvision_)
+        external
+        onlyOwner()
+    {
         rewardPerActionProvision = rewardPerActionProvision_;
         maxActionsPerProvision = maxActionsPerProvision_;
     }
@@ -46,6 +70,19 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
     }
 
     /**
+     * @dev This function is used by the owner to update actions.
+     * @param action The name of the action.
+     * @param reputationalAlbtReward The reputational albt reward for this action.
+     */
+    function updateAction(string memory action, uint256 reputationalAlbtReward)
+        external
+        onlyOwner()
+    {
+        require(rewardPerAction[keccak256(abi.encodePacked(action))] > 0, "Action should already exist");
+        rewardPerAction[keccak256(abi.encodePacked(action))] = reputationalAlbtReward;
+    }
+
+    /**
      * @dev This function is used by users to provide rewards to all users for their actions.
      * @param actions The actions provided.
      * @param signatures The signatures representing the actions.
@@ -55,11 +92,10 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
         bytes[] memory signatures
     )
         external
-        onlyOwner()
     {
+        require(staking.getEligibilityForActionProvision(msg.sender), "Must be at least lvl2 staker");
         require(actions.length == signatures.length, "Invalid length");
         require(actions.length <= maxActionsPerProvision, "Too many actions");
-        // TODO - Rachid specifies the require to add here.
 
         address[] memory accounts = new address[](actions.length.add(1));
         uint256[] memory rewards = new uint256[](actions.length.add(1));

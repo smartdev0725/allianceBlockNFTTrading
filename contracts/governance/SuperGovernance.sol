@@ -7,11 +7,19 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title AllianceBlock Governance contract
+ * @dev Extends OwnableUpgradeable, DaoCronjob
  * @notice Responsible for govern AllianceBlock's ecosystem
- */
+*/
 contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
     using SafeMath for uint256;
 
+    /**
+     * @notice Sets Registry and Staking contracts
+     * @dev used to initialize SuperGovernance
+     * @dev requires not already initialized
+     * @param registryAddress_ the Registry address
+     * @param stakingAddress_ the Stake address
+    */
     function setRegistryAndStaking(
         address registryAddress_,
         address stakingAddress_
@@ -26,6 +34,14 @@ contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
         emit InitGovernance(registryAddress_, stakingAddress_, msg.sender);
     }
 
+    /**
+     * @notice Votes for Request
+     * @dev Executes cronJob
+     * @dev requires msg.sender to be Super Delegator
+     * @dev requires current epoch to be 0 or 1
+     * @param requestId the Request ID
+     * @param decision the decision (Approve / Deny)
+    */
     function superVoteForRequest(
         uint256 requestId,
         bool decision
@@ -34,7 +50,6 @@ contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
     checkCronjob()
     {
         require(msg.sender == superDelegator, "Only super delegator can call this function");
-        require(currentEpoch <= 1, "Super delegating works only till first epoch");
 
         if(approvalRequests[requestId].isMilestone) {
             registry.decideForMilestone(approvalRequests[requestId].loanId, decision);
@@ -48,73 +63,5 @@ contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
         }
 
         emit VotedForRequest(approvalRequests[requestId].loanId, requestId, decision, msg.sender);
-    }
-
-    function openDaoMembershipSubscriptions()
-    external
-    onlyOwner()
-    {
-        votingStatusForDaoMembers = VotingStatusMembers.PRE_STATE;
-    }
-
-    function openDaoMembershipVoting()
-    external
-    onlyOwner()
-    {
-        votingStatusForDaoMembers = VotingStatusMembers.VOTING;
-    }
-
-    function openDaoDelegatingSubscriptions(
-        uint256 amountOfDaoMembers_,
-        uint256 daoClaimingDuration_,
-        uint256 daoLateClaimingDuration_
-    )
-    external
-    onlyOwner()
-    {
-        updatableVariables[keccak256(abi.encode("amountOfDaoMembers"))] = amountOfDaoMembers_;
-        updatableVariables[keccak256(abi.encode("daoClaimingDuration"))] = daoClaimingDuration_;
-        updatableVariables[keccak256(abi.encode("daoLateClaimingDuration"))] = daoLateClaimingDuration_;
-
-        votingStatusForDaoMembers = VotingStatusMembers.CLAIM_MEMBERSHIP;
-
-        addCronjob(CronjobType.DAO_MEMBERSHIP_VOTING, block.timestamp.add(daoClaimingDuration_), 0);
-
-        amountOfEpochDaoMembersNeededPerEpoch[currentEpoch.add(1)] = amountOfDaoMembers_;
-    }
-
-    function openDaoDelegatingVoting()
-    external
-    onlyOwner()
-    {
-        votingStatusForDaoDelegators = VotingStatusDelegators.VOTING;
-    }
-
-    function openDaoDelegating(
-        uint256 amountOfDaoDelegators_,
-        uint256 daoMembershipVotingDuration_,
-        uint256 daoDelegationVotingDuration_,
-        uint256 daoDelegationApprovalDuration_,
-        uint256 daoDelegationSubstituteClaimDuration_
-    )
-    external
-    onlyOwner()
-    {
-        updatableVariables[keccak256(abi.encode("amountOfDaoDelegators"))] = amountOfDaoDelegators_;
-        updatableVariables[keccak256(abi.encode("daoMembershipVotingDuration"))] = daoMembershipVotingDuration_;
-        updatableVariables[keccak256(abi.encode("daoDelegationVotingDuration"))] = daoDelegationVotingDuration_;
-        updatableVariables[keccak256(abi.encode("daoDelegationApprovalDuration"))] = daoDelegationApprovalDuration_;
-        updatableVariables[keccak256(abi.encode("daoDelegationSubstituteClaimDuration"))] = daoDelegationSubstituteClaimDuration_;
-
-        votingStatusForDaoDelegators = VotingStatusDelegators.APPROVE_VOTING;
-
-        addCronjob(CronjobType.DAO_DELEGATORS_VOTING, block.timestamp.add(daoDelegationApprovalDuration_), 0);
-
-        uint256 timestampToOpenDaoMembershipVoting =
-            block.timestamp.add(daoDelegationApprovalDuration_).add(
-            updatableVariables[keccak256(abi.encode("daoClaimingDuration"))]).add(
-            updatableVariables[keccak256(abi.encode("daoLateClaimingDuration"))]);
-
-        addCronjob(CronjobType.DAO_MEMBERSHIP_VOTING, timestampToOpenDaoMembershipVoting, 0);
     }
 }
