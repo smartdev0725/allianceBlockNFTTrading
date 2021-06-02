@@ -9,7 +9,7 @@ import "../libs/DoubleLinkedList.sol";
 /**
  * @title AllianceBlock GovernanceStorage contract
  * @notice Responsible for governance storage
- */
+*/
 contract GovernanceTypesAndStorage {
     using ValuedDoubleLinkedList for ValuedDoubleLinkedList.LinkedList;
     using DoubleLinkedList for DoubleLinkedList.LinkedList;

@@ -9,8 +9,9 @@ import "../interfaces/IRegistry.sol";
 
 /**
  * @title AllianceBlock Governance contract
+ * @dev Extends GovernanceTypesAndStorage
  * @notice Responsible for governing AllianceBlock's ecosystem
- */
+*/
 contract DaoCronjob is GovernanceTypesAndStorage {
     using SafeMath for uint256;
     using ValuedDoubleLinkedList for ValuedDoubleLinkedList.LinkedList;
@@ -21,6 +22,10 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         _;
     }
 
+    /**
+     * @notice Checks if needs to execute a DAO cronJob
+     * @dev Calls executeCronjob() at the most 1 cronJob per tx
+    */
     function checkCronjobs() public returns (bool) {
         uint256 mostRecentCronjobTimestamp = cronjobList.getHeadValue();
         if (mostRecentCronjobTimestamp == 0 || block.timestamp < mostRecentCronjobTimestamp) return false;
@@ -32,6 +37,11 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         return true;
     }
 
+    /**
+     * @notice Executes the next DAO cronJob
+     * @param cronjobId The cronJob id to be executed.
+     * @param timestamp The current block height
+    */
     function executeCronjob(uint256 cronjobId, uint256 timestamp) internal {
         if (cronjobs[cronjobId].cronjobType == CronjobType.DAO_APPROVAL) {
             executeDaoApproval(cronjobs[cronjobId].externalId);
@@ -41,16 +51,34 @@ contract DaoCronjob is GovernanceTypesAndStorage {
         }
     }
 
-    function addCronjob(CronjobType cronjobType, uint256 timestamp, uint256 externalId) internal {
+    /**
+     * @notice Adds a cronJob to the queue
+     * @dev Adds a node to the cronjobList (ValuedDoubleLinkedList)
+     * @param cronjobType The type of cronJob
+     * @param timestamp The current block height
+     * @param externalId Id of the request in case of dao approval, change voting request or investment
+    */
+     function addCronjob(CronjobType cronjobType, uint256 timestamp, uint256 externalId) internal {
         totalCronjobs = totalCronjobs.add(1);
         cronjobs[totalCronjobs] = Cronjob(cronjobType, externalId);
         cronjobList.addNodeIncrement(timestamp, totalCronjobs);
     }
 
+    /**
+     * @notice Removes a cronJob from the queue
+     * @dev Removes a node from the cronjobList (ValuedDoubleLinkedList)
+     * @param cronjobId The cronJob ID
+    */
     function removeCronjob(uint256 cronjobId) internal {
         cronjobList.removeNode(cronjobId);
     }
 
+    /**
+     * @notice Updates an investment
+     * @dev checks if lottery should start or adds cronJob for late application
+     * @param investmentId The id of the investment to update
+     * @param timestamp the current block height
+    */
     function updateInvestment(uint256 investmentId, uint256 timestamp) internal {
         if (registry.getRequestingInterestStatus(investmentId)) {
             registry.startLotteryPhase(investmentId);

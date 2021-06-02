@@ -7,11 +7,19 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title AllianceBlock Governance contract
+ * @dev Extends OwnableUpgradeable, DaoCronjob
  * @notice Responsible for govern AllianceBlock's ecosystem
- */
+*/
 contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
     using SafeMath for uint256;
 
+    /**
+     * @notice Sets Registry and Staking contracts
+     * @dev used to initialize SuperGovernance
+     * @dev requires not already initialized
+     * @param registryAddress_ the Registry address
+     * @param stakingAddress_ the Stake address
+    */
     function setRegistryAndStaking(
         address registryAddress_,
         address stakingAddress_
@@ -26,6 +34,14 @@ contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
         emit InitGovernance(registryAddress_, stakingAddress_, msg.sender);
     }
 
+    /**
+     * @notice Votes for Request
+     * @dev Executes cronJob
+     * @dev requires msg.sender to be Super Delegator
+     * @dev requires current epoch to be 0 or 1
+     * @param requestId the Request ID
+     * @param decision the decision (Approve / Deny)
+    */
     function superVoteForRequest(
         uint256 requestId,
         bool decision
@@ -50,6 +66,10 @@ contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
         emit VotedForRequest(approvalRequests[requestId].loanId, requestId, decision, msg.sender);
     }
 
+    /**
+     * @notice Opens DAO Membership Subscriptions
+     * @dev First step towards transitioning to second epoch
+    */
     function openDaoMembershipSubscriptions()
     external
     onlyOwner()
@@ -57,6 +77,10 @@ contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
         votingStatusForDaoMembers = VotingStatusMembers.PRE_STATE;
     }
 
+    /**
+     * @notice Opens DAO Membership Voting
+     * @dev Second step towards transitioning to second epoch
+    */
     function openDaoMembershipVoting()
     external
     onlyOwner()
@@ -64,6 +88,13 @@ contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
         votingStatusForDaoMembers = VotingStatusMembers.VOTING;
     }
 
+    /**
+     * @notice Opens DAO Delegator Subscriptions
+     * @dev Third step towards transitioning to second epoch
+     * @param amountOfDaoMembers_ the amount of DAO Members to allow
+     * @param daoClaimingDuration_ the duration of the claiming period
+     * @param daoLateClaimingDuration_ the duration of the late-claim period
+    */
     function openDaoDelegatingSubscriptions(
         uint256 amountOfDaoMembers_,
         uint256 daoClaimingDuration_,
@@ -83,6 +114,10 @@ contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
         amountOfEpochDaoMembersNeededPerEpoch[currentEpoch.add(1)] = amountOfDaoMembers_;
     }
 
+    /**
+     * @notice Opens DAO Delegator Voting
+     * @dev Fourth step towards transitioning to second epoch
+    */
     function openDaoDelegatingVoting()
     external
     onlyOwner()
@@ -90,6 +125,15 @@ contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
         votingStatusForDaoDelegators = VotingStatusDelegators.VOTING;
     }
 
+    /**
+     * @notice Opens DAO Delegator
+     * @dev Fifth (last) step towards transitioning to second epoch
+     * @param amountOfDaoDelegators_ the amount of DAO Delegators
+     * @param daoMembershipVotingDuration_ the duration for Members to vote
+     * @param daoDelegationVotingDuration_ the duration for Delegators to vote
+     * @param daoDelegationApprovalDuration_ the approval period for Delegators to vote
+     * @param daoDelegationSubstituteClaimDuration_ the period in which subs can claim their Delegator position
+    */
     function openDaoDelegating(
         uint256 amountOfDaoDelegators_,
         uint256 daoMembershipVotingDuration_,

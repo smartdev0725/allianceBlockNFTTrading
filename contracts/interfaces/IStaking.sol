@@ -2,7 +2,7 @@
 pragma solidity >=0.6.0 <0.8.0;
 
 /**
- * @dev Interface of the Staking contract.
+ * @title Interface of the Staking contract.
  */
 interface IStaking {
     function getBalance(address staker_) external view returns (uint256);

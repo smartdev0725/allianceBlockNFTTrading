@@ -12,9 +12,11 @@ import "./rALBT.sol";
 /**
  * @title AllianceBlock Escrow contract
  * @notice Responsible for handling the funds in AllianceBlock's ecosystem.
+ * @dev Extends Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable
  */
 contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable {
     /**
+     * @notice Initialize
      * @dev Initializes the contract.
      * @param lendingToken_ The token that lenders will be able to lend.
      * @param mainNFT_ The ERC721 token contract which will represent the whole loans.
@@ -33,7 +35,9 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
-     * @dev Initializes the contract.
+     * @notice After Initialize
+     * @dev To be executed after Initialize
+     * @dev requires not already initialized
      * @param registryAddress_ The registry address.
      * @param actionVerifierAddress_ The actionVerifier address.
      * @param stakingAddress_ The staking address
@@ -52,6 +56,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
+     * @notice Transfer Funding NFT
      * @dev This function is used to send the ERC1155 tokens from escrow to the lenders.
      * @param loanId The id of the loan.
      * @param partitionsPurchased The amount of ERC1155 tokens that should be sent back to the lender.
@@ -66,6 +71,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
+     * @notice Transfer Lending Token
      * @dev This function is used to send the lended amount to the seeker.
      * @param seeker Seeker's address.
      * @param amount The amount of lending tokens to be sent to seeker.
@@ -75,6 +81,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
+     * @notice Transfer Collateral Token
      * @dev This function is used to send the collateral amount to the seeker.
      * @param collateralToken The collateral token's contract address.
      * @param recipient The address to transfer the collateral tokens to.
@@ -89,6 +96,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
+     * @notice Multi Mint Reputation Token
      * @dev This function is used to multi mint reputational tokens.
      * @param recipients The addresses to mint the reputational tokens to.
      * @param amounts The amounts of reputational tokens to be minted.
@@ -101,6 +109,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
+     * @notice Mint Reputation Token
      * @dev This function is used to mint reputational tokens.
      * @param recipient The address to mint the reputational tokens to.
      * @param amount The amount of reputational tokens to be minted.
@@ -113,6 +122,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
+     * @notice Burn Reputation token
      * @dev This function is used to burn reputational tokens.
      * @param from The address to burn the reputational tokens from.
      * @param amount The amount of reputational tokens to be burnt.
@@ -125,6 +135,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
+     * @notice Change Registry
      * @dev This function is used to change the registry address in case of an upgrade.
      * @param registryAddress The address of the upgraded Registry contract.
      */

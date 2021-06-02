@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 /**
  * @title Alliance Block Main NFT
  * @notice NFT custodied Asset
+ * @dev Extends Initializable, ERC721Upgradeable
  */
 contract MainNFT is Initializable, ERC721Upgradeable  {
 
