@@ -3,7 +3,7 @@ import {ethers} from 'hardhat';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
-  describe.only('Succeeds', async () => {
+  describe('Succeeds', async () => {
 
     describe('Initial values', () => {
       it('should get correct contract uri', async function () {

@@ -65,5 +65,5 @@ describe('Funding', function () {
 
   });
 
-  describe.only('When checking funding', checkFunding.bind(this));
+  describe('When checking funding', checkFunding.bind(this));
 });
