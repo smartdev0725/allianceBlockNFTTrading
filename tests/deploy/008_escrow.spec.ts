@@ -11,17 +11,14 @@ describe('Contract Escrow', () => {
     const escrowContract = await ethers.getContract('Escrow');
 
     const fundingNFTProxyContract = await deployments.get('FundingNFT_Proxy');
-    const mainNFTProxyContract = await deployments.get('MainNFT_Proxy');
     const lendingTokenContract = await deployments.get('LendingToken');
 
     // When
     const lendingToken = await escrowContract.lendingToken();
-    const mainNFT = await escrowContract.mainNFT();
     const fundingNFT = await escrowContract.fundingNFT();
 
     // Then
     expect(lendingToken).to.equal(lendingTokenContract.address);
-    expect(mainNFT).to.equal(mainNFTProxyContract.address);
     expect(fundingNFT).to.equal(fundingNFTProxyContract.address);
   });
 });

@@ -62,7 +62,6 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
      * @param escrowAddress address of the escrow contract
      * @param governanceAddress_ address of the DAO contract
      * @param lendingToken_ address of the Lending Token
-     * @param mainNFT_ TODO DELETE THIS FOR MVP
      * @param fundingNFT_ address of the Funding NFT
      * @param baseAmountForEachPartition_ The base amount for each partition
      * @param minimumInterestPercentage_ the minimum interest percentage
@@ -76,7 +75,6 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
         address escrowAddress,
         address governanceAddress_,
         address lendingToken_,
-        address mainNFT_,
         address fundingNFT_,
         uint256 baseAmountForEachPartition_,
         uint256 minimumInterestPercentage_,
@@ -92,7 +90,6 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
         governance = IGovernance(governanceAddress_);
         lendingToken = IERC20(lendingToken_);
         minimumInterestPercentage = minimumInterestPercentage_;
-        mainNFT = IERC721Mint(mainNFT_);
         fundingNFT = IERC1155Mint(fundingNFT_);
         maxMilestones = maxMilestones_;
         milestoneExtensionInterval = milestoneExtensionInterval_;
