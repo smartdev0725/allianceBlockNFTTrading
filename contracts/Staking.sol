@@ -128,26 +128,39 @@ import "hardhat/console.sol";
         _applyReputation(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
 
         _stake(msg.sender, amount.sub(balance[msg.sender]));
-        emit Staked(msg.sender, amount.sub(balance[msg.sender]));
     }
 
-    // TODO - Add way to unstake only partially (drop levels)
+    /**
+     * @notice Unstake
+     * @param stakingType The staking type to drop to
+     * @dev msg.sender withdraws till reaching stakingType
+    */
+    function unstake(StakingType stakingType) external {
+        require(balance[msg.sender] > stakingTypeAmounts[uint256(stakingType)], "Can only drop to lower level");
+        uint256 stakingTypeIndex = _getStakingType(msg.sender);
+        uint256 amount = stakingTypeAmounts[uint256(stakingType)];
 
+        _applyReputation(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
+
+        uint256 amountToWithdraw = balance[msg.sender].sub(amount);
+        getReward();
+
+        _withdraw(msg.sender, amountToWithdraw);
+    }
 
     /**
      * @notice Exit
      * @dev msg.sender withdraws and exits
-     * @dev requires msg.sender not subscribed
     */
     function exit() external {
-        require(!freezed[msg.sender], "Unsubscribe to exit");
-
         uint256 stakingTypeIndex = _getStakingType(msg.sender);
 
         _applyReputation(msg.sender, stakingTypeIndex, 0);
 
-        _withdraw(msg.sender, balance[msg.sender]);
+        uint256 amountToWithdraw = balance[msg.sender];
         getReward();
+
+        _withdraw(msg.sender, amountToWithdraw);
     }
 
     /**

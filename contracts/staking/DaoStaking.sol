@@ -20,6 +20,7 @@ contract DaoStaking is StakingTypesAndStorage {
         totalSupply = totalSupply.sub(amount_);
         balance[staker_] = balance[staker_].sub(amount_);
         albt.transfer(staker_, amount_);
+        emit Withdrawn(staker_, amount_);
     }
 
     /**
@@ -31,6 +32,7 @@ contract DaoStaking is StakingTypesAndStorage {
         albt.transferFrom(staker_, address(this), amount_);
         totalSupply = totalSupply.add(amount_);
         balance[staker_] = balance[staker_].add(amount_);
+        emit Staked(staker_, amount_);
     }
 
     /**
