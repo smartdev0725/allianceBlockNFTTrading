@@ -39,12 +39,12 @@ contract GovernanceTypesAndStorage {
     IStaking public staking;
 
     uint256 public totalIds;
+    uint256 public currentEpoch;
 
     mapping(bytes32 => uint256) public updatableVariables;
 
     // CRONJOB types and variables
     enum CronjobType {
-        DAO_APPROVAL, // Cronjob type for approvals on registry requests.
         INVESTMENT // Cronjob type for users to show interest for an investment.
     }
 

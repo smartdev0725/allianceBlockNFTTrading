@@ -43,12 +43,7 @@ contract DaoCronjob is GovernanceTypesAndStorage {
      * @param timestamp The current block height
     */
     function executeCronjob(uint256 cronjobId, uint256 timestamp) internal {
-        if (cronjobs[cronjobId].cronjobType == CronjobType.DAO_APPROVAL) {
-            executeDaoApproval(cronjobs[cronjobId].externalId);
-        }
-        else {
-            updateInvestment(cronjobs[cronjobId].externalId, timestamp);
-        }
+        updateInvestment(cronjobs[cronjobId].externalId, timestamp);
     }
 
     /**
@@ -87,27 +82,6 @@ contract DaoCronjob is GovernanceTypesAndStorage {
             uint256 nextCronjobTimestamp = timestamp.add(
                 updatableVariables[keccak256(abi.encode("lateApplicationsForInvestmentDuration"))]);
             addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, investmentId);
-        }
-    }
-
-    function executeDaoApproval(uint256 requestId) internal {
-        uint256 approvalsNeeded = updatableVariables[keccak256(abi.encode("approvalsNeededForRegistryRequest"))];
-        requestsPerEpoch[approvalRequests[requestId].epochSubmitted].removeNode(requestId);
-
-        bool decision = false;
-        if (approvalRequests[requestId].approvalsProvided >= approvalsNeeded) {
-            decision = true;
-            approvalRequests[requestId].isApproved = true;
-        }
-
-        approvalRequests[requestId].isMilestone ?
-            registry.decideForMilestone(approvalRequests[requestId].loanId, decision) :
-            registry.decideForLoan(approvalRequests[requestId].loanId, decision);
-
-        uint256 numberOfNonVotingDelegators = remainingDelegatorIdsToVotePerRequest[requestId].getSize();
-
-        if (numberOfNonVotingDelegators > 0) {
-            penaltizeDelegatorsForNonVoting(numberOfNonVotingDelegators, approvalRequests[requestId].epochSubmitted, requestId);
         }
     }
 }

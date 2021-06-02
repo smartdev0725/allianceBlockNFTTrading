@@ -2,7 +2,7 @@
 pragma solidity ^0.7.0;
 
 import "hardhat/console.sol";
-import "./governance/DaoSubscriptions.sol";
+import "./governance/SuperGovernance.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IRegistry.sol";
@@ -11,10 +11,10 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title AllianceBlock Governance contract
- * @dev Extends Initializable, DaoSubscriptions
+ * @dev Extends Initializable, SuperGovernance
  * @notice Responsible for governing AllianceBlock's ecosystem
  */
-contract Governance is Initializable, DaoSubscriptions {
+contract Governance is Initializable, SuperGovernance {
     using SafeMath for uint256;
     using DoubleLinkedList for DoubleLinkedList.LinkedList;
 
@@ -81,20 +81,6 @@ contract Governance is Initializable, DaoSubscriptions {
                 block.timestamp.add(updatableVariables[keccak256(abi.encode("loanApprovalRequestDuration"))]);
         }
 
-        if (currentEpoch > 1) {
-            addCronjob(
-                CronjobType.DAO_APPROVAL,
-                approvalRequests[totalApprovalRequests].deadlineTimestamp,
-                totalApprovalRequests
-            );
-
-            requestsPerEpoch[currentEpoch].addNode(totalApprovalRequests);
-
-            if (epochDaoDelegators[currentEpoch].getSize() > 0) {
-                epochDaoDelegators[currentEpoch].cloneList(remainingDelegatorIdsToVotePerRequest[totalApprovalRequests]);
-            }
-        }
-
         emit ApprovalRequested(
             approvalRequests[totalApprovalRequests].loanId,
             approvalRequests[totalApprovalRequests].isMilestone,
@@ -103,30 +89,6 @@ contract Governance is Initializable, DaoSubscriptions {
         );
 
         totalApprovalRequests = totalApprovalRequests.add(1);
-    }
-
-    /**
-     * @notice Used for voting on a Request
-     * @dev Executes cronjob()
-     * @param requestId The id of the Request to vote on
-     * @param decision The casted vote (0 or 1)
-    */
-    function voteForRequest(
-        uint256 requestId,
-        bool decision
-    )
-    external
-    onlyDaoDelegatorNotVoted(requestId, approvalRequests[requestId].epochSubmitted)
-    onlyBeforeDeadline(requestId)
-    checkCronjob()
-    {
-        if (decision) {
-            approvalRequests[requestId].approvalsProvided = approvalRequests[requestId].approvalsProvided.add(1);
-        }
-
-        remainingDelegatorIdsToVotePerRequest[requestId].removeNode(addressToId[msg.sender]);
-
-        emit VotedForRequest(approvalRequests[requestId].loanId, requestId, decision, msg.sender);
     }
 
     /**
