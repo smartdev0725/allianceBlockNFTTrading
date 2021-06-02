@@ -5,7 +5,7 @@ const {expectRevert} = require('@openzeppelin/test-helpers');
 export default async function suite() {
   describe.only('Succeeds', async () => {
 
-    describe('Initial values', async() => {
+    describe('Initial values', () => {
       it('should get correct contract uri', async function () {
         // Given
         const contractURI = await this.fundingNFTContract.contractURI();
@@ -67,9 +67,9 @@ export default async function suite() {
         expect(supportERC1155).to.be.equal(true);
         expect(supportMetadata).to.be.equal(true);
       });
-    })
+    });
 
-    describe('Basic Minting', function () {
+    describe('Basic Minting', () => {
       it('only minter role should be able to mint a new NFT', async function () {
         await expectRevert(
           this.fundingNFTContract.connect(this.lender1Signer).mintGen0(this.lender1, 10, 1),
@@ -109,6 +109,50 @@ export default async function suite() {
         expect(balances[0].toString()).to.be.equal('10');
         expect(balances[1].toString()).to.be.equal('20');
       });
+    });
+
+    describe('Loan Id and Generation',  () => {
+      it('only minter role should be able to mint gen0', async function () {
+        const tx = await this.fundingNFTContract.connect(this.seekerSigner).mintGen0(this.lender1, 10, 1);
+
+        // Correct Event.
+        await expect(tx)
+          .to.emit(this.fundingNFTContract, 'TransferSingle')
+          .withArgs(this.seeker, ethers.constants.AddressZero, this.lender1, 1, 10);
+
+      });
+
+      //
+      // it('should be able to increase loan generation', async function () {
+      //   const tx = await this.fundingNFTContract.connect(this.seekerSigner).increaseGeneration(3, this.lender1, 10);
+      //
+      //   // Correct Event. Tokens burned
+      //   await expect(tx)
+      //     .to.emit(this.fundingNFTContract, 'TransferSingle')
+      //     .withArgs(this.seeker, this.seeker, ethers.constants.AddressZero, 3, 10);
+      //
+      //   // Correct Event. New Gen Tokens minted
+      //   await expect(tx)
+      //     .to.emit(this.fundingNFTContract, 'TransferSingle')
+      //     .withArgs(this.seeker, ethers.constants.AddressZero, this.seeker, 3, 10);
+      //
+      //   // const newTokenId = String(tx.logs[1].args.id);
+      //   // const {generation, loanId} = await fundingNFT.formatTokenId(newTokenId);
+      //   //
+      //   // assert.equal(generation, 1);
+      //   // assert.equal(loanId, 3);
+      //
+      // });
+      //
+      // it('should get correct balance for alice', async function () {
+      //   const balanceGen0 = await fundingNFT.balanceOf(alice, 3);
+      //
+      //   const tokenId = await fundingNFT.getTokenId(1, 3);
+      //   const balanceGen1 = await fundingNFT.balanceOf(alice, tokenId);
+      //
+      //   assert.equal(balanceGen0, 0);
+      //   assert.equal(balanceGen1, 10);
+      // });
     });
   });
 }
