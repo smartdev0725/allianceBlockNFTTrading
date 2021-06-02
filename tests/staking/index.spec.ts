@@ -4,7 +4,7 @@ import { deployments, ethers, getNamedAccounts } from 'hardhat';
 import { getContracts, getSigners } from '../helpers/utils';
 
 describe('Staking', function () {
-  before(async function () {
+  beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();
 
