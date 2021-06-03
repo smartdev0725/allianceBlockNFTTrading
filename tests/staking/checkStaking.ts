@@ -317,5 +317,74 @@ export default async function suite() {
       expect(Number(rALBTBalanceAfter)).to.be.lessThan(Number(rALBTBalanceBefore));
       expect(rewardAfter).to.be.equal(Number(0));
     });
+
+    it('when unstaking can only drop to lower level', async function () {
+      // Given
+      await this.stakingContract
+        .connect(this.staker1Signer)
+        .stake(StakingType.STAKER_LVL_1);
+      // Then
+      expectRevert(this.stakingContract.connect(this.staker1Signer).unstake(StakingType.STAKER_LVL_1), 'Can only drop to lower level');
+      expectRevert(this.stakingContract.connect(this.staker1Signer).unstake(StakingType.STAKER_LVL_2), 'Can only drop to lower level');
+      expectRevert(this.stakingContract.connect(this.staker1Signer).unstake(StakingType.STAKER_LVL_3_OR_DAO_MEMBER), 'Can only drop to lower level');
+
+      // Given
+      await this.stakingContract
+        .connect(this.staker1Signer)
+        .stake(StakingType.STAKER_LVL_2);
+      // Then
+      expectRevert(this.stakingContract.connect(this.staker1Signer).unstake(StakingType.STAKER_LVL_2), 'Can only drop to lower level');
+      expectRevert(this.stakingContract.connect(this.staker1Signer).unstake(StakingType.STAKER_LVL_3_OR_DAO_MEMBER), 'Can only drop to lower level');
+      // Given
+      await this.stakingContract
+        .connect(this.staker1Signer)
+        .stake(StakingType.STAKER_LVL_3_OR_DAO_MEMBER);
+      // Then
+      expectRevert(this.stakingContract.connect(this.staker1Signer).unstake(StakingType.STAKER_LVL_3_OR_DAO_MEMBER), 'Can only drop to lower level');
+    });
+
+    it('when unstaking from level 2 to level 1 stake balances are updated accordingly', async function () {
+      // Given
+      await this.stakingContract
+        .connect(this.staker1Signer)
+        .stake(StakingType.STAKER_LVL_2);
+      const staker1StakingAmountBefore = await this.stakingContract.getBalance(
+        this.staker1
+      );
+      const staker1ALBTBalanceBefore = await this.ALBTContract.balanceOf(
+        this.staker1
+      );
+      const stakingContractALBTBalanceBefore = await this.ALBTContract.balanceOf(this.stakingContract.address);
+      const stakedSupplyBefore = await this.stakingContract.totalSupply();
+      const rALBTBalanceBefore = await this.rALBTContract.balanceOf(
+        this.staker1
+      );
+      const amountToUnstake = staker1StakingAmountBefore.sub(await this.stakingContract.stakingTypeAmounts(StakingType.STAKER_LVL_1));
+      const totalAmountFromStakingToStaker = amountToUnstake.add(await this.stakingContract.earned(this.staker1));
+
+      // When
+      await expect(this.stakingContract.connect(this.staker1Signer).unstake(StakingType.STAKER_LVL_1)).to.emit(this.stakingContract, "Withdrawn").withArgs(this.staker1, amountToUnstake);
+
+      const staker1StakingAmountAfter = await this.stakingContract.getBalance(
+        this.staker1
+      );
+      const staker1ALBTBalanceAfter = await this.ALBTContract.balanceOf(
+        this.staker1
+      );
+      const stakingContractALBTBalanceAfter = await this.ALBTContract.balanceOf(this.stakingContract.address);
+      const stakedSupplyAfter = await this.stakingContract.totalSupply();
+      const rALBTBalanceAfter = await this.rALBTContract.balanceOf(
+        this.staker1
+      );
+      const rewardAfter = await this.stakingContract.earned(this.staker1);
+
+      // Then
+      expect(staker1StakingAmountAfter).to.be.equal(staker1StakingAmountBefore.sub(totalAmountFromStakingToStaker));
+      expect(staker1ALBTBalanceAfter).to.be.equal(staker1ALBTBalanceBefore.add(totalAmountFromStakingToStaker));
+      expect(stakingContractALBTBalanceAfter).to.be.equal(stakingContractALBTBalanceBefore.sub(totalAmountFromStakingToStaker));
+      expect(stakedSupplyAfter).to.be.equal(stakedSupplyBefore.sub(totalAmountFromStakingToStaker));
+      expect(Number(rALBTBalanceAfter)).to.be.lessThan(Number(rALBTBalanceBefore));
+      expect(Number(rewardAfter)).to.be.equal(Number(0));
+    });
   });
 }
