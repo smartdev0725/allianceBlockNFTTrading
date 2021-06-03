@@ -39,6 +39,10 @@ export const getContracts = async () => {
 
   const ALBTContract = await ethers.getContract('ALBT');
 
+  const actionVerifierContract = await ethers.getContract('ActionVerifier');
+
+  const rALBTContract = await ethers.getContract('rALBT');
+
   return {
     registryContract,
     governanceContract,
@@ -49,6 +53,8 @@ export const getContracts = async () => {
     collateralTokenContract,
     ALBTContract,
     stakingContract,
+    rALBTContract,
+    actionVerifierContract
   };
 };
 
