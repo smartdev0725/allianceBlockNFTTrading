@@ -26,7 +26,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
     IStaking public staking;
 
     /**
-     * @dev Constructor of the ActionVerifier contract.
+     * @dev Initializer of the ActionVerifier contract.
      * @param rewardPerActionProvision_ The reward that an action provider accumulates for each action provision.
      * @param maxActionsPerProvision_ The max actions that an account can take rewards for in one function call.
      * @param escrow_ The address of the escrow.
