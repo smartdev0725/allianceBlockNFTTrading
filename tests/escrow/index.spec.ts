@@ -1,18 +1,17 @@
 import checkEscrow from './checkEscrow';
 
-import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import { deployments, ethers, getNamedAccounts } from 'hardhat';
 
 describe('Escrow', function () {
   beforeEach(async function () {
     // Deploy fixtures
-    const {deploy, fixture, get} = deployments
+    const { deploy, fixture, get } = deployments
     await fixture();
 
     // Get accounts
-    const {deployer, staker1, staker2, proxyOwner} = await getNamedAccounts();
+    const { deployer, staker1, staker2, proxyOwner } = await getNamedAccounts();
 
     const fundingNFTContract = await get('FundingNFT');
-    const mainNFTContract = await get('MainNFT');
     const lendingTokenContract = await get('LendingToken');
 
     await deploy('Escrow2', {
@@ -23,7 +22,7 @@ describe('Escrow', function () {
         methodName: 'initialize',
         proxyContract: 'OpenZeppelinTransparentProxy',
       },
-      args: [lendingTokenContract.address, mainNFTContract.address, fundingNFTContract.address],
+      args: [lendingTokenContract.address, fundingNFTContract.address],
       log: true,
     });
 
