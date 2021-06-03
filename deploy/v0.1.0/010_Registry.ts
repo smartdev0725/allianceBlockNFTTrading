@@ -25,7 +25,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const escrowAddress = (await get('Escrow')).address;
   const governanceAddress = (await get('Governance')).address;
   const lendingTokenAddress = process.env.LENDING_TOKEN_ADDRESS ? process.env.LENDING_TOKEN_ADDRESS: (await get('LendingToken')).address;
-  const mainNFTAddress = (await get('MainNFT')).address;
   const fundingNFTAddress = (await get('FundingNFT')).address;
 
   await deploy(contractName, {
@@ -40,7 +39,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       escrowAddress,
       governanceAddress,
       lendingTokenAddress,
-      mainNFTAddress,
       fundingNFTAddress,
       ethers.utils.parseEther(BASE_AMOUNT + '').toString(), // Same as toWei in web3
       MINIMUM_INTEREST_PERCENTAGE,
@@ -61,8 +59,7 @@ export default func;
 func.tags = [id, version];
 func.dependencies = [
   'FundingNFT',
-  'MainNFT',
-  'Staking',
+  'LendingToken',
   'Governance',
   'Escrow',
 ];

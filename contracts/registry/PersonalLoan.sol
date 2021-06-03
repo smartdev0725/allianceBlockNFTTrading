@@ -75,7 +75,6 @@ contract PersonalLoan is LoanDetails {
         );
 
         // TODO - Mint Correctly And Burn on Settlement
-        // mainNFT.mint(address(escrow));
         fundingNFT.mintGen0(
             address(escrow),
             loanDetails[totalLoans].totalPartitions,

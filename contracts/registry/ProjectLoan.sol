@@ -97,7 +97,6 @@ contract ProjectLoan is LoanDetails {
         );
 
         // TODO - Mint Correctly And Burn on Settlement
-        // mainNFT.mint(address(escrow));
         fundingNFT.mintOfGen(
             address(escrow),
             loanDetails[totalLoans].totalPartitions,

@@ -17,7 +17,6 @@ contract EscrowDetails {
     IRegistry public registry;
 
     IERC20 public lendingToken;
-    IERC721Mint public mainNFT;
     IERC1155Mint public fundingNFT;
     address public actionVerifier;
     address public staking;
