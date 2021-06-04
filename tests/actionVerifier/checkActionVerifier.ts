@@ -76,5 +76,25 @@ export default async function suite() {
 
     });
 
+    it('Check for an existing action for true', async function () {
+      // Given and When
+      await this.actionVerifierContract.connect(this.deployerSigner).importAction("Action", 10)
+
+      // Then
+      const action = ethers.utils.keccak256(ethers.utils.solidityPack([ "string" ], [ "Action" ]))
+      const rewardPerActionBefore = await this.actionVerifierContract.rewardPerAction(action)
+      expect(rewardPerActionBefore.toNumber()).to.be.equal(10);
+
+      const existAction = await this.actionVerifierContract.connect(this.seekerSigner).checkAction("Action")
+      expect(existAction).to.be.equal(true);
+
+    });
+
+    it('Check for an existing action for false', async function () {
+      const existAction = await this.actionVerifierContract.connect(this.seekerSigner).checkAction("Test")
+      expect(existAction).to.be.equal(false);
+
+    });
+
   })
 }
