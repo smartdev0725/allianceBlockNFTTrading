@@ -54,5 +54,27 @@ export default async function suite() {
       expect(rewardPerAction.toNumber()).to.be.equal(10);
     });
 
+    it('Should revert when update action with another user', async function () {
+      await expectRevert(
+        this.actionVerifierContract.connect(this.seekerSigner).updateAction('Test', 10),
+        'Ownable: caller is not the owner'
+      );
+    });
+
+    it('Should update action', async function () {
+      // Given and When
+      await this.actionVerifierContract.connect(this.deployerSigner).importAction("Action", 10)
+
+      // Then
+      const action = ethers.utils.keccak256(ethers.utils.solidityPack([ "string" ], [ "Action" ]))
+      const rewardPerActionBefore = await this.actionVerifierContract.rewardPerAction(action)
+      expect(rewardPerActionBefore.toNumber()).to.be.equal(10);
+
+      await this.actionVerifierContract.connect(this.deployerSigner).updateAction("Action", 20)
+      const rewardPerActionAfter = await this.actionVerifierContract.rewardPerAction(action)
+      expect(rewardPerActionAfter.toNumber()).to.be.equal(20);
+
+    });
+
   })
 }
