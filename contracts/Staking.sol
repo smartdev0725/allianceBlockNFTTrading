@@ -127,7 +127,9 @@ import "hardhat/console.sol";
 
         _applyReputation(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
 
-        _stake(msg.sender, amount.sub(balance[msg.sender]));
+        uint256 amountToStake = amount.sub(balance[msg.sender]);
+        _stake(msg.sender, amountToStake);
+        emit Staked(msg.sender, amountToStake);
     }
 
     /**
@@ -217,7 +219,6 @@ import "hardhat/console.sol";
                 return i.add(1);
             }
         }
-
         return 0;
     }
 
@@ -235,11 +236,11 @@ import "hardhat/console.sol";
         internal
     {
         if (previousLevelIndex < newLevelIndex) {
-            uint256 amountToMint = findAmount(newLevelIndex, previousLevelIndex);
+            uint256 amountToMint = _findAmount(newLevelIndex, previousLevelIndex);
             escrow.mintReputationalToken(account, amountToMint);
         }
         else {
-            uint256 amountToBurn = findAmount(previousLevelIndex, newLevelIndex);
+            uint256 amountToBurn = _findAmount(previousLevelIndex, newLevelIndex);
             escrow.burnReputationalToken(account, amountToBurn);
         }
     }
@@ -250,7 +251,7 @@ import "hardhat/console.sol";
      * @param smallIndex ???
      * @return amount of reputation
     */
-    function findAmount(uint256 bigIndex, uint256 smallIndex) internal view returns (uint256 amount) {
+    function _findAmount(uint256 bigIndex, uint256 smallIndex) internal view returns (uint256 amount) {
         if (bigIndex > 3) bigIndex = 3;
         if (smallIndex == 0) {
             amount = reputationalStakingTypeAmounts[bigIndex.sub(1)];
