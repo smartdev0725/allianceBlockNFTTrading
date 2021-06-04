@@ -12,3 +12,5 @@ yarn.lock
 dist/
 deployments/localhost/
 contractsInfo.json
+coverage/
+coverage.json
