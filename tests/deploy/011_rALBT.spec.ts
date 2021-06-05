@@ -15,7 +15,7 @@ describe('Contract rALBT', () => {
     const symbol = await rALBTContract.symbol();
 
     // Then
-    expect(name).to.equal("Reputational AllianceBlock Token");
-    expect(symbol).to.equal("rALBT");
+    expect(name).to.equal('Reputational AllianceBlock Token');
+    expect(symbol).to.equal('rALBT');
   });
 });

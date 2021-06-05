@@ -24,7 +24,9 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const escrowAddress = (await get('Escrow')).address;
   const governanceAddress = (await get('Governance')).address;
-  const lendingTokenAddress = process.env.LENDING_TOKEN_ADDRESS ? process.env.LENDING_TOKEN_ADDRESS: (await get('LendingToken')).address;
+  const lendingTokenAddress = process.env.LENDING_TOKEN_ADDRESS
+    ? process.env.LENDING_TOKEN_ADDRESS
+    : (await get('LendingToken')).address;
   const fundingNFTAddress = (await get('FundingNFT')).address;
 
   await deploy(contractName, {
@@ -57,10 +59,5 @@ const id = contractName + version;
 
 export default func;
 func.tags = [id, version];
-func.dependencies = [
-  'FundingNFT',
-  'LendingToken',
-  'Governance',
-  'Escrow',
-];
+func.dependencies = ['FundingNFT', 'LendingToken', 'Governance', 'Escrow'];
 func.id = id;

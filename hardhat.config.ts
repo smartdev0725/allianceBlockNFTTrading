@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 dotenv.config({path: __dirname + '/.env'});
 
 import {HardhatUserConfig} from 'hardhat/types';
-import { task } from "hardhat/config";
+import {task} from 'hardhat/config';
 import '@nomiclabs/hardhat-ethers';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
@@ -11,7 +11,7 @@ import 'solidity-coverage';
 
 import {node_url, accounts} from './utils/network';
 
-task("accounts", "Prints the list of accounts",  async (args, hre) => {
+task('accounts', 'Prints the list of accounts', async (args, hre) => {
   const accounts = await hre.ethers.getSigners();
 
   for (const account of accounts) {

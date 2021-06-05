@@ -10,7 +10,9 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
   const {deploy, get} = deployments;
 
-  const albtContractAddress = process.env.ALBT_TOKEN_ADDRESS ? process.env.ALBT_TOKEN_ADDRESS: (await get('ALBT')).address;
+  const albtContractAddress = process.env.ALBT_TOKEN_ADDRESS
+    ? process.env.ALBT_TOKEN_ADDRESS
+    : (await get('ALBT')).address;
   const governanceContractAddress = (await get('Governance')).address;
   const escrowContractAddress = (await get('Escrow')).address;
   const {deployer, proxyOwner} = await getNamedAccounts();

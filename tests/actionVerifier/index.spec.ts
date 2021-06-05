@@ -1,12 +1,12 @@
 import checkActionVerifier from './checkActionVerifier';
 
-import { deployments, ethers, getNamedAccounts } from 'hardhat';
-import {getContracts, getSigners} from "../helpers/utils";
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import {getContracts, getSigners} from '../helpers/utils';
 
 describe('Action Verifier', function () {
   beforeEach(async function () {
     // Deploy fixtures
-    const { deploy, fixture, get } = deployments
+    const {deploy, fixture, get} = deployments;
     await fixture();
 
     // Get accounts
@@ -54,7 +54,13 @@ describe('Action Verifier', function () {
     this.staker2Signer = staker2Signer;
 
     // Get contracts
-    const { actionVerifierContract, escrowContract, rALBTContract, stakingContract, ALBTContract } = await getContracts();
+    const {
+      actionVerifierContract,
+      escrowContract,
+      rALBTContract,
+      stakingContract,
+      ALBTContract,
+    } = await getContracts();
     this.actionVerifierContract = actionVerifierContract;
     this.escrowContract = escrowContract;
     this.stakingContract = stakingContract;
@@ -62,5 +68,8 @@ describe('Action Verifier', function () {
     this.rALBTContract = rALBTContract;
   });
 
-  describe.only('When checking action verifier functionalities', checkActionVerifier.bind(this));
+  describe.only(
+    'When checking action verifier functionalities',
+    checkActionVerifier.bind(this)
+  );
 });

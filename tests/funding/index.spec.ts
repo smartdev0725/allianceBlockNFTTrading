@@ -49,20 +49,19 @@ describe('Funding', function () {
     this.staker2Signer = staker2Signer;
 
     // Get contracts
-    const { fundingNFTContract, registryContract } = await getContracts();
+    const {fundingNFTContract, registryContract} = await getContracts();
     this.fundingNFTContract = fundingNFTContract;
     this.registryContract = registryContract;
 
     await this.fundingNFTContract.grantRole(
-      ethers.utils.solidityKeccak256([ "string", ], [ "MINTER_ROLE" ]),
-      seeker,
+      ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
+      seeker
     );
 
     await this.fundingNFTContract.grantRole(
-      ethers.utils.solidityKeccak256([ "string", ], [ "PAUSER_ROLE" ]),
-      staker1,
+      ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
+      staker1
     );
-
   });
 
   describe('When checking funding', checkFunding.bind(this));

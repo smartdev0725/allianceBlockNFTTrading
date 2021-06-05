@@ -11,7 +11,9 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const {deployer, proxyOwner} = await getNamedAccounts();
 
-  const lendingTokenAddress = process.env.LENDING_TOKEN_ADDRESS ? process.env.LENDING_TOKEN_ADDRESS: (await get('LendingToken')).address;
+  const lendingTokenAddress = process.env.LENDING_TOKEN_ADDRESS
+    ? process.env.LENDING_TOKEN_ADDRESS
+    : (await get('LendingToken')).address;
   const fundingNFTAddress = (await get('FundingNFT')).address;
 
   await deploy(contractName, {

@@ -54,7 +54,7 @@ export const getContracts = async () => {
     ALBTContract,
     stakingContract,
     rALBTContract,
-    actionVerifierContract
+    actionVerifierContract,
   };
 };
 
