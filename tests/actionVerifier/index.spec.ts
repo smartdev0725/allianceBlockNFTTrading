@@ -12,6 +12,7 @@ describe('Action Verifier', function () {
     // Get accounts
     const {
       deployer,
+      proxyOwner,
       seeker,
       lender1,
       lender2,
@@ -20,6 +21,7 @@ describe('Action Verifier', function () {
       rewardDistributor,
     } = await getNamedAccounts();
     this.deployer = deployer;
+    this.proxyOwner = proxyOwner;
     this.seeker = seeker;
     this.lender1 = lender1;
     this.lender2 = lender2;
@@ -30,6 +32,7 @@ describe('Action Verifier', function () {
     // Get signers
     const {
       deployerSigner,
+      proxyOwnerSigner,
       delegator1Signer,
       delegator2Signer,
       lender1Signer,
@@ -40,6 +43,7 @@ describe('Action Verifier', function () {
       staker2Signer,
     } = await getSigners();
     this.deployerSigner = deployerSigner;
+    this.proxyOwnerSigner = proxyOwnerSigner;
     this.delegator1Signer = delegator1Signer;
     this.delegator2Signer = delegator2Signer;
     this.lender1Signer = lender1Signer;
@@ -50,10 +54,12 @@ describe('Action Verifier', function () {
     this.staker2Signer = staker2Signer;
 
     // Get contracts
-    const { actionVerifierContract, escrowContract, stakingContract } = await getContracts();
+    const { actionVerifierContract, escrowContract, rALBTContract, stakingContract, ALBTContract } = await getContracts();
     this.actionVerifierContract = actionVerifierContract;
     this.escrowContract = escrowContract;
     this.stakingContract = stakingContract;
+    this.ALBTContract = ALBTContract;
+    this.rALBTContract = rALBTContract;
   });
 
   describe.only('When checking action verifier functionalities', checkActionVerifier.bind(this));
