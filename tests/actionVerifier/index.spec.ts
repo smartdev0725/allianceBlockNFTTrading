@@ -68,7 +68,7 @@ describe('Action Verifier', function () {
     this.rALBTContract = rALBTContract;
   });
 
-  describe.only(
+  describe(
     'When checking action verifier functionalities',
     checkActionVerifier.bind(this)
   );
