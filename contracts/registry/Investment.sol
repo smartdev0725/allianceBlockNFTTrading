@@ -15,7 +15,12 @@ contract Investment is LoanDetails {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 
-    // TODO - EVENTS
+    // EVENTS
+    event InvestmentRequested(
+        uint256 indexed loanId,
+        address indexed user,
+        uint256 amount
+    );
 
     /**
      * @notice Requests investment
@@ -68,6 +73,7 @@ contract Investment is LoanDetails {
         governance.requestApproval(totalLoans, false, 0);
 
         // Add event for investment request
+        emit InvestmentRequested(totalLoans, msg.sender, totalAmountRequested_);
 
         totalLoans = totalLoans.add(1);
     }

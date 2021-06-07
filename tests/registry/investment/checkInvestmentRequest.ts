@@ -1,8 +1,7 @@
 import BN from 'bn.js';
 import { LoanType, LoanStatus } from '../../helpers/registryEnums';
-import { ONE_DAY, BASE_AMOUNT } from '../../helpers/constants';
-import { getCurrentTimestamp } from '../../helpers/time';
-import { deployments, ethers, getNamedAccounts } from 'hardhat';
+import { BASE_AMOUNT } from '../../helpers/constants';
+import { ethers } from 'hardhat';
 import { BigNumber } from 'ethers';
 import chai, { expect } from 'chai';
 import { solidity } from 'ethereum-waffle';
@@ -31,14 +30,14 @@ export default async function suite() {
       const totalAmountRequested = ethers.utils.parseEther('30000');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-      await this.registryContract
+      await expect(this.registryContract
         .connect(this.seekerSigner)
         .requestInvestment(
           this.projectTokenContract.address,
           amountOfTokensToBePurchased,
           totalAmountRequested,
           ipfsHash
-        );
+        )).to.emit(this.registryContract, "InvestmentRequested").withArgs(loanId, this.seeker, totalAmountRequested);
       // TO DO: Add expect to emit event once events are added to the investment contract
 
       const newSeekerProjectTokenBalance =
