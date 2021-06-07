@@ -328,5 +328,32 @@ export default async function suite() {
       const balanceAfter1 = await this.rALBTContract.balanceOf(this.lender1);
       expect(balanceAfter1.toNumber()).to.be.equal(0);
     });
+
+    it('Can provide rewards', async function () {
+      // Given
+      await this.actionVerifierContract.connect(this.deployerSigner).importAction("Project Vote", ethers.utils.parseEther("10"));
+      await this.actionVerifierContract.connect(this.deployerSigner).importAction("Create Thread", ethers.utils.parseEther("10"));
+      await this.actionVerifierContract.connect(this.deployerSigner).updateVariables(ethers.utils.parseEther("10"), 10);
+
+      // Mint albt tokens to deployer address
+      const amountToTransfer = ethers.utils.parseEther('1000000');
+      await this.ALBTContract.connect(this.deployerSigner).mint(
+        this.lender1,
+        amountToTransfer
+      );
+      await this.ALBTContract.connect(this.lender1Signer).approve(
+        this.stakingContract.address,
+        amountToTransfer
+      );
+
+      await this.stakingContract.connect(this.lender1Signer).stake(StakingType.STAKER_LVL_2);
+
+      // When
+      await this.actionVerifierContract.connect(this.lender1Signer).provideRewardsForActions( actions , signatures);
+
+      // Then
+      const balanceAfter1 = await this.rALBTContract.balanceOf(this.lender1);
+      expect(balanceAfter1.toNumber()).to.be.greaterThan(0);
+    });
   });
 }
