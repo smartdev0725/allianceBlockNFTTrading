@@ -38,7 +38,6 @@ export default async function suite() {
           totalAmountRequested,
           ipfsHash
         )).to.emit(this.registryContract, "InvestmentRequested").withArgs(loanId, this.seeker, totalAmountRequested);
-      // TO DO: Add expect to emit event once events are added to the investment contract
 
       const newSeekerProjectTokenBalance =
         await this.projectTokenContract.balanceOf(this.seeker);
