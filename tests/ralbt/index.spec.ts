@@ -53,5 +53,5 @@ describe('rAlbt', function () {
 
   });
 
-  describe.only('When checking rAlbt', checkrAlbt.bind(this));
+  describe('When checking rAlbt', checkrAlbt.bind(this));
 });
