@@ -120,5 +120,49 @@ export default async function suite() {
         expect(balance.toNumber()).to.be.equal(newBalance);
       });
     });
+
+    describe("multiMintTo", () => {
+      it("should fail if a account other than owner call", async function() {
+        await expectRevert(
+          this.rALBTContract.connect(this.lender1Signer).multiMintTo([], []),
+          'Ownable: caller is not the owner'
+        );
+      });
+
+      it("should fail if length of parameters are not equal", async function() {
+        await expectRevert(
+          this.rALBTContract.connect(this.deployerSigner).multiMintTo([this.lender1, this.lender2], [10000]),
+          'Invalid length of to or amounts'
+        );
+      });
+
+      it("should success", async function() {
+        const amount1 = 10000;
+        const amount2 = 20000;
+
+        await expect(this.rALBTContract.connect(this.deployerSigner).multiMintTo([this.lender1, this.lender2], [amount1, amount2]))
+          .to.emit(this.rALBTContract, "Transfer")
+
+        const balance1 = await this.rALBTContract.balanceOf(this.lender1);
+        const balance2 = await this.rALBTContract.balanceOf(this.lender2);
+        const totalSupply = await this.rALBTContract.totalSupply();
+        expect(balance1.toNumber()).to.be.equal(amount1);
+        expect(balance2.toNumber()).to.be.equal(amount2);
+        expect(totalSupply.toNumber()).to.be.equal(amount1 + amount2);
+
+      });
+
+      it("should success with zero addresses", async function() {
+        const amount1 = 10000;
+        const amount2 = 20000;
+
+        await expect(this.rALBTContract.connect(this.deployerSigner).multiMintTo([ethers.constants.AddressZero, ethers.constants.AddressZero], [amount1, amount2]))
+          .to.not.emit(this.rALBTContract, "Transfer")
+
+        const totalSupply = await this.rALBTContract.totalSupply();
+        expect(totalSupply.toNumber()).to.be.equal(0);
+
+      });
+    });
   });
 }
