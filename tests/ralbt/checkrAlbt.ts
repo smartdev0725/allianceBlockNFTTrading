@@ -61,6 +61,15 @@ export default async function suite() {
         );
       });
 
+      it("should fail if address to is zero", async function() {
+        const amount = 10000;
+
+        await expectRevert(
+          this.rALBTContract.connect(this.deployerSigner).mintTo(ethers.constants.AddressZero, amount),
+          'ERC20: mint to the zero address'
+        );
+      });
+
       it("should success", async function() {
         const amount = 10000;
 
@@ -79,6 +88,15 @@ export default async function suite() {
         await expectRevert(
           this.rALBTContract.connect(this.lender1Signer).burnFrom(this.lender1, amount),
           'Ownable: caller is not the owner'
+        );
+      });
+
+      it("should fail if address to is zero", async function() {
+        const amount = 10000;
+
+        await expectRevert(
+          this.rALBTContract.connect(this.deployerSigner).burnFrom(ethers.constants.AddressZero, amount),
+          'ERC20: burn from the zero address'
         );
       });
 
