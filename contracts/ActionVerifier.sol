@@ -26,6 +26,17 @@ import "hardhat/console.sol";
     IEscrow public escrow;
     IStaking public staking;
 
+    bytes32 public DOMAIN_SEPARATOR;
+
+    bytes32 public constant EIP712DOMAIN_TYPEHASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
+
+    struct EIP712Domain {
+        string  name;
+        string  version;
+        uint256 chainId;
+        address verifyingContract;
+    }
+
     /**
      * @dev Initializer of the ActionVerifier contract.
      * @param rewardPerActionProvision_ The reward that an action provider accumulates for each action provision.
@@ -36,13 +47,31 @@ import "hardhat/console.sol";
         uint256 rewardPerActionProvision_,
         uint256 maxActionsPerProvision_,
         address escrow_,
-        address staking_
+        address staking_,
+        uint256 chainId
     ) public initializer {
         __Ownable_init();
         escrow = IEscrow(escrow_);
         staking = IStaking(staking_);
         rewardPerActionProvision = rewardPerActionProvision_;
         maxActionsPerProvision = maxActionsPerProvision_;
+
+        DOMAIN_SEPARATOR = hash(EIP712Domain({
+            name: "AllianceBlock Verifier",
+            version: '1.0',
+            chainId: chainId,
+            verifyingContract: address(this)
+        }));
+    }
+
+    function hash(EIP712Domain memory eip712Domain) internal view returns (bytes32) {
+        return keccak256(abi.encode(
+            EIP712DOMAIN_TYPEHASH,
+            keccak256(bytes(eip712Domain.name)),
+            keccak256(bytes(eip712Domain.version)),
+            eip712Domain.chainId,
+            eip712Domain.verifyingContract
+        ));
     }
 
     /**
@@ -105,7 +134,7 @@ import "hardhat/console.sol";
 
         for (uint256 i = 0; i < actions.length; i++) {
             if (
-                actions[i].isValidSignature(signatures[i]) &&
+                actions[i].isValidSignature(signatures[i], DOMAIN_SEPARATOR) &&
                 rewardPerAction[keccak256(abi.encodePacked(actions[i].actionName))] > 0
             )
             {

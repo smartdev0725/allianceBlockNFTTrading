@@ -1,6 +1,7 @@
 import {expect} from 'chai';
-import {ethers, getNamedAccounts} from 'hardhat';
+import {ethers, getNamedAccounts, web3} from 'hardhat';
 import {StakingType} from '../helpers/registryEnums';
+import {getSignature} from '../helpers/utils';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
@@ -330,31 +331,44 @@ export default async function suite() {
     });
 
     // TODO: we should do the DOMAIN_SEPARATOR more flexible, so we are allowed to test it
-    // it('Can provide rewards', async function () {
-    //   // Given
-    //   await this.actionVerifierContract.connect(this.deployerSigner).importAction("Project Vote", ethers.utils.parseEther("10"));
-    //   await this.actionVerifierContract.connect(this.deployerSigner).importAction("Create Thread", ethers.utils.parseEther("10"));
-    //   await this.actionVerifierContract.connect(this.deployerSigner).updateVariables(ethers.utils.parseEther("10"), 10);
-    //
-    //   // Mint albt tokens to deployer address
-    //   const amountToTransfer = ethers.utils.parseEther('1000000');
-    //   await this.ALBTContract.connect(this.deployerSigner).mint(
-    //     this.lender1,
-    //     amountToTransfer
-    //   );
-    //   await this.ALBTContract.connect(this.lender1Signer).approve(
-    //     this.stakingContract.address,
-    //     amountToTransfer
-    //   );
-    //
-    //   await this.stakingContract.connect(this.lender1Signer).stake(StakingType.STAKER_LVL_2);
-    //
-    //   // When
-    //   await this.actionVerifierContract.connect(this.lender1Signer).provideRewardsForActions( actions , signatures);
-    //
-    //   // Then
-    //   const balanceAfter1 = await this.rALBTContract.balanceOf(this.lender1);
-    //   expect(balanceAfter1.toNumber()).to.be.greaterThan(0);
-    // });
+    it.only('Can provide rewards', async function () {
+      const actions = [
+        {
+          account: this.lender1,
+          actionName: 'Project Vote',
+          answer: 'Yes',
+          referralId: '5',
+        },
+      ];
+
+      // Given
+      await this.actionVerifierContract.connect(this.deployerSigner).importAction("Project Vote", ethers.utils.parseEther("10"));
+      await this.actionVerifierContract.connect(this.deployerSigner).importAction("Create Thread", ethers.utils.parseEther("10"));
+      await this.actionVerifierContract.connect(this.deployerSigner).updateVariables(ethers.utils.parseEther("10"), 10);
+
+      let signature = await getSignature('Project Vote', 'Yes', this.lender1, 5, this.actionVerifierContract.address, web3);
+
+      const signatures = [signature];
+    
+      // Mint albt tokens to deployer address
+      const amountToTransfer = ethers.utils.parseEther('1000000');
+      await this.ALBTContract.connect(this.deployerSigner).mint(
+        this.lender1,
+        amountToTransfer
+      );
+      await this.ALBTContract.connect(this.lender1Signer).approve(
+        this.stakingContract.address,
+        amountToTransfer
+      );
+    
+      await this.stakingContract.connect(this.lender1Signer).stake(StakingType.STAKER_LVL_2);
+    
+      // When
+      await this.actionVerifierContract.connect(this.lender1Signer).provideRewardsForActions(actions , signatures);
+    
+      // Then
+      // const balanceAfter1 = await this.rALBTContract.balanceOf(this.lender1);
+      // expect(balanceAfter1.toNumber()).to.be.greaterThan(0);
+    });
   });
 }

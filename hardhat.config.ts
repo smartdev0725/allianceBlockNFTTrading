@@ -4,6 +4,8 @@ dotenv.config({path: __dirname + '/.env'});
 import {HardhatUserConfig} from 'hardhat/types';
 import {task} from 'hardhat/config';
 import '@nomiclabs/hardhat-ethers';
+import '@nomiclabs/hardhat-web3';
+
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import '@typechain/hardhat';
