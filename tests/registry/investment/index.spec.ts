@@ -52,7 +52,9 @@ describe('Registry Investments', function () {
       escrowContract,
       lendingTokenContract,
       projectTokenContract,
-      collateralTokenContract
+      collateralTokenContract,
+      stakingContract,
+      ALBTContract
     } = await getContracts();
     this.registryContract = registryContract;
     this.governanceContract = governanceContract;
@@ -61,6 +63,11 @@ describe('Registry Investments', function () {
     this.lendingTokenContract = lendingTokenContract;
     this.projectTokenContract = projectTokenContract;
     this.collateralTokenContract = collateralTokenContract;
+    this.stakingContract = stakingContract;
+    this.ALBTContract = ALBTContract;
+    const rALBTFactory = await ethers.getContractFactory("rALBT");
+    const rALBTAddress = await this.escrowContract.reputationalALBT();
+    this.rALBTContract = await rALBTFactory.attach(rALBTAddress);
 
     // Initialize Transfers
     await initializeTransfers(
@@ -103,6 +110,17 @@ describe('Registry Investments', function () {
     await this.governanceContract
       .connect(this.superDelegatorSigner)
       .superVoteForRequest(this.approvalRequest, true);
+
+    // Transfer albt tokens to stakers.
+    const amountToTransfer = ethers.utils.parseEther('1000000');
+    await this.ALBTContract.connect(this.deployerSigner).mint(
+      this.lender1,
+      amountToTransfer
+    );
+    await this.ALBTContract.connect(this.lender1Signer).approve(
+      this.stakingContract.address,
+      amountToTransfer
+    );
   });
 
   describe(

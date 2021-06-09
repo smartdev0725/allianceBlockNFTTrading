@@ -102,13 +102,16 @@ contract Investment is LoanDetails {
         uint256 reputationalBalance = _updateReputationalBalanceForPreviouslyLockedTokens();
         uint256 totalLotteryNumbers = reputationalBalance.div(rAlbtPerLotteryNumber);
 
-        if (totalLotteryNumbers == 0) return; // Maybe revert here?
+        if (totalLotteryNumbers == 0)
+            revert("Not elegible for lottery numbers");
 
         uint256 immediateTickets;
 
         // TODO - Explain this check to Rachid.
         while (totalLotteryNumbers > lotteryNumbersForImmediateTicket) {
             immediateTickets = immediateTickets.add(1);
+            console.log("totalLotteryNumbers", totalLotteryNumbers);
+            console.log("lotteryNumbersForImmediateTicket", lotteryNumbersForImmediateTicket);
             totalLotteryNumbers = totalLotteryNumbers.sub(lotteryNumbersForImmediateTicket);
         }
 
@@ -119,7 +122,7 @@ contract Investment is LoanDetails {
             immediateTickets = ticketsRemaining[investmentId];
             loanStatus[investmentId] = LoanLibrary.LoanStatus.SETTLED;
 
-            // Maybe also stop the procedure here.
+            return;
         }
 
         if (immediateTickets > 0) {
@@ -166,7 +169,7 @@ contract Investment is LoanDetails {
         }
 
         while (counter != 0) {
-            uint256 randomNumber = getRandomNumber(maxNumber);
+            uint256 randomNumber = _getRandomNumber(maxNumber);
             lotteryNonce = lotteryNonce.add(1);
 
             address randomAddress = addressOfLotteryNumber[investmentId][randomNumber.add(1)];
@@ -277,7 +280,7 @@ contract Investment is LoanDetails {
      * @param maxNumber the max number possible
      * @return randomNumber the random number generated
     */
-     function getRandomNumber(uint256 maxNumber) internal view returns (uint256 randomNumber) {
+    function _getRandomNumber(uint256 maxNumber) internal view returns (uint256 randomNumber) {
         randomNumber = uint256(keccak256(abi.encodePacked(
                 block.difficulty,
                 block.timestamp,
@@ -306,6 +309,7 @@ contract Investment is LoanDetails {
             lastBlockCheckedForLockedTicketsPerAddress[msg.sender] = block.number;
         }
 
+        console.log("rALBT contract", rALBT.balanceOf(msg.sender));
         return rALBT.balanceOf(msg.sender);
     }
 

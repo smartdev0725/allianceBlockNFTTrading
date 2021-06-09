@@ -5,6 +5,7 @@ import { ethers } from 'hardhat';
 import { BigNumber } from 'ethers';
 import chai, { expect } from 'chai';
 import { solidity } from 'ethereum-waffle';
+import { StakingType } from '../../helpers/registryEnums';
 const { expectRevert } = require('@openzeppelin/test-helpers');
 
 chai.use(solidity);
@@ -33,6 +34,10 @@ export default async function suite() {
       await expectRevert(this.registryContract.connect(this.lender1Signer).showInterestForInvestment(this.loanId, 0), "Cannot show interest for 0 partitions");
     });
 
+    it('should revert when sender has no reputational ALBT yet', async function () {
+      await expectRevert(this.registryContract.connect(this.lender1Signer).showInterestForInvestment(this.loanId, BigNumber.from(5)), "Not elegible for lottery numbers");
+    });
+
     it('sends lending token for the purchased amount of partitions to escrow', async function () {
       // Given
       const numberOfPartitions = BigNumber.from(3);
@@ -43,6 +48,9 @@ export default async function suite() {
         await this.lendingTokenContract.balanceOf(this.escrowContract.address);
 
       // When
+      await this.stakingContract
+        .connect(this.lender1Signer)
+        .stake(StakingType.STAKER_LVL_1);
       await this.registryContract.connect(this.lender1Signer).showInterestForInvestment(this.loanId, numberOfPartitions);
 
       // Then
@@ -62,6 +70,9 @@ export default async function suite() {
       const partitionsPurchasedBefore = loanDetailsBefore.partitionsPurchased;
 
       // When
+      await this.stakingContract
+        .connect(this.lender1Signer)
+        .stake(StakingType.STAKER_LVL_1);
       await this.registryContract.connect(this.lender1Signer).showInterestForInvestment(this.loanId, numberOfPartitions);
 
       // Then
@@ -70,6 +81,36 @@ export default async function suite() {
       expect(partitionsPurchasedAfter).to.be.equal(partitionsPurchasedBefore.add(numberOfPartitions));
     });
 
-    //TODO: Test the reputational balance and lottery ticket parts
+    it('should give tickets for reputational ALBT', async function () {
+      // Given
+      const numberOfPartitions = BigNumber.from(5);
+      const ticketsRemainingBefore = await this.registryContract.ticketsRemaining(this.loanId);
+      const totalLotteryNumbersPerInvestmentBefore = await this.registryContract.totalLotteryNumbersPerInvestment(this.loanId);
+      const remainingTicketsPerAddressBefore = await this.registryContract.remainingTicketsPerAddress(this.loanId, this.lender1);
+      const ticketsWonPerAddressBefore = await this.registryContract.ticketsWonPerAddress(this.loanId, this.lender1);
+
+      console.log("ticketsRemainingBefore", ticketsRemainingBefore.toString());
+      console.log("totalLotteryNumbersPerInvestmentBefore", totalLotteryNumbersPerInvestmentBefore.toString());
+      console.log("remainingTicketsPerAddressBefore", remainingTicketsPerAddressBefore.toString());
+      console.log("ticketsWonPerAddressBefore", ticketsWonPerAddressBefore.toString());
+
+      // When
+      // Stake first to get rALBT
+      await this.stakingContract
+        .connect(this.lender1Signer)
+        .stake(StakingType.STAKER_LVL_1);
+      await this.registryContract.connect(this.lender1Signer).showInterestForInvestment(this.loanId, numberOfPartitions);
+
+      // Then
+      const ticketsRemainingAfter = await this.registryContract.ticketsRemaining(this.loanId);
+      const totalLotteryNumbersPerInvestmentAfter = await this.registryContract.totalLotteryNumbersPerInvestment(this.loanId);
+      const remainingTicketsPerAddressAfter = await this.registryContract.remainingTicketsPerAddress(this.loanId, this.lender1);
+      const ticketsWonPerAddressAfter = await this.registryContract.ticketsWonPerAddress(this.loanId, this.lender1);
+
+      console.log("ticketsRemainingAfter", ticketsRemainingAfter.toString());
+      console.log("totalLotteryNumbersPerInvestmentAfter", totalLotteryNumbersPerInvestmentAfter.toString());
+      console.log("remainingTicketsPerAddressAfter", remainingTicketsPerAddressAfter.toString());
+      console.log("ticketsWonPerAddressAfter", ticketsWonPerAddressAfter.toString());
+    });
   });
 }
