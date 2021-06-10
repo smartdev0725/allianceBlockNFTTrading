@@ -1,7 +1,7 @@
 import checkStaking from './checkStaking';
 
-import { deployments, ethers, getNamedAccounts } from 'hardhat';
-import { getContracts, getSigners } from '../helpers/utils';
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import {getContracts, getSigners} from '../helpers/utils';
 
 describe('Staking', function () {
   beforeEach(async function () {
@@ -69,7 +69,7 @@ describe('Staking', function () {
     this.collateralTokenContract = collateralTokenContract;
     this.ALBTContract = ALBTContract;
     this.stakingContract = stakingContract;
-    const rALBTFactory = await ethers.getContractFactory("rALBT");
+    const rALBTFactory = await ethers.getContractFactory('rALBT');
     const rALBTAddress = await this.escrowContract.reputationalALBT();
     this.rALBTContract = await rALBTFactory.attach(rALBTAddress);
 
