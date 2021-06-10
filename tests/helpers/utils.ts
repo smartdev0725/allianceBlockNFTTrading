@@ -41,7 +41,9 @@ export const getContracts = async () => {
 
   const actionVerifierContract = await ethers.getContract('ActionVerifier');
 
-  const rALBTContract = await ethers.getContract('rALBT');
+  const rALBTFactory = await ethers.getContractFactory("rALBT");
+  const rALBTAddress = await escrowContract.reputationalALBT();
+  const rALBTContract = await rALBTFactory.attach(rALBTAddress);
 
   return {
     registryContract,
@@ -153,7 +155,7 @@ export const getSignature = async (
       name: "AllianceBlock Verifier",
       version: "1.0",
       chainId: 1337,
-      verifyingContract: actionVerifierContract,        
+      verifyingContract: actionVerifierContract,
     },
 
     // Defining the message signing data content.
@@ -198,7 +200,7 @@ export const getSignature = async (
         }
         else{
           resolve(result.result);
-        }        
+        }
       }
     )
   );
