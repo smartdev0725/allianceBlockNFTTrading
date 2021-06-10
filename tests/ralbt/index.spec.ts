@@ -6,7 +6,8 @@ import { getContracts, getSigners } from '../helpers/utils';
 describe('rAlbt', function () {
   beforeEach(async function () {
     // Deploy fixtures
-    await deployments.fixture();
+    const {deploy , fixture} = deployments;
+    await fixture();
 
     // Get accounts
     const {
@@ -48,10 +49,16 @@ describe('rAlbt', function () {
     this.staker1Signer = staker1Signer;
     this.staker2Signer = staker2Signer;
 
-    const { rALBTContract } = await getContracts();
-    this.rALBTContract = rALBTContract;
+    // We deploy an instance only for testing
+    await deploy('rALBT', {
+      contract: 'rALBT',
+      from: this.deployer,
+      log: true,
+    });
+
+    this.rALBTContract = await ethers.getContract('rALBT');
 
   });
 
-  describe('When checking rAlbt', checkrAlbt.bind(this));
+  describe('When checking rALBT', checkrAlbt.bind(this));
 });
