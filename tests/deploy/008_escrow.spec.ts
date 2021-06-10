@@ -16,9 +16,13 @@ describe('Contract Escrow', () => {
     // When
     const lendingToken = await escrowContract.lendingToken();
     const fundingNFT = await escrowContract.fundingNFT();
+    const rALBTFactory = await ethers.getContractFactory("rALBT");
+    const rALBTAddress = await escrowContract.reputationalALBT();
+    const rALBTContract = await rALBTFactory.attach(rALBTAddress);
 
     // Then
     expect(lendingToken).to.equal(lendingTokenContract.address);
     expect(fundingNFT).to.equal(fundingNFTProxyContract.address);
+    expect(await rALBTContract.provider.getCode(rALBTContract.address)).to.not.equal("0x");
   });
 });
