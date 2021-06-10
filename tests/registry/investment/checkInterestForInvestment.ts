@@ -114,6 +114,8 @@ export default async function suite() {
       console.log("totalLotteryNumbersPerInvestmentAfter", totalLotteryNumbersPerInvestmentAfter.toString());
       console.log("remainingTicketsPerAddressAfter", remainingTicketsPerAddressAfter.toString());
       console.log("ticketsWonPerAddressAfter", ticketsWonPerAddressAfter.toString());
+
+      // TODO: expect
     });
   });
 }
