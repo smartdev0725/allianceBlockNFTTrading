@@ -3,18 +3,13 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./BytesReader.sol";
+import "hardhat/console.sol";
 
 /**
  * @title Signature Verifier Library
 */
 library SignatureVerifier {
     using BytesReader for bytes;
-    struct EIP712Domain {
-        string  name;
-        string  version;
-        uint256 chainId;
-        address verifyingContract;
-    }
 
     struct Action {
         string actionName;
@@ -22,10 +17,7 @@ library SignatureVerifier {
         address account;
         uint256 referralId;
     }
-
     bytes32 constant ACTION_TYPEHASH = 0x1f76bf6993440811cef7b51dc00dee9d4e8fa911023c7f2d088ce4e46ac2346f;
-
-    bytes32 constant DOMAIN_SEPARATOR = 0x1dfa77e97babb94d286b16b99eb32c73720eb70b034d837f9cc6c0d2b01ba2ce;
 
     /**
      * @notice Gets Actions struct hash
@@ -47,7 +39,7 @@ library SignatureVerifier {
      * @param action the Action to retrieve
      * @return actionHash actionHash the keccak Action hash
     */
-    function getActionTypedDataHash(Action memory action) internal view returns (bytes32 actionHash) {
+    function getActionTypedDataHash(Action memory action, bytes32 DOMAIN_SEPARATOR) internal view returns (bytes32 actionHash) {
         actionHash = keccak256(abi.encodePacked(
             "\x19\x01",
             DOMAIN_SEPARATOR,
@@ -63,7 +55,8 @@ library SignatureVerifier {
     */
     function isValidSignature(
         Action memory action,
-        bytes memory signature
+        bytes memory signature,
+        bytes32 DOMAIN_SEPARATOR
     )
         internal
         view
@@ -71,11 +64,16 @@ library SignatureVerifier {
     {
         if (signature.length != 65) return false;
 
-        bytes32 hash = getActionTypedDataHash(action);
+        bytes32 hash = getActionTypedDataHash(action, DOMAIN_SEPARATOR);
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
 
-        uint8 v = uint8(signature[0]);
-        bytes32 r = signature.readBytes32(1);
-        bytes32 s = signature.readBytes32(33);
+        assembly {
+          r := mload(add(signature, 32))
+          s := mload(add(signature, 64))
+          v := and(mload(add(signature, 65)), 255)
+        }
 
         address recovered = ecrecover(hash, v, r, s);
 
