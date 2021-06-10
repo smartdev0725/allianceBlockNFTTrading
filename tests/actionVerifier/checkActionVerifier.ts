@@ -293,7 +293,7 @@ export default async function suite() {
         .updateVariables(ethers.utils.parseEther('10'), 10);
 
       const signatures = [
-        '0x951663526a6d560d2a96eb59a186c154bc5366ceae61689736199047e936cff3308e6528c95cfba26b55721c6ccd95e7df59d955a3236b2ecb25e1fbbda012c31c',
+        '0x9955af11969a2d2a7f860cb00e6a00cfa7c581f5df2dbe8ea16700b33f4b4b9b69f945012f7ea7d3febf11eb1b78e1adc2d1c14c2cf48b25000938cc1860c83e01',
       ];
 
       const actions = [
@@ -327,7 +327,8 @@ export default async function suite() {
 
       // Then
       const balanceAfter1 = await this.rALBTContract.balanceOf(this.lender1);
-      expect(balanceAfter1.toNumber()).to.be.equal(0);
+      // See reputationalStakingTypeAmounts on the deployed contract (deploy folder), is 5000 for stake. Must not mint or provide any other reward
+      expect(balanceAfter1.toString()).to.be.equal(ethers.utils.parseEther('5000').toString());
     });
 
     it('Can provide rewards', async function () {
