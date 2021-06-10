@@ -330,8 +330,7 @@ export default async function suite() {
       expect(balanceAfter1.toNumber()).to.be.equal(0);
     });
 
-    // TODO: we should do the DOMAIN_SEPARATOR more flexible, so we are allowed to test it
-    it.only('Can provide rewards', async function () {
+    it('Can provide rewards', async function () {
       const actions = [
         {
           account: this.lender1,
@@ -349,7 +348,7 @@ export default async function suite() {
       let signature = await getSignature('Project Vote', 'Yes', this.lender1, 5, this.actionVerifierContract.address, web3);
 
       const signatures = [signature];
-    
+
       // Mint albt tokens to deployer address
       const amountToTransfer = ethers.utils.parseEther('1000000');
       await this.ALBTContract.connect(this.deployerSigner).mint(
@@ -360,15 +359,15 @@ export default async function suite() {
         this.stakingContract.address,
         amountToTransfer
       );
-    
+
       await this.stakingContract.connect(this.lender1Signer).stake(StakingType.STAKER_LVL_2);
-    
+
       // When
       await this.actionVerifierContract.connect(this.lender1Signer).provideRewardsForActions(actions , signatures);
-    
+
       // Then
-      // const balanceAfter1 = await this.rALBTContract.balanceOf(this.lender1);
-      // expect(balanceAfter1.toNumber()).to.be.greaterThan(0);
+      const balanceAfter1 = await this.rALBTContract.balanceOf(this.lender1);
+      expect(+ethers.utils.formatEther(balanceAfter1.toString())).to.be.greaterThan(0);
     });
   });
 }
