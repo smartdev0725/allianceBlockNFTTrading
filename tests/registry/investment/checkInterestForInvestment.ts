@@ -83,6 +83,7 @@ export default async function suite() {
 
     it('should give tickets for reputational ALBT', async function () {
       // Given
+      console.log("BEFORE SHOWING INTEREST")
       const numberOfPartitions = BigNumber.from(5);
       const ticketsRemainingBefore = await this.registryContract.ticketsRemaining(this.loanId);
       const totalLotteryNumbersPerInvestmentBefore = await this.registryContract.totalLotteryNumbersPerInvestment(this.loanId);
@@ -96,12 +97,14 @@ export default async function suite() {
 
       // When
       // Stake first to get rALBT
+      console.log("STAKING AND SHOWING INTEREST...")
       await this.stakingContract
         .connect(this.lender1Signer)
-        .stake(StakingType.STAKER_LVL_1);
+        .stake(StakingType.STAKER_LVL_2);
       await this.registryContract.connect(this.lender1Signer).showInterestForInvestment(this.loanId, numberOfPartitions);
 
       // Then
+      console.log("AFTER SHOWING INTEREST")
       const ticketsRemainingAfter = await this.registryContract.ticketsRemaining(this.loanId);
       const totalLotteryNumbersPerInvestmentAfter = await this.registryContract.totalLotteryNumbersPerInvestment(this.loanId);
       const remainingTicketsPerAddressAfter = await this.registryContract.remainingTicketsPerAddress(this.loanId, this.lender1);

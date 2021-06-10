@@ -108,11 +108,10 @@ contract Investment is LoanDetails {
         uint256 immediateTickets;
 
         // TODO - Explain this check to Rachid.
-        while (totalLotteryNumbers > lotteryNumbersForImmediateTicket) {
-            immediateTickets = immediateTickets.add(1);
-            console.log("totalLotteryNumbers", totalLotteryNumbers);
-            console.log("lotteryNumbersForImmediateTicket", lotteryNumbersForImmediateTicket);
-            totalLotteryNumbers = totalLotteryNumbers.sub(lotteryNumbersForImmediateTicket);
+        if (totalLotteryNumbers > lotteryNumbersForImmediateTicket) {
+            immediateTickets = totalLotteryNumbers.sub(
+                totalLotteryNumbers.mod(lotteryNumbersForImmediateTicket))
+                .div(lotteryNumbersForImmediateTicket);
         }
 
         if (immediateTickets > amountOfPartitions) immediateTickets = amountOfPartitions;
@@ -309,7 +308,6 @@ contract Investment is LoanDetails {
             lastBlockCheckedForLockedTicketsPerAddress[msg.sender] = block.number;
         }
 
-        console.log("rALBT contract", rALBT.balanceOf(msg.sender));
         return rALBT.balanceOf(msg.sender);
     }
 

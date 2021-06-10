@@ -78,7 +78,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Setup registry
   const totalTicketsPerRun = 100000;
-  const rAlbtPerLotteryNumber = 100;
+  const rAlbtPerLotteryNumber = ethers.utils.parseEther('1000');
   const blocksLockedForReputation = 20;
   const lotteryNumbersForImmediateTicket = 100;
   await registryContract
