@@ -14,7 +14,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const deployerSigner = signers[0];
 
   const Staking = await get('Staking');
-  const rALBT = await get('rALBT');
 
   const stakingContract = await ethers.getContract('Staking');
   await stakingContract.setRewardDistribution(rewardDistributor);
@@ -24,6 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const governanceContract = await ethers.getContract('Governance');
   const escrowContract = await ethers.getContract('Escrow');
   const actionVerifierContract = await ethers.getContract('ActionVerifier');
+  const rALBTAddress = await escrowContract.reputationalALBT();
 
   // Setup escrow
   const escrowRegistryAddress = await escrowContract.registry();
@@ -88,7 +88,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await registryContract
     .connect(deployerSigner)
     .initializeInvestment(
-      rALBT.address,
+      rALBTAddress,
       totalTicketsPerRun,
       rAlbtPerLotteryNumber,
       blocksLockedForReputation,
