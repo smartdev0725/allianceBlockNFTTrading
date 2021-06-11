@@ -11,7 +11,7 @@ const { expectRevert } = require('@openzeppelin/test-helpers');
 chai.use(solidity);
 
 export default async function suite() {
-  describe.only('Show investment interest', async () => {
+  describe('Show investment interest', async () => {
     it('reverts when investment is not approved yet', async function () {
       const loanId = await this.registryContract.totalLoans();
       const amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
