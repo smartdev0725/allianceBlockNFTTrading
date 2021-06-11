@@ -7,13 +7,15 @@ const version = 'v0.1.0';
 const contractName = 'ActionVerifier';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments, getNamedAccounts, getChainId} = hre;
   const {deploy, get} = deployments;
 
   const {deployer, proxyOwner} = await getNamedAccounts();
 
   const escrowContractAddress = (await get('Escrow')).address;
   const stakingContractAddress = (await get('Staking')).address;
+
+  const chainId = await getChainId();
 
   await deploy(contractName, {
     contract: contractName,
@@ -23,7 +25,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
-    args: [10, 10, escrowContractAddress, stakingContractAddress],
+    args: [10, 10, escrowContractAddress, stakingContractAddress, chainId], // Other possible network 1337
     log: true,
   });
   return true;

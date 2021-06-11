@@ -1,16 +1,18 @@
-import checkFunding from './checkFunding';
+import checkActionVerifier from './checkActionVerifier';
 
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {getContracts, getSigners} from '../helpers/utils';
 
-describe('Funding', function () {
+describe('Action Verifier', function () {
   beforeEach(async function () {
     // Deploy fixtures
-    await deployments.fixture();
+    const {deploy, fixture, get} = deployments;
+    await fixture();
 
     // Get accounts
     const {
       deployer,
+      proxyOwner,
       seeker,
       lender1,
       lender2,
@@ -19,6 +21,7 @@ describe('Funding', function () {
       rewardDistributor,
     } = await getNamedAccounts();
     this.deployer = deployer;
+    this.proxyOwner = proxyOwner;
     this.seeker = seeker;
     this.lender1 = lender1;
     this.lender2 = lender2;
@@ -29,6 +32,7 @@ describe('Funding', function () {
     // Get signers
     const {
       deployerSigner,
+      proxyOwnerSigner,
       delegator1Signer,
       delegator2Signer,
       lender1Signer,
@@ -39,6 +43,7 @@ describe('Funding', function () {
       staker2Signer,
     } = await getSigners();
     this.deployerSigner = deployerSigner;
+    this.proxyOwnerSigner = proxyOwnerSigner;
     this.delegator1Signer = delegator1Signer;
     this.delegator2Signer = delegator2Signer;
     this.lender1Signer = lender1Signer;
@@ -49,20 +54,22 @@ describe('Funding', function () {
     this.staker2Signer = staker2Signer;
 
     // Get contracts
-    const {fundingNFTContract, registryContract} = await getContracts();
-    this.fundingNFTContract = fundingNFTContract;
-    this.registryContract = registryContract;
-
-    await this.fundingNFTContract.grantRole(
-      ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
-      seeker
-    );
-
-    await this.fundingNFTContract.grantRole(
-      ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
-      staker1
-    );
+    const {
+      actionVerifierContract,
+      escrowContract,
+      rALBTContract,
+      stakingContract,
+      ALBTContract,
+    } = await getContracts();
+    this.actionVerifierContract = actionVerifierContract;
+    this.escrowContract = escrowContract;
+    this.stakingContract = stakingContract;
+    this.ALBTContract = ALBTContract;
+    this.rALBTContract = rALBTContract;
   });
 
-  describe('When checking funding', checkFunding.bind(this));
+  describe(
+    'When checking action verifier functionalities',
+    checkActionVerifier.bind(this)
+  );
 });

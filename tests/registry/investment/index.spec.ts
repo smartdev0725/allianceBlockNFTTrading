@@ -1,6 +1,7 @@
 // Project
 import checkInvestmentRequest from './checkInvestmentRequest';
 import checkInterestForInvestment from './checkInterestForInvestment';
+import checkExecuteLotteryRun from './checkExecuteLotteryRun';
 
 import {
   getContracts,
@@ -130,5 +131,9 @@ describe('Registry Investments', function () {
   describe(
     'When checking interest for investment',
     checkInterestForInvestment.bind(this)
+  );
+  describe(
+    'When checking execute lottery run',
+    checkExecuteLotteryRun.bind(this)
   );
 });
