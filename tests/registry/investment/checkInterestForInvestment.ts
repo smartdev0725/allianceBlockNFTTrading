@@ -11,7 +11,7 @@ const { expectRevert } = require('@openzeppelin/test-helpers');
 chai.use(solidity);
 
 export default async function suite() {
-  describe.only('Show investment interest', async () => {
+  describe('Show investment interest', async () => {
     it('reverts when investment is not approved yet', async function () {
       const loanId = await this.registryContract.totalLoans();
       const amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
@@ -83,39 +83,35 @@ export default async function suite() {
 
     it('should give tickets for reputational ALBT', async function () {
       // Given
-      console.log("BEFORE SHOWING INTEREST")
       const numberOfPartitions = BigNumber.from(5);
       const ticketsRemainingBefore = await this.registryContract.ticketsRemaining(this.loanId);
       const totalLotteryNumbersPerInvestmentBefore = await this.registryContract.totalLotteryNumbersPerInvestment(this.loanId);
       const remainingTicketsPerAddressBefore = await this.registryContract.remainingTicketsPerAddress(this.loanId, this.lender1);
       const ticketsWonPerAddressBefore = await this.registryContract.ticketsWonPerAddress(this.loanId, this.lender1);
-
-      console.log("ticketsRemainingBefore", ticketsRemainingBefore.toString());
-      console.log("totalLotteryNumbersPerInvestmentBefore", totalLotteryNumbersPerInvestmentBefore.toString());
-      console.log("remainingTicketsPerAddressBefore", remainingTicketsPerAddressBefore.toString());
-      console.log("ticketsWonPerAddressBefore", ticketsWonPerAddressBefore.toString());
+      // Check investment data before showing interest
+      expect(ticketsRemainingBefore).to.be.equal(this.totalAmountRequested.div(ethers.utils.parseEther(BASE_AMOUNT.toString())));
+      expect(totalLotteryNumbersPerInvestmentBefore).to.be.equal(BigNumber.from(0));
+      expect(remainingTicketsPerAddressBefore).to.be.equal(BigNumber.from(0));
+      expect(ticketsWonPerAddressBefore).to.be.equal(BigNumber.from(0));
 
       // When
       // Stake first to get rALBT
-      console.log("STAKING AND SHOWING INTEREST...")
       await this.stakingContract
         .connect(this.lender1Signer)
-        .stake(StakingType.STAKER_LVL_2);
+        .stake(StakingType.STAKER_LVL_1);
       await this.registryContract.connect(this.lender1Signer).showInterestForInvestment(this.loanId, numberOfPartitions);
 
       // Then
-      console.log("AFTER SHOWING INTEREST")
       const ticketsRemainingAfter = await this.registryContract.ticketsRemaining(this.loanId);
       const totalLotteryNumbersPerInvestmentAfter = await this.registryContract.totalLotteryNumbersPerInvestment(this.loanId);
       const remainingTicketsPerAddressAfter = await this.registryContract.remainingTicketsPerAddress(this.loanId, this.lender1);
       const ticketsWonPerAddressAfter = await this.registryContract.ticketsWonPerAddress(this.loanId, this.lender1);
 
-      console.log("ticketsRemainingAfter", ticketsRemainingAfter.toString());
-      console.log("totalLotteryNumbersPerInvestmentAfter", totalLotteryNumbersPerInvestmentAfter.toString());
-      console.log("remainingTicketsPerAddressAfter", remainingTicketsPerAddressAfter.toString());
-      console.log("ticketsWonPerAddressAfter", ticketsWonPerAddressAfter.toString());
-
-      // TODO: expect
+      // No immediate tickets are given for staking only level 1
+      expect(ticketsRemainingAfter).to.be.equal(ticketsRemainingBefore);
+      expect(totalLotteryNumbersPerInvestmentAfter).to.be.equal(BigNumber.from(1));
+      expect(remainingTicketsPerAddressAfter).to.be.equal(numberOfPartitions.sub(ticketsRemainingBefore.sub(ticketsRemainingAfter)));
+      expect(ticketsWonPerAddressAfter).to.be.equal(BigNumber.from(0));
     });
   });
 }
