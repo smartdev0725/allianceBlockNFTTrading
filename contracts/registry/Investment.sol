@@ -109,9 +109,9 @@ contract Investment is LoanDetails {
 
         // TODO - Explain this check to Rachid.
         if (totalLotteryNumbers > lotteryNumbersForImmediateTicket) {
-            immediateTickets = totalLotteryNumbers.sub(
-                totalLotteryNumbers.mod(lotteryNumbersForImmediateTicket))
-                .div(lotteryNumbersForImmediateTicket);
+            uint256 rest = totalLotteryNumbers.mod(lotteryNumbersForImmediateTicket);
+            immediateTickets = totalLotteryNumbers.sub(rest).div(lotteryNumbersForImmediateTicket);
+            totalLotteryNumbers = rest;
         }
 
         if (immediateTickets > amountOfPartitions) immediateTickets = amountOfPartitions;
