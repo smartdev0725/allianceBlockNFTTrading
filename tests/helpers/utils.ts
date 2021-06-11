@@ -39,6 +39,12 @@ export const getContracts = async () => {
 
   const ALBTContract = await ethers.getContract('ALBT');
 
+  const actionVerifierContract = await ethers.getContract('ActionVerifier');
+
+  const rALBTFactory = await ethers.getContractFactory("rALBT");
+  const rALBTAddress = await escrowContract.reputationalALBT();
+  const rALBTContract = await rALBTFactory.attach(rALBTAddress);
+
   return {
     registryContract,
     governanceContract,
@@ -49,6 +55,8 @@ export const getContracts = async () => {
     collateralTokenContract,
     ALBTContract,
     stakingContract,
+    rALBTContract,
+    actionVerifierContract,
   };
 };
 
@@ -125,4 +133,75 @@ export const waitFor = (
   p: Promise<ContractTransaction>
 ): Promise<ContractReceipt> => {
   return p.then((tx) => tx.wait());
+};
+
+export const getSignature = async (
+  actionName: string,
+  answer: string,
+  account: string,
+  referralId: number,
+  actionVerifierContract: string,
+  web3: any
+) => {
+  const message =  {
+    actionName,
+    answer,
+    account,
+    referralId,
+  };
+
+  const msgParams = JSON.stringify({
+    domain: {
+      name: "AllianceBlock Verifier",
+      version: "1.0",
+      chainId: 1337,
+      verifyingContract: actionVerifierContract,
+    },
+
+    // Defining the message signing data content.
+    message,
+    // Refers to the keys of the *types* object below.
+    primaryType: "Action",
+    types: {
+      // TODO: Clarify if EIP712Domain refers to the domain the contract is hosted on
+      EIP712Domain: [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "uint256" },
+        { name: "verifyingContract", type: "address" },
+      ],
+      Action: [
+        { name: "actionName", type: "string" },
+        { name: "answer", type: "string" },
+        { name: "account", type: "address" },
+        { name: "referralId", type: "uint256" },
+      ],
+    },
+  });
+
+  const from = account;
+
+  const params = [from, msgParams];
+  const method = "eth_signTypedData_v4";
+
+  return new Promise((resolve, reject) =>
+    web3.currentProvider.send(
+      {
+        method,
+        params,
+        from,
+      },
+      async function (err: any, result: any) {
+        if (err) {
+          reject(err)
+        }
+        else if (result.error) {
+          reject(result.error)
+        }
+        else{
+          resolve(result.result);
+        }
+      }
+    )
+  );
 };

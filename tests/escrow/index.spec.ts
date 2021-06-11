@@ -1,15 +1,15 @@
 import checkEscrow from './checkEscrow';
 
-import { deployments, ethers, getNamedAccounts } from 'hardhat';
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
 describe('Escrow', function () {
   beforeEach(async function () {
     // Deploy fixtures
-    const { deploy, fixture, get } = deployments
+    const {deploy, fixture, get} = deployments;
     await fixture();
 
     // Get accounts
-    const { deployer, staker1, staker2, proxyOwner } = await getNamedAccounts();
+    const {deployer, staker1, staker2, proxyOwner} = await getNamedAccounts();
 
     const fundingNFTContract = await get('FundingNFT');
     const lendingTokenContract = await get('LendingToken');
@@ -32,7 +32,7 @@ describe('Escrow', function () {
     this.lendingTokenContract = await ethers.getContract('LendingToken');
 
     const rALBTAddress = await this.escrowContract.reputationalALBT();
-    this.rALBTContract = await ethers.getContractAt("rALBT", rALBTAddress);
+    this.rALBTContract = await ethers.getContractAt('rALBT', rALBTAddress);
 
     // Setup escrow
     await this.escrowContract.afterInitialize(

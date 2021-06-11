@@ -1,12 +1,13 @@
-import checkFunding from './checkFunding';
+import checkrAlbt from './checkrAlbt';
 
-import {deployments, ethers, getNamedAccounts} from 'hardhat';
-import {getContracts, getSigners} from '../helpers/utils';
+import { deployments, ethers, getNamedAccounts } from 'hardhat';
+import { getContracts, getSigners } from '../helpers/utils';
 
-describe('Funding', function () {
+describe('rAlbt', function () {
   beforeEach(async function () {
     // Deploy fixtures
-    await deployments.fixture();
+    const {deploy , fixture} = deployments;
+    await fixture();
 
     // Get accounts
     const {
@@ -48,21 +49,16 @@ describe('Funding', function () {
     this.staker1Signer = staker1Signer;
     this.staker2Signer = staker2Signer;
 
-    // Get contracts
-    const {fundingNFTContract, registryContract} = await getContracts();
-    this.fundingNFTContract = fundingNFTContract;
-    this.registryContract = registryContract;
+    // We deploy an instance only for testing
+    await deploy('rALBT', {
+      contract: 'rALBT',
+      from: this.deployer,
+      log: true,
+    });
 
-    await this.fundingNFTContract.grantRole(
-      ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
-      seeker
-    );
+    this.rALBTContract = await ethers.getContract('rALBT');
 
-    await this.fundingNFTContract.grantRole(
-      ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
-      staker1
-    );
   });
 
-  describe('When checking funding', checkFunding.bind(this));
+  describe('When checking rALBT', checkrAlbt.bind(this));
 });

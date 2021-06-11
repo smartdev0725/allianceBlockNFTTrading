@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {ethers, getNamedAccounts} from 'hardhat';
-import {getSigners} from "../helpers/utils";
+import {getSigners} from '../helpers/utils';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
@@ -14,13 +14,21 @@ export default async function suite() {
       const amount = ethers.utils.parseEther('1');
 
       // When
-      await this.fundingNFTContract.mintGen0(this.escrowContract.address, amount, loanId);
+      await this.fundingNFTContract.mintGen0(
+        this.escrowContract.address,
+        amount,
+        loanId
+      );
       const escrowBalanceBefore = await this.fundingNFTContract.balanceOf(
         this.escrowContract.address,
         loanId
       );
       expect(escrowBalanceBefore.toString()).to.be.equal(amount.toString());
-      await this.escrowContract.transferFundingNFT(loanId, partitionsToPurchase, seeker);
+      await this.escrowContract.transferFundingNFT(
+        loanId,
+        partitionsToPurchase,
+        seeker
+      );
 
       // Then
       const escrowBalanceAfter = await this.fundingNFTContract.balanceOf(
@@ -44,7 +52,11 @@ export default async function suite() {
 
       // When and Then
       await expectRevert(
-        this.escrowContract.transferFundingNFT(loanId, partitionsToPurchase, seeker),
+        this.escrowContract.transferFundingNFT(
+          loanId,
+          partitionsToPurchase,
+          seeker
+        ),
         'ERC1155: insufficient balance for transfer'
       );
     });
@@ -61,28 +73,35 @@ export default async function suite() {
       const amount = ethers.utils.parseEther('1');
 
       // When and Then
-      await this.fundingNFTContract.mintGen0(this.escrowContract.address, amount, loanId);
+      await this.fundingNFTContract.mintGen0(
+        this.escrowContract.address,
+        amount,
+        loanId
+      );
       const escrowBalanceBefore = await this.fundingNFTContract.balanceOf(
         this.escrowContract.address,
         loanId
       );
       expect(escrowBalanceBefore.toString()).to.be.equal(amount.toString());
       await expectRevert(
-        this.escrowContract.connect(seekerSigner).transferFundingNFT(loanId, partitionsToPurchase, seeker),
+        this.escrowContract
+          .connect(seekerSigner)
+          .transferFundingNFT(loanId, partitionsToPurchase, seeker),
         'Only Registry'
       );
     });
+  });
 
-  })
-
-  describe('Registry', async() => {
+  describe('Registry', async () => {
     it('when change registry from another account not allowed should revert', async function () {
       // Given
       const {seekerSigner} = await getSigners();
 
       // When and Then
       await expectRevert(
-        this.escrowContract.connect(seekerSigner).changeRegistry(ethers.constants.AddressZero),
+        this.escrowContract
+          .connect(seekerSigner)
+          .changeRegistry(ethers.constants.AddressZero),
         'Ownable: caller is not the owner'
       );
     });
@@ -92,32 +111,46 @@ export default async function suite() {
       const {deployerSigner} = await getSigners();
 
       // When
-      await this.escrowContract.connect(deployerSigner).changeRegistry(ethers.constants.AddressZero)
+      await this.escrowContract
+        .connect(deployerSigner)
+        .changeRegistry(ethers.constants.AddressZero);
 
       // Then
       const registryAddress = await this.escrowContract.registry();
       expect(registryAddress).to.be.equal(ethers.constants.AddressZero);
     });
-  })
+  });
 
-  describe('Collateral Token', async() => {
+  describe('Collateral Token', async () => {
     it('when transfer collateral token', async function () {
       // Given
       const {seeker} = await getNamedAccounts();
-      const { deployerSigner } = await getSigners();
+      const {deployerSigner} = await getSigners();
       const amount = ethers.utils.parseEther('1');
 
       // When
-      await this.collateralTokenContract.mint(this.escrowContract.address, amount);
-      await this.escrowContract.connect(deployerSigner).transferCollateralToken(this.collateralTokenContract.address, seeker, amount);
+      await this.collateralTokenContract.mint(
+        this.escrowContract.address,
+        amount
+      );
+      await this.escrowContract
+        .connect(deployerSigner)
+        .transferCollateralToken(
+          this.collateralTokenContract.address,
+          seeker,
+          amount
+        );
 
       // Then
-      const escrowBalance = await this.collateralTokenContract.balanceOf(this.escrowContract.address);
-      const seekerBalance = await this.collateralTokenContract.balanceOf(seeker);
+      const escrowBalance = await this.collateralTokenContract.balanceOf(
+        this.escrowContract.address
+      );
+      const seekerBalance = await this.collateralTokenContract.balanceOf(
+        seeker
+      );
       expect(escrowBalance.toNumber()).to.be.equal(0);
       expect(seekerBalance.toString()).to.be.equal(amount.toString());
     });
-
 
     it('when transfer collateral token without balance should revert', async function () {
       // Given
@@ -127,7 +160,9 @@ export default async function suite() {
       // When and Then
       await expectRevert(
         this.escrowContract.transferCollateralToken(
-          this.collateralTokenContract.address, seeker, amount
+          this.collateralTokenContract.address,
+          seeker,
+          amount
         ),
         'ERC20: transfer amount exceeds balance'
       );
@@ -141,34 +176,45 @@ export default async function suite() {
       const amount = ethers.utils.parseEther('1');
 
       // When and Then
-      await this.collateralTokenContract.mint(this.escrowContract.address, amount);
+      await this.collateralTokenContract.mint(
+        this.escrowContract.address,
+        amount
+      );
 
       await expectRevert(
-        this.escrowContract.connect(seekerSigner).transferCollateralToken(this.collateralTokenContract.address, seeker, amount),
+        this.escrowContract
+          .connect(seekerSigner)
+          .transferCollateralToken(
+            this.collateralTokenContract.address,
+            seeker,
+            amount
+          ),
         'Only Registry'
       );
     });
-
   });
 
-  describe('Lending Token', async() => {
+  describe('Lending Token', async () => {
     it('when transfer lending token', async function () {
       // Given
       const {seeker} = await getNamedAccounts();
-      const { deployerSigner } = await getSigners();
+      const {deployerSigner} = await getSigners();
       const amount = ethers.utils.parseEther('1');
 
       // When
       await this.lendingTokenContract.mint(this.escrowContract.address, amount);
-      await this.escrowContract.connect(deployerSigner).transferLendingToken(seeker, amount);
+      await this.escrowContract
+        .connect(deployerSigner)
+        .transferLendingToken(seeker, amount);
 
       // Then
-      const escrowBalance = await this.lendingTokenContract.balanceOf(this.escrowContract.address);
+      const escrowBalance = await this.lendingTokenContract.balanceOf(
+        this.escrowContract.address
+      );
       const seekerBalance = await this.lendingTokenContract.balanceOf(seeker);
       expect(escrowBalance.toNumber()).to.be.equal(0);
       expect(seekerBalance.toString()).to.be.equal(amount.toString());
     });
-
 
     it('when transfer lending token without balance should revert', async function () {
       // Given
@@ -193,21 +239,24 @@ export default async function suite() {
       await this.lendingTokenContract.mint(this.escrowContract.address, amount);
 
       await expectRevert(
-        this.escrowContract.connect(seekerSigner).transferLendingToken(seeker, amount),
+        this.escrowContract
+          .connect(seekerSigner)
+          .transferLendingToken(seeker, amount),
         'Only Registry'
       );
     });
-
   });
 
-  describe('multiMintReputationalToken', async() => {
+  describe('multiMintReputationalToken', async () => {
     it('when mint reputational tokens with an invalid user should revert', async function () {
       // Given
       const {seekerSigner} = await getSigners();
 
       // When and Then
       await expectRevert(
-        this.escrowContract.connect(seekerSigner).multiMintReputationalToken([], []),
+        this.escrowContract
+          .connect(seekerSigner)
+          .multiMintReputationalToken([], []),
         'Action Verifier'
       );
     });
@@ -218,7 +267,9 @@ export default async function suite() {
 
       // When and Then
       await expectRevert(
-        this.escrowContract.connect(staker1Signer).multiMintReputationalToken([1,2], [1, 1]),
+        this.escrowContract
+          .connect(staker1Signer)
+          .multiMintReputationalToken([1, 2], [1, 1]),
         'invalid ENS name'
       );
     });
@@ -231,7 +282,9 @@ export default async function suite() {
 
       // When and Then
       await expectRevert(
-        this.escrowContract.connect(staker1Signer).multiMintReputationalToken([lender1, lender2], [amount]),
+        this.escrowContract
+          .connect(staker1Signer)
+          .multiMintReputationalToken([lender1, lender2], [amount]),
         'Invalid length of to or amounts'
       );
     });
@@ -243,7 +296,9 @@ export default async function suite() {
       const amount = ethers.utils.parseEther('1');
 
       // When
-      await this.escrowContract.connect(staker1Signer).multiMintReputationalToken([lender1, lender2], [amount, amount]);
+      await this.escrowContract
+        .connect(staker1Signer)
+        .multiMintReputationalToken([lender1, lender2], [amount, amount]);
 
       // Then
       const balanceLender1 = await this.rALBTContract.balanceOf(lender1);
@@ -251,11 +306,10 @@ export default async function suite() {
 
       expect(balanceLender1.toString()).to.be.equal(amount.toString());
       expect(balanceLender2.toString()).to.be.equal(amount.toString());
-
     });
   });
 
-  describe('mintReputationalToken', async() => {
+  describe('mintReputationalToken', async () => {
     it('when mint reputational tokens with an invalid user should revert', async function () {
       // Given
       const {lender1} = await getNamedAccounts();
@@ -264,7 +318,9 @@ export default async function suite() {
 
       // When and Then
       await expectRevert(
-        this.escrowContract.connect(seekerSigner).mintReputationalToken(lender1, amount),
+        this.escrowContract
+          .connect(seekerSigner)
+          .mintReputationalToken(lender1, amount),
         'Only Registry or Staking'
       );
     });
@@ -276,16 +332,17 @@ export default async function suite() {
       const amount = ethers.utils.parseEther('1');
 
       // When
-      await this.escrowContract.connect(staker2Signer).mintReputationalToken(lender1, amount);
+      await this.escrowContract
+        .connect(staker2Signer)
+        .mintReputationalToken(lender1, amount);
 
       // Then
       const balanceLender1 = await this.rALBTContract.balanceOf(lender1);
       expect(balanceLender1.toString()).to.be.equal(amount.toString());
-
     });
   });
 
-  describe('burnReputationalToken', async() => {
+  describe('burnReputationalToken', async () => {
     it('when burn reputational tokens with an invalid user should revert', async function () {
       // Given
       const {lender1} = await getNamedAccounts();
@@ -294,7 +351,9 @@ export default async function suite() {
 
       // When and Then
       await expectRevert(
-        this.escrowContract.connect(seekerSigner).burnReputationalToken(lender1, amount),
+        this.escrowContract
+          .connect(seekerSigner)
+          .burnReputationalToken(lender1, amount),
         'Only Staking'
       );
     });
@@ -306,16 +365,21 @@ export default async function suite() {
       const amount = ethers.utils.parseEther('1');
 
       // When
-      await this.escrowContract.connect(staker2Signer).mintReputationalToken(lender1, amount);
+      await this.escrowContract
+        .connect(staker2Signer)
+        .mintReputationalToken(lender1, amount);
 
       // Then
       const balanceLender1 = await this.rALBTContract.balanceOf(lender1);
       expect(balanceLender1.toString()).to.be.equal(amount.toString());
 
-      await this.escrowContract.connect(staker2Signer).burnReputationalToken(lender1, amount);
-      const balanceLender1AfterBurn = await this.rALBTContract.balanceOf(lender1);
+      await this.escrowContract
+        .connect(staker2Signer)
+        .burnReputationalToken(lender1, amount);
+      const balanceLender1AfterBurn = await this.rALBTContract.balanceOf(
+        lender1
+      );
       expect(balanceLender1AfterBurn.toNumber()).to.be.equal(0);
-
     });
-  })
+  });
 }
