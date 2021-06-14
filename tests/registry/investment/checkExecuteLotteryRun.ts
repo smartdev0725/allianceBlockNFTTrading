@@ -51,7 +51,7 @@ export default async function suite() {
       );
     });
 
-    it('when execute lottery and can run lottery only if has remaining ticket  ', async function () {
+    it('Can run lottery only if has remaining ticket  ', async function () {
       const numberOfPartitions = BigNumber.from(3000);
       await this.stakingContract
         .connect(this.lender1Signer)
