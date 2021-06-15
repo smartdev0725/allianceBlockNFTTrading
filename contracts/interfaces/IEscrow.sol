@@ -9,8 +9,8 @@ interface IEscrow {
     function receiveFunding(uint256 loanId, uint256 amount) external;
 
     function transferFundingNFT(
-        uint256 loanId,
-        uint256 partitionsToPurchase,
+        uint256 investmentId,
+        uint256 partitionsPurchased,
         address receiver
     ) external;
 
