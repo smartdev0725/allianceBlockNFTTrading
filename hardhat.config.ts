@@ -8,6 +8,7 @@ import '@nomiclabs/hardhat-web3';
 
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
+import 'hardhat-contract-sizer';
 import '@typechain/hardhat';
 import 'solidity-coverage';
 
@@ -102,6 +103,11 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY || '',
+  },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: true,
+    disambiguatePaths: false,
   },
 };
 
