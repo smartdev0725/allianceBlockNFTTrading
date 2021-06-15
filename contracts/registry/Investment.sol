@@ -167,7 +167,7 @@ contract Investment is LoanDetails {
             ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(counter);
         }
 
-        while (counter != 0) {
+        for (uint256 i = counter; i > 0; i--)  {
             uint256 randomNumber = _getRandomNumber(maxNumber);
             lotteryNonce = lotteryNonce.add(1);
 
@@ -179,8 +179,6 @@ contract Investment is LoanDetails {
 
                 ticketsWonPerAddress[investmentId][randomAddress] =
                     ticketsWonPerAddress[investmentId][randomAddress].add(1);
-
-                counter -= 1;
             }
         }
     }
