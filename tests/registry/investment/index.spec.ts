@@ -122,6 +122,24 @@ describe('Registry Investments', function () {
       this.stakingContract.address,
       amountToTransfer
     );
+
+    await this.ALBTContract.connect(this.deployerSigner).mint(
+      this.lender2,
+      amountToTransfer
+    );
+    await this.ALBTContract.connect(this.lender2Signer).approve(
+      this.stakingContract.address,
+      amountToTransfer
+    );
+
+    await this.ALBTContract.connect(this.deployerSigner).mint(
+      this.lender3,
+      amountToTransfer
+    );
+    await this.ALBTContract.connect(this.lender3Signer).approve(
+      this.stakingContract.address,
+      amountToTransfer
+    );
   });
 
   describe(
