@@ -5,7 +5,6 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155HolderUpgradeable.sol";
-import "./libs/LoanLibrary.sol";
 import "./EscrowDetails.sol";
 import "./rALBT.sol";
 
@@ -52,16 +51,16 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     /**
      * @notice Transfer Funding NFT
      * @dev This function is used to send the ERC1155 tokens from escrow to the lenders.
-     * @param loanId The id of the loan.
+     * @param investmentId The id of the investment.
      * @param partitionsPurchased The amount of ERC1155 tokens that should be sent back to the lender.
      * @param receiver Lender's address.
      */
     function transferFundingNFT(
-        uint256 loanId,
+        uint256 investmentId,
         uint256 partitionsPurchased,
         address receiver
     ) external onlyRegistry() {
-        fundingNFT.safeTransferFrom(address(this), receiver, loanId, partitionsPurchased, "");
+        fundingNFT.safeTransferFrom(address(this), receiver, investmentId, partitionsPurchased, "");
     }
 
     /**
@@ -75,18 +74,18 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
-     * @notice Transfer Collateral Token
-     * @dev This function is used to send the collateral amount to the seeker.
-     * @param collateralToken The collateral token's contract address.
-     * @param recipient The address to transfer the collateral tokens to.
-     * @param amount The amount of collateral tokens to be sent to seeker.
+     * @notice Transfer Project Token
+     * @dev This function is used to send the project token amount to the seeker.
+     * @param projectToken The project token's contract address.
+     * @param recipient The address to transfer the project tokens to.
+     * @param amount The amount of project tokens to be sent to seeker.
      */
-    function transferCollateralToken(
-        address collateralToken,
+    function transferProjectToken(
+        address projectToken,
         address recipient,
         uint256 amount
     ) external onlyRegistry() {
-        IERC20(collateralToken).transfer(recipient, amount);
+        IERC20(projectToken).transfer(recipient, amount);
     }
 
     /**

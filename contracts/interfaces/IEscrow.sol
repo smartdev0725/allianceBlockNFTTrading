@@ -16,8 +16,8 @@ interface IEscrow {
 
     function transferLendingToken(address seeker, uint256 amount) external;
 
-    function transferCollateralToken(
-        address collateralToken,
+    function transferProjectToken(
+        address projectToken,
         address seeker,
         uint256 amount
     ) external;

@@ -2,7 +2,7 @@
 pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../libs/LoanLibrary.sol";
+import "../libs/InvestmentLibrary.sol";
 import "../interfaces/IERC1155Mint.sol";
 import "../interfaces/IERC721Mint.sol";
 import "../interfaces/IGovernance.sol";
@@ -10,24 +10,20 @@ import "../interfaces/IEscrow.sol";
 
 /**
  * @title AllianceBlock Storage contract
- * @notice Responsible for loan storage
+ * @notice Responsible for investment storage
  */
 contract Storage {
-    uint256 public totalLoans; // The total amount of loan requests.
+    uint256 public totalInvestments; // The total amount of investment requests.
 
-    // Mapping from loan id -> details for each and every loan.
-    mapping(uint256 => LoanLibrary.LoanDetails) public loanDetails;
-    // Mapping from loan id -> details for personal loans.
-    mapping(uint256 => LoanLibrary.PersonalLoanPayments) public personalLoanPayments;
-    // Mapping from loan id -> details for project loans.
-    mapping(uint256 => LoanLibrary.ProjectLoanPayments) public projectLoanPayments;
-    // Mapping from loan id -> loan status.
-    mapping(uint256 => LoanLibrary.LoanStatus) public loanStatus;
-    // Mapping from loan id -> loan seeker's address.
-    mapping(uint256 => address) public loanSeeker;
-    // The amount of investment tokens each ticket contains. (Only for INVESTMENT type)
+    // Mapping from investment id -> details for each and every investment.
+    mapping(uint256 => InvestmentLibrary.InvestmentDetails) public investmentDetails;
+    // Mapping from investment id -> investment status.
+    mapping(uint256 => InvestmentLibrary.InvestmentStatus) public investmentStatus;
+    // Mapping from investment id -> investment seeker's address.
+    mapping(uint256 => address) public investmentSeeker;
+    // The amount of investment tokens each ticket contains.
     mapping(uint256 => uint256) public investmentTokensPerTicket;
-    // The amount of tickets remaining to be allocated to investors. (Only for INVESTMENT type)
+    // The amount of tickets remaining to be allocated to investors.
     mapping(uint256 => uint256) public ticketsRemaining;
     // The number lottery numbers allocated from all investors for a specific investment.
     mapping(uint256 => uint256) public totalLotteryNumbersPerInvestment;
@@ -50,20 +46,8 @@ contract Storage {
     IEscrow public escrow; // Escrow's contract address.
     IERC20 public rALBT; // rALBT's contract address.
 
-    // This variable represents the base amount in which every loan amount is divided to. (also the starting value for each ERC1155)
+    // This variable represents the base amount in which every investment amount is divided to. (also the starting value for each ERC1155)
     uint256 public baseAmountForEachPartition;
-    // This variable represents the minimum interest percentage that each loan should have.
-    uint256 public minimumInterestPercentage;
-    // This variable represents the maximum number of milestones a project loan can contain.
-    uint256 public maxMilestones;
-    // If milestone is rejected, this time interval is provided for the project to deliver.
-    uint256 public milestoneExtensionInterval;
-    // The amount of vesting batches when a lender decides to get project tokens.
-    uint256 public vestingBatches;
-    // The time interval between vesting batches when a lender decides to get project tokens.
-    uint256 public vestingTimeInterval;
-    // The time interval for adding funds.
-    uint256 public fundingTimeInterval;
     // The amount of tickets to be provided by each run of the lottery.
     uint256 public totalTicketsPerRun;
     // The amount of rALBT needed to allocate one lottery number.
