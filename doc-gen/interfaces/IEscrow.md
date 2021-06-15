@@ -5,13 +5,13 @@
 
 
 
-### `receiveFunding(uint256 loanId, uint256 amount)` (external)
+### `receiveFunding(uint256 investmentId, uint256 amount)` (external)
 
 
 
 
 
-### `transferFundingNFT(uint256 loanId, uint256 partitionsToPurchase, address receiver)` (external)
+### `transferFundingNFT(uint256 investmentId, uint256 partitionsToPurchase, address receiver)` (external)
 
 
 

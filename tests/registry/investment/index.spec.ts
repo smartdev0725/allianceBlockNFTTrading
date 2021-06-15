@@ -90,7 +90,7 @@ describe('Registry Investments', function () {
 
     this.approvalRequest = await governanceContract.totalApprovalRequests();
 
-    this.loanId = await this.registryContract.totalLoans();
+    this.investmentId = await this.registryContract.totalInvestments();
     this.startingEscrowProjectTokenBalance =
       await projectTokenContract.balanceOf(escrowContract.address);
 

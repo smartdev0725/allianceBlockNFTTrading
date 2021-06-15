@@ -22,7 +22,7 @@ Initialize Investment
 This function is called by the owner to initialize the investment type.
 
 
-### `decideForLoan(uint256 loanId, bool decision)` (external)
+### `decideForLoan(uint256 investmentId, bool decision)` (external)
 
 Decide For Loan
 
@@ -30,7 +30,7 @@ Decide For Loan
 This function is called by governance to approve or reject a loan request.
 
 
-### `fundLoan(uint256 loanId, uint256 partitionsToPurchase)` (external)
+### `fundLoan(uint256 investmentId, uint256 partitionsToPurchase)` (external)
 
 Fund Loan
 
@@ -39,7 +39,7 @@ This function is called by the lenders to fund a loan.
 requires enough purchasable partitions
 
 
-### `executePayment(uint256 loanId)` (external)
+### `executePayment(uint256 investmentId)` (external)
 
 Execute Payment
 
@@ -63,7 +63,7 @@ Start Lottery Phase
 This function is called by governance to start the lottery phase for an investment.
 
 
-### `challengeLoan(uint256 loanId)` (external)
+### `challengeLoan(uint256 investmentId)` (external)
 
 Challenge Loan
 
@@ -93,7 +93,7 @@ Start Loan
 
 
 
-### `getLoanMetadata(uint256 loanId) → struct LoanLibrary.LoanDetails, enum LoanLibrary.LoanStatus, address, enum LoanLibrary.RepaymentBatchType` (public)
+### `getLoanMetadata(uint256 investmentId) → struct LoanLibrary.LoanDetails, enum LoanLibrary.LoanStatus, address, enum LoanLibrary.RepaymentBatchType` (public)
 
 Get Loan Metadata
 
@@ -102,43 +102,43 @@ This helper function provides a single point for querying the Loan metadata
 returns Loan Details, Loan Status, Loan Seeker Address and Repayment Batch Type
 
 
-### `LoanPartitionsPurchased(uint256 loanId, uint256 partitionsToPurchase, address lender)`
+### `LoanPartitionsPurchased(uint256 investmentId, uint256 partitionsToPurchase, address lender)`
 
 
 
 
 
-### `LoanStarted(uint256 loanId, enum LoanLibrary.LoanType loanType)`
+### `LoanStarted(uint256 investmentId, enum LoanLibrary.LoanType loanType)`
 
 
 
 
 
-### `LoanApproved(uint256 loanId, enum LoanLibrary.LoanType loanType)`
+### `LoanApproved(uint256 investmentId, enum LoanLibrary.LoanType loanType)`
 
 
 
 
 
-### `LoanRejected(uint256 loanId, enum LoanLibrary.LoanType loanType)`
+### `LoanRejected(uint256 investmentId, enum LoanLibrary.LoanType loanType)`
 
 
 
 
 
-### `LoanChallenged(uint256 loanId, enum LoanLibrary.LoanType loanType, address user)`
+### `LoanChallenged(uint256 investmentId, enum LoanLibrary.LoanType loanType, address user)`
 
 
 
 
 
-### `PaymentReceived(uint256 loanId, uint256 amountOfTokens, uint256 generation, bool onProjectTokens, address user)`
+### `PaymentReceived(uint256 investmentId, uint256 amountOfTokens, uint256 generation, bool onProjectTokens, address user)`
 
 
 
 
 
-### `PaymentExecuted(uint256 loanId, enum LoanLibrary.LoanType loanType, address seeker)`
+### `PaymentExecuted(uint256 investmentId, enum LoanLibrary.LoanType loanType, address seeker)`
 
 
 

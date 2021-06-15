@@ -5,13 +5,13 @@
 
 
 
-### `requestApproval(uint256 loanId, bool isMilestone, uint256 milestoneNumber)` (external)
+### `requestApproval(uint256 investmentId, bool isMilestone, uint256 milestoneNumber)` (external)
 
 
 
 
 
-### `storeInvestmentTriggering(uint256 loanId)` (external)
+### `storeInvestmentTriggering(uint256 investmentId)` (external)
 
 
 

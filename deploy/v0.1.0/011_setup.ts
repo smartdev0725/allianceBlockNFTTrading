@@ -5,11 +5,6 @@ import {ethers} from 'hardhat';
 const version = 'v0.1.0';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
-  const {get} = deployments;
-
-  const {rewardDistributor} = await getNamedAccounts();
-
   const signers = await ethers.getSigners();
   const deployerSigner = signers[0];
 

@@ -9,7 +9,7 @@ export default async function suite() {
       // Given
       const {seeker} = await getNamedAccounts();
 
-      const loanId = 1;
+      const investmentId = 1;
       const partitionsToPurchase = ethers.utils.parseEther('1');
       const amount = ethers.utils.parseEther('1');
 
@@ -17,15 +17,15 @@ export default async function suite() {
       await this.fundingNFTContract.mintGen0(
         this.escrowContract.address,
         amount,
-        loanId
+        investmentId
       );
       const escrowBalanceBefore = await this.fundingNFTContract.balanceOf(
         this.escrowContract.address,
-        loanId
+        investmentId
       );
       expect(escrowBalanceBefore.toString()).to.be.equal(amount.toString());
       await this.escrowContract.transferFundingNFT(
-        loanId,
+        investmentId,
         partitionsToPurchase,
         seeker
       );
@@ -33,11 +33,11 @@ export default async function suite() {
       // Then
       const escrowBalanceAfter = await this.fundingNFTContract.balanceOf(
         this.escrowContract.address,
-        loanId
+        investmentId
       );
       const seekerBalance = await this.fundingNFTContract.balanceOf(
         seeker,
-        loanId
+        investmentId
       );
       expect(escrowBalanceAfter.toNumber()).to.be.equal(0);
       expect(seekerBalance.toString()).to.be.equal(amount.toString());
@@ -47,13 +47,13 @@ export default async function suite() {
       // Given
       const {seeker} = await getNamedAccounts();
 
-      const loanId = 1;
+      const investmentId = 1;
       const partitionsToPurchase = ethers.utils.parseEther('1');
 
       // When and Then
       await expectRevert(
         this.escrowContract.transferFundingNFT(
-          loanId,
+          investmentId,
           partitionsToPurchase,
           seeker
         ),
@@ -68,7 +68,7 @@ export default async function suite() {
       // Get signers
       const {seekerSigner} = await getSigners();
 
-      const loanId = 1;
+      const investmentId = 1;
       const partitionsToPurchase = ethers.utils.parseEther('1');
       const amount = ethers.utils.parseEther('1');
 
@@ -76,17 +76,17 @@ export default async function suite() {
       await this.fundingNFTContract.mintGen0(
         this.escrowContract.address,
         amount,
-        loanId
+        investmentId
       );
       const escrowBalanceBefore = await this.fundingNFTContract.balanceOf(
         this.escrowContract.address,
-        loanId
+        investmentId
       );
       expect(escrowBalanceBefore.toString()).to.be.equal(amount.toString());
       await expectRevert(
         this.escrowContract
           .connect(seekerSigner)
-          .transferFundingNFT(loanId, partitionsToPurchase, seeker),
+          .transferFundingNFT(investmentId, partitionsToPurchase, seeker),
         'Only Registry'
       );
     });
@@ -135,7 +135,7 @@ export default async function suite() {
       );
       await this.escrowContract
         .connect(deployerSigner)
-        .transferCollateralToken(
+        .transferProjectToken(
           this.collateralTokenContract.address,
           seeker,
           amount
@@ -159,7 +159,7 @@ export default async function suite() {
 
       // When and Then
       await expectRevert(
-        this.escrowContract.transferCollateralToken(
+        this.escrowContract.transferProjectToken(
           this.collateralTokenContract.address,
           seeker,
           amount
@@ -184,7 +184,7 @@ export default async function suite() {
       await expectRevert(
         this.escrowContract
           .connect(seekerSigner)
-          .transferCollateralToken(
+          .transferProjectToken(
             this.collateralTokenContract.address,
             seeker,
             amount

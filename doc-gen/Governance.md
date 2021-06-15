@@ -13,7 +13,7 @@ Initialize the contract.
 
 
 
-### `requestApproval(uint256 loanId, bool isMilestone, uint256 milestoneNumber)` (external)
+### `requestApproval(uint256 investmentId, bool isMilestone, uint256 milestoneNumber)` (external)
 
 Request a loan or investment approval
 

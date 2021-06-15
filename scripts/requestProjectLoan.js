@@ -79,9 +79,9 @@ async function main() {
     from: delegators[1],
   });
 
-  const loanStatus = await registry.loanStatus(loanId);
+  const loanStatus = await registry.loanStatus(investmentId);
   if (loanStatus == LoanStatus.APPROVED) {
-    console.log('Requested and approved loan with ID', loanId.toNumber());
+    console.log('Requested and approved loan with ID', investmentId.toNumber());
   }
 }
 

@@ -30,13 +30,13 @@ Responsible for governance storage
 
 
 
-### `VotedForRequest(uint256 loanId, uint256 requestId, bool decision, address user)`
+### `VotedForRequest(uint256 investmentId, uint256 requestId, bool decision, address user)`
 
 
 
 
 
-### `ApprovalRequested(uint256 loanId, bool isMilestone, uint256 milestoneNumber, address user)`
+### `ApprovalRequested(uint256 investmentId, bool isMilestone, uint256 milestoneNumber, address user)`
 
 
 

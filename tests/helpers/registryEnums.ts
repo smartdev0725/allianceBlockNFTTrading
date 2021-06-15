@@ -26,6 +26,5 @@ export enum LoanStatus {
 export enum StakingType {
   STAKER_LVL_1 = '0',
   STAKER_LVL_2 = '1',
-  STAKER_LVL_3_OR_DAO_MEMBER = '2',
-  DAO_DELEGATOR = '3',
+  STAKER_LVL_3 = '2',
 }

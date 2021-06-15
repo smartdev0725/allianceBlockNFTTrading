@@ -15,24 +15,10 @@ describe('Governance upgrade test', () => {
     const governanceContract = await ethers.getContract('Governance');
 
     // When
-    const [
-      totalApprovalRequests, // Don't remove this
-      approvalsNeededForRegistryRequest, // Don't remove this
-      loanApprovalRequestDuration,
-      milestoneApprovalRequestDuration,
-      amountToStakeForDaoMember,
-    ] = await governanceContract.getDaoData();
+    const superGovernanceAddress = await governanceContract.superDelegator();
 
     // Then
-    expect(loanApprovalRequestDuration.toNumber()).to.equal(
-      DAO_LOAN_APPROVAL_REQUEST_DURATION
-    );
-    expect(milestoneApprovalRequestDuration.toNumber()).to.equal(
-      DAO_MILESTONE_APPROVAL_REQUEST_DURATION
-    );
-    expect(amountToStakeForDaoMember.toString()).to.equal(
-      ethers.utils.parseEther('20000').toString()
-    );
+    expect(ethers.utils.isAddress(superGovernanceAddress)).to.equal(true);
 
     // Check new method don't exist
     expect(() => governanceContract.getSomething2()).to.throw(
@@ -62,15 +48,9 @@ describe('Governance upgrade test', () => {
 
     // Then
     // Old Governance variables
-    expect(loanApprovalRequestDuration.toNumber()).to.equal(
-      DAO_LOAN_APPROVAL_REQUEST_DURATION
-    );
-    expect(milestoneApprovalRequestDuration.toNumber()).to.equal(
-      DAO_MILESTONE_APPROVAL_REQUEST_DURATION
-    );
-    expect(amountToStakeForDaoMember.toString()).to.equal(
-      ethers.utils.parseEther('20000').toString()
-    );
+    const superGovernanceUpgradedAddress = await governanceContractUpgraded.superDelegator();
+    expect(ethers.utils.isAddress(superGovernanceUpgradedAddress)).to.equal(true);
+
 
     // Check new Governance variables exist
     expect(foo.toNumber()).to.equal(0);

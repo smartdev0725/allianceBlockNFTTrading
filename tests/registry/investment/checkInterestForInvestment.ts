@@ -1,5 +1,3 @@
-import BN from 'bn.js';
-import {LoanType, LoanStatus} from '../../helpers/registryEnums';
 import {BASE_AMOUNT} from '../../helpers/constants';
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
@@ -13,7 +11,7 @@ chai.use(solidity);
 export default async function suite() {
   describe('Show investment interest', async () => {
     it('reverts when investment is not approved yet', async function () {
-      const loanId = await this.registryContract.totalLoans();
+      const investmentId = await this.registryContract.totalInvestments();
       const amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
       const totalAmountRequested = ethers.utils.parseEther('30000');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
@@ -30,7 +28,7 @@ export default async function suite() {
       await expectRevert(
         this.registryContract
           .connect(this.lender1Signer)
-          .showInterestForInvestment(loanId, 2),
+          .showInterestForInvestment(investmentId, 2),
         'Can show interest only in Approved state'
       );
     });
@@ -39,7 +37,7 @@ export default async function suite() {
       await expectRevert(
         this.registryContract
           .connect(this.lender1Signer)
-          .showInterestForInvestment(this.loanId, 0),
+          .showInterestForInvestment(this.investmentId, 0),
         'Cannot show interest for 0 partitions'
       );
     });
@@ -48,7 +46,7 @@ export default async function suite() {
       await expectRevert(
         this.registryContract
           .connect(this.lender1Signer)
-          .showInterestForInvestment(this.loanId, BigNumber.from(5)),
+          .showInterestForInvestment(this.investmentId, BigNumber.from(5)),
         'Not elegible for lottery numbers'
       );
     });
@@ -70,7 +68,7 @@ export default async function suite() {
         .stake(StakingType.STAKER_LVL_1);
       await this.registryContract
         .connect(this.lender1Signer)
-        .showInterestForInvestment(this.loanId, numberOfPartitions);
+        .showInterestForInvestment(this.investmentId, numberOfPartitions);
 
       // Then
       const lenderLendingTokenBalanceAfter =
@@ -89,10 +87,10 @@ export default async function suite() {
     it('increments the number of purchased partitions', async function () {
       // Given
       const numberOfPartitions = BigNumber.from(5);
-      const loanDetailsBefore = await this.registryContract.loanDetails(
-        this.loanId
+      const investmentDetailsBefore = await this.registryContract.investmentDetails(
+        this.investmentId
       );
-      const partitionsPurchasedBefore = loanDetailsBefore.partitionsPurchased;
+      const partitionsRequestedBefore = investmentDetailsBefore.partitionsRequested;
 
       // When
       await this.stakingContract
@@ -100,15 +98,15 @@ export default async function suite() {
         .stake(StakingType.STAKER_LVL_1);
       await this.registryContract
         .connect(this.lender1Signer)
-        .showInterestForInvestment(this.loanId, numberOfPartitions);
+        .showInterestForInvestment(this.investmentId, numberOfPartitions);
 
       // Then
-      const loanDetailsAfter = await this.registryContract.loanDetails(
-        this.loanId
+      const investmentDetailsAfter = await this.registryContract.investmentDetails(
+        this.investmentId
       );
-      const partitionsPurchasedAfter = loanDetailsAfter.partitionsPurchased;
-      expect(partitionsPurchasedAfter).to.be.equal(
-        partitionsPurchasedBefore.add(numberOfPartitions)
+      const partitionsRequestedAfter = investmentDetailsAfter.partitionsRequested;
+      expect(partitionsRequestedAfter).to.be.equal(
+        partitionsRequestedBefore.add(numberOfPartitions)
       );
     });
 
@@ -116,19 +114,19 @@ export default async function suite() {
       // Given
       const numberOfPartitions = BigNumber.from(5);
       const ticketsRemainingBefore =
-        await this.registryContract.ticketsRemaining(this.loanId);
+        await this.registryContract.ticketsRemaining(this.investmentId);
       const totalLotteryNumbersPerInvestmentBefore =
         await this.registryContract.totalLotteryNumbersPerInvestment(
-          this.loanId
+          this.investmentId
         );
       const remainingTicketsPerAddressBefore =
         await this.registryContract.remainingTicketsPerAddress(
-          this.loanId,
+          this.investmentId,
           this.lender1
         );
       const ticketsWonPerAddressBefore =
         await this.registryContract.ticketsWonPerAddress(
-          this.loanId,
+          this.investmentId,
           this.lender1
         );
       // Check investment data before showing interest
@@ -150,23 +148,23 @@ export default async function suite() {
         .stake(StakingType.STAKER_LVL_1);
       await this.registryContract
         .connect(this.lender1Signer)
-        .showInterestForInvestment(this.loanId, numberOfPartitions);
+        .showInterestForInvestment(this.investmentId, numberOfPartitions);
 
       // Then
       const ticketsRemainingAfter =
-        await this.registryContract.ticketsRemaining(this.loanId);
+        await this.registryContract.ticketsRemaining(this.investmentId);
       const totalLotteryNumbersPerInvestmentAfter =
         await this.registryContract.totalLotteryNumbersPerInvestment(
-          this.loanId
+          this.investmentId
         );
       const remainingTicketsPerAddressAfter =
         await this.registryContract.remainingTicketsPerAddress(
-          this.loanId,
+          this.investmentId,
           this.lender1
         );
       const ticketsWonPerAddressAfter =
         await this.registryContract.ticketsWonPerAddress(
-          this.loanId,
+          this.investmentId,
           this.lender1
         );
 
