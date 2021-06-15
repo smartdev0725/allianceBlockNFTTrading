@@ -3,7 +3,6 @@ pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./StakingTypesAndStorage.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Alliance Block Staking Details

@@ -3,7 +3,6 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./BytesReader.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Signature Verifier Library
