@@ -14,18 +14,16 @@ contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
     using SafeMath for uint256;
 
     /**
-     * @notice Sets Registry and Staking contracts
+     * @notice Sets Registry contract
      * @dev used to initialize SuperGovernance
      * @dev requires not already initialized
      * @param registryAddress_ the Registry address
-     * @param stakingAddress_ the Stake address
      */
-    function setRegistryAndStaking(address registryAddress_, address stakingAddress_) external onlyOwner() {
+    function setRegistry(address registryAddress_) external onlyOwner() {
         require(address(registry) == address(0), "Cannot initialize second time");
         registry = IRegistry(registryAddress_);
-        staking = IStaking(stakingAddress_);
 
-        emit InitGovernance(registryAddress_, stakingAddress_, msg.sender);
+        emit InitGovernance(registryAddress_, msg.sender);
     }
 
     /**
@@ -38,18 +36,15 @@ contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
      */
     function superVoteForRequest(uint256 requestId, bool decision) external checkCronjob() {
         require(msg.sender == superDelegator, "Only super delegator can call this function");
+        require(approvalRequests[requestId].approvalsProvided == 0, "Cannot approve again same investment");
 
-        if (approvalRequests[requestId].isMilestone) {
-            registry.decideForMilestone(approvalRequests[requestId].loanId, decision);
-        } else {
-            registry.decideForLoan(approvalRequests[requestId].loanId, decision);
-        }
+        registry.decideForInvestment(approvalRequests[requestId].investmentId, decision);
 
         if (decision) {
             approvalRequests[requestId].approvalsProvided = approvalRequests[requestId].approvalsProvided.add(1);
             approvalRequests[requestId].isApproved = true;
         }
 
-        emit VotedForRequest(approvalRequests[requestId].loanId, requestId, decision, msg.sender);
+        emit VotedForRequest(approvalRequests[requestId].investmentId, requestId, decision, msg.sender);
     }
 }

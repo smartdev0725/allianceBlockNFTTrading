@@ -55,7 +55,7 @@ contract Investment is InvestmentDetails {
 
         fundingNFT.pauseTokenTransfer(totalInvestments); //Pause trades for ERC1155s with the specific investment ID.
 
-        governance.requestApproval(totalInvestments, false, 0);
+        governance.requestApproval(totalInvestments);
 
         // Add event for investment request
         emit InvestmentRequested(totalInvestments, msg.sender, totalAmountRequested_);
