@@ -13,10 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const signers = await ethers.getSigners();
   const deployerSigner = signers[0];
 
-  const Staking = await get('Staking');
-
   const stakingContract = await ethers.getContract('Staking');
-  await stakingContract.setRewardDistribution(rewardDistributor);
 
   const registryContract = await ethers.getContract('Registry');
   const fundingNFTContract = await ethers.getContract('FundingNFT');
@@ -43,15 +40,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Setup governance
   const governanceAddress = await governanceContract.registry();
-  const stakingAddress = await governanceContract.staking();
-  if (
-    governanceAddress === ethers.constants.AddressZero &&
-    stakingAddress === ethers.constants.AddressZero
-  ) {
-    await governanceContract.setRegistryAndStaking(
-      registryContract.address,
-      Staking.address
-    );
+  if (governanceAddress === ethers.constants.AddressZero) {
+    await governanceContract.setRegistry(registryContract.address);
   }
 
   // Setup FundingNFT

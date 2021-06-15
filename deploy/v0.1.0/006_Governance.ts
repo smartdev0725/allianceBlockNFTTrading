@@ -30,11 +30,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     },
     args: [
       superDelegator,
-      DAO_LOAN_APPROVAL_REQUEST_DURATION,
-      DAO_MILESTONE_APPROVAL_REQUEST_DURATION,
-      DAO_UPDATE_REQUEST_DURATION,
-      2,
-      2,
       APPLICATION_FOR_INVESTMENT_DURATION,
       LATE_APPLICATION_FOR_INVESTMENT_DURATION,
     ],
