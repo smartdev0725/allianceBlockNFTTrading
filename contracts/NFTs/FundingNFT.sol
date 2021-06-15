@@ -13,21 +13,13 @@ import "../libs/TokenFormat.sol";
  * @title Alliance Block Funding NFTs
  * @notice NFTs that will be held by users
  * @dev Extends Initializable, ContextUpgradeable, AccessControlUpgradeable, ERC1155Upgradeable
-*/
+ */
 contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeable, ERC1155Upgradeable {
     using TokenFormat for uint256;
 
     // Events
-    event GenerationIncreased(
-        uint256 indexed loanId,
-        address indexed user,
-        uint256 newGeneration
-    );
-    event GenerationDecreased(
-        uint256 indexed loanId,
-        address indexed user,
-        uint256 newGeneration
-    );
+    event GenerationIncreased(uint256 indexed loanId, address indexed user, uint256 newGeneration);
+    event GenerationDecreased(uint256 indexed loanId, address indexed user, uint256 newGeneration);
     event TransfersPaused(uint256 loanId);
     event TransfersResumed(uint256 loanId);
 
@@ -51,7 +43,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @notice Initializes the contract
      * @param baseUri sets the base URI
      * @param contractUri sets the contract URI
-    */
+     */
     function initialize(string memory baseUri, string memory contractUri) public initializer {
         MINTER_ROLE = keccak256("MINTER_ROLE");
         PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -70,10 +62,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
     }
 
     modifier onlyMinter() {
-        require(
-            hasRole(MINTER_ROLE, _msgSender()),
-            "Must have minter role to mint"
-        );
+        require(hasRole(MINTER_ROLE, _msgSender()), "Must have minter role to mint");
         _;
     }
 
@@ -87,7 +76,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
     /**
      * @notice contract metadata
      * @return the contractURI stored in memory
-    */
+     */
     function contractURI() public view returns (string memory) {
         return _contractURI;
     }
@@ -97,7 +86,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @dev Owner can pause transfers for specific tokens
      * @dev pauses all loan ids, no matter the generation
      * @param loanId the loan ID to be paused
-    */
+     */
     function pauseTokenTransfer(uint256 loanId) external onlyPauser {
         transfersPaused[loanId] = true;
         emit TransfersPaused(loanId);
@@ -107,7 +96,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @notice Unpauses the token transfers
      * @dev Owner can unpause transfers for specific tokens
      * @param loanId the loan ID to be unpaused
-    */
+     */
     function unpauseTokenTransfer(uint256 loanId) external onlyPauser {
         transfersPaused[loanId] = false;
         emit TransfersResumed(loanId);
@@ -118,8 +107,12 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @param to the target address that will receive the Gen0 tokens
      * @param amount the amount of tokens to mint
      * @param loanId the ID of the loan
-    */
-    function mintGen0(address to, uint256 amount, uint256 loanId) external onlyMinter {
+     */
+    function mintGen0(
+        address to,
+        uint256 amount,
+        uint256 loanId
+    ) external onlyMinter {
         // LoanId is the tokenId used to mint
         _mint(to, loanId, amount, "");
     }
@@ -130,7 +123,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @param amount The amount of tokens to mint.
      * @param generation The generation of the tokens. The id of the tokens will be composed of the loan id and this generation number.
      * @param loanId The loan identifier
-    */
+     */
     function mintOfGen(
         address to,
         uint256 amount,
@@ -149,7 +142,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @param user the owner of the tokens
      * @param amount the number of tokens to change
      * @param generationsToDecrease the number of generations to decrease
-    */
+     */
     function decreaseGenerations(
         uint256 tokenId,
         address user,
@@ -166,7 +159,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @param tokenId the ID of the token to increase a single generation
      * @param user the owner of the tokens
      * @param amount the number of tokens to increase a single generation
-    */
+     */
     function increaseGeneration(
         uint256 tokenId,
         address user,
@@ -183,7 +176,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @param user the owner of the tokens
      * @param amount the number of tokens to increase generations
      * @param generationsToAdd the number of generations to increase
-    */
+     */
     function increaseGenerations(
         uint256 tokenId,
         address user,
@@ -198,8 +191,8 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @param account the owner of the tokens
      * @param id id of the token
      * @param amount the number of tokens to burn
-    */
-     function burn(
+     */
+    function burn(
         address account,
         uint256 id,
         uint256 amount
@@ -215,7 +208,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @param user the owner of the tokens
      * @param amount the number of tokens to increase generations
      * @param generationsToAdd the number of generations to increase
-    */
+     */
     function _increaseGenerations(
         uint256 tokenId,
         address user,
@@ -245,7 +238,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @param user the owner of the tokens
      * @param amount the number of tokens to decrease  Generations
      * @param generationsToDecrease the number of generations to decrease
-    */
+     */
     function _decreaseGenerations(
         uint256 tokenId,
         address user,
@@ -278,7 +271,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @param ids array of ids
      * @param amounts array of amounts
      * @param data TBD
-    */
+     */
     function _beforeTokenTransfer(
         address operator,
         address from,

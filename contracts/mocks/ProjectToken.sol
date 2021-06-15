@@ -9,5 +9,5 @@ import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
  * @dev Extends ERC20PresetMinterPauser
  */
 contract ProjectToken is ERC20PresetMinterPauser {
-    constructor() ERC20PresetMinterPauser("Project Token", "PT"){}
+    constructor() ERC20PresetMinterPauser("Project Token", "PT") {}
 }

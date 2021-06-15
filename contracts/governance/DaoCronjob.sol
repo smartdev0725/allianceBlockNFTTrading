@@ -11,7 +11,7 @@ import "../interfaces/IRegistry.sol";
  * @title AllianceBlock Governance contract
  * @dev Extends GovernanceTypesAndStorage
  * @notice Responsible for governing AllianceBlock's ecosystem
-*/
+ */
 contract DaoCronjob is GovernanceTypesAndStorage {
     using SafeMath for uint256;
     using ValuedDoubleLinkedList for ValuedDoubleLinkedList.LinkedList;
@@ -25,11 +25,12 @@ contract DaoCronjob is GovernanceTypesAndStorage {
     /**
      * @notice Checks if needs to execute a DAO cronJob
      * @dev Calls executeCronjob() at the most 1 cronJob per tx
-    */
+     */
     function checkCronjobs() public returns (bool) {
         uint256 mostRecentCronjobTimestamp = cronjobList.getHeadValue();
         if (mostRecentCronjobTimestamp == 0 || block.timestamp < mostRecentCronjobTimestamp) return false;
-        else { // only pop head for now for gas reasons, maybe later we can execute them all together.
+        else {
+            // only pop head for now for gas reasons, maybe later we can execute them all together.
             (uint256 head, uint256 timestamp) = cronjobList.popHeadAndValue();
             executeCronjob(head, timestamp);
         }
@@ -41,7 +42,7 @@ contract DaoCronjob is GovernanceTypesAndStorage {
      * @notice Executes the next DAO cronJob
      * @param cronjobId The cronJob id to be executed.
      * @param timestamp The current block height
-    */
+     */
     function executeCronjob(uint256 cronjobId, uint256 timestamp) internal {
         updateInvestment(cronjobs[cronjobId].externalId, timestamp);
     }
@@ -52,8 +53,12 @@ contract DaoCronjob is GovernanceTypesAndStorage {
      * @param cronjobType The type of cronJob
      * @param timestamp The current block height
      * @param externalId Id of the request in case of dao approval, change voting request or investment
-    */
-     function addCronjob(CronjobType cronjobType, uint256 timestamp, uint256 externalId) internal {
+     */
+    function addCronjob(
+        CronjobType cronjobType,
+        uint256 timestamp,
+        uint256 externalId
+    ) internal {
         totalCronjobs = totalCronjobs.add(1);
         cronjobs[totalCronjobs] = Cronjob(cronjobType, externalId);
         cronjobList.addNodeIncrement(timestamp, totalCronjobs);
@@ -63,7 +68,7 @@ contract DaoCronjob is GovernanceTypesAndStorage {
      * @notice Removes a cronJob from the queue
      * @dev Removes a node from the cronjobList (ValuedDoubleLinkedList)
      * @param cronjobId The cronJob ID
-    */
+     */
     function removeCronjob(uint256 cronjobId) internal {
         cronjobList.removeNode(cronjobId);
     }
@@ -73,14 +78,13 @@ contract DaoCronjob is GovernanceTypesAndStorage {
      * @dev checks if lottery should start or adds cronJob for late application
      * @param investmentId The id of the investment to update
      * @param timestamp the current block height
-    */
+     */
     function updateInvestment(uint256 investmentId, uint256 timestamp) internal {
         if (registry.getRequestingInterestStatus(investmentId)) {
             registry.startLotteryPhase(investmentId);
-        }
-        else {
-            uint256 nextCronjobTimestamp = timestamp.add(
-                updatableVariables[keccak256(abi.encode("lateApplicationsForInvestmentDuration"))]);
+        } else {
+            uint256 nextCronjobTimestamp =
+                timestamp.add(updatableVariables[keccak256(abi.encode("lateApplicationsForInvestmentDuration"))]);
             addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, investmentId);
         }
     }

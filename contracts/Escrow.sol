@@ -21,10 +21,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param lendingToken_ The token that lenders will be able to lend.
      * @param fundingNFT_ The ERC1155 token contract which will represent the lending amounts.
      */
-    function initialize(
-        address lendingToken_,
-        address fundingNFT_
-    ) public initializer {
+    function initialize(address lendingToken_, address fundingNFT_) public initializer {
         __Ownable_init();
         lendingToken = IERC20(lendingToken_);
         fundingNFT = IERC1155Mint(fundingNFT_);
@@ -98,10 +95,10 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param recipients The addresses to mint the reputational tokens to.
      * @param amounts The amounts of reputational tokens to be minted.
      */
-    function multiMintReputationalToken(
-        address[] memory recipients,
-        uint256[] memory amounts
-    ) external onlyActionVerifier() {
+    function multiMintReputationalToken(address[] memory recipients, uint256[] memory amounts)
+        external
+        onlyActionVerifier()
+    {
         reputationalALBT.multiMintTo(recipients, amounts);
     }
 
@@ -111,10 +108,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param recipient The address to mint the reputational tokens to.
      * @param amount The amount of reputational tokens to be minted.
      */
-    function mintReputationalToken(
-        address recipient,
-        uint256 amount
-    ) external onlyRegistryOrStaking() {
+    function mintReputationalToken(address recipient, uint256 amount) external onlyRegistryOrStaking() {
         reputationalALBT.mintTo(recipient, amount);
     }
 
@@ -124,10 +118,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param from The address to burn the reputational tokens from.
      * @param amount The amount of reputational tokens to be burnt.
      */
-    function burnReputationalToken(
-        address from,
-        uint256 amount
-    ) external onlyStaking() {
+    function burnReputationalToken(address from, uint256 amount) external onlyStaking() {
         reputationalALBT.burnFrom(from, amount);
     }
 

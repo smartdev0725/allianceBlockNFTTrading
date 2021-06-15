@@ -14,7 +14,7 @@ import "hardhat/console.sol";
  * @notice Responsible for ALBT Staking
  * @dev Extends  Initializable, DaoStaking, OwnableUpgradeable
  */
- contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
+contract Staking is Initializable, DaoStaking, OwnableUpgradeable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -26,7 +26,7 @@ import "hardhat/console.sol";
      * @param escrow_ the escrow address
      * @param stakingTypeAmounts_ the array of Staking Type Amounts
      * @param reputationalStakingTypeAmounts_ the array of Reputation Staking Type Amounts
-    */
+     */
     function initialize(
         IERC20 albt_,
         address governance_,
@@ -44,11 +44,11 @@ import "hardhat/console.sol";
         periodFinish = 0;
         rewardRate = 0;
 
-        for(uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
+        for (uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
             stakingTypeAmounts[i] = stakingTypeAmounts_[i];
         }
 
-        for(uint256 i = 0; i < reputationalStakingTypeAmounts_.length; i++) {
+        for (uint256 i = 0; i < reputationalStakingTypeAmounts_.length; i++) {
             reputationalStakingTypeAmounts[i] = reputationalStakingTypeAmounts_[i];
         }
     }
@@ -66,18 +66,15 @@ import "hardhat/console.sol";
     /**
      * @notice Set Reward Distribution
      * @param _rewardDistribution the address for distribute the rewards to
-    */
-    function setRewardDistribution(address _rewardDistribution)
-        external
-        onlyOwner
-    {
+     */
+    function setRewardDistribution(address _rewardDistribution) external onlyOwner {
         rewardDistribution = _rewardDistribution;
     }
 
     /**
      * @notice Last Time Reward Applicable
      * @dev checks if the staking period is positive
-    */
+     */
     function lastTimeRewardApplicable() public view returns (uint256) {
         return Math.min(block.timestamp, periodFinish);
     }
@@ -85,18 +82,14 @@ import "hardhat/console.sol";
     /**
      * @notice Calculate Rewards per Token
      * @dev returns the calculated reward
-    */
+     */
     function rewardPerToken() public view returns (uint256) {
         if (totalSupply == 0) {
             return rewardPerTokenStored;
         }
         return
             rewardPerTokenStored.add(
-                lastTimeRewardApplicable()
-                    .sub(lastUpdateTime)
-                    .mul(rewardRate)
-                    .mul(1e18)
-                    .div(totalSupply)
+                lastTimeRewardApplicable().sub(lastUpdateTime).mul(rewardRate).mul(1e18).div(totalSupply)
             );
     }
 
@@ -104,20 +97,17 @@ import "hardhat/console.sol";
      * @notice Earned
      * @param account the address
      * @return the staked earnings for the account
-    */
+     */
     function earned(address account) public view returns (uint256) {
         return
-            balance[account]
-                .mul(rewardPerToken().sub(userRewardPerTokenPaid[account]))
-                .div(1e18)
-                .add(rewards[account]);
+            balance[account].mul(rewardPerToken().sub(userRewardPerTokenPaid[account])).div(1e18).add(rewards[account]);
     }
 
     /**
      * @notice Stake
      * @param stakingType The staking type
      * @dev requires not Delegator and cannot repeat staking type
-    */
+     */
     function stake(StakingType stakingType) public updateReward(msg.sender) {
         require(uint256(stakingType) < 3, "Delegator type stake only via Governance");
         require(balance[msg.sender] < stakingTypeAmounts[uint256(stakingType)], "Cannot stake for same type again");
@@ -136,7 +126,7 @@ import "hardhat/console.sol";
      * @notice Unstake
      * @param stakingType The staking type to drop to
      * @dev msg.sender withdraws till reaching stakingType
-    */
+     */
     function unstake(StakingType stakingType) external {
         require(balance[msg.sender] > stakingTypeAmounts[uint256(stakingType)], "Can only drop to lower level");
         uint256 stakingTypeIndex = _getStakingType(msg.sender);
@@ -153,7 +143,7 @@ import "hardhat/console.sol";
     /**
      * @notice Exit
      * @dev msg.sender withdraws and exits
-    */
+     */
     function exit() external {
         uint256 stakingTypeIndex = _getStakingType(msg.sender);
 
@@ -168,7 +158,7 @@ import "hardhat/console.sol";
     /**
      * @notice Get Rewards
      * @dev accrues rewards to msg.sender
-    */
+     */
     function getReward() public updateReward(msg.sender) {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
@@ -181,12 +171,8 @@ import "hardhat/console.sol";
     /**
      * @notice Notify Reward Amount
      * @param reward the reward amount
-    */
-    function notifyRewardAmount(uint256 reward)
-        external
-        onlyRewardDistribution
-        updateReward(address(0))
-    {
+     */
+    function notifyRewardAmount(uint256 reward) external onlyRewardDistribution updateReward(address(0)) {
         if (block.timestamp >= periodFinish) {
             rewardRate = reward.div(STAKING_DURATION);
         } else {
@@ -202,7 +188,7 @@ import "hardhat/console.sol";
     /**
      * @notice Returns true if account is staker Lvl2 or more
      * @param account The staker to check for
-    */
+     */
     function getEligibilityForActionProvision(address account) external view returns (bool) {
         if (balance[account] >= stakingTypeAmounts[1]) return true;
         return false;
@@ -212,7 +198,7 @@ import "hardhat/console.sol";
      * @notice Get Staking Type
      * @param account the address
      * @return the staking type
-    */
+     */
     function _getStakingType(address account) internal view returns (uint256) {
         for (uint256 i = 0; i < 4; i++) {
             if (balance[account] == stakingTypeAmounts[i]) {
@@ -227,19 +213,16 @@ import "hardhat/console.sol";
      * @param account the address
      * @param previousLevelIndex The index of the previous level
      * @param newLevelIndex the index for the new level
-    */
+     */
     function _applyReputation(
         address account,
         uint256 previousLevelIndex,
         uint256 newLevelIndex
-    )
-        internal
-    {
+    ) internal {
         if (previousLevelIndex < newLevelIndex) {
             uint256 amountToMint = _findAmount(newLevelIndex, previousLevelIndex);
             escrow.mintReputationalToken(account, amountToMint);
-        }
-        else {
+        } else {
             uint256 amountToBurn = _findAmount(previousLevelIndex, newLevelIndex);
             escrow.burnReputationalToken(account, amountToBurn);
         }
@@ -250,15 +233,15 @@ import "hardhat/console.sol";
      * @param bigIndex ???
      * @param smallIndex ???
      * @return amount of reputation
-    */
+     */
     function _findAmount(uint256 bigIndex, uint256 smallIndex) internal view returns (uint256 amount) {
         if (bigIndex > 3) bigIndex = 3;
         if (smallIndex == 0) {
             amount = reputationalStakingTypeAmounts[bigIndex.sub(1)];
-        }
-        else {
+        } else {
             amount = reputationalStakingTypeAmounts[bigIndex.sub(1)].sub(
-                reputationalStakingTypeAmounts[smallIndex.sub(1)]);
+                reputationalStakingTypeAmounts[smallIndex.sub(1)]
+            );
         }
     }
 }

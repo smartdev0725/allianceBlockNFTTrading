@@ -2,7 +2,7 @@ pragma solidity ^0.7.0;
 
 /**
  * @title Double linked-list
-*/
+ */
 library DoubleLinkedList {
     struct Node {
         uint256 next;
@@ -20,7 +20,7 @@ library DoubleLinkedList {
      * @notice Get Head ID
      * @param self the LinkedList
      * @return the first item of the list
-    */
+     */
     function getHeadId(LinkedList storage self) internal view returns (uint256) {
         return self.head;
     }
@@ -29,7 +29,7 @@ library DoubleLinkedList {
      * @notice Get list size
      * @param self the LinkedList
      * @return the size of the list
-    */
+     */
     function getSize(LinkedList storage self) internal view returns (uint256) {
         return self.size;
     }
@@ -38,11 +38,8 @@ library DoubleLinkedList {
      * @notice Adds a new node to the list
      * @param self the LinkedList
      * @param id the node to add
-    */
-    function addNode(
-        LinkedList storage self,
-        uint256 id
-    ) internal {
+     */
+    function addNode(LinkedList storage self, uint256 id) internal {
         //If empty
         if (self.head == 0) {
             self.head = id;
@@ -63,21 +60,18 @@ library DoubleLinkedList {
      * @notice Removes node from the list
      * @param self the LinkedList
      * @param id the id of the node to remove
-    */
+     */
     function removeNode(LinkedList storage self, uint256 id) internal {
-        if(self.size == 1) {
+        if (self.size == 1) {
             self.head = 0;
             self.tail = 0;
-        }
-        else if (id == self.head) {
+        } else if (id == self.head) {
             self.head = self.nodes[self.head].next;
             self.nodes[self.head].previous = 0;
-        }
-        else if (id == self.tail) {
+        } else if (id == self.tail) {
             self.tail = self.nodes[self.tail].previous;
             self.nodes[self.tail].next = 0;
-        }
-        else {
+        } else {
             self.nodes[self.nodes[id].next].previous = self.nodes[id].previous;
             self.nodes[self.nodes[id].previous].next = self.nodes[id].next;
         }
@@ -89,15 +83,14 @@ library DoubleLinkedList {
      * @notice Pops the head of the list
      * @param self the LinkedList
      * @return head the first item of the list
-    */
-    function popHead(LinkedList storage self) internal returns(uint256 head) {
+     */
+    function popHead(LinkedList storage self) internal returns (uint256 head) {
         head = self.head;
 
-        if(self.size == 1) {
+        if (self.size == 1) {
             self.head = 0;
             self.tail = 0;
-        }
-        else {
+        } else {
             self.head = self.nodes[self.head].next;
             self.nodes[self.head].previous = 0;
         }
@@ -110,8 +103,8 @@ library DoubleLinkedList {
      * @param self the LinkedList
      * @param index the id of the index
      * @return id the item in index position
-    */
-    function getIndexedId(LinkedList storage self, uint256 index) internal returns(uint256 id) {
+     */
+    function getIndexedId(LinkedList storage self, uint256 index) internal returns (uint256 id) {
         id = self.head;
 
         for (uint256 i = 1; i < index; i++) {
@@ -123,7 +116,7 @@ library DoubleLinkedList {
      * @notice Clone LinkedList
      * @param self the LinkedList
      * @param listToClone the LinkedList storage to clone the list from
-    */
+     */
     function cloneList(LinkedList storage self, LinkedList storage listToClone) internal {
         self.head = listToClone.head;
         self.tail = listToClone.tail;

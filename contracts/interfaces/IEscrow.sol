@@ -21,7 +21,9 @@ interface IEscrow {
         address seeker,
         uint256 amount
     ) external;
+
     function mintReputationalToken(address recipient, uint256 amount) external;
+
     function burnReputationalToken(address from, uint256 amount) external;
 
     function multiMintReputationalToken(address[] memory recipients, uint256[] memory amounts) external;

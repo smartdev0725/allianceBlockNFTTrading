@@ -9,7 +9,7 @@ import "../libs/DoubleLinkedList.sol";
 /**
  * @title AllianceBlock GovernanceStorage contract
  * @notice Responsible for governance storage
-*/
+ */
 contract GovernanceTypesAndStorage {
     using ValuedDoubleLinkedList for ValuedDoubleLinkedList.LinkedList;
     using DoubleLinkedList for DoubleLinkedList.LinkedList;
@@ -25,8 +25,13 @@ contract GovernanceTypesAndStorage {
     }
 
     // EVENTS
-    event VotedForRequest(uint indexed loanId, uint indexed requestId, bool decision, address indexed user);
-    event ApprovalRequested(uint indexed loanId, bool indexed isMilestone, uint milestoneNumber, address indexed user);
+    event VotedForRequest(uint256 indexed loanId, uint256 indexed requestId, bool decision, address indexed user);
+    event ApprovalRequested(
+        uint256 indexed loanId,
+        bool indexed isMilestone,
+        uint256 milestoneNumber,
+        address indexed user
+    );
     event InitGovernance(address indexed registryAddress_, address indexed stakingAddress_, address indexed user);
 
     uint256 public totalApprovalRequests; // The total amount of approvals requested.
@@ -67,14 +72,12 @@ contract GovernanceTypesAndStorage {
     }
 
     modifier onlyBeforeDeadline(uint256 requestId) {
-        require(approvalRequests[requestId].deadlineTimestamp > block.timestamp,
-            "Only before deadline is reached");
+        require(approvalRequests[requestId].deadlineTimestamp > block.timestamp, "Only before deadline is reached");
         _;
     }
 
     modifier onlyAfterDeadlineAndNotApproved(uint256 requestId) {
-        require(approvalRequests[requestId].deadlineTimestamp <= block.timestamp,
-            "Only after deadline is reached");
+        require(approvalRequests[requestId].deadlineTimestamp <= block.timestamp, "Only after deadline is reached");
         require(!approvalRequests[requestId].isApproved, "Only if not already approved");
         _;
     }

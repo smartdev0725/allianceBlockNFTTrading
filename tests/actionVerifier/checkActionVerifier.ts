@@ -328,7 +328,9 @@ export default async function suite() {
       // Then
       const balanceAfter1 = await this.rALBTContract.balanceOf(this.lender1);
       // See reputationalStakingTypeAmounts on the deployed contract (deploy folder), is 5000 for stake. Must not mint or provide any other reward
-      expect(balanceAfter1.toString()).to.be.equal(ethers.utils.parseEther('5000').toString());
+      expect(balanceAfter1.toString()).to.be.equal(
+        ethers.utils.parseEther('5000').toString()
+      );
     });
 
     it('Can provide rewards', async function () {
@@ -342,11 +344,24 @@ export default async function suite() {
       ];
 
       // Given
-      await this.actionVerifierContract.connect(this.deployerSigner).importAction("Project Vote", ethers.utils.parseEther("10"));
-      await this.actionVerifierContract.connect(this.deployerSigner).importAction("Create Thread", ethers.utils.parseEther("10"));
-      await this.actionVerifierContract.connect(this.deployerSigner).updateVariables(ethers.utils.parseEther("10"), 10);
+      await this.actionVerifierContract
+        .connect(this.deployerSigner)
+        .importAction('Project Vote', ethers.utils.parseEther('10'));
+      await this.actionVerifierContract
+        .connect(this.deployerSigner)
+        .importAction('Create Thread', ethers.utils.parseEther('10'));
+      await this.actionVerifierContract
+        .connect(this.deployerSigner)
+        .updateVariables(ethers.utils.parseEther('10'), 10);
 
-      let signature = await getSignature('Project Vote', 'Yes', this.lender1, 5, this.actionVerifierContract.address, web3);
+      let signature = await getSignature(
+        'Project Vote',
+        'Yes',
+        this.lender1,
+        5,
+        this.actionVerifierContract.address,
+        web3
+      );
 
       const signatures = [signature];
 
@@ -361,14 +376,20 @@ export default async function suite() {
         amountToTransfer
       );
 
-      await this.stakingContract.connect(this.lender1Signer).stake(StakingType.STAKER_LVL_2);
+      await this.stakingContract
+        .connect(this.lender1Signer)
+        .stake(StakingType.STAKER_LVL_2);
 
       // When
-      await this.actionVerifierContract.connect(this.lender1Signer).provideRewardsForActions(actions , signatures);
+      await this.actionVerifierContract
+        .connect(this.lender1Signer)
+        .provideRewardsForActions(actions, signatures);
 
       // Then
       const balanceAfter1 = await this.rALBTContract.balanceOf(this.lender1);
-      expect(+ethers.utils.formatEther(balanceAfter1.toString())).to.be.greaterThan(0);
+      expect(
+        +ethers.utils.formatEther(balanceAfter1.toString())
+      ).to.be.greaterThan(0);
     });
   });
 }

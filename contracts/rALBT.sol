@@ -9,8 +9,8 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
  * @title AllianceBlock Reputation Token contract
  * @dev Extends Ownable
  */
- contract rALBT is Ownable {
-	using SafeMath for uint256;
+contract rALBT is Ownable {
+    using SafeMath for uint256;
 
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to
@@ -20,11 +20,11 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
      */
     event Transfer(address indexed from, address indexed to, uint256 value);
 
-	string constant NAME = "Reputational AllianceBlock Token"; // The name of the token
-	string constant SYMBOL = "rALBT"; // The symbol of the token
+    string constant NAME = "Reputational AllianceBlock Token"; // The name of the token
+    string constant SYMBOL = "rALBT"; // The symbol of the token
     uint256 _totalSupply;
 
-    mapping (address => uint256) private _balances;
+    mapping(address => uint256) private _balances;
 
     /**
      * @notice Multi Mint To
@@ -47,7 +47,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
      * @param amountToMint The amount of tokens to be minted
      */
     function mintTo(address to, uint256 amountToMint) external onlyOwner() {
-    	_mint(to, amountToMint);
+        _mint(to, amountToMint);
     }
 
     /**
@@ -56,7 +56,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
      * @param amountToBurn The amount of tokens to be burnt
      */
     function burnFrom(address from, uint256 amountToBurn) external onlyOwner() {
-    	_burn(from, amountToBurn);
+        _burn(from, amountToBurn);
     }
 
     /**

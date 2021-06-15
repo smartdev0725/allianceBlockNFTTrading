@@ -6,7 +6,11 @@ pragma solidity >=0.6.0 <0.8.0;
  * @title Interface of the IERC1155 mint function.
  */
 interface IERC1155Mint {
-    function mintGen0(address to, uint256 amount, uint256 loanId) external;
+    function mintGen0(
+        address to,
+        uint256 amount,
+        uint256 loanId
+    ) external;
 
     function mintOfGen(
         address to,
@@ -41,10 +45,7 @@ interface IERC1155Mint {
         uint256 generationsToAdd
     ) external;
 
-    function balanceOf(address account, uint256 id)
-        external
-        view
-        returns (uint256);
+    function balanceOf(address account, uint256 id) external view returns (uint256);
 
     function burn(
         address account,

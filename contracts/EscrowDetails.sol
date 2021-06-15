@@ -40,8 +40,7 @@ contract EscrowDetails {
     }
 
     modifier onlyRegistryOrStaking() {
-        require(msg.sender == staking || msg.sender == address(registry),
-            "Only Registry or Staking");
+        require(msg.sender == staking || msg.sender == address(registry), "Only Registry or Staking");
         _;
     }
 }

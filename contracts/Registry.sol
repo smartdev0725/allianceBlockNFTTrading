@@ -21,28 +21,11 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
     using TokenFormat for uint256;
 
     // Events
-    event LoanPartitionsPurchased(
-        uint256 indexed loanId,
-        uint256 partitionsToPurchase,
-        address lender
-    );
-    event LoanStarted(
-        uint256 indexed loanId,
-        LoanLibrary.LoanType indexed loanType
-    );
-    event LoanApproved(
-        uint256 indexed loanId,
-        LoanLibrary.LoanType indexed loanType
-    );
-    event LoanRejected(
-        uint256 indexed loanId,
-        LoanLibrary.LoanType indexed loanType
-    );
-    event LoanChallenged(
-        uint256 indexed loanId,
-        LoanLibrary.LoanType indexed loanType,
-        address user
-    );
+    event LoanPartitionsPurchased(uint256 indexed loanId, uint256 partitionsToPurchase, address lender);
+    event LoanStarted(uint256 indexed loanId, LoanLibrary.LoanType indexed loanType);
+    event LoanApproved(uint256 indexed loanId, LoanLibrary.LoanType indexed loanType);
+    event LoanRejected(uint256 indexed loanId, LoanLibrary.LoanType indexed loanType);
+    event LoanChallenged(uint256 indexed loanId, LoanLibrary.LoanType indexed loanType, address user);
     event PaymentReceived(
         uint256 indexed loanId,
         uint256 amountOfTokens,
@@ -50,11 +33,7 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
         bool indexed onProjectTokens,
         address user
     );
-    event PaymentExecuted(
-        uint256 indexed loanId,
-        LoanLibrary.LoanType indexed loanType,
-        address indexed seeker
-    );
+    event PaymentExecuted(uint256 indexed loanId, LoanLibrary.LoanType indexed loanType, address indexed seeker);
 
     /**
      * @notice Initialize
@@ -113,10 +92,7 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
         uint256 rAlbtPerLotteryNumber_,
         uint256 blocksLockedForReputation_,
         uint256 lotteryNumbersForImmediateTicket_
-    )
-    external
-    onlyOwner()
-    {
+    ) external onlyOwner() {
         require(totalTicketsPerRun == 0, "Cannot initialize twice");
         rALBT = IERC20(reputationalAlbt);
         totalTicketsPerRun = totalTicketsPerRun_;
@@ -131,10 +107,7 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
      * @param loanId The id of the loan.
      * @param decision The decision of the governance. [true -> approved] [false -> rejected]
      */
-    function decideForLoan(uint256 loanId, bool decision)
-        external
-        onlyGovernance()
-    {
+    function decideForLoan(uint256 loanId, bool decision) external onlyGovernance() {
         if (decision) _approveLoan(loanId);
         else _rejectLoan(loanId);
     }
@@ -146,15 +119,9 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
      * @param loanId The id of the loan.
      * @param partitionsToPurchase The amount of ERC1155 tokens (which represent partitions of the loan) to be purchased.
      */
-    function fundLoan(uint256 loanId, uint256 partitionsToPurchase)
-        external
-        onlyActivelyFundedLoan(loanId)
-    {
+    function fundLoan(uint256 loanId, uint256 partitionsToPurchase) external onlyActivelyFundedLoan(loanId) {
         require(
-            partitionsToPurchase <=
-                loanDetails[loanId].totalPartitions.sub(
-                    loanDetails[loanId].partitionsPurchased
-                ),
+            partitionsToPurchase <= loanDetails[loanId].totalPartitions.sub(loanDetails[loanId].partitionsPurchased),
             "Not enough partitions left for purchase"
         );
 
@@ -171,22 +138,13 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
         if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
             escrow.transferFundingNFT(loanId, partitionsToPurchase, msg.sender);
         } else {
-            _transferFundingNFTToProjectFunder(
-                loanId,
-                partitionsToPurchase,
-                msg.sender
-            );
+            _transferFundingNFTToProjectFunder(loanId, partitionsToPurchase, msg.sender);
         }
 
-        loanDetails[loanId].partitionsPurchased = loanDetails[loanId]
-            .partitionsPurchased
-            .add(partitionsToPurchase);
+        loanDetails[loanId].partitionsPurchased = loanDetails[loanId].partitionsPurchased.add(partitionsToPurchase);
 
         emit LoanPartitionsPurchased(loanId, partitionsToPurchase, msg.sender);
-        if (
-            loanDetails[loanId].partitionsPurchased ==
-            loanDetails[loanId].totalPartitions
-        ) {
+        if (loanDetails[loanId].partitionsPurchased == loanDetails[loanId].totalPartitions) {
             _startLoan(loanId);
         }
     }
@@ -221,20 +179,9 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
         if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
             _receivePersonalLoanPayment(loanId, generation, amountOfTokens);
         } else {
-            _receiveProjectLoanPayment(
-                loanId,
-                generation,
-                amountOfTokens,
-                onProjectTokens
-            );
+            _receiveProjectLoanPayment(loanId, generation, amountOfTokens, onProjectTokens);
         }
-        emit PaymentReceived(
-            loanId,
-            amountOfTokens,
-            generation,
-            onProjectTokens,
-            msg.sender
-        );
+        emit PaymentReceived(loanId, amountOfTokens, generation, onProjectTokens, msg.sender);
     }
 
     /**
@@ -242,10 +189,7 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
      * @dev This function is called by governance to start the lottery phase for an investment.
      * @param investmentId The id of the investment.
      */
-    function startLotteryPhase(uint256 investmentId)
-        external
-        onlyGovernance()
-    {
+    function startLotteryPhase(uint256 investmentId) external onlyGovernance() {
         _startLoan(investmentId);
     }
 
@@ -255,22 +199,17 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
             If challenging succeeds it can end up to either small penalty or whole collateral loss.
      * @param loanId The id of the loan.
      */
-    function challengeLoan(uint256 loanId)
-        external
-        onlyActiveLoan(loanId)
-        onlyAfterDeadlineReached(loanId)
-    {
-        if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL)
-            _challengePersonalLoan(loanId);
+    function challengeLoan(uint256 loanId) external onlyActiveLoan(loanId) onlyAfterDeadlineReached(loanId) {
+        if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) _challengePersonalLoan(loanId);
         else _challengeProjectLoan(loanId);
         emit LoanChallenged(loanId, loanDetails[loanId].loanType, msg.sender);
     }
 
-     /**
+    /**
      * @notice Approve Loan
      * @param loanId_ The id of the loan.
      */
-     function _approveLoan(uint256 loanId_) internal {
+    function _approveLoan(uint256 loanId_) internal {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.APPROVED;
         loanDetails[loanId_].approvalDate = block.timestamp;
         fundingNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
@@ -281,11 +220,11 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
         emit LoanApproved(loanId_, loanDetails[loanId_].loanType);
     }
 
-     /**
+    /**
      * @notice Reject Loan
      * @param loanId_ The id of the loan.
      */
-     function _rejectLoan(uint256 loanId_) internal {
+    function _rejectLoan(uint256 loanId_) internal {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.REJECTED;
         escrow.transferCollateralToken(
             loanDetails[loanId_].collateralToken,
@@ -295,18 +234,16 @@ contract Registry is Initializable, Investment, PersonalLoan, ProjectLoan, Ownab
         emit LoanRejected(loanId_, loanDetails[loanId_].loanType);
     }
 
-     /**
+    /**
      * @notice Start Loan
      * @param loanId_ The id of the loan.
      */
-     function _startLoan(uint256 loanId_) internal {
+    function _startLoan(uint256 loanId_) internal {
         loanStatus[loanId_] = LoanLibrary.LoanStatus.STARTED;
         loanDetails[loanId_].startingDate = block.timestamp;
 
-        if (loanDetails[loanId_].loanType == LoanLibrary.LoanType.PERSONAL)
-            _startPersonalLoan(loanId_);
-        else if (loanDetails[loanId_].loanType == LoanLibrary.LoanType.PROJECT)
-            _startProjectLoan(loanId_);
+        if (loanDetails[loanId_].loanType == LoanLibrary.LoanType.PERSONAL) _startPersonalLoan(loanId_);
+        else if (loanDetails[loanId_].loanType == LoanLibrary.LoanType.PROJECT) _startProjectLoan(loanId_);
         emit LoanStarted(loanId_, loanDetails[loanId_].loanType);
     }
 

@@ -9,5 +9,5 @@ import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
  * @dev Extends ERC20PresetMinterPauser
  */
 contract CollateralToken is ERC20PresetMinterPauser {
-    constructor() public ERC20PresetMinterPauser("Collateral Token", "CLT"){}
+    constructor() public ERC20PresetMinterPauser("Collateral Token", "CLT") {}
 }

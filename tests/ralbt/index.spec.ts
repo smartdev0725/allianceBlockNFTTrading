@@ -1,12 +1,12 @@
 import checkrAlbt from './checkrAlbt';
 
-import { deployments, ethers, getNamedAccounts } from 'hardhat';
-import { getContracts, getSigners } from '../helpers/utils';
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import {getContracts, getSigners} from '../helpers/utils';
 
 describe('rAlbt', function () {
   beforeEach(async function () {
     // Deploy fixtures
-    const {deploy , fixture} = deployments;
+    const {deploy, fixture} = deployments;
     await fixture();
 
     // Get accounts
@@ -57,7 +57,6 @@ describe('rAlbt', function () {
     });
 
     this.rALBTContract = await ethers.getContract('rALBT');
-
   });
 
   describe('When checking rALBT', checkrAlbt.bind(this));

@@ -11,12 +11,7 @@ import "hardhat/console.sol";
  * @notice Responsible for staking storage
  */
 contract StakingTypesAndStorage {
-    enum StakingType {
-        STAKER_LVL_1,
-        STAKER_LVL_2,
-        STAKER_LVL_3_OR_DAO_MEMBER,
-        DAO_DELEGATOR
-    }
+    enum StakingType {STAKER_LVL_1, STAKER_LVL_2, STAKER_LVL_3_OR_DAO_MEMBER, DAO_DELEGATOR}
 
     uint256 public STAKING_DURATION;
 

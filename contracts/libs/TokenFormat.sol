@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 
 /**
  * @title The Token Format library
-*/
+ */
 library TokenFormat {
     // Use a split bit implementation.
     // Store the generation in the upper 128 bits..
@@ -16,7 +16,7 @@ library TokenFormat {
      * @return generation
      * @return loanId
      */
-    function formatTokenId(uint tokenId) internal pure returns(uint generation, uint loanId) {
+    function formatTokenId(uint256 tokenId) internal pure returns (uint256 generation, uint256 loanId) {
         generation = tokenId >> 128;
         loanId = tokenId & _LOAN_ID_MASK;
     }
@@ -27,7 +27,7 @@ library TokenFormat {
      * @param loanId the loanID
      * @return tokenId the token id
      */
-    function getTokenId(uint gen, uint loanId) internal pure returns(uint tokenId) {
+    function getTokenId(uint256 gen, uint256 loanId) internal pure returns (uint256 tokenId) {
         return (gen << 128) | loanId;
     }
 }

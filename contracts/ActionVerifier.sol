@@ -15,7 +15,7 @@ import "hardhat/console.sol";
  * @dev Extends Initializable, OwnableUpgradeable
  * @notice Handles user's Actions and Rewards within the protocol
  */
- contract ActionVerifier is Initializable, OwnableUpgradeable {
+contract ActionVerifier is Initializable, OwnableUpgradeable {
     using SafeMath for uint256;
     using SignatureVerifier for SignatureVerifier.Action;
 
@@ -31,8 +31,8 @@ import "hardhat/console.sol";
     bytes32 public constant EIP712DOMAIN_TYPEHASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
 
     struct EIP712Domain {
-        string  name;
-        string  version;
+        string name;
+        string version;
         uint256 chainId;
         address verifyingContract;
     }
@@ -56,22 +56,27 @@ import "hardhat/console.sol";
         rewardPerActionProvision = rewardPerActionProvision_;
         maxActionsPerProvision = maxActionsPerProvision_;
 
-        DOMAIN_SEPARATOR = hash(EIP712Domain({
-            name: "AllianceBlock Verifier",
-            version: '1.0',
-            chainId: chainId,
-            verifyingContract: address(this)
-        }));
+        DOMAIN_SEPARATOR = hash(
+            EIP712Domain({
+                name: "AllianceBlock Verifier",
+                version: "1.0",
+                chainId: chainId,
+                verifyingContract: address(this)
+            })
+        );
     }
 
     function hash(EIP712Domain memory eip712Domain) internal view returns (bytes32) {
-        return keccak256(abi.encode(
-            EIP712DOMAIN_TYPEHASH,
-            keccak256(bytes(eip712Domain.name)),
-            keccak256(bytes(eip712Domain.version)),
-            eip712Domain.chainId,
-            eip712Domain.verifyingContract
-        ));
+        return
+            keccak256(
+                abi.encode(
+                    EIP712DOMAIN_TYPEHASH,
+                    keccak256(bytes(eip712Domain.name)),
+                    keccak256(bytes(eip712Domain.version)),
+                    eip712Domain.chainId,
+                    eip712Domain.verifyingContract
+                )
+            );
     }
 
     /**
@@ -79,10 +84,7 @@ import "hardhat/console.sol";
      * @param rewardPerActionProvision_ The reward that an action provider accumulates for each action provision.
      * @param maxActionsPerProvision_ The max actions that an account can take rewards for in one function call.
      */
-    function updateVariables(uint256 rewardPerActionProvision_, uint256 maxActionsPerProvision_)
-        external
-        onlyOwner()
-    {
+    function updateVariables(uint256 rewardPerActionProvision_, uint256 maxActionsPerProvision_) external onlyOwner() {
         rewardPerActionProvision = rewardPerActionProvision_;
         maxActionsPerProvision = maxActionsPerProvision_;
     }
@@ -92,10 +94,7 @@ import "hardhat/console.sol";
      * @param action The name of the action.
      * @param reputationalAlbtReward The reputational albt reward for this action.
      */
-    function importAction(string memory action, uint256 reputationalAlbtReward)
-        external
-        onlyOwner()
-    {
+    function importAction(string memory action, uint256 reputationalAlbtReward) external onlyOwner() {
         rewardPerAction[keccak256(abi.encodePacked(action))] = reputationalAlbtReward;
     }
 
@@ -104,10 +103,7 @@ import "hardhat/console.sol";
      * @param action The name of the action.
      * @param reputationalAlbtReward The reputational albt reward for this action.
      */
-    function updateAction(string memory action, uint256 reputationalAlbtReward)
-        external
-        onlyOwner()
-    {
+    function updateAction(string memory action, uint256 reputationalAlbtReward) external onlyOwner() {
         require(rewardPerAction[keccak256(abi.encodePacked(action))] > 0, "Action should already exist");
         rewardPerAction[keccak256(abi.encodePacked(action))] = reputationalAlbtReward;
     }
@@ -117,12 +113,7 @@ import "hardhat/console.sol";
      * @param actions The actions provided.
      * @param signatures The signatures representing the actions.
      */
-    function provideRewardsForActions(
-        SignatureVerifier.Action[] memory actions,
-        bytes[] memory signatures
-    )
-        external
-    {
+    function provideRewardsForActions(SignatureVerifier.Action[] memory actions, bytes[] memory signatures) external {
         require(staking.getEligibilityForActionProvision(msg.sender), "Must be at least lvl2 staker");
         require(actions.length == signatures.length, "Invalid length");
         require(actions.length <= maxActionsPerProvision, "Too many actions");
@@ -136,14 +127,12 @@ import "hardhat/console.sol";
             if (
                 actions[i].isValidSignature(signatures[i], DOMAIN_SEPARATOR) &&
                 rewardPerAction[keccak256(abi.encodePacked(actions[i].actionName))] > 0
-            )
-            {
+            ) {
                 accounts[i] = actions[i].account;
                 rewards[i] = rewardPerAction[keccak256(abi.encodePacked(actions[i].actionName))];
 
                 rewardForCaller = rewardForCaller.add(rewardPerActionProvision);
-            }
-            else {
+            } else {
                 accounts[i] = address(0);
                 rewards[i] = 0;
             }
@@ -159,8 +148,8 @@ import "hardhat/console.sol";
      * @notice Check Action
      * @dev checks if given action has a reward
      * @return exist boolean represents checks if action has a reward associated
-    */
-    function checkAction(string memory action) public view returns (bool exist){
-         return rewardPerAction[keccak256(abi.encodePacked(action))] > 0;
+     */
+    function checkAction(string memory action) public view returns (bool exist) {
+        return rewardPerAction[keccak256(abi.encodePacked(action))] > 0;
     }
 }

@@ -1,11 +1,11 @@
 import BN from 'bn.js';
-import { LoanType, LoanStatus } from '../../helpers/registryEnums';
-import { BASE_AMOUNT } from '../../helpers/constants';
-import { ethers } from 'hardhat';
-import { BigNumber } from 'ethers';
-import chai, { expect } from 'chai';
-import { solidity } from 'ethereum-waffle';
-const { expectRevert } = require('@openzeppelin/test-helpers');
+import {LoanType, LoanStatus} from '../../helpers/registryEnums';
+import {BASE_AMOUNT} from '../../helpers/constants';
+import {ethers} from 'hardhat';
+import {BigNumber} from 'ethers';
+import chai, {expect} from 'chai';
+import {solidity} from 'ethereum-waffle';
+const {expectRevert} = require('@openzeppelin/test-helpers');
 
 chai.use(solidity);
 
@@ -30,24 +30,25 @@ export default async function suite() {
       const totalAmountRequested = ethers.utils.parseEther('30000');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-      await expect(this.registryContract
-        .connect(this.seekerSigner)
-        .requestInvestment(
-          this.projectTokenContract.address,
-          amountOfTokensToBePurchased,
-          totalAmountRequested,
-          ipfsHash
-        )).to.emit(this.registryContract, "InvestmentRequested").withArgs(loanId, this.seeker, totalAmountRequested);
+      await expect(
+        this.registryContract
+          .connect(this.seekerSigner)
+          .requestInvestment(
+            this.projectTokenContract.address,
+            amountOfTokensToBePurchased,
+            totalAmountRequested,
+            ipfsHash
+          )
+      )
+        .to.emit(this.registryContract, 'InvestmentRequested')
+        .withArgs(loanId, this.seeker, totalAmountRequested);
 
       const newSeekerProjectTokenBalance =
         await this.projectTokenContract.balanceOf(this.seeker);
       const newEscrowProjectTokenBalance =
         await this.projectTokenContract.balanceOf(this.escrowContract.address);
       const tokenId = BigNumber.from(
-        new BN(0)
-          .ishln(128)
-          .or(new BN(loanId.toNumber()))
-          .toString()
+        new BN(0).ishln(128).or(new BN(loanId.toNumber())).toString()
       );
       const newEscrowFundingNftBalance =
         await this.fundingNFTContract.balanceOf(
@@ -60,13 +61,14 @@ export default async function suite() {
       const loanStatus = await this.registryContract.loanStatus(loanId);
       const loanDetails = await this.registryContract.loanDetails(loanId);
       const loanSeeker = await this.registryContract.loanSeeker(loanId);
-      const investmentTokensPerTicket = await this.registryContract.investmentTokensPerTicket(
-        loanId
-      );
+      const investmentTokensPerTicket =
+        await this.registryContract.investmentTokensPerTicket(loanId);
       const daoApprovalRequest = await this.governanceContract.approvalRequests(
         approvalRequest
       );
-      const totalPartitions = totalAmountRequested.div(ethers.utils.parseEther(BASE_AMOUNT + ''));
+      const totalPartitions = totalAmountRequested.div(
+        ethers.utils.parseEther(BASE_AMOUNT + '')
+      );
 
       // Correct Details.
       expect(loanDetails.loanType.toString()).to.be.equal(LoanType.INVESTMENT);
@@ -91,16 +93,24 @@ export default async function suite() {
       // Correct Seeker.
       expect(loanSeeker.toString()).to.be.equal(this.seeker);
       // Correct investmentTokensPerTicket.
-      expect(investmentTokensPerTicket.toString()).to.be.equal(amountOfTokensToBePurchased.div(totalPartitions));
+      expect(investmentTokensPerTicket.toString()).to.be.equal(
+        amountOfTokensToBePurchased.div(totalPartitions)
+      );
       // Loan id is incremented correctly
-      expect(await this.registryContract.totalLoans()).to.be.equal(loanId.add(1));
+      expect(await this.registryContract.totalLoans()).to.be.equal(
+        loanId.add(1)
+      );
 
       // Correct Balances.
       expect(
-        initSeekerProjectTokenBalance.sub(newSeekerProjectTokenBalance).toString()
+        initSeekerProjectTokenBalance
+          .sub(newSeekerProjectTokenBalance)
+          .toString()
       ).to.be.equal(amountOfTokensToBePurchased.toString());
       expect(
-        newEscrowProjectTokenBalance.sub(initEscrowProjectTokenBalance).toString()
+        newEscrowProjectTokenBalance
+          .sub(initEscrowProjectTokenBalance)
+          .toString()
       ).to.be.equal(amountOfTokensToBePurchased.toString());
       expect(
         newEscrowFundingNftBalance.sub(initEscrowFundingNftBalance).toString()
@@ -122,14 +132,17 @@ export default async function suite() {
       const totalAmountRequested = ethers.utils.parseEther('30001');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-      await expectRevert(this.registryContract
-        .connect(this.seekerSigner)
-        .requestInvestment(
-          this.projectTokenContract.address,
-          amountOfTokensToBePurchased,
-          totalAmountRequested,
-          ipfsHash
-        ), "Token amount and price should result in integer amount of tickets");
+      await expectRevert(
+        this.registryContract
+          .connect(this.seekerSigner)
+          .requestInvestment(
+            this.projectTokenContract.address,
+            amountOfTokensToBePurchased,
+            totalAmountRequested,
+            ipfsHash
+          ),
+        'Token amount and price should result in integer amount of tickets'
+      );
     });
 
     it('when the requested amount is not a multiple of the investment tokens amount', async function () {
@@ -137,14 +150,17 @@ export default async function suite() {
       const totalAmountRequested = ethers.utils.parseEther('30000');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-      await expectRevert(this.registryContract
-        .connect(this.seekerSigner)
-        .requestInvestment(
-          this.projectTokenContract.address,
-          amountOfTokensToBePurchased,
-          totalAmountRequested,
-          ipfsHash
-        ), "Token amount and price should result in integer amount of tickets");
-    })
+      await expectRevert(
+        this.registryContract
+          .connect(this.seekerSigner)
+          .requestInvestment(
+            this.projectTokenContract.address,
+            amountOfTokensToBePurchased,
+            totalAmountRequested,
+            ipfsHash
+          ),
+        'Token amount and price should result in integer amount of tickets'
+      );
+    });
   });
 }

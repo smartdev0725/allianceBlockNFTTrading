@@ -8,7 +8,7 @@ import {
   getSigners,
   initializeTransfers,
 } from '../../helpers/utils';
-import { deployments, ethers, getNamedAccounts } from 'hardhat';
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
 describe('Registry Investments', function () {
   beforeEach(async function () {
@@ -16,7 +16,7 @@ describe('Registry Investments', function () {
     await deployments.fixture();
 
     // Get accounts
-    const { deployer, seeker, lender1, lender2, lender3, superDelegator } =
+    const {deployer, seeker, lender1, lender2, lender3, superDelegator} =
       await getNamedAccounts();
     this.deployer = deployer;
     this.seeker = seeker;
@@ -55,7 +55,7 @@ describe('Registry Investments', function () {
       projectTokenContract,
       collateralTokenContract,
       stakingContract,
-      ALBTContract
+      ALBTContract,
     } = await getContracts();
     this.registryContract = registryContract;
     this.governanceContract = governanceContract;
@@ -66,7 +66,7 @@ describe('Registry Investments', function () {
     this.collateralTokenContract = collateralTokenContract;
     this.stakingContract = stakingContract;
     this.ALBTContract = ALBTContract;
-    const rALBTFactory = await ethers.getContractFactory("rALBT");
+    const rALBTFactory = await ethers.getContractFactory('rALBT');
     const rALBTAddress = await this.escrowContract.reputationalALBT();
     this.rALBTContract = await rALBTFactory.attach(rALBTAddress);
 
@@ -78,7 +78,7 @@ describe('Registry Investments', function () {
         projectTokenContract,
         collateralTokenContract,
       },
-      { deployer, lender1, lender2, lender3, seeker },
+      {deployer, lender1, lender2, lender3, seeker},
       {
         deployerSigner,
         lender1Signer,
@@ -91,9 +91,8 @@ describe('Registry Investments', function () {
     this.approvalRequest = await governanceContract.totalApprovalRequests();
 
     this.loanId = await this.registryContract.totalLoans();
-    this.startingEscrowProjectTokenBalance = await projectTokenContract.balanceOf(
-      escrowContract.address
-    );
+    this.startingEscrowProjectTokenBalance =
+      await projectTokenContract.balanceOf(escrowContract.address);
 
     this.amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
     this.totalAmountRequested = ethers.utils.parseEther('30000');

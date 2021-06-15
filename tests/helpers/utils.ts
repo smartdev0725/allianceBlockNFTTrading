@@ -41,7 +41,7 @@ export const getContracts = async () => {
 
   const actionVerifierContract = await ethers.getContract('ActionVerifier');
 
-  const rALBTFactory = await ethers.getContractFactory("rALBT");
+  const rALBTFactory = await ethers.getContractFactory('rALBT');
   const rALBTAddress = await escrowContract.reputationalALBT();
   const rALBTContract = await rALBTFactory.attach(rALBTAddress);
 
@@ -143,7 +143,7 @@ export const getSignature = async (
   actionVerifierContract: string,
   web3: any
 ) => {
-  const message =  {
+  const message = {
     actionName,
     answer,
     account,
@@ -152,8 +152,8 @@ export const getSignature = async (
 
   const msgParams = JSON.stringify({
     domain: {
-      name: "AllianceBlock Verifier",
-      version: "1.0",
+      name: 'AllianceBlock Verifier',
+      version: '1.0',
       chainId: 1337,
       verifyingContract: actionVerifierContract,
     },
@@ -161,20 +161,20 @@ export const getSignature = async (
     // Defining the message signing data content.
     message,
     // Refers to the keys of the *types* object below.
-    primaryType: "Action",
+    primaryType: 'Action',
     types: {
       // TODO: Clarify if EIP712Domain refers to the domain the contract is hosted on
       EIP712Domain: [
-        { name: "name", type: "string" },
-        { name: "version", type: "string" },
-        { name: "chainId", type: "uint256" },
-        { name: "verifyingContract", type: "address" },
+        {name: 'name', type: 'string'},
+        {name: 'version', type: 'string'},
+        {name: 'chainId', type: 'uint256'},
+        {name: 'verifyingContract', type: 'address'},
       ],
       Action: [
-        { name: "actionName", type: "string" },
-        { name: "answer", type: "string" },
-        { name: "account", type: "address" },
-        { name: "referralId", type: "uint256" },
+        {name: 'actionName', type: 'string'},
+        {name: 'answer', type: 'string'},
+        {name: 'account', type: 'address'},
+        {name: 'referralId', type: 'uint256'},
       ],
     },
   });
@@ -182,7 +182,7 @@ export const getSignature = async (
   const from = account;
 
   const params = [from, msgParams];
-  const method = "eth_signTypedData_v4";
+  const method = 'eth_signTypedData_v4';
 
   return new Promise((resolve, reject) =>
     web3.currentProvider.send(
@@ -193,12 +193,10 @@ export const getSignature = async (
       },
       async function (err: any, result: any) {
         if (err) {
-          reject(err)
-        }
-        else if (result.error) {
-          reject(result.error)
-        }
-        else{
+          reject(err);
+        } else if (result.error) {
+          reject(result.error);
+        } else {
           resolve(result.result);
         }
       }

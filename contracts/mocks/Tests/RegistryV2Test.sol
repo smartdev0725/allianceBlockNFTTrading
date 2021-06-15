@@ -15,15 +15,15 @@ contract RegistryV2Test is Registry {
     uint256 public bar;
 
     /**
-    * @dev Only for testing purposes
-    */
+     * @dev Only for testing purposes
+     */
     function getSomething1() public view returns (uint256) {
         return 1;
     }
 
     /**
-    * @dev Only for testing purposes
-    */
+     * @dev Only for testing purposes
+     */
     function getSomething2() public view returns (uint256) {
         return 2;
     }

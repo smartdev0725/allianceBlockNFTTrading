@@ -10,17 +10,13 @@ import "../libs/TokenFormat.sol";
  * @title AllianceBlock Investment contract
  * @notice Functionality for Investment.
  * @dev Extends LoanDetails
-*/
+ */
 contract Investment is LoanDetails {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 
     // EVENTS
-    event InvestmentRequested(
-        uint256 indexed loanId,
-        address indexed user,
-        uint256 amount
-    );
+    event InvestmentRequested(uint256 indexed loanId, address indexed user, uint256 amount);
 
     /**
      * @notice Requests investment
@@ -30,7 +26,7 @@ contract Investment is LoanDetails {
      * @param amountOfInvestmentTokens The amount of investment tokens to be purchased.
      * @param totalAmountRequested_ The total amount requested so as all investment tokens to be sold.
      * @param extraInfo The ipfs hash where more specific details for loan request are stored.
-    */
+     */
     function requestInvestment(
         address investmentToken,
         uint256 amountOfInvestmentTokens,
@@ -40,7 +36,7 @@ contract Investment is LoanDetails {
         // TODO - Change 10 ** 18 to decimals if needed.
         require(
             totalAmountRequested_.mod(baseAmountForEachPartition) == 0 &&
-            totalAmountRequested_.mul(10**18).mod(amountOfInvestmentTokens) == 0,
+                totalAmountRequested_.mul(10**18).mod(amountOfInvestmentTokens) == 0,
             "Token amount and price should result in integer amount of tickets"
         );
 
@@ -53,20 +49,11 @@ contract Investment is LoanDetails {
             extraInfo
         );
 
-        IERC20(investmentToken).transferFrom(
-            msg.sender,
-            address(escrow),
-            amountOfInvestmentTokens
-        );
+        IERC20(investmentToken).transferFrom(msg.sender, address(escrow), amountOfInvestmentTokens);
 
-        fundingNFT.mintGen0(
-            address(escrow),
-            loanDetails[totalLoans].totalPartitions,
-            totalLoans
-        );
+        fundingNFT.mintGen0(address(escrow), loanDetails[totalLoans].totalPartitions, totalLoans);
 
-        investmentTokensPerTicket[totalLoans] = amountOfInvestmentTokens.div(
-            loanDetails[totalLoans].totalPartitions);
+        investmentTokensPerTicket[totalLoans] = amountOfInvestmentTokens.div(loanDetails[totalLoans].totalPartitions);
 
         fundingNFT.pauseTokenTransfer(totalLoans); //Pause trades for ERC1155s with the specific loan ID.
 
@@ -84,26 +71,24 @@ contract Investment is LoanDetails {
      * @dev require Approval state and valid partition
      * @param investmentId The id of the investment.
      * @param amountOfPartitions The amount of partitions this specific investor wanna invest in.
-    */
-    function showInterestForInvestment(uint256 investmentId, uint256 amountOfPartitions)
-        external
-    {
-        require(loanStatus[investmentId] == LoanLibrary.LoanStatus.APPROVED, "Can show interest only in Approved state");
+     */
+    function showInterestForInvestment(uint256 investmentId, uint256 amountOfPartitions) external {
+        require(
+            loanStatus[investmentId] == LoanLibrary.LoanStatus.APPROVED,
+            "Can show interest only in Approved state"
+        );
         require(amountOfPartitions > 0, "Cannot show interest for 0 partitions");
 
-        lendingToken.transferFrom(
-            msg.sender,
-            address(escrow),
-            amountOfPartitions.mul(baseAmountForEachPartition)
-        );
+        lendingToken.transferFrom(msg.sender, address(escrow), amountOfPartitions.mul(baseAmountForEachPartition));
 
-        loanDetails[investmentId].partitionsPurchased = loanDetails[investmentId].partitionsPurchased.add(amountOfPartitions);
+        loanDetails[investmentId].partitionsPurchased = loanDetails[investmentId].partitionsPurchased.add(
+            amountOfPartitions
+        );
 
         uint256 reputationalBalance = _updateReputationalBalanceForPreviouslyLockedTokens();
         uint256 totalLotteryNumbers = reputationalBalance.div(rAlbtPerLotteryNumber);
 
-        if (totalLotteryNumbers == 0)
-            revert("Not elegible for lottery numbers");
+        if (totalLotteryNumbers == 0) revert("Not elegible for lottery numbers");
 
         uint256 immediateTickets;
 
@@ -145,15 +130,18 @@ contract Investment is LoanDetails {
      * @dev This function is called by any investor interested in a project to run part of the lottery.
      * @dev requires Started state and available tickets
      * @param investmentId The id of the investment.
-    */
-    function executeLotteryRun(uint256 investmentId)
-        external
-    {
+     */
+    function executeLotteryRun(uint256 investmentId) external {
         require(loanStatus[investmentId] == LoanLibrary.LoanStatus.STARTED, "Can run lottery only in Started state");
-        require(remainingTicketsPerAddress[investmentId][msg.sender] > 0, "Can run lottery only if has remaining ticket");
+        require(
+            remainingTicketsPerAddress[investmentId][msg.sender] > 0,
+            "Can run lottery only if has remaining ticket"
+        );
 
         ticketsWonPerAddress[investmentId][msg.sender] = ticketsWonPerAddress[investmentId][msg.sender].add(1);
-        remainingTicketsPerAddress[investmentId][msg.sender] = remainingTicketsPerAddress[investmentId][msg.sender].sub(1);
+        remainingTicketsPerAddress[investmentId][msg.sender] = remainingTicketsPerAddress[investmentId][msg.sender].sub(
+            1
+        );
         ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(1);
 
         uint256 counter = totalTicketsPerRun;
@@ -167,18 +155,20 @@ contract Investment is LoanDetails {
             ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(counter);
         }
 
-        for (uint256 i = counter; i > 0; i--)  {
+        for (uint256 i = counter; i > 0; i--) {
             uint256 randomNumber = _getRandomNumber(maxNumber);
             lotteryNonce = lotteryNonce.add(1);
 
             address randomAddress = addressOfLotteryNumber[investmentId][randomNumber.add(1)];
 
             if (remainingTicketsPerAddress[investmentId][randomAddress] > 0) {
-                remainingTicketsPerAddress[investmentId][randomAddress] =
-                    remainingTicketsPerAddress[investmentId][randomAddress].sub(1);
+                remainingTicketsPerAddress[investmentId][randomAddress] = remainingTicketsPerAddress[investmentId][
+                    randomAddress
+                ]
+                    .sub(1);
 
-                ticketsWonPerAddress[investmentId][randomAddress] =
-                    ticketsWonPerAddress[investmentId][randomAddress].add(1);
+                ticketsWonPerAddress[investmentId][randomAddress] = ticketsWonPerAddress[investmentId][randomAddress]
+                    .add(1);
             }
         }
     }
@@ -190,31 +180,36 @@ contract Investment is LoanDetails {
      * @param investmentId The id of the investment.
      * @param ticketsToLock The amount of won tickets to be locked, so as to get more rALBT.
      * @param ticketsToWithdraw The amount of won tickets to be withdrawn instantly.
-    */
-    function withdrawInvestmentTickets(uint256 investmentId, uint256 ticketsToLock, uint256 ticketsToWithdraw)
-        external
-    {
+     */
+    function withdrawInvestmentTickets(
+        uint256 investmentId,
+        uint256 ticketsToLock,
+        uint256 ticketsToWithdraw
+    ) external {
         require(loanStatus[investmentId] == LoanLibrary.LoanStatus.SETTLED, "Can withdraw only in Settled state");
-        require(ticketsWonPerAddress[investmentId][msg.sender] > 0 &&
-            ticketsWonPerAddress[investmentId][msg.sender] >= ticketsToLock.add(ticketsToWithdraw),
+        require(
+            ticketsWonPerAddress[investmentId][msg.sender] > 0 &&
+                ticketsWonPerAddress[investmentId][msg.sender] >= ticketsToLock.add(ticketsToWithdraw),
             "Not enough tickets won"
         );
 
-        ticketsWonPerAddress[investmentId][msg.sender] = ticketsWonPerAddress[investmentId][msg.sender].sub(
-            ticketsToLock).sub(ticketsToWithdraw);
+        ticketsWonPerAddress[investmentId][msg.sender] = ticketsWonPerAddress[investmentId][msg.sender]
+            .sub(ticketsToLock)
+            .sub(ticketsToWithdraw);
 
         _updateReputationalBalanceForPreviouslyLockedTokens();
 
         if (ticketsToLock > 0) {
-            lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender] =
-                lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender].add(ticketsToLock);
+            lockedTicketsForSpecificInvestmentPerAddress[investmentId][
+                msg.sender
+            ] = lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender].add(ticketsToLock);
 
             lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].add(ticketsToLock);
         }
 
         if (ticketsToWithdraw > 0) {
             uint256 amountToWithdraw = investmentTokensPerTicket[investmentId].mul(ticketsToWithdraw);
-            escrow.transferCollateralToken(loanDetails[investmentId].collateralToken ,msg.sender, amountToWithdraw);
+            escrow.transferCollateralToken(loanDetails[investmentId].collateralToken, msg.sender, amountToWithdraw);
         }
 
         if (remainingTicketsPerAddress[investmentId][msg.sender] > 0) {
@@ -226,9 +221,7 @@ contract Investment is LoanDetails {
      * @dev This function is called by an investor to withdraw lending tokens provided for non-won tickets.
      * @param investmentId The id of the investment.
      */
-    function withdrawAmountProvidedForNonWonTickets(uint256 investmentId)
-        external
-    {
+    function withdrawAmountProvidedForNonWonTickets(uint256 investmentId) external {
         require(loanStatus[investmentId] == LoanLibrary.LoanStatus.SETTLED, "Can withdraw only in Settled state");
         require(remainingTicketsPerAddress[investmentId][msg.sender] > 0, "No non-won tickets to withdraw");
 
@@ -241,20 +234,20 @@ contract Investment is LoanDetails {
      * @dev requires Settled state and available tickets
      * @param investmentId The id of the investment.
      * @param ticketsToWithdraw The amount of locked tickets to be withdrawn.
-    */
-    function withdrawLockedInvestmentTickets(uint256 investmentId, uint256 ticketsToWithdraw)
-        external
-    {
+     */
+    function withdrawLockedInvestmentTickets(uint256 investmentId, uint256 ticketsToWithdraw) external {
         require(loanStatus[investmentId] == LoanLibrary.LoanStatus.SETTLED, "Can withdraw only in Settled state");
-        require(ticketsToWithdraw > 0 &&
-            lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender] >= ticketsToWithdraw,
+        require(
+            ticketsToWithdraw > 0 &&
+                lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender] >= ticketsToWithdraw,
             "Not enough tickets to withdraw"
         );
 
         _updateReputationalBalanceForPreviouslyLockedTokens();
 
-        lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender] =
-            lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender].sub(ticketsToWithdraw);
+        lockedTicketsForSpecificInvestmentPerAddress[investmentId][
+            msg.sender
+        ] = lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender].sub(ticketsToWithdraw);
 
         lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].sub(ticketsToWithdraw);
 
@@ -266,7 +259,7 @@ contract Investment is LoanDetails {
      * @notice Gets Requesting status
      * @dev Returns true if investors have shown interest for equal or more than the total tickets.
      * @param investmentId The id of the investment type to be checked.
-    */
+     */
     function getRequestingInterestStatus(uint256 investmentId) external view returns (bool) {
         return loanDetails[investmentId].totalPartitions <= loanDetails[investmentId].partitionsPurchased;
     }
@@ -276,29 +269,30 @@ contract Investment is LoanDetails {
      * @dev This function generates a random number
      * @param maxNumber the max number possible
      * @return randomNumber the random number generated
-    */
+     */
     function _getRandomNumber(uint256 maxNumber) internal view returns (uint256 randomNumber) {
-        randomNumber = uint256(keccak256(abi.encodePacked(
-                block.difficulty,
-                block.timestamp,
-                lotteryNonce,
-                blockhash(block.number),
-                msg.sender
-            ))).mod(maxNumber);
+        randomNumber = uint256(
+            keccak256(
+                abi.encodePacked(block.difficulty, block.timestamp, lotteryNonce, blockhash(block.number), msg.sender)
+            )
+        )
+            .mod(maxNumber);
     }
 
     /**
      * @notice Updates reputation balance
      * @dev updates balance of reputation for locked tokens
      * @return the reputation balance of msg.sender
-    */
+     */
     function _updateReputationalBalanceForPreviouslyLockedTokens() internal returns (uint256) {
         if (lockedTicketsPerAddress[msg.sender] > 0) {
-            uint256 amountOfReputationalAlbtPerTicket = (block.number.sub(
-                lastBlockCheckedForLockedTicketsPerAddress[msg.sender])).div(blocksLockedForReputation);
+            uint256 amountOfReputationalAlbtPerTicket =
+                (block.number.sub(lastBlockCheckedForLockedTicketsPerAddress[msg.sender])).div(
+                    blocksLockedForReputation
+                );
 
-            uint256 amountOfReputationalAlbtToMint = amountOfReputationalAlbtPerTicket.mul(
-                lockedTicketsPerAddress[msg.sender]);
+            uint256 amountOfReputationalAlbtToMint =
+                amountOfReputationalAlbtPerTicket.mul(lockedTicketsPerAddress[msg.sender]);
 
             if (amountOfReputationalAlbtToMint > 0)
                 escrow.mintReputationalToken(msg.sender, amountOfReputationalAlbtToMint);
@@ -309,11 +303,9 @@ contract Investment is LoanDetails {
         return rALBT.balanceOf(msg.sender);
     }
 
-    function _withdrawAmountProvidedForNonWonTickets(uint256 investmentId_)
-        internal
-    {
-        uint256 amountToReturnForNonWonTickets = remainingTicketsPerAddress[investmentId_][msg.sender].mul(
-            baseAmountForEachPartition);
+    function _withdrawAmountProvidedForNonWonTickets(uint256 investmentId_) internal {
+        uint256 amountToReturnForNonWonTickets =
+            remainingTicketsPerAddress[investmentId_][msg.sender].mul(baseAmountForEachPartition);
         remainingTicketsPerAddress[investmentId_][msg.sender] = 0;
 
         escrow.transferLendingToken(msg.sender, amountToReturnForNonWonTickets);
