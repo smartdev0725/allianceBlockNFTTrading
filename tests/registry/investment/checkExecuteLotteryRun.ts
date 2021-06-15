@@ -86,7 +86,7 @@ export default async function suite() {
       );
     });
 
-    it.only('Try to  run lottery only if has remaining ticket  ', async function () {
+    it('Try to  run lottery with multiple users', async function () {
       await this.stakingContract
         .connect(this.lender1Signer)
         .stake(StakingType.STAKER_LVL_2);
