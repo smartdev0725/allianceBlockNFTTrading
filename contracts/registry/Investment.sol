@@ -15,7 +15,12 @@ contract Investment is LoanDetails {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 
-    // TODO - EVENTS
+    // EVENTS
+    event InvestmentRequested(
+        uint256 indexed loanId,
+        address indexed user,
+        uint256 amount
+    );
 
     /**
      * @notice Requests investment
@@ -68,6 +73,7 @@ contract Investment is LoanDetails {
         governance.requestApproval(totalLoans, false, 0);
 
         // Add event for investment request
+        emit InvestmentRequested(totalLoans, msg.sender, totalAmountRequested_);
 
         totalLoans = totalLoans.add(1);
     }
@@ -96,14 +102,16 @@ contract Investment is LoanDetails {
         uint256 reputationalBalance = _updateReputationalBalanceForPreviouslyLockedTokens();
         uint256 totalLotteryNumbers = reputationalBalance.div(rAlbtPerLotteryNumber);
 
-        if (totalLotteryNumbers == 0) return; // Maybe revert here?
+        if (totalLotteryNumbers == 0)
+            revert("Not elegible for lottery numbers");
 
         uint256 immediateTickets;
 
         // TODO - Explain this check to Rachid.
-        while (totalLotteryNumbers > lotteryNumbersForImmediateTicket) {
-            immediateTickets = immediateTickets.add(1);
-            totalLotteryNumbers = totalLotteryNumbers.sub(lotteryNumbersForImmediateTicket);
+        if (totalLotteryNumbers > lotteryNumbersForImmediateTicket) {
+            uint256 rest = totalLotteryNumbers.mod(lotteryNumbersForImmediateTicket);
+            immediateTickets = totalLotteryNumbers.sub(rest).div(lotteryNumbersForImmediateTicket);
+            totalLotteryNumbers = rest;
         }
 
         if (immediateTickets > amountOfPartitions) immediateTickets = amountOfPartitions;
@@ -113,7 +121,7 @@ contract Investment is LoanDetails {
             immediateTickets = ticketsRemaining[investmentId];
             loanStatus[investmentId] = LoanLibrary.LoanStatus.SETTLED;
 
-            // Maybe also stop the procedure here.
+            return;
         }
 
         if (immediateTickets > 0) {
@@ -159,8 +167,8 @@ contract Investment is LoanDetails {
             ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(counter);
         }
 
-        while (counter != 0) {
-            uint256 randomNumber = getRandomNumber(maxNumber);
+        for (uint256 i = counter; i > 0; i--)  {
+            uint256 randomNumber = _getRandomNumber(maxNumber);
             lotteryNonce = lotteryNonce.add(1);
 
             address randomAddress = addressOfLotteryNumber[investmentId][randomNumber.add(1)];
@@ -171,8 +179,6 @@ contract Investment is LoanDetails {
 
                 ticketsWonPerAddress[investmentId][randomAddress] =
                     ticketsWonPerAddress[investmentId][randomAddress].add(1);
-
-                counter -= 1;
             }
         }
     }
@@ -271,7 +277,7 @@ contract Investment is LoanDetails {
      * @param maxNumber the max number possible
      * @return randomNumber the random number generated
     */
-     function getRandomNumber(uint256 maxNumber) internal view returns (uint256 randomNumber) {
+    function _getRandomNumber(uint256 maxNumber) internal view returns (uint256 randomNumber) {
         randomNumber = uint256(keccak256(abi.encodePacked(
                 block.difficulty,
                 block.timestamp,

@@ -6,6 +6,7 @@ export enum RepaymentBatchType {
 export enum LoanType {
   PERSONAL = '0',
   PROJECT = '1',
+  INVESTMENT = '2',
 }
 
 export enum LoanStatus {
