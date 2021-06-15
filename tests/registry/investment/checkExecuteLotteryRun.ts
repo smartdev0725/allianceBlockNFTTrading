@@ -190,10 +190,26 @@ export default async function suite() {
 
       await this.registryContract.connect(this.lender3Signer).executeLotteryRun(this.loanId);
 
+      const lender3remainingTicketsPerAddressBefore = await this.registryContract.remainingTicketsPerAddress(this.loanId, this.lender3);
+      const lendingTokenBalanceBefore = await this.lendingTokenContract.balanceOf(this.lender3);
+
       const balanceProjectTokenBefore = await this.projectTokenContract.balanceOf(this.lender1);
       await this.registryContract.connect(this.lender1Signer).withdrawInvestmentTickets(this.loanId, 200, 700);
+      await this.registryContract.connect(this.lender3Signer).withdrawAmountProvidedForNonWonTickets(this.loanId);
+
+      const lendingTokenBalanceAfter = await this.lendingTokenContract.balanceOf(this.lender3);
 
       // Then
+      const lender3remainingTicketsPerAddressAfter = await this.registryContract.remainingTicketsPerAddress(this.loanId, this.lender3);
+      expect(+lender3remainingTicketsPerAddressBefore.toString()).to.be.greaterThan(+lender3remainingTicketsPerAddressAfter.toString());
+
+      expect(+lendingTokenBalanceAfter.toString()).to.be.greaterThan(+lendingTokenBalanceBefore.toString());
+
+      await expectRevert(
+        this.registryContract.connect(this.lender1Signer).withdrawAmountProvidedForNonWonTickets(this.loanId),
+        'No non-won tickets to withdraw'
+      );
+
       const balanceProjectTokenAfter = await this.projectTokenContract.balanceOf(this.lender1);
       expect(+balanceProjectTokenAfter.toString()).to.be.greaterThan(+balanceProjectTokenBefore.toString());
       const lender1ticketsWonPerAddressAfter = await this.registryContract.ticketsWonPerAddress(this.loanId, this.lender1);
