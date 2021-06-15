@@ -18,10 +18,10 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
     using TokenFormat for uint256;
 
     // Events
-    event GenerationIncreased(uint256 indexed loanId, address indexed user, uint256 newGeneration);
-    event GenerationDecreased(uint256 indexed loanId, address indexed user, uint256 newGeneration);
-    event TransfersPaused(uint256 loanId);
-    event TransfersResumed(uint256 loanId);
+    event GenerationIncreased(uint256 indexed investmentId, address indexed user, uint256 newGeneration);
+    event GenerationDecreased(uint256 indexed investmentId, address indexed user, uint256 newGeneration);
+    event TransfersPaused(uint256 investmentId);
+    event TransfersResumed(uint256 investmentId);
 
     // contract URI for marketplaces
     string private _contractURI;
@@ -66,13 +66,6 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
         _;
     }
 
-    // /**
-    // * @dev token metadata
-    // */
-    // function uri(uint tokenId) public view override returns(string memory){
-    //     return Strings.strConcat(_baseURI, ipfsHashes[tokenId]);
-    // }
-
     /**
      * @notice contract metadata
      * @return the contractURI stored in memory
@@ -85,36 +78,36 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @notice Pauses the token transfers
      * @dev Owner can pause transfers for specific tokens
      * @dev pauses all loan ids, no matter the generation
-     * @param loanId the loan ID to be paused
+     * @param investmentId the investment ID to be paused
      */
-    function pauseTokenTransfer(uint256 loanId) external onlyPauser {
-        transfersPaused[loanId] = true;
-        emit TransfersPaused(loanId);
+    function pauseTokenTransfer(uint256 investmentId) external onlyPauser {
+        transfersPaused[investmentId] = true;
+        emit TransfersPaused(investmentId);
     }
 
     /**
      * @notice Unpauses the token transfers
      * @dev Owner can unpause transfers for specific tokens
-     * @param loanId the loan ID to be unpaused
+     * @param investmentId the investment ID to be unpaused
      */
-    function unpauseTokenTransfer(uint256 loanId) external onlyPauser {
-        transfersPaused[loanId] = false;
-        emit TransfersResumed(loanId);
+    function unpauseTokenTransfer(uint256 investmentId) external onlyPauser {
+        transfersPaused[investmentId] = false;
+        emit TransfersResumed(investmentId);
     }
 
     /**
      * @notice Mint generation 0 tokens
      * @param to the target address that will receive the Gen0 tokens
      * @param amount the amount of tokens to mint
-     * @param loanId the ID of the loan
+     * @param investmentId the ID of the investment
      */
     function mintGen0(
         address to,
         uint256 amount,
-        uint256 loanId
+        uint256 investmentId
     ) external onlyMinter {
-        // LoanId is the tokenId used to mint
-        _mint(to, loanId, amount, "");
+        // investmentId is the tokenId used to mint
+        _mint(to, investmentId, amount, "");
     }
 
     /**
@@ -122,15 +115,15 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @param to The address to mint the tokens to.
      * @param amount The amount of tokens to mint.
      * @param generation The generation of the tokens. The id of the tokens will be composed of the loan id and this generation number.
-     * @param loanId The loan identifier
+     * @param investmentId The loan identifier
      */
     function mintOfGen(
         address to,
         uint256 amount,
         uint256 generation,
-        uint256 loanId
+        uint256 investmentId
     ) external onlyMinter {
-        uint256 tokenId = generation.getTokenId(loanId);
+        uint256 tokenId = generation.getTokenId(investmentId);
         _mint(to, tokenId, amount, "");
     }
 
@@ -215,11 +208,11 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
         uint256 amount,
         uint256 generationsToAdd
     ) internal {
-        (uint256 generation, uint256 loanId) = tokenId.formatTokenId();
+        (uint256 generation, uint256 investmentId) = tokenId.formatTokenId();
 
-        // Increase generation, leave loanId same
+        // Increase generation, leave investmentId same
         generation += generationsToAdd;
-        uint256 newTokenId = generation.getTokenId(loanId);
+        uint256 newTokenId = generation.getTokenId(investmentId);
 
         // Burn previous gen tokens
         burn(user, tokenId, amount);
@@ -227,7 +220,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
         // Mint new generation tokens
         _mint(user, newTokenId, amount, "");
 
-        emit GenerationIncreased(loanId, user, generation);
+        emit GenerationIncreased(investmentId, user, generation);
     }
 
     /**
@@ -245,13 +238,13 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
         uint256 amount,
         uint256 generationsToDecrease
     ) internal {
-        (uint256 generation, uint256 loanId) = tokenId.formatTokenId();
+        (uint256 generation, uint256 investmentId) = tokenId.formatTokenId();
 
         require(generation >= generationsToDecrease, "Invalid token ID");
 
-        // Decrease generation, leave loanId same
+        // Decrease generation, leave investmentId same
         generation -= generationsToDecrease;
-        uint256 newTokenId = generation.getTokenId(loanId);
+        uint256 newTokenId = generation.getTokenId(investmentId);
 
         // Burn previous gen tokens
         burn(user, tokenId, amount);
@@ -259,12 +252,12 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
         // Mint new generation tokens
         _mint(user, newTokenId, amount, "");
 
-        emit GenerationDecreased(loanId, user, generation);
+        emit GenerationDecreased(investmentId, user, generation);
     }
 
     /**
      * @notice Runs checks before transferring a token
-     * @dev Validates if the loanId from the tokenId can be transferred and not paused
+     * @dev Validates if the investmentId from the tokenId can be transferred and not paused
      * @param operator TBD
      * @param from TBD
      * @param to TBD
@@ -281,8 +274,8 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
         bytes memory data
     ) internal override {
         for (uint256 i = 0; i < ids.length; i++) {
-            (, uint256 loanId) = ids[i].formatTokenId();
-            require(!transfersPaused[loanId], "Transfers paused");
+            (, uint256 investmentId) = ids[i].formatTokenId();
+            require(!transfersPaused[investmentId], "Transfers paused");
         }
     }
 }
