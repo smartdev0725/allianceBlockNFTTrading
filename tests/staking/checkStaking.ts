@@ -126,7 +126,7 @@ export default async function suite() {
       );
     });
 
-    it('when staking for level 3 or DAO member, ALBT, rALBT and staking balances are updated accordingly', async function () {
+    it('when staking for level 3, ALBT, rALBT and staking balances are updated accordingly', async function () {
       // Given
       const staker1StakingAmountBefore = await this.stakingContract.getBalance(
         this.staker1
@@ -304,7 +304,7 @@ export default async function suite() {
       );
     });
 
-    it('when exiting/withdrawing from level 3 or dao member stake balances are updated accordingly', async function () {
+    it('when exiting/withdrawing from level 3 stake balances are updated accordingly', async function () {
       // Given
       await this.stakingContract
         .connect(this.staker1Signer)

@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { LoanStatus} from '../../helpers/registryEnums';
+import { InvestmentStatus} from '../../helpers/registryEnums';
 import {BASE_AMOUNT} from '../../helpers/constants';
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
@@ -83,7 +83,7 @@ export default async function suite() {
         totalPartitions.toString()
       );
       // Correct Status.
-      expect(investmentStatus.toString()).to.be.equal(LoanStatus.REQUESTED);
+      expect(investmentStatus.toString()).to.be.equal(InvestmentStatus.REQUESTED);
       // Correct Seeker.
       expect(investmentSeeker.toString()).to.be.equal(this.seeker);
       // Correct investmentTokensPerTicket.

@@ -1,26 +1,10 @@
-export enum RepaymentBatchType {
-  ONLY_INTEREST = '0',
-  INTEREST_PLUS_NOMINAL = '1',
-}
-
-export enum LoanType {
-  PERSONAL = '0',
-  PROJECT = '1',
-  INVESTMENT = '2',
-}
-
-export enum LoanStatus {
+export enum InvestmentStatus {
   REQUESTED = '0',
   APPROVED = '1',
-  FUNDING = '2',
-  STARTED = '3',
-  AWAITING_MILESTONE_APPROVAL = '4',
-  AWAITING_REPAYMENT = '5',
-  SETTLED = '6',
-  DEFAULT = '7',
-  LIQUIDATED = '8',
-  REJECTED = '9',
-  AWAITING_MILESTONE_APPLICATION = '10',
+  STARTED = '2',
+  SETTLED = '3',
+  DEFAULT = '4',
+  REJECTED = '5',
 }
 
 export enum StakingType {

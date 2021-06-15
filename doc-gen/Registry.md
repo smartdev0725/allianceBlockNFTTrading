@@ -93,7 +93,7 @@ Start Loan
 
 
 
-### `getLoanMetadata(uint256 investmentId) → struct LoanLibrary.LoanDetails, enum LoanLibrary.LoanStatus, address, enum LoanLibrary.RepaymentBatchType` (public)
+### `getLoanMetadata(uint256 investmentId) → struct LoanLibrary.LoanDetails, enum LoanLibrary.InvestmentStatus, address, enum LoanLibrary.RepaymentBatchType` (public)
 
 Get Loan Metadata
 
