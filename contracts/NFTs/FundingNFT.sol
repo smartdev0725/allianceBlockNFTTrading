@@ -279,7 +279,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) internal override {
+    ) internal view override {
         for (uint256 i = 0; i < ids.length; i++) {
             (, uint256 loanId) = ids[i].formatTokenId();
             require(!transfersPaused[loanId], "Transfers paused");

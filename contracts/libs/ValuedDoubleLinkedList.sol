@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
 /**
@@ -212,8 +213,6 @@ library ValuedDoubleLinkedList {
      */
     function removeMultipleFromHead(LinkedList storage self, uint256 amountOfNodes) internal {
         for (uint256 i = 0; i < amountOfNodes; i++) {
-            uint256 head = self.head;
-
             if (self.size == 1) {
                 self.head = 0;
                 self.tail = 0;

@@ -7,9 +7,9 @@ import "./InvestmentDetails.sol";
 import "../libs/TokenFormat.sol";
 
 /**
- * @title AllianceBlock Investment contract
+ * @title AllianceBlock Investment contract.
  * @notice Functionality for Investment.
- * @dev Extends InvestmentDetails
+ * @dev Extends InvestmentDetails.
  */
 contract Investment is InvestmentDetails {
     using SafeMath for uint256;
@@ -227,9 +227,9 @@ contract Investment is InvestmentDetails {
     }
 
     /**
-     * @notice Withdraw locked investment ticket
+     * @notice Withdraw locked investment ticket.
      * @dev This function is called by an investor to withdraw his locked tickets.
-     * @dev requires Settled state and available tickets
+     * @dev requires Settled state and available tickets.
      * @param investmentId The id of the investment.
      * @param ticketsToWithdraw The amount of locked tickets to be withdrawn.
      */

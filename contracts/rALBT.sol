@@ -63,7 +63,7 @@ contract rALBT is Ownable {
      * @notice Name
      * @dev Returns the name of the token.
      */
-    function name() public view returns (string memory) {
+    function name() public pure returns (string memory) {
         return NAME;
     }
 
@@ -72,7 +72,7 @@ contract rALBT is Ownable {
      * @dev Returns the symbol of the token, usually a shorter version of the
      * name.
      */
-    function symbol() public view returns (string memory) {
+    function symbol() public pure returns (string memory) {
         return SYMBOL;
     }
 
@@ -90,7 +90,7 @@ contract rALBT is Ownable {
      * no way affects any of the arithmetic of the contract, including
      * {IERC20-balanceOf} and {IERC20-transfer}.
      */
-    function decimals() public view returns (uint8) {
+    function decimals() public pure returns (uint8) {
         return 18;
     }
 

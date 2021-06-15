@@ -9,5 +9,5 @@ import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
  * @dev Extends ERC20PresetMinterPauser
  */
 contract ALBT is ERC20PresetMinterPauser {
-    constructor() public ERC20PresetMinterPauser("AllianceBlock Token", "ALBT") {}
+    constructor() ERC20PresetMinterPauser("AllianceBlock Token", "ALBT") {}
 }

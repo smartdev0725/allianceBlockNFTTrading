@@ -24,7 +24,7 @@ library SignatureVerifier {
      * @param action the Action to retrieve
      * @return the keccak hash Action struct
      */
-    function getActionStructHash(Action memory action) internal view returns (bytes32) {
+    function getActionStructHash(Action memory action) internal pure returns (bytes32) {
         return
             keccak256(
                 abi.encode(
@@ -44,7 +44,7 @@ library SignatureVerifier {
      */
     function getActionTypedDataHash(Action memory action, bytes32 DOMAIN_SEPARATOR)
         internal
-        view
+        pure
         returns (bytes32 actionHash)
     {
         actionHash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, getActionStructHash(action)));
@@ -60,7 +60,7 @@ library SignatureVerifier {
         Action memory action,
         bytes memory signature,
         bytes32 DOMAIN_SEPARATOR
-    ) internal view returns (bool) {
+    ) internal pure returns (bool) {
         if (signature.length != 65) return false;
 
         bytes32 hash = getActionTypedDataHash(action, DOMAIN_SEPARATOR);

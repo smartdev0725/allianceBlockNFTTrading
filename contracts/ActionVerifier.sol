@@ -66,7 +66,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
         );
     }
 
-    function hash(EIP712Domain memory eip712Domain) internal view returns (bytes32) {
+    function hash(EIP712Domain memory eip712Domain) internal pure returns (bytes32) {
         return
             keccak256(
                 abi.encode(
