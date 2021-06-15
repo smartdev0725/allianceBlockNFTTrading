@@ -11,61 +11,61 @@ Extends Storage
 
 
 
-### `onlySeeker(uint256 loanId)`
+### `onlySeeker(uint256 investmentId)`
 
 
 
 
 
-### `onlyActivelyFundedLoan(uint256 loanId)`
+### `onlyActivelyFundedLoan(uint256 investmentId)`
 
 
 
 
 
-### `onlyActiveLoan(uint256 loanId)`
+### `onlyActiveLoan(uint256 investmentId)`
 
 
 
 
 
-### `onlyOnProjectRepayment(uint256 loanId)`
+### `onlyOnProjectRepayment(uint256 investmentId)`
 
 
 
 
 
-### `onlySettledLoan(uint256 loanId)`
+### `onlySettledLoan(uint256 investmentId)`
 
 
 
 
 
-### `onlyBetweenMilestoneTimeframe(uint256 loanId)`
+### `onlyBetweenMilestoneTimeframe(uint256 investmentId)`
 
 
 
 
 
-### `onlyBetweenBatchTimeframe(uint256 loanId)`
+### `onlyBetweenBatchTimeframe(uint256 investmentId)`
 
 
 
 
 
-### `onlyAfterDeadlineReached(uint256 loanId)`
+### `onlyAfterDeadlineReached(uint256 investmentId)`
 
 
 
 
 
-### `onlyPersonalLoan(uint256 loanId)`
+### `onlyPersonalLoan(uint256 investmentId)`
 
 
 
 
 
-### `onlyProjectLoan(uint256 loanId)`
+### `onlyProjectLoan(uint256 investmentId)`
 
 
 
@@ -77,13 +77,13 @@ Extends Storage
 
 
 
-### `onlyWhenAwaitingMilestoneApproval(uint256 loanId)`
+### `onlyWhenAwaitingMilestoneApproval(uint256 investmentId)`
 
 
 
 
 
-### `onlyEnoughERC1155Balance(uint256 loanId, uint256 amountOfTokens)`
+### `onlyEnoughERC1155Balance(uint256 investmentId, uint256 amountOfTokens)`
 
 
 

@@ -5,13 +5,13 @@
 
 
 
-### `mintGen0(address to, uint256 amount, uint256 loanId)` (external)
+### `mintGen0(address to, uint256 amount, uint256 investmentId)` (external)
 
 
 
 
 
-### `mintOfGen(address to, uint256 amount, uint256 generation, uint256 loanId)` (external)
+### `mintOfGen(address to, uint256 amount, uint256 generation, uint256 investmentId)` (external)
 
 
 
@@ -29,7 +29,7 @@
 
 
 
-### `pauseTokenTransfer(uint256 loanId)` (external)
+### `pauseTokenTransfer(uint256 investmentId)` (external)
 
 
 

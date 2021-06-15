@@ -5,13 +5,13 @@
 
 
 
-### `decideForLoan(uint256 loanId, bool decision)` (external)
+### `decideForLoan(uint256 investmentId, bool decision)` (external)
 
 
 
 
 
-### `decideForMilestone(uint256 loanId, bool decision)` (external)
+### `decideForMilestone(uint256 investmentId, bool decision)` (external)
 
 
 

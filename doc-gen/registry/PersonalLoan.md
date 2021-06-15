@@ -66,7 +66,7 @@ requires elligibility
 
 
 
-### `PersonalLoanRequested(uint256 loanId, address user, uint256 amount)`
+### `PersonalLoanRequested(uint256 investmentId, address user, uint256 amount)`
 
 
 

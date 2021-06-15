@@ -1,9 +1,5 @@
 import {ethers, deployments} from 'hardhat';
 import {expect} from 'chai';
-import {
-  DAO_LOAN_APPROVAL_REQUEST_DURATION,
-  DAO_MILESTONE_APPROVAL_REQUEST_DURATION,
-} from '../helpers/constants';
 
 describe('Contract Governance', () => {
   beforeEach(async () => {
@@ -15,23 +11,9 @@ describe('Contract Governance', () => {
     const governanceContract = await ethers.getContract('Governance');
 
     // When
-    const [
-      totalApprovalRequests, // Don't remove this
-      approvalsNeededForRegistryRequest, // Don't remove this
-      loanApprovalRequestDuration,
-      milestoneApprovalRequestDuration,
-      amountToStakeForDaoMember,
-    ] = await governanceContract.getDaoData();
+    const superGovernanceAddress = await governanceContract.superDelegator();
 
     // Then
-    expect(loanApprovalRequestDuration.toNumber()).to.equal(
-      DAO_LOAN_APPROVAL_REQUEST_DURATION
-    );
-    expect(milestoneApprovalRequestDuration.toNumber()).to.equal(
-      DAO_MILESTONE_APPROVAL_REQUEST_DURATION
-    );
-    expect(amountToStakeForDaoMember.toString()).to.equal(
-      ethers.utils.parseEther('20000').toString()
-    );
+    expect(ethers.utils.isAddress(superGovernanceAddress)).to.equal(true);
   });
 });

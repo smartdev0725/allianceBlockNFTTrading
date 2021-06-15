@@ -1303,46 +1303,46 @@
       "applyMilestone(uint256)": {
         "details": "This function is used by the project to apply a milestone for a specific loan.",
         "params": {
-          "loanId": "The id of the loan."
+          "investmentId": "The id of the loan."
         }
       },
       "challengeLoan(uint256)": {
         "details": "Through this function any address can challenge a loan in case of rules breaking by the seeker. If challenging succeeds it can end up to either small penalty or whole collateral loss.",
         "params": {
-          "loanId": "The id of the loan."
+          "investmentId": "The id of the loan."
         }
       },
       "decideForLoan(uint256,bool)": {
         "details": "This function is called by governance to approve or reject a loan request.",
         "params": {
           "decision": "The decision of the governance. [true -> approved] [false -> rejected]",
-          "loanId": "The id of the loan."
+          "investmentId": "The id of the loan."
         }
       },
       "decideForMilestone(uint256,bool)": {
         "details": "This function is called by governance to approve or reject an applied milestone's request.",
         "params": {
           "decision": "The decision of the governance. [true -> approved] [false -> rejected]",
-          "loanId": "The id of the loan."
+          "investmentId": "The id of the loan."
         }
       },
       "executePayment(uint256)": {
         "details": "This function is called by the seeker to return part of or whole owed amount for a loan (depending on agreement).",
         "params": {
-          "loanId": "The id of the loan."
+          "investmentId": "The id of the loan."
         }
       },
       "fundLoan(uint256,uint256)": {
         "details": "This function is called by the lenders to fund a loan.",
         "params": {
-          "loanId": "The id of the loan.",
+          "investmentId": "The id of the loan.",
           "partitionsToPurchase": "The amount of ERC1155 tokens (which represent partitions of the loan) to be purchased."
         }
       },
       "getAmountToBeRepaid(uint256)": {
         "details": "getAmountToBeRepaid is a function to obtain the amount that should be paid to settle the loan taking into account the amount paid back with project tokens and the interest percentage.",
         "params": {
-          "loanId": "The id of the loan to get the amount to be repaid from."
+          "investmentId": "The id of the loan to get the amount to be repaid from."
         },
         "returns": {
           "amount": "The total amount to be paid in lending tokens to settle the loan."
@@ -1351,13 +1351,13 @@
       "getLoanMetadata(uint256)": {
         "details": "This helper function provides a single point for querying the Loan metadata",
         "params": {
-          "loanId": "The id of the loan."
+          "investmentId": "The id of the loan."
         }
       },
       "getTotalInterest(uint256)": {
         "details": "getTotalInterest is a function to obtain the total amount of interest to pay back taking into account the interest free amount paid back with project tokens and the interest percentage set for the loan.",
         "params": {
-          "loanId": "The id of the loan to get the interest percentage from."
+          "investmentId": "The id of the loan to get the interest percentage from."
         },
         "returns": {
           "totalInterest": "The total amount of interest to be paid to settle the loan."

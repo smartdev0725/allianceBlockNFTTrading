@@ -15,7 +15,7 @@ This function is used for potential borrowing project to request a loan.
 requires Total milestones should coincide with requested amounts and durations
 
 
-### `applyMilestone(uint256 loanId)` (external)
+### `applyMilestone(uint256 investmentId)` (external)
 
 Apply Milestone
 
@@ -23,7 +23,7 @@ Apply Milestone
 This function is used by the project to apply a milestone for a specific loan.
 
 
-### `decideForMilestone(uint256 loanId, bool decision)` (external)
+### `decideForMilestone(uint256 investmentId, bool decision)` (external)
 
 Decide For Loan
 
@@ -131,7 +131,7 @@ Retrieve Milestone info
 
 
 
-### `getAmountToBeRepaid(uint256 loanId) → uint256 amount` (public)
+### `getAmountToBeRepaid(uint256 investmentId) → uint256 amount` (public)
 
 Retrieves the amount to be repaid to fulfill a loan
 
@@ -140,7 +140,7 @@ getAmountToBeRepaid is a function to obtain the amount that should be paid to se
 taking into account the amount paid back with project tokens and the interest percentage.
 
 
-### `getTotalInterest(uint256 loanId) → uint256 totalInterest` (public)
+### `getTotalInterest(uint256 investmentId) → uint256 totalInterest` (public)
 
 Retrieves the total interest
 
@@ -149,42 +149,42 @@ getTotalInterest is a function to obtain the total amount of interest to pay bac
 taking into account the interest free amount paid back with project tokens and the interest percentage set for the loan.
 
 
-### `balanceOfAllFundingNFTGenerations(uint256 loanId, address funder) → uint256 balance` (public)
+### `balanceOfAllFundingNFTGenerations(uint256 investmentId, address funder) → uint256 balance` (public)
 
 Balance of all Funding NFT over Generations
 
 
 
 
-### `balanceOfFundingNFTGeneration(uint256 loanId, uint256 generation, address funder) → uint256 balance` (public)
+### `balanceOfFundingNFTGeneration(uint256 investmentId, uint256 generation, address funder) → uint256 balance` (public)
 
 Balance of all Funding NFT per Generation
 
 
 
 
-### `getProjectTokenPrice(uint256 loanId) → uint256 price` (public)
+### `getProjectTokenPrice(uint256 investmentId) → uint256 price` (public)
 
 Retrieves the Project Token Price
 
 
 
 
-### `getDiscountedProjectTokenPrice(uint256 loanId) → uint256 price` (public)
+### `getDiscountedProjectTokenPrice(uint256 investmentId) → uint256 price` (public)
 
 Calculates the Discounted Project Token price
 
 
 
 
-### `getAvailableFundingNFTForConversion(uint256 loanId, address funder) → uint256 balance` (public)
+### `getAvailableFundingNFTForConversion(uint256 investmentId, address funder) → uint256 balance` (public)
 
 Calculates the available Funding NFT for conversion
 
 
 
 
-### `getAmountOfProjectTokensToReceive(uint256 loanId, uint256 amountFundingNFT) → uint256 amount` (public)
+### `getAmountOfProjectTokensToReceive(uint256 investmentId, uint256 amountFundingNFT) → uint256 amount` (public)
 
 Calculates the amount of Project Tokens to receive
 
@@ -192,25 +192,25 @@ Calculates the amount of Project Tokens to receive
 
 
 
-### `ProjectLoanRequested(uint256 loanId, address user, uint256 amount)`
+### `ProjectLoanRequested(uint256 investmentId, address user, uint256 amount)`
 
 
 
 
 
-### `ProjectLoanMilestoneApprovalRequested(uint256 loanId, uint256 milestoneNumber)`
+### `ProjectLoanMilestoneApprovalRequested(uint256 investmentId, uint256 milestoneNumber)`
 
 
 
 
 
-### `ProjectLoanMilestoneDecided(uint256 loanId, bool decision)`
+### `ProjectLoanMilestoneDecided(uint256 investmentId, bool decision)`
 
 
 
 
 
-### `ProjectTokenPaymentReceived(uint256 loanId, address user, uint256 amountOfProjectTokens, uint256 discountedPrice)`
+### `ProjectTokenPaymentReceived(uint256 investmentId, address user, uint256 amountOfProjectTokens, uint256 discountedPrice)`
 
 
 

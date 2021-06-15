@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IERC1155Mint.sol";
 import "./interfaces/IERC721Mint.sol";
-import "./libs/LoanLibrary.sol";
 import "./interfaces/IRegistry.sol";
 import "./rALBT.sol";
 
@@ -21,7 +19,7 @@ contract EscrowDetails {
     address public actionVerifier;
     address public staking;
 
-    mapping(uint256 => address) public loanSeeker;
+    mapping(uint256 => address) public investmentSeeker;
     rALBT public reputationalALBT;
 
     modifier onlyRegistry() {

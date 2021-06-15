@@ -9,14 +9,14 @@ interface IERC1155Mint {
     function mintGen0(
         address to,
         uint256 amount,
-        uint256 loanId
+        uint256 investmentId
     ) external;
 
     function mintOfGen(
         address to,
         uint256 amount,
         uint256 generation,
-        uint256 loanId
+        uint256 investmentId
     ) external;
 
     function decreaseGenerations(
@@ -34,7 +34,7 @@ interface IERC1155Mint {
         bytes calldata data
     ) external;
 
-    function pauseTokenTransfer(uint256 loanId) external;
+    function pauseTokenTransfer(uint256 investmentId) external;
 
     function unpauseTokenTransfer(uint256 tokenId) external;
 

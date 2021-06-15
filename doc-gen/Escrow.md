@@ -23,7 +23,7 @@ To be executed after Initialize
 requires not already initialized
 
 
-### `transferFundingNFT(uint256 loanId, uint256 partitionsPurchased, address receiver)` (external)
+### `transferFundingNFT(uint256 investmentId, uint256 partitionsPurchased, address receiver)` (external)
 
 Transfer Funding NFT
 

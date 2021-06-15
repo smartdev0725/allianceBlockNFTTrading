@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
 /**
@@ -104,7 +105,7 @@ library DoubleLinkedList {
      * @param index the id of the index
      * @return id the item in index position
      */
-    function getIndexedId(LinkedList storage self, uint256 index) internal returns (uint256 id) {
+    function getIndexedId(LinkedList storage self, uint256 index) internal view returns (uint256 id) {
         id = self.head;
 
         for (uint256 i = 1; i < index; i++) {

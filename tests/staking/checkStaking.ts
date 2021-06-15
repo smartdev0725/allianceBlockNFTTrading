@@ -8,27 +8,6 @@ const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
   describe('Succeeds', async () => {
-    beforeEach(async function () {
-      await this.stakingContract
-        .connect(this.rewardDistributorSigner)
-        .notifyRewardAmount(BigNumber.from(0));
-    });
-
-    it('when the reward distributor is correctly set', async function () {
-      expect(await this.stakingContract.rewardDistribution()).to.be.equal(
-        this.rewardDistributor
-      );
-    });
-
-    it('when only reward distributor can notifyRewardAmount', async function () {
-      await expectRevert(
-        this.stakingContract
-          .connect(this.staker1Signer)
-          .notifyRewardAmount(BigNumber.from(0)),
-        'Caller is not reward distribution'
-      );
-    });
-
     it('when staking for level 1, ALBT, rALBT and staking balances are updated accordingly', async function () {
       // Given
       const staker1StakingAmountBefore = await this.stakingContract.getBalance(
@@ -147,14 +126,14 @@ export default async function suite() {
       );
     });
 
-    it('when staking for level 3 or DAO member, ALBT, rALBT and staking balances are updated accordingly', async function () {
+    it('when staking for level 3, ALBT, rALBT and staking balances are updated accordingly', async function () {
       // Given
       const staker1StakingAmountBefore = await this.stakingContract.getBalance(
         this.staker1
       );
       const amountToStake = (
         await this.stakingContract.stakingTypeAmounts(
-          StakingType.STAKER_LVL_3_OR_DAO_MEMBER
+          StakingType.STAKER_LVL_3
         )
       ).sub(staker1StakingAmountBefore);
       const staker1ALBTBalanceBefore = await this.ALBTContract.balanceOf(
@@ -171,7 +150,7 @@ export default async function suite() {
       await expect(
         this.stakingContract
           .connect(this.staker1Signer)
-          .stake(StakingType.STAKER_LVL_3_OR_DAO_MEMBER)
+          .stake(StakingType.STAKER_LVL_3)
       )
         .to.emit(this.stakingContract, 'Staked')
         .withArgs(this.staker1, amountToStake);
@@ -223,41 +202,6 @@ export default async function suite() {
       );
     });
 
-    it('when staking for DAO Delegator level reverts', async function () {
-      expectRevert(
-        this.stakingContract
-          .connect(this.staker1Signer)
-          .stake(StakingType.DAO_DELEGATOR),
-        'Delegator type stake only via Governance'
-      );
-    });
-
-    it('when staking tokens and getting rewards', async function () {
-      // Given
-      await this.stakingContract
-        .connect(this.staker1Signer)
-        .stake(StakingType.STAKER_LVL_1);
-
-      const rewardAmount = ethers.utils.parseEther('1000');
-
-      await this.stakingContract
-        .connect(this.rewardDistributorSigner)
-        .notifyRewardAmount(rewardAmount);
-
-      // When
-      // Fast forward one day
-      await increaseTime(this.staker1Signer.provider, ONE_DAY);
-
-      const initialEarnedBal = await this.stakingContract.earned(this.staker1);
-      await this.stakingContract.connect(this.staker1Signer).getReward();
-      const postEarnedBal = await this.stakingContract.earned(this.staker1);
-
-      // Then
-      expect(initialEarnedBal.toNumber()).to.be.greaterThan(
-        postEarnedBal.toNumber()
-      );
-    });
-
     it('when exiting/withdrawing from level 1 stake balances are updated accordingly', async function () {
       // Given
       await this.stakingContract
@@ -292,7 +236,6 @@ export default async function suite() {
       const rALBTBalanceAfter = await this.rALBTContract.balanceOf(
         this.staker1
       );
-      const rewardAfter = await this.stakingContract.earned(this.staker1);
 
       // Then
       expect(staker1StakingAmountAfter).to.be.equal(0);
@@ -308,7 +251,6 @@ export default async function suite() {
       expect(Number(rALBTBalanceAfter)).to.be.lessThan(
         Number(rALBTBalanceBefore)
       );
-      expect(rewardAfter).to.be.equal(Number(0));
     });
 
     it('when exiting/withdrawing from level 2 stake balances are updated accordingly', async function () {
@@ -345,7 +287,6 @@ export default async function suite() {
       const rALBTBalanceAfter = await this.rALBTContract.balanceOf(
         this.staker1
       );
-      const rewardAfter = await this.stakingContract.earned(this.staker1);
 
       // Then
       expect(staker1StakingAmountAfter).to.be.equal(0);
@@ -361,14 +302,13 @@ export default async function suite() {
       expect(Number(rALBTBalanceAfter)).to.be.lessThan(
         Number(rALBTBalanceBefore)
       );
-      expect(rewardAfter).to.be.equal(Number(0));
     });
 
-    it('when exiting/withdrawing from level 3 or dao member stake balances are updated accordingly', async function () {
+    it('when exiting/withdrawing from level 3 stake balances are updated accordingly', async function () {
       // Given
       await this.stakingContract
         .connect(this.staker1Signer)
-        .stake(StakingType.STAKER_LVL_3_OR_DAO_MEMBER);
+        .stake(StakingType.STAKER_LVL_3);
       const staker1StakingAmountBefore = await this.stakingContract.getBalance(
         this.staker1
       );
@@ -398,7 +338,6 @@ export default async function suite() {
       const rALBTBalanceAfter = await this.rALBTContract.balanceOf(
         this.staker1
       );
-      const rewardAfter = await this.stakingContract.earned(this.staker1);
 
       // Then
       expect(staker1StakingAmountAfter).to.be.equal(0);
@@ -414,7 +353,6 @@ export default async function suite() {
       expect(Number(rALBTBalanceAfter)).to.be.lessThan(
         Number(rALBTBalanceBefore)
       );
-      expect(rewardAfter).to.be.equal(Number(0));
     });
 
     it('when unstaking can only drop to lower level', async function () {
@@ -438,7 +376,7 @@ export default async function suite() {
       expectRevert(
         this.stakingContract
           .connect(this.staker1Signer)
-          .unstake(StakingType.STAKER_LVL_3_OR_DAO_MEMBER),
+          .unstake(StakingType.STAKER_LVL_3),
         'Can only drop to lower level'
       );
 
@@ -456,18 +394,18 @@ export default async function suite() {
       expectRevert(
         this.stakingContract
           .connect(this.staker1Signer)
-          .unstake(StakingType.STAKER_LVL_3_OR_DAO_MEMBER),
+          .unstake(StakingType.STAKER_LVL_3),
         'Can only drop to lower level'
       );
       // Given
       await this.stakingContract
         .connect(this.staker1Signer)
-        .stake(StakingType.STAKER_LVL_3_OR_DAO_MEMBER);
+        .stake(StakingType.STAKER_LVL_3);
       // Then
       expectRevert(
         this.stakingContract
           .connect(this.staker1Signer)
-          .unstake(StakingType.STAKER_LVL_3_OR_DAO_MEMBER),
+          .unstake(StakingType.STAKER_LVL_3),
         'Can only drop to lower level'
       );
     });
@@ -489,13 +427,9 @@ export default async function suite() {
       const rALBTBalanceBefore = await this.rALBTContract.balanceOf(
         this.staker1
       );
-      const amountToUnstake = staker1StakingAmountBefore.sub(
+      const totalAmountFromStakingToStaker = staker1StakingAmountBefore.sub(
         await this.stakingContract.stakingTypeAmounts(StakingType.STAKER_LVL_1)
       );
-      const totalAmountFromStakingToStaker = amountToUnstake.add(
-        await this.stakingContract.earned(this.staker1)
-      );
-
       // When
       await expect(
         this.stakingContract
@@ -503,7 +437,7 @@ export default async function suite() {
           .unstake(StakingType.STAKER_LVL_1)
       )
         .to.emit(this.stakingContract, 'Withdrawn')
-        .withArgs(this.staker1, amountToUnstake);
+        .withArgs(this.staker1, totalAmountFromStakingToStaker);
 
       const staker1StakingAmountAfter = await this.stakingContract.getBalance(
         this.staker1
@@ -518,7 +452,6 @@ export default async function suite() {
       const rALBTBalanceAfter = await this.rALBTContract.balanceOf(
         this.staker1
       );
-      const rewardAfter = await this.stakingContract.earned(this.staker1);
 
       // Then
       expect(staker1StakingAmountAfter).to.be.equal(
@@ -536,14 +469,13 @@ export default async function suite() {
       expect(Number(rALBTBalanceAfter)).to.be.lessThan(
         Number(rALBTBalanceBefore)
       );
-      expect(Number(rewardAfter)).to.be.equal(Number(0));
     });
 
     it('when unstaking from level 3 to level 2 stake balances are updated accordingly', async function () {
       // Given
       await this.stakingContract
         .connect(this.staker1Signer)
-        .stake(StakingType.STAKER_LVL_3_OR_DAO_MEMBER);
+        .stake(StakingType.STAKER_LVL_3);
       const staker1StakingAmountBefore = await this.stakingContract.getBalance(
         this.staker1
       );
@@ -556,11 +488,8 @@ export default async function suite() {
       const rALBTBalanceBefore = await this.rALBTContract.balanceOf(
         this.staker1
       );
-      const amountToUnstake = staker1StakingAmountBefore.sub(
+      const totalAmountFromStakingToStaker = staker1StakingAmountBefore.sub(
         await this.stakingContract.stakingTypeAmounts(StakingType.STAKER_LVL_2)
-      );
-      const totalAmountFromStakingToStaker = amountToUnstake.add(
-        await this.stakingContract.earned(this.staker1)
       );
 
       // When
@@ -570,7 +499,7 @@ export default async function suite() {
           .unstake(StakingType.STAKER_LVL_2)
       )
         .to.emit(this.stakingContract, 'Withdrawn')
-        .withArgs(this.staker1, amountToUnstake);
+        .withArgs(this.staker1, totalAmountFromStakingToStaker);
 
       const staker1StakingAmountAfter = await this.stakingContract.getBalance(
         this.staker1
@@ -585,7 +514,6 @@ export default async function suite() {
       const rALBTBalanceAfter = await this.rALBTContract.balanceOf(
         this.staker1
       );
-      const rewardAfter = await this.stakingContract.earned(this.staker1);
 
       // Then
       expect(staker1StakingAmountAfter).to.be.equal(
@@ -603,14 +531,13 @@ export default async function suite() {
       expect(Number(rALBTBalanceAfter)).to.be.lessThan(
         Number(rALBTBalanceBefore)
       );
-      expect(Number(rewardAfter)).to.be.equal(Number(0));
     });
 
     it('when unstaking from level 3 to level 1 stake balances are updated accordingly', async function () {
       // Given
       await this.stakingContract
         .connect(this.staker1Signer)
-        .stake(StakingType.STAKER_LVL_3_OR_DAO_MEMBER);
+        .stake(StakingType.STAKER_LVL_3);
       const staker1StakingAmountBefore = await this.stakingContract.getBalance(
         this.staker1
       );
@@ -625,9 +552,6 @@ export default async function suite() {
       );
       const amountToUnstake = staker1StakingAmountBefore.sub(
         await this.stakingContract.stakingTypeAmounts(StakingType.STAKER_LVL_1)
-      );
-      const totalAmountFromStakingToStaker = amountToUnstake.add(
-        await this.stakingContract.earned(this.staker1)
       );
 
       // When
@@ -652,25 +576,23 @@ export default async function suite() {
       const rALBTBalanceAfter = await this.rALBTContract.balanceOf(
         this.staker1
       );
-      const rewardAfter = await this.stakingContract.earned(this.staker1);
 
       // Then
       expect(staker1StakingAmountAfter).to.be.equal(
-        staker1StakingAmountBefore.sub(totalAmountFromStakingToStaker)
+        staker1StakingAmountBefore.sub(amountToUnstake)
       );
       expect(staker1ALBTBalanceAfter).to.be.equal(
-        staker1ALBTBalanceBefore.add(totalAmountFromStakingToStaker)
+        staker1ALBTBalanceBefore.add(amountToUnstake)
       );
       expect(stakingContractALBTBalanceAfter).to.be.equal(
-        stakingContractALBTBalanceBefore.sub(totalAmountFromStakingToStaker)
+        stakingContractALBTBalanceBefore.sub(amountToUnstake)
       );
       expect(stakedSupplyAfter).to.be.equal(
-        stakedSupplyBefore.sub(totalAmountFromStakingToStaker)
+        stakedSupplyBefore.sub(amountToUnstake)
       );
       expect(Number(rALBTBalanceAfter)).to.be.lessThan(
         Number(rALBTBalanceBefore)
       );
-      expect(Number(rewardAfter)).to.be.equal(Number(0));
     });
   });
 }

@@ -5,8 +5,8 @@ import {getSigners, initializeTransfers} from '../helpers/utils';
 
 describe('Registry upgrade test', () => {
   let approvalRequest: BigNumber;
-  let loanIdBefore: BigNumber;
-  let loanIdAfter: BigNumber;
+  let investmentIdBefore: BigNumber;
+  let investmentIdAfter: BigNumber;
   let amountOfInvestmentTokens: BigNumber;
 
   beforeEach(async () => {
@@ -47,7 +47,7 @@ describe('Registry upgrade test', () => {
       }
     );
 
-    loanIdBefore = await registryContract.totalLoans();
+    investmentIdBefore = await registryContract.totalInvestments();
 
     approvalRequest = await governanceContract.totalApprovalRequests();
 
@@ -68,7 +68,7 @@ describe('Registry upgrade test', () => {
       .connect(superDelegatorSigner)
       .superVoteForRequest(approvalRequest, true);
 
-    loanIdAfter = await registryContract.totalLoans();
+    investmentIdAfter = await registryContract.totalInvestments();
   });
 
   it('Investment should be ok', async function () {
@@ -76,13 +76,12 @@ describe('Registry upgrade test', () => {
     const registryContract = await ethers.getContract('Registry');
 
     // When
-    const loanDetails = await registryContract.loanDetails(loanIdBefore);
+    const investmentDetails = await registryContract.investmentDetails(investmentIdBefore);
 
     // Then
-    expect(loanDetails.loanId.toNumber()).to.equal(loanIdBefore.toNumber());
-    expect(loanDetails.loanType).to.equal(2);
+    expect(investmentDetails.investmentId.toNumber()).to.equal(investmentIdBefore.toNumber());
     expect(amountOfInvestmentTokens.toString()).to.equal(
-      loanDetails.collateralAmount.toString()
+      investmentDetails.projectTokensAmount.toString()
     );
     // Check new method don't exist
     expect(() => registryContract.getSomething2()).to.throw(
@@ -120,15 +119,14 @@ describe('Registry upgrade test', () => {
     expect(something1.toNumber()).to.equal(1);
     expect(something2.toNumber()).to.equal(2);
 
-    const loanDetailsAfterUpdate = await registryContract.loanDetails(
-      loanIdBefore
+    const investmentDetailsAfterUpdate = await registryContract.investmentDetails(
+      investmentIdBefore
     );
-    expect(loanDetailsAfterUpdate.loanId.toNumber()).to.equal(
-      loanIdBefore.toNumber()
+    expect(investmentDetailsAfterUpdate.investmentId.toNumber()).to.equal(
+      investmentIdBefore.toNumber()
     );
-    expect(loanDetailsAfterUpdate.loanType).to.equal(2);
     expect(amountOfInvestmentTokens.toString()).to.equal(
-      loanDetailsAfterUpdate.collateralAmount.toString()
+      investmentDetailsAfterUpdate.projectTokensAmount.toString()
     );
   });
 });

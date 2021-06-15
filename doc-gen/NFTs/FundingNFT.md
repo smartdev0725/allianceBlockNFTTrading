@@ -32,7 +32,7 @@ contract metadata
 
 
 
-### `pauseTokenTransfer(uint256 loanId)` (external)
+### `pauseTokenTransfer(uint256 investmentId)` (external)
 
 Pauses the token transfers
 
@@ -41,7 +41,7 @@ Owner can pause transfers for specific tokens
 pauses all loan ids, no matter the generation
 
 
-### `unpauseTokenTransfer(uint256 loanId)` (external)
+### `unpauseTokenTransfer(uint256 investmentId)` (external)
 
 Unpauses the token transfers
 
@@ -49,14 +49,14 @@ Unpauses the token transfers
 Owner can unpause transfers for specific tokens
 
 
-### `mintGen0(address to, uint256 amount, uint256 loanId)` (external)
+### `mintGen0(address to, uint256 amount, uint256 investmentId)` (external)
 
 Mint generation 0 tokens
 
 
 
 
-### `mintOfGen(address to, uint256 amount, uint256 generation, uint256 loanId)` (external)
+### `mintOfGen(address to, uint256 amount, uint256 generation, uint256 investmentId)` (external)
 
 Mint tokens of a specific generation directly
 
@@ -120,29 +120,29 @@ token owner should have approvedForAll before calling this function
 Runs checks before transferring a token
 
 
-Validates if the loanId from the tokenId can be transferred and not paused
+Validates if the investmentId from the tokenId can be transferred and not paused
 
 
 
-### `GenerationIncreased(uint256 loanId, address user, uint256 newGeneration)`
-
-
-
-
-
-### `GenerationDecreased(uint256 loanId, address user, uint256 newGeneration)`
+### `GenerationIncreased(uint256 investmentId, address user, uint256 newGeneration)`
 
 
 
 
 
-### `TransfersPaused(uint256 loanId)`
+### `GenerationDecreased(uint256 investmentId, address user, uint256 newGeneration)`
 
 
 
 
 
-### `TransfersResumed(uint256 loanId)`
+### `TransfersPaused(uint256 investmentId)`
+
+
+
+
+
+### `TransfersResumed(uint256 investmentId)`
 
 
 

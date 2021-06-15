@@ -963,7 +963,7 @@
         "params": {
           "amount": "The amount of tokens to mint.",
           "generation": "The generation of the tokens. The id of the tokens will be composed of the loan id and this generation number.",
-          "loanId": "The loan identifier",
+          "investmentId": "The loan identifier",
           "to": "The address to mint the tokens to."
         }
       },

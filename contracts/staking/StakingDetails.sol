@@ -1,14 +1,14 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./StakingTypesAndStorage.sol";
-import "hardhat/console.sol";
 
 /**
- * @title Alliance Block DAO Staking Contract
+ * @title Alliance Block Staking Details
  * @dev Extends StakingTypesAndStorage
  */
-contract DaoStaking is StakingTypesAndStorage {
+contract StakingDetails is StakingTypesAndStorage {
     using SafeMath for uint256;
 
     /**
@@ -48,8 +48,7 @@ contract DaoStaking is StakingTypesAndStorage {
      * @notice Get Amounts to Stake
      * @return stakerLvl1Amount Staker lvl 1 Amount
      * @return stakerLvl2Amount Staker lvl 2 Amount
-     * @return stakerLvl3orDaoMemberAmount Staker lvl 3 Amount Dao Member
-     * @return daoDelegatorAmount Staker lvl 4 Amount (DAO Delegator)
+     * @return stakerLvl3Amount Staker lvl 3 Amount
      */
     function getAmountsToStake()
         external
@@ -57,13 +56,11 @@ contract DaoStaking is StakingTypesAndStorage {
         returns (
             uint256 stakerLvl1Amount,
             uint256 stakerLvl2Amount,
-            uint256 stakerLvl3orDaoMemberAmount,
-            uint256 daoDelegatorAmount
+            uint256 stakerLvl3Amount
         )
     {
         stakerLvl1Amount = stakingTypeAmounts[uint256(StakingType.STAKER_LVL_1)];
         stakerLvl2Amount = stakingTypeAmounts[uint256(StakingType.STAKER_LVL_2)];
-        stakerLvl3orDaoMemberAmount = stakingTypeAmounts[uint256(StakingType.STAKER_LVL_3_OR_DAO_MEMBER)];
-        daoDelegatorAmount = stakingTypeAmounts[uint256(StakingType.DAO_DELEGATOR)];
+        stakerLvl3Amount = stakingTypeAmounts[uint256(StakingType.STAKER_LVL_3)];
     }
 }

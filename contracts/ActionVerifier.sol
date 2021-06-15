@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IEscrow.sol";
 import "./interfaces/IStaking.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "hardhat/console.sol";
 
 /**
  * @title AllianceBlock ActionVerifier contract
@@ -66,7 +65,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
         );
     }
 
-    function hash(EIP712Domain memory eip712Domain) internal view returns (bytes32) {
+    function hash(EIP712Domain memory eip712Domain) internal pure returns (bytes32) {
         return
             keccak256(
                 abi.encode(

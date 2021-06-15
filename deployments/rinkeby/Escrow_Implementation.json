@@ -525,7 +525,7 @@
       "transferFundingNFT(uint256,uint256,address)": {
         "details": "This function is used to send the ERC1155 tokens from escrow to the lenders.",
         "params": {
-          "loanId": "The id of the loan.",
+          "investmentId": "The id of the loan.",
           "partitionsPurchased": "The amount of ERC1155 tokens that should be sent back to the lender.",
           "receiver": "Lender's address."
         }

@@ -1,17 +1,9 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import '@nomiclabs/hardhat-ethers';
-import {deployments, ethers} from 'hardhat';
+import {ethers} from 'hardhat';
 
-import {
-  BASE_AMOUNT,
-  MINIMUM_INTEREST_PERCENTAGE,
-  MAX_MILESTONES,
-  MILESTONE_EXTENSION,
-  VESTING_BATCHES,
-  VESTING_TIME_INTERVAL,
-  FUNDING_TIME_INTERVAL,
-} from '../../utils/constants';
+import {BASE_AMOUNT} from '../../utils/constants';
 
 const version = 'v0.1.0';
 const contractName = 'Registry';
@@ -43,12 +35,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       lendingTokenAddress,
       fundingNFTAddress,
       ethers.utils.parseEther(BASE_AMOUNT + '').toString(), // Same as toWei in web3
-      MINIMUM_INTEREST_PERCENTAGE,
-      MAX_MILESTONES,
-      MILESTONE_EXTENSION,
-      VESTING_BATCHES,
-      VESTING_TIME_INTERVAL,
-      FUNDING_TIME_INTERVAL,
     ],
     log: true,
   });
