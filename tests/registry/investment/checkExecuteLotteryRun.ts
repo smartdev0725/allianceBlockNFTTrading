@@ -78,5 +78,49 @@ export default async function suite() {
         numberOfPartitions.toNumber()
       );
     });
+
+    it('Cannot withdraw tickets in a non settled state', async function () {
+      await expectRevert(
+        this.registryContract.withdrawInvestmentTickets(this.loanId, BigNumber.from(10), BigNumber.from(10)),
+        'Can withdraw only in Settled state'
+      );
+    });
+
+    it.only('Try to  run lottery only if has remaining ticket  ', async function () {
+      await this.stakingContract
+        .connect(this.lender1Signer)
+        .stake(StakingType.STAKER_LVL_2);
+      await this.stakingContract
+        .connect(this.lender2Signer)
+        .stake(StakingType.STAKER_LVL_2);
+      await this.stakingContract
+        .connect(this.lender3Signer)
+        .stake(StakingType.STAKER_LVL_2);
+
+      await this.registryContract.connect(this.lender1Signer).showInterestForInvestment(this.loanId,  BigNumber.from(900));
+      await this.registryContract.connect(this.lender2Signer).showInterestForInvestment(this.loanId,  BigNumber.from(900));
+      await this.registryContract.connect(this.lender3Signer).showInterestForInvestment(this.loanId,  BigNumber.from(1200));
+
+      // Move time to 2 days
+      await increaseTime(this.deployerSigner.provider, 2 * 24 * 60 * 60); // 2 days
+
+      await this.governanceContract
+        .connect(this.superDelegatorSigner)
+        .checkCronjobs();
+
+      await this.registryContract.connect(this.lender3Signer).executeLotteryRun(this.loanId);
+
+      const ticketsRemainingAfter = await this.registryContract.ticketsRemaining(this.loanId);
+      const lender1remainingTicketsPerAddressAfter = await this.registryContract.remainingTicketsPerAddress(this.loanId, this.lender1);
+      const lender1ticketsWonPerAddressAfter = await this.registryContract.ticketsWonPerAddress(this.loanId, this.lender1);
+      const lender2remainingTicketsPerAddressAfter = await this.registryContract.remainingTicketsPerAddress(this.loanId, this.lender2);
+      const lender2ticketsWonPerAddressAfter = await this.registryContract.ticketsWonPerAddress(this.loanId, this.lender2);
+
+      expect(ticketsRemainingAfter.toNumber()).to.be.equal(0);
+      expect(lender1remainingTicketsPerAddressAfter.toNumber()).to.be.equal(0);
+      expect(lender2remainingTicketsPerAddressAfter.toNumber()).to.be.equal(0);
+      expect(lender1ticketsWonPerAddressAfter.toNumber()).to.be.equal(900);
+      expect(lender2ticketsWonPerAddressAfter.toNumber()).to.be.equal(900);
+    });
   });
 }
