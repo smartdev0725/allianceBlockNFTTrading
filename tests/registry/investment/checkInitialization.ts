@@ -39,5 +39,16 @@ export default async function suite() {
       );
     });
 
+    it('When initialize with zero values and zero address should revert', async function () {
+      const totalTicketsPerRun = 0;
+      const rAlbtPerLotteryNumber = 0;
+      const blocksLockedForReputation = 0;
+      const lotteryNumbersForImmediateTicket = 0;
+      await expectRevert(
+        this.registryContract.initializeInvestment( ethers.constants.AddressZero, totalTicketsPerRun, rAlbtPerLotteryNumber, blocksLockedForReputation, lotteryNumbersForImmediateTicket),
+        'Cannot initialize with 0 addresses'
+      );
+    });
+
   });
 }
