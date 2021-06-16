@@ -39,21 +39,13 @@ export default async function suite() {
       );
     });
 
-  });
-
-  describe('Governance initialization', async () => {
-    it('When initialize again should revert', async function () {
-      const registryAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
-
+    it('When initialize with zero values and zero address should revert', async function () {
+      const totalTicketsPerRun = 0;
+      const rAlbtPerLotteryNumber = 0;
+      const blocksLockedForReputation = 0;
+      const lotteryNumbersForImmediateTicket = 0;
       await expectRevert(
-        this.governanceContract.setRegistry(registryAddress),
-        'Cannot initialize second time'
-      );
-    });
-
-    it('When initialize with zero address should revert', async function () {
-      await expectRevert(
-        this.governanceContract.setRegistry( ethers.constants.AddressZero),
+        this.registryContract.initializeInvestment( ethers.constants.AddressZero, totalTicketsPerRun, rAlbtPerLotteryNumber, blocksLockedForReputation, lotteryNumbersForImmediateTicket),
         'Cannot initialize with 0 addresses'
       );
     });
