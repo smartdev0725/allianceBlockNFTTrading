@@ -2,6 +2,7 @@
 import checkInvestmentRequest from './checkInvestmentRequest';
 import checkInterestForInvestment from './checkInterestForInvestment';
 import checkExecuteLotteryRun from './checkExecuteLotteryRun';
+import checkInitialization from './checkInitialization';
 
 import {
   getContracts,
@@ -152,5 +153,9 @@ describe('Registry Investments', function () {
   describe(
     'When checking execute lottery run',
     checkExecuteLotteryRun.bind(this)
+  );
+  describe(
+    'When checking initialization',
+    checkInitialization.bind(this)
   );
 });
