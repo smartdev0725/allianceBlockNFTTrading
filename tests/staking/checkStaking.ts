@@ -1,8 +1,5 @@
 import {expect} from 'chai';
-import {ONE_DAY} from '../helpers/constants';
-import {increaseTime} from '../helpers/time';
 import {ethers} from 'hardhat';
-import {BigNumber} from 'ethers';
 import {StakingType} from '../helpers/registryEnums';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 

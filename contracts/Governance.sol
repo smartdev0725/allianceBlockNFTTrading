@@ -46,6 +46,7 @@ contract Governance is Initializable, SuperGovernance {
      * @param superDelegator_ The address of the upgraded super delegator.
      */
     function updateSuperDelegator(address superDelegator_) external onlyOwner() {
+        require(superDelegator_ != address(0), "Cannot initialize with 0 addresses");
         superDelegator = superDelegator_;
     }
 
