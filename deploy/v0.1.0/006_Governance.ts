@@ -12,7 +12,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {deployer, proxyOwner, superDelegator} = await getNamedAccounts();
+  const {deployer, proxyOwner, superDelegator} = await getNamedAccounts();  
 
   await deploy(contractName, {
     contract: contractName,
