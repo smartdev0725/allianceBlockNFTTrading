@@ -62,7 +62,12 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
         uint256 blocksLockedForReputation_,
         uint256 lotteryNumbersForImmediateTicket_
     ) external onlyOwner() {
-        require(totalTicketsPerRun == 0, "Cannot initialize twice");
+        require(address(rALBT) == address(0), "Cannot initialize rALBT second time");
+        require(totalTicketsPerRun == 0, "Cannot initialize second time");
+        require(rAlbtPerLotteryNumber == 0, "Cannot initialize second time");
+        require(blocksLockedForReputation == 0, "Cannot initialize second time");
+        require(lotteryNumbersForImmediateTicket == 0, "Cannot initialize second time");
+
         rALBT = IERC20(reputationalAlbt);
         totalTicketsPerRun = totalTicketsPerRun_;
         rAlbtPerLotteryNumber = rAlbtPerLotteryNumber_;
