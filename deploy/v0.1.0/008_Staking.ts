@@ -12,11 +12,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployer, proxyOwner} = await getNamedAccounts();
 
   const chainId = await getChainId();
-  if (+chainId !== 31337 && !process.env.ALBT_TOKEN_ADDRESS) {
+  if (+chainId === 1 && !process.env.ALBT_TOKEN_ADDRESS) {
     throw new Error("ALBT_TOKEN_ADDRESS env var should not be empty");
   }
 
-  const albtContractAddress = process.env.ALBT_TOKEN_ADDRESS
+  const albtContractAddress = (+chainId === 1)
     ? process.env.ALBT_TOKEN_ADDRESS
     : (await get('ALBT')).address;
   const escrowContractAddress = (await get('Escrow')).address;

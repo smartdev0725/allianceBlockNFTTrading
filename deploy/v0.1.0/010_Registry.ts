@@ -14,13 +14,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployer, proxyOwner} = await getNamedAccounts();
 
   const chainId = await getChainId();
-  if (+chainId !== 31337 && !process.env.LENDING_TOKEN_ADDRESS) {
+  if (+chainId === 1 && !process.env.LENDING_TOKEN_ADDRESS) {
     throw new Error("LENDING_TOKEN_ADDRESS env var should not be empty");
   }
 
   const escrowAddress = (await get('Escrow')).address;
   const governanceAddress = (await get('Governance')).address;
-  const lendingTokenAddress = process.env.LENDING_TOKEN_ADDRESS
+  const lendingTokenAddress = (+chainId === 1)
     ? process.env.LENDING_TOKEN_ADDRESS
     : (await get('LendingToken')).address;
   const fundingNFTAddress = (await get('FundingNFT')).address;
