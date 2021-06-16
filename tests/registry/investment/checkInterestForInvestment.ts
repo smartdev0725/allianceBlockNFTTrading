@@ -3,7 +3,7 @@ import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {StakingType} from '../../helpers/registryEnums';
+import {StakingType, InvestmentStatus} from '../../helpers/registryEnums';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 chai.use(solidity);
@@ -110,6 +110,89 @@ export default async function suite() {
       );
     });
 
+    it('when showing interest two times', async function () {
+      // Given
+      const numberOfPartitions = BigNumber.from(5);
+
+      // When
+      await this.stakingContract
+        .connect(this.lender1Signer)
+        .stake(StakingType.STAKER_LVL_1);
+      await this.registryContract
+        .connect(this.lender1Signer)
+        .showInterestForInvestment(this.investmentId, numberOfPartitions);
+
+      const investmentDetailsBefore = await this.registryContract.investmentDetails(
+        this.investmentId
+      );
+      const partitionsRequestedBefore = investmentDetailsBefore.partitionsRequested;
+
+      await this.registryContract
+        .connect(this.lender1Signer)
+        .showInterestForInvestment(this.investmentId, numberOfPartitions);
+
+      // Then
+      const investmentDetailsAfter = await this.registryContract.investmentDetails(
+        this.investmentId
+      );
+      const partitionsRequestedAfter = investmentDetailsAfter.partitionsRequested;
+      expect(partitionsRequestedAfter).to.be.equal(
+        partitionsRequestedBefore.add(numberOfPartitions)
+      );
+    });
+
+    it('when showing interest and is eligible for immediate tickets', async function () {
+      // Given
+      const numberOfPartitions = BigNumber.from(3);
+
+      // When
+      await this.stakingContract
+        .connect(this.lender1Signer)
+        .stake(StakingType.STAKER_LVL_3);
+
+      const ticketsRemainingBefore = await this.registryContract.ticketsRemaining(this.investmentId);
+
+      await this.registryContract
+        .connect(this.lender1Signer)
+        .showInterestForInvestment(this.investmentId, numberOfPartitions);
+
+      // Then
+      const ticketsRemainingAfter = await this.registryContract.ticketsRemaining(this.investmentId);
+      const ticketsWon = await this.registryContract.ticketsWonPerAddress(this.investmentId, this.lender1);
+      expect(ticketsWon.toString()).to.be.equal(
+        '2'
+      );
+      expect(ticketsRemainingBefore.sub(ticketsRemainingAfter).toString()).to.be.equal(
+        '2'
+      );
+    });
+
+    it('when showing interest but applying for less tickets than immediate tickets eligible', async function () {
+      // Given
+      const numberOfPartitions = BigNumber.from(1);
+
+      // When
+      await this.stakingContract
+        .connect(this.lender1Signer)
+        .stake(StakingType.STAKER_LVL_3);
+
+      const ticketsRemainingBefore = await this.registryContract.ticketsRemaining(this.investmentId);
+
+      await this.registryContract
+        .connect(this.lender1Signer)
+        .showInterestForInvestment(this.investmentId, numberOfPartitions);
+
+      // Then
+      const ticketsRemainingAfter = await this.registryContract.ticketsRemaining(this.investmentId);
+      const ticketsWon = await this.registryContract.ticketsWonPerAddress(this.investmentId, this.lender1);
+      expect(ticketsWon.toString()).to.be.equal(
+        '1'
+      );
+      expect(ticketsRemainingBefore.sub(ticketsRemainingAfter).toString()).to.be.equal(
+        '1'
+      );
+    });
+
     it('should give tickets for reputational ALBT', async function () {
       // Given
       const numberOfPartitions = BigNumber.from(5);
@@ -179,6 +262,68 @@ export default async function suite() {
         )
       );
       expect(ticketsWonPerAddressAfter).to.be.equal(BigNumber.from(0));
+    });
+
+    it('when all tickets are provided as immediate (no lottery)', async function () {
+      // Given
+      this.amountOfTokensToBePurchased = ethers.utils.parseEther('80');
+      this.totalAmountRequested = ethers.utils.parseEther('40'); // Only 4 tickets
+      this.ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
+
+      await this.registryContract
+        .connect(this.seekerSigner)
+        .requestInvestment(
+          this.projectTokenContract.address,
+          this.amountOfTokensToBePurchased,
+          this.totalAmountRequested,
+          this.ipfsHash
+        );
+
+      await this.governanceContract
+        .connect(this.superDelegatorSigner)
+        .superVoteForRequest(this.approvalRequest.add(1), true);
+
+      // When
+      await this.stakingContract
+        .connect(this.lender1Signer)
+        .stake(StakingType.STAKER_LVL_3);
+
+      await this.stakingContract
+        .connect(this.lender2Signer)
+        .stake(StakingType.STAKER_LVL_3);
+
+      const ticketsRemainingBefore = await this.registryContract.ticketsRemaining(this.investmentId.add(1));
+
+      const numberOfPartitions = 3;
+
+      await this.registryContract
+        .connect(this.lender1Signer)
+        .showInterestForInvestment(this.investmentId.add(1), numberOfPartitions);
+
+      await this.registryContract
+        .connect(this.lender2Signer)
+        .showInterestForInvestment(this.investmentId.add(1), numberOfPartitions);
+
+      // Then
+      const ticketsRemainingAfter = await this.registryContract.ticketsRemaining(this.investmentId.add(1));
+      const ticketsWonForLender1 = await this.registryContract.ticketsWonPerAddress(this.investmentId.add(1), this.lender1);
+      const ticketsWonForLender2 = await this.registryContract.ticketsWonPerAddress(this.investmentId.add(1), this.lender2);
+      const status = await this.registryContract.investmentStatus(this.investmentId.add(1));
+      expect(ticketsWonForLender1.toString()).to.be.equal(
+        '2'
+      );
+      expect(ticketsWonForLender2.toString()).to.be.equal(
+        '2'
+      );
+      expect(ticketsRemainingBefore.sub(ticketsRemainingAfter).toString()).to.be.equal(
+        '4'
+      );
+      expect(ticketsRemainingAfter.toString()).to.be.equal(
+        '0'
+      );
+      expect(status.toString()).to.be.equal(
+        InvestmentStatus.SETTLED
+      );
     });
   });
 }

@@ -4,7 +4,6 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./InvestmentDetails.sol";
 import "../libs/TokenFormat.sol";
-import "hardhat/console.sol";
 
 /**
  * @title AllianceBlock Investment contract.
@@ -112,7 +111,7 @@ contract Investment is InvestmentDetails {
         if (immediateTickets > 0) {
             // Just in case we provided immediate tickets and tickets finished, so there is no lottery in this case.
             // TODO - Maybe return here.
-            if (immediateTickets > ticketsRemaining[investmentId_]) {
+            if (immediateTickets >= ticketsRemaining[investmentId_]) {
                 immediateTickets = ticketsRemaining[investmentId_];
                 investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.SETTLED;
             }
