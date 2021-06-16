@@ -9,10 +9,14 @@ const version = 'v0.1.0';
 const contractName = 'Registry';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments, getNamedAccounts, getChainId} = hre;
   const {deploy, get} = deployments;
-
   const {deployer, proxyOwner} = await getNamedAccounts();
+
+  const chainId = await getChainId();
+  if (+chainId !== 31337 && !process.env.LENDING_TOKEN_ADDRESS) {
+    throw new Error("LENDING_TOKEN_ADDRESS env var should not be empty");
+  }
 
   const escrowAddress = (await get('Escrow')).address;
   const governanceAddress = (await get('Governance')).address;
