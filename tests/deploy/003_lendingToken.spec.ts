@@ -15,7 +15,7 @@ describe('Contract LendingToken', () => {
     const symbol = await lendingTokenContract.symbol();
 
     // Then
-    expect(name).to.equal('Lending Token');
-    expect(symbol).to.equal('LGT');
+    expect(name).to.equal('Lending Token USDC');
+    expect(symbol).to.equal('USDC');
   });
 });

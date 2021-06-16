@@ -41,6 +41,15 @@ contract Governance is Initializable, SuperGovernance {
     }
 
     /**
+     * @notice Update Superdelegator
+     * @dev This function is used to update the superDelegator address.
+     * @param superDelegator_ The address of the upgraded super delegator.
+     */
+    function updateSuperDelegator(address superDelegator_) external onlyOwner() {
+        superDelegator = superDelegator_;
+    }
+
+    /**
      * @notice Request a investment or investment approval
      * @dev Executes cronJob()
      * @param investmentId The id of the investment or investment to approve
