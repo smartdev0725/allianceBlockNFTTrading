@@ -125,5 +125,13 @@ export default async function suite() {
       expect(superDelegator).to.be.equal(this.seeker);
 
     });
+
+    it('When requestApproval not from registry should revert', async function () {
+      await expectRevert(
+        this.governanceContract.requestApproval(1),
+        'Only Registry contract'
+      );
+    });
+
   });
 }
