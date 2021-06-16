@@ -47,7 +47,7 @@ export default async function suite() {
         this.registryContract
           .connect(this.lender1Signer)
           .showInterestForInvestment(this.investmentId, BigNumber.from(5)),
-        'Not elegible for lottery numbers'
+        'Not eligible for lottery numbers'
       );
     });
 

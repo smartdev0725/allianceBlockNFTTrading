@@ -85,7 +85,7 @@ contract Investment is InvestmentDetails {
         uint256 reputationalBalance = _updateReputationalBalanceForPreviouslyLockedTokens();
         uint256 totalLotteryNumbers = reputationalBalance.div(rAlbtPerLotteryNumber);
 
-        if (totalLotteryNumbers == 0) revert("Not elegible for lottery numbers");
+        if (totalLotteryNumbers == 0) revert("Not eligible for lottery numbers");
 
         uint256 immediateTickets;
 
