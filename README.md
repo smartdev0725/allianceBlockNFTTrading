@@ -30,6 +30,7 @@ $ yarn
 ```
 
 ## Usage
+Remember to configure your env vars, the mnemonics are really important for deployment. You can check the corresponding accounts addresses with the command `ỳarn accounts...`
 
 ```bash
 # Lint
@@ -41,10 +42,15 @@ yarn compile
 # Run tests
 yarn dev
 yarn test
-# Deploy to hardhat network
-yarn deploy hardhat
+# Verify accounts to use 
+yarn accounts:rinkeby
+yarn accounts:mainnet
+# Deploy to rinkeby network (Remember to set env vars with mnemonics)
+yarn deploy:rinkeby
 # Deploy specific contracts using tags
-yarn deploy hardhat --tags v0.1.0
+yarn deploy:rinkeby:tags v0.1.0
+# Verify contracts in etherscan
+yarn verify:rinkeby --api-key <etherscan api key>
 ```
 
 
