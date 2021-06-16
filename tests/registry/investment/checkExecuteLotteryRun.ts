@@ -57,7 +57,7 @@ export default async function suite() {
 
     it('Can run lottery only if has remaining ticket  ', async function () {
       // Given
-      const numberOfPartitions = BigNumber.from(3000);
+      const numberOfPartitions = BigNumber.from(20);
       await this.stakingContract
         .connect(this.lender1Signer)
         .stake(StakingType.STAKER_LVL_2);
@@ -125,13 +125,13 @@ export default async function suite() {
       // When
       await this.registryContract
         .connect(this.lender1Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(900));
+        .showInterestForInvestment(this.investmentId, BigNumber.from(10));
       await this.registryContract
         .connect(this.lender2Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(900));
+        .showInterestForInvestment(this.investmentId, BigNumber.from(9));
       await this.registryContract
         .connect(this.lender3Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(1200));
+        .showInterestForInvestment(this.investmentId, BigNumber.from(1));
 
       // Move time to 2 days
       await increaseTime(this.deployerSigner.provider, 2 * 24 * 60 * 60); // 2 days
@@ -167,12 +167,24 @@ export default async function suite() {
           this.investmentId,
           this.lender2
         );
+      const lender3remainingTicketsPerAddressAfter =
+        await this.registryContract.remainingTicketsPerAddress(
+          this.investmentId,
+          this.lender3
+        );
+      const lender3ticketsWonPerAddressAfter =
+        await this.registryContract.ticketsWonPerAddress(
+          this.investmentId,
+          this.lender3
+        );
 
       expect(ticketsRemainingAfter.toNumber()).to.be.equal(0);
       expect(lender1remainingTicketsPerAddressAfter.toNumber()).to.be.equal(0);
       expect(lender2remainingTicketsPerAddressAfter.toNumber()).to.be.equal(0);
-      expect(lender1ticketsWonPerAddressAfter.toNumber()).to.be.equal(900);
-      expect(lender2ticketsWonPerAddressAfter.toNumber()).to.be.equal(900);
+      expect(lender3remainingTicketsPerAddressAfter.toNumber()).to.be.equal(0);
+      expect(lender1ticketsWonPerAddressAfter.toNumber()).to.be.equal(10);
+      expect(lender2ticketsWonPerAddressAfter.toNumber()).to.be.equal(9);
+      expect(lender3ticketsWonPerAddressAfter.toNumber()).to.be.equal(1);
     });
 
     it('Try to withdraw tickets and revert', async function () {
@@ -218,7 +230,7 @@ export default async function suite() {
       );
     });
 
-    it('Try to withdraw tickets', async function () {
+    it('Withdraw tickets', async function () {
       // Given
       await this.stakingContract
         .connect(this.lender1Signer)
@@ -233,13 +245,101 @@ export default async function suite() {
       // When
       await this.registryContract
         .connect(this.lender1Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(900));
+        .showInterestForInvestment(this.investmentId, BigNumber.from(10));
       await this.registryContract
         .connect(this.lender2Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(900));
+        .showInterestForInvestment(this.investmentId, BigNumber.from(9));
       await this.registryContract
         .connect(this.lender3Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(1200));
+        .showInterestForInvestment(this.investmentId, BigNumber.from(1));
+
+      // Move time to 2 days
+      await increaseTime(this.deployerSigner.provider, 2 * 24 * 60 * 60); // 2 days
+
+      await this.governanceContract
+        .connect(this.superDelegatorSigner)
+        .checkCronjobs();
+
+      await this.registryContract
+        .connect(this.lender3Signer)
+        .executeLotteryRun(this.investmentId);
+
+      // const lender3remainingTicketsPerAddressBefore =
+      //   await this.registryContract.remainingTicketsPerAddress(
+      //     this.investmentId,
+      //     this.lender3
+      //   );
+      // const lendingTokenBalanceBefore =
+      //   await this.lendingTokenContract.balanceOf(this.lender3);
+
+      const balanceProjectTokenBefore =
+        await this.projectTokenContract.balanceOf(this.lender1);
+      await this.registryContract
+        .connect(this.lender1Signer)
+        .withdrawInvestmentTickets(this.investmentId, 3, 7);
+      // await this.registryContract
+      //   .connect(this.lender3Signer)
+      //   .withdrawAmountProvidedForNonWonTickets(this.investmentId);
+
+      // const lendingTokenBalanceAfter =
+      //   await this.lendingTokenContract.balanceOf(this.lender3);
+
+      // Then
+      // const lender3remainingTicketsPerAddressAfter =
+      //   await this.registryContract.remainingTicketsPerAddress(
+      //     this.investmentId,
+      //     this.lender3
+      //   );
+      // expect(
+      //   +lender3remainingTicketsPerAddressBefore.toString()
+      // ).to.be.greaterThan(+lender3remainingTicketsPerAddressAfter.toString());
+
+      // expect(+lendingTokenBalanceAfter.toString()).to.be.greaterThan(
+      //   +lendingTokenBalanceBefore.toString()
+      // );
+
+      await expectRevert(
+        this.registryContract
+          .connect(this.lender1Signer)
+          .withdrawAmountProvidedForNonWonTickets(this.investmentId),
+        'No non-won tickets to withdraw'
+      );
+
+      const balanceProjectTokenAfter =
+        await this.projectTokenContract.balanceOf(this.lender1);
+      expect(+balanceProjectTokenAfter.toString()).to.be.greaterThan(
+        +balanceProjectTokenBefore.toString()
+      );
+      const lender1ticketsWonPerAddressAfter =
+        await this.registryContract.ticketsWonPerAddress(
+          this.investmentId,
+          this.lender1
+        );
+      expect(lender1ticketsWonPerAddressAfter.toNumber()).to.be.equal(0);
+    });
+
+    it('Withdraw amount provided for non won tickets', async function () {
+      // Given
+      await this.stakingContract
+        .connect(this.lender1Signer)
+        .stake(StakingType.STAKER_LVL_2);
+      await this.stakingContract
+        .connect(this.lender2Signer)
+        .stake(StakingType.STAKER_LVL_2);
+      await this.stakingContract
+        .connect(this.lender3Signer)
+        .stake(StakingType.STAKER_LVL_2);
+
+      // When
+      await this.registryContract
+        .connect(this.lender1Signer)
+        .showInterestForInvestment(this.investmentId, BigNumber.from(10));
+      await this.registryContract
+        .connect(this.lender2Signer)
+        .showInterestForInvestment(this.investmentId, BigNumber.from(9));
+      await this.registryContract
+        .connect(this.lender3Signer)
+        .showInterestForInvestment(this.investmentId, BigNumber.from(21));
 
       // Move time to 2 days
       await increaseTime(this.deployerSigner.provider, 2 * 24 * 60 * 60); // 2 days
@@ -260,11 +360,6 @@ export default async function suite() {
       const lendingTokenBalanceBefore =
         await this.lendingTokenContract.balanceOf(this.lender3);
 
-      const balanceProjectTokenBefore =
-        await this.projectTokenContract.balanceOf(this.lender1);
-      await this.registryContract
-        .connect(this.lender1Signer)
-        .withdrawInvestmentTickets(this.investmentId, 200, 700);
       await this.registryContract
         .connect(this.lender3Signer)
         .withdrawAmountProvidedForNonWonTickets(this.investmentId);
@@ -285,25 +380,6 @@ export default async function suite() {
       expect(+lendingTokenBalanceAfter.toString()).to.be.greaterThan(
         +lendingTokenBalanceBefore.toString()
       );
-
-      await expectRevert(
-        this.registryContract
-          .connect(this.lender1Signer)
-          .withdrawAmountProvidedForNonWonTickets(this.investmentId),
-        'No non-won tickets to withdraw'
-      );
-
-      const balanceProjectTokenAfter =
-        await this.projectTokenContract.balanceOf(this.lender1);
-      expect(+balanceProjectTokenAfter.toString()).to.be.greaterThan(
-        +balanceProjectTokenBefore.toString()
-      );
-      const lender1ticketsWonPerAddressAfter =
-        await this.registryContract.ticketsWonPerAddress(
-          this.investmentId,
-          this.lender1
-        );
-      expect(lender1ticketsWonPerAddressAfter.toNumber()).to.be.equal(0);
     });
   });
 }

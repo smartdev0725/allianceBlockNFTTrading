@@ -25,7 +25,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     ethers.utils.parseEther('5000'),
     ethers.utils.parseEther('20000'),
     ethers.utils.parseEther('50000'),
-    ethers.utils.parseEther('200000'),
   ];
   const reputationalStakingTypeAmounts = [
     ethers.utils.parseEther('1000'),

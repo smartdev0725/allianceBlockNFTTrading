@@ -4,6 +4,7 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./InvestmentDetails.sol";
 import "../libs/TokenFormat.sol";
+import "hardhat/console.sol";
 
 /**
  * @title AllianceBlock Investment contract.
@@ -82,44 +83,53 @@ contract Investment is InvestmentDetails {
             amountOfPartitions
         );
 
+        // if it's not the first time calling the function lucky numbers are not provided again.
+        if (remainingTicketsPerAddress[investmentId][msg.sender] > 0 || ticketsWonPerAddress[investmentId][msg.sender] > 0) {
+            remainingTicketsPerAddress[investmentId][msg.sender] =
+                remainingTicketsPerAddress[investmentId][msg.sender].add(amountOfPartitions);
+        }
+        else {
+            _applyImmediateTicketsAndProvideLuckyNumbers(investmentId, amountOfPartitions);
+        }
+    }
+
+    function _applyImmediateTicketsAndProvideLuckyNumbers(uint256 investmentId_, uint256 amountOfPartitions_) internal {
         uint256 reputationalBalance = _updateReputationalBalanceForPreviouslyLockedTokens();
         uint256 totalLotteryNumbers = reputationalBalance.div(rAlbtPerLotteryNumber);
 
-        if (totalLotteryNumbers == 0) revert("Not elegible for lottery numbers");
+        if (totalLotteryNumbers == 0) revert("Not eligible for lottery numbers");
 
         uint256 immediateTickets;
 
-        // TODO - Explain this check to Rachid.
         if (totalLotteryNumbers > lotteryNumbersForImmediateTicket) {
             uint256 rest = totalLotteryNumbers.mod(lotteryNumbersForImmediateTicket);
             immediateTickets = totalLotteryNumbers.sub(rest).div(lotteryNumbersForImmediateTicket);
             totalLotteryNumbers = rest;
         }
 
-        if (immediateTickets > amountOfPartitions) immediateTickets = amountOfPartitions;
-
-        // Just in case we provided immediate tickets and tickets finished, so there is no lottery in this case.
-        if (immediateTickets > ticketsRemaining[investmentId]) {
-            immediateTickets = ticketsRemaining[investmentId];
-            investmentStatus[investmentId] = InvestmentLibrary.InvestmentStatus.SETTLED;
-
-            return;
-        }
+        if (immediateTickets > amountOfPartitions_) immediateTickets = amountOfPartitions_;
 
         if (immediateTickets > 0) {
-            ticketsWonPerAddress[investmentId][msg.sender] = immediateTickets;
-            ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(immediateTickets);
+            // Just in case we provided immediate tickets and tickets finished, so there is no lottery in this case.
+            // TODO - Maybe return here.
+            if (immediateTickets > ticketsRemaining[investmentId_]) {
+                immediateTickets = ticketsRemaining[investmentId_];
+                investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.SETTLED;
+            }
+
+            ticketsWonPerAddress[investmentId_][msg.sender] = immediateTickets;
+            ticketsRemaining[investmentId_] = ticketsRemaining[investmentId_].sub(immediateTickets);
         }
 
-        remainingTicketsPerAddress[investmentId][msg.sender] = amountOfPartitions.sub(immediateTickets);
+        remainingTicketsPerAddress[investmentId_][msg.sender] = amountOfPartitions_.sub(immediateTickets);
 
-        uint256 maxLotteryNumber = totalLotteryNumbersPerInvestment[investmentId].add(totalLotteryNumbers);
+        uint256 maxLotteryNumber = totalLotteryNumbersPerInvestment[investmentId_].add(totalLotteryNumbers);
 
-        for (uint256 i = totalLotteryNumbersPerInvestment[investmentId].add(1); i <= maxLotteryNumber; i++) {
-            addressOfLotteryNumber[investmentId][i] = msg.sender;
+        for (uint256 i = totalLotteryNumbersPerInvestment[investmentId_].add(1); i <= maxLotteryNumber; i++) {
+            addressOfLotteryNumber[investmentId_][i] = msg.sender;
         }
 
-        totalLotteryNumbersPerInvestment[investmentId] = maxLotteryNumber;
+        totalLotteryNumbersPerInvestment[investmentId_] = maxLotteryNumber;
     }
 
     /**
@@ -152,7 +162,7 @@ contract Investment is InvestmentDetails {
             ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(counter);
         }
 
-        for (uint256 i = counter; i > 0; i--) {
+        while (counter > 0) {
             uint256 randomNumber = _getRandomNumber(maxNumber);
             lotteryNonce = lotteryNonce.add(1);
 
@@ -166,6 +176,8 @@ contract Investment is InvestmentDetails {
 
                 ticketsWonPerAddress[investmentId][randomAddress] = ticketsWonPerAddress[investmentId][randomAddress]
                     .add(1);
+
+                counter--;
             }
         }
     }
@@ -283,16 +295,16 @@ contract Investment is InvestmentDetails {
      */
     function _updateReputationalBalanceForPreviouslyLockedTokens() internal returns (uint256) {
         if (lockedTicketsPerAddress[msg.sender] > 0) {
+            // Decimals for rALBT => 18
             uint256 amountOfReputationalAlbtPerTicket =
-                (block.number.sub(lastBlockCheckedForLockedTicketsPerAddress[msg.sender])).div(
+                (block.number.sub(lastBlockCheckedForLockedTicketsPerAddress[msg.sender])).mul(10**18).div(
                     blocksLockedForReputation
                 );
 
             uint256 amountOfReputationalAlbtToMint =
                 amountOfReputationalAlbtPerTicket.mul(lockedTicketsPerAddress[msg.sender]);
 
-            if (amountOfReputationalAlbtToMint > 0)
-                escrow.mintReputationalToken(msg.sender, amountOfReputationalAlbtToMint);
+            escrow.mintReputationalToken(msg.sender, amountOfReputationalAlbtToMint);
 
             lastBlockCheckedForLockedTicketsPerAddress[msg.sender] = block.number;
         }

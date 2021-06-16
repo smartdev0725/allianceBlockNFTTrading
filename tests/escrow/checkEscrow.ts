@@ -4,7 +4,25 @@ import {getSigners} from '../helpers/utils';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
-  describe('Funding NFT', async () => {
+  describe('Success', async () => {
+    it('When initialize again should revert', async function () {
+      const registryAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
+      const actionVerifierAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
+      const stakingAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
+
+      await expectRevert(
+        this.escrowContract.afterInitialize(registryAddress, actionVerifierAddress, stakingAddress),
+        'Cannot initialize second time'
+      );
+    });
+
+    it('When initialize with zero address should revert', async function () {
+      await expectRevert(
+        this.escrowContract.afterInitialize( ethers.constants.AddressZero,  ethers.constants.AddressZero,  ethers.constants.AddressZero),
+        'Cannot initialize with 0 addresses'
+      );
+    });
+
     it('when transfer funding nft', async function () {
       // Given
       const {seeker} = await getNamedAccounts();
