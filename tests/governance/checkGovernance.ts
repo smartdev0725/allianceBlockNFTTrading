@@ -98,4 +98,32 @@ export default async function suite() {
     });
 
   });
+
+  describe('Governance update', async () => {
+    it('When update superdelegator with another user should revert', async function () {
+      const otherAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
+
+      await expectRevert(
+        this.governanceContract.connect(this.seekerSigner).updateSuperDelegator(otherAddress),
+        'caller is not the owner'
+      );
+    });
+
+    it('When update superdelegator with zero address should revert', async function () {
+      await expectRevert(
+        this.governanceContract.connect(this.deployerSigner).updateSuperDelegator( ethers.constants.AddressZero),
+        'Cannot initialize with 0 addresses'
+      );
+    });
+
+    it('When update superdelegator should be success', async function () {
+      // Given and When
+      this.governanceContract.connect(this.deployerSigner).updateSuperDelegator(this.seeker);
+
+      // Then
+      const superDelegator = await this.governanceContract.superDelegator();
+      expect(superDelegator).to.be.equal(this.seeker);
+
+    });
+  });
 }
