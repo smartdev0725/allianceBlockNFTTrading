@@ -156,5 +156,27 @@ export default async function suite() {
         'Token amount and price should result in integer amount of tickets'
       );
     });
+
+    it('when investment request is rejected', async function () {
+      const investmentId = await this.registryContract.totalInvestments();
+
+      await this.registryContract
+        .connect(this.seekerSigner)
+        .requestInvestment(
+          this.projectTokenContract.address,
+          this.amountOfTokensToBePurchased,
+          this.totalAmountRequested,
+          this.ipfsHash
+        );
+
+      await this.governanceContract
+        .connect(this.superDelegatorSigner)
+        .superVoteForRequest(this.approvalRequest.add(1), false);
+
+
+      const investmentStatus = (await this.registryContract.getInvestmentMetadata(investmentId))[1];
+      // Correct Status.
+      expect(investmentStatus.toString()).to.be.equal(InvestmentStatus.REJECTED);
+    });
   });
 }
