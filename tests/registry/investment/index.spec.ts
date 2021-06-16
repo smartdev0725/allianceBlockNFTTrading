@@ -2,6 +2,7 @@
 import checkInvestmentRequest from './checkInvestmentRequest';
 import checkInterestForInvestment from './checkInterestForInvestment';
 import checkExecuteLotteryRun from './checkExecuteLotteryRun';
+import checkInitialization from './checkInitialization';
 
 import {
   getContracts,
@@ -94,8 +95,8 @@ describe('Registry Investments', function () {
     this.startingEscrowProjectTokenBalance =
       await projectTokenContract.balanceOf(escrowContract.address);
 
-    this.amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
-    this.totalAmountRequested = ethers.utils.parseEther('30000');
+    this.amountOfTokensToBePurchased = ethers.utils.parseEther('1000');
+    this.totalAmountRequested = ethers.utils.parseEther('200');
     this.ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
     await this.registryContract
@@ -152,5 +153,9 @@ describe('Registry Investments', function () {
   describe(
     'When checking execute lottery run',
     checkExecuteLotteryRun.bind(this)
+  );
+  describe(
+    'When checking initialization',
+    checkInitialization.bind(this)
   );
 });

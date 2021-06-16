@@ -154,7 +154,7 @@ export const getSignature = async (
     domain: {
       name: 'AllianceBlock Verifier',
       version: '1.0',
-      chainId: 1337,
+      chainId: 31337,
       verifyingContract: actionVerifierContract,
     },
 

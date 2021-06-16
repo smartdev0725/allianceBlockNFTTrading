@@ -53,7 +53,6 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable {
     function stake(StakingType stakingType) public {
         require(balance[msg.sender] < stakingTypeAmounts[uint256(stakingType)], "Cannot stake for same type again");
         uint256 amount = stakingTypeAmounts[uint256(stakingType)];
-        require(amount > 0, "Unsupported Staking type");
 
         uint256 stakingTypeIndex = _getStakingType(msg.sender);
 
@@ -71,7 +70,6 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable {
      */
     function unstake(StakingType stakingType) external {
         require(balance[msg.sender] > stakingTypeAmounts[uint256(stakingType)], "Can only drop to lower level");
-        require(uint256(stakingType) >= 0, "Unsupported staking type");
 
         uint256 stakingTypeIndex = _getStakingType(msg.sender);
         uint256 amount = stakingTypeAmounts[uint256(stakingType)];
@@ -79,7 +77,6 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable {
         _applyReputation(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
 
         uint256 amountToWithdraw = balance[msg.sender].sub(amount);
-
         _withdraw(msg.sender, amountToWithdraw);
     }
 

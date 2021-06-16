@@ -19,6 +19,7 @@ contract SuperGovernance is OwnableUpgradeable, DaoCronjob {
      * @param registryAddress_ the Registry address
      */
     function setRegistry(address registryAddress_) external onlyOwner() {
+        require(registryAddress_ != address(0), "Cannot initialize with 0 addresses");
         require(address(registry) == address(0), "Cannot initialize second time");
         registry = IRegistry(registryAddress_);
 

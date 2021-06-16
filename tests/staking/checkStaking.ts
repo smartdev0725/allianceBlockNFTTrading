@@ -8,6 +8,14 @@ const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
   describe('Succeeds', async () => {
+    it('when calling getAmountsToStake()', async function () {
+      const amounts = await this.stakingContract.getAmountsToStake();
+
+      expect(amounts[0].toString()).to.be.equal(ethers.utils.parseEther('5000'));
+      expect(amounts[1].toString()).to.be.equal(ethers.utils.parseEther('20000'));
+      expect(amounts[2].toString()).to.be.equal(ethers.utils.parseEther('50000'));
+    });
+
     it('when staking for level 1, ALBT, rALBT and staking balances are updated accordingly', async function () {
       // Given
       const staker1StakingAmountBefore = await this.stakingContract.getBalance(
