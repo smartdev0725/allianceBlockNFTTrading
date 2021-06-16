@@ -39,9 +39,9 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         address actionVerifierAddress_,
         address stakingAddress_
     ) external onlyOwner() {
-        require(address(registry) == address(0), "Cannot initialize registry second time");
-        require(address(actionVerifier) == address(0), "Cannot initialize actionVerifier second time");
-        require(address(staking) == address(0), "Cannot initialize staking second time");
+        require(registryAddress_ != address(0) && actionVerifierAddress_ != address(0) && stakingAddress_ != address(0)
+            , "Cannot initialize with 0 addresses");
+        require(address(registry) == address(0), "Cannot initialize second time");
         registry = IRegistry(registryAddress_);
         actionVerifier = actionVerifierAddress_;
         staking = stakingAddress_;

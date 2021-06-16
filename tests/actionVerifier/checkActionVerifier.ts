@@ -143,6 +143,15 @@ export default async function suite() {
       expect(rewardPerActionAfter.toNumber()).to.be.equal(20);
     });
 
+    it('Update action should revert if action does not exist', async function () {
+      await expectRevert(
+        this.actionVerifierContract
+          .connect(this.deployerSigner)
+          .updateAction('Project Vote', ethers.utils.parseEther('10')),
+        'Action should already exist'
+      );
+    });
+
     it('Check for an existing action for true', async function () {
       // Given and When
       await this.actionVerifierContract
@@ -368,28 +377,34 @@ export default async function suite() {
       // Mint albt tokens to deployer address
       const amountToTransfer = ethers.utils.parseEther('1000000');
       await this.ALBTContract.connect(this.deployerSigner).mint(
-        this.lender1,
+        this.lender2,
         amountToTransfer
       );
-      await this.ALBTContract.connect(this.lender1Signer).approve(
+      await this.ALBTContract.connect(this.lender2Signer).approve(
         this.stakingContract.address,
         amountToTransfer
       );
 
       await this.stakingContract
-        .connect(this.lender1Signer)
+        .connect(this.lender2Signer)
         .stake(StakingType.STAKER_LVL_2);
+
+      const actionAccountBalanceBefore = await this.rALBTContract.balanceOf(this.lender1);
+      const provisionAccountBalanceBefore = await this.rALBTContract.balanceOf(this.lender2);
 
       // When
       await this.actionVerifierContract
-        .connect(this.lender1Signer)
+        .connect(this.lender2Signer)
         .provideRewardsForActions(actions, signatures);
 
       // Then
-      const balanceAfter1 = await this.rALBTContract.balanceOf(this.lender1);
-      expect(
-        +ethers.utils.formatEther(balanceAfter1.toString())
-      ).to.be.greaterThan(0);
+      const actionAccountBalanceAfter = await this.rALBTContract.balanceOf(this.lender1);
+      const provisionAccountBalanceAfter = await this.rALBTContract.balanceOf(this.lender2);
+
+      expect(actionAccountBalanceAfter.sub(actionAccountBalanceBefore).toString()
+      ).to.be.equal(ethers.utils.parseEther('10'));
+      expect(provisionAccountBalanceAfter.sub(provisionAccountBalanceBefore).toString()
+      ).to.be.equal(ethers.utils.parseEther('10'));
     });
   });
 }
