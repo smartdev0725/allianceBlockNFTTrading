@@ -39,6 +39,8 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
         uint256 baseAmountForEachPartition_
     ) public initializer {
         __Ownable_init();
+        __Investment_init();
+
         escrow = IEscrow(escrowAddress);
         baseAmountForEachPartition = baseAmountForEachPartition_;
         governance = IGovernance(governanceAddress_);

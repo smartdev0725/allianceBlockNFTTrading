@@ -4,18 +4,24 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./InvestmentDetails.sol";
 import "../libs/TokenFormat.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 /**
  * @title AllianceBlock Investment contract.
  * @notice Functionality for Investment.
  * @dev Extends InvestmentDetails.
  */
-contract Investment is InvestmentDetails {
+contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 
     // EVENTS
     event InvestmentRequested(uint256 indexed investmentId, address indexed user, uint256 amount);
+
+    function __Investment_init() public initializer {
+        __ReentrancyGuard_init();
+    }
 
     /**
      * @notice Requests investment
@@ -31,7 +37,7 @@ contract Investment is InvestmentDetails {
         uint256 amountOfInvestmentTokens,
         uint256 totalAmountRequested_,
         string memory extraInfo
-    ) external {
+    ) external nonReentrant() {
         // TODO - Change 10 ** 18 to decimals if needed.
         require(
             totalAmountRequested_.mod(baseAmountForEachPartition) == 0 &&
@@ -69,7 +75,7 @@ contract Investment is InvestmentDetails {
      * @param investmentId The id of the investment.
      * @param amountOfPartitions The amount of partitions this specific investor wanna invest in.
      */
-    function showInterestForInvestment(uint256 investmentId, uint256 amountOfPartitions) external {
+    function showInterestForInvestment(uint256 investmentId, uint256 amountOfPartitions) external  nonReentrant() {
         require(
             investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.APPROVED,
             "Can show interest only in Approved state"
@@ -193,7 +199,7 @@ contract Investment is InvestmentDetails {
         uint256 investmentId,
         uint256 ticketsToLock,
         uint256 ticketsToWithdraw
-    ) external {
+    ) external  nonReentrant() {
         require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
         require(
             ticketsWonPerAddress[investmentId][msg.sender] > 0 &&
@@ -229,7 +235,7 @@ contract Investment is InvestmentDetails {
      * @dev This function is called by an investor to withdraw lending tokens provided for non-won tickets.
      * @param investmentId The id of the investment.
      */
-    function withdrawAmountProvidedForNonWonTickets(uint256 investmentId) external {
+    function withdrawAmountProvidedForNonWonTickets(uint256 investmentId) external nonReentrant() {
         require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
         require(remainingTicketsPerAddress[investmentId][msg.sender] > 0, "No non-won tickets to withdraw");
 
@@ -243,7 +249,7 @@ contract Investment is InvestmentDetails {
      * @param investmentId The id of the investment.
      * @param ticketsToWithdraw The amount of locked tickets to be withdrawn.
      */
-    function withdrawLockedInvestmentTickets(uint256 investmentId, uint256 ticketsToWithdraw) external {
+    function withdrawLockedInvestmentTickets(uint256 investmentId, uint256 ticketsToWithdraw) external nonReentrant() {
         require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
         require(
             ticketsToWithdraw > 0 &&

@@ -8,13 +8,14 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IEscrow.sol";
 import "./interfaces/IStaking.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 /**
  * @title AllianceBlock ActionVerifier contract
  * @dev Extends Initializable, OwnableUpgradeable
  * @notice Handles user's Actions and Rewards within the protocol
  */
-contract ActionVerifier is Initializable, OwnableUpgradeable {
+contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
     using SignatureVerifier for SignatureVerifier.Action;
 
@@ -50,6 +51,8 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
         uint256 chainId
     ) public initializer {
         __Ownable_init();
+        __ReentrancyGuard_init();
+
         escrow = IEscrow(escrow_);
         staking = IStaking(staking_);
         rewardPerActionProvision = rewardPerActionProvision_;
@@ -112,7 +115,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
      * @param actions The actions provided.
      * @param signatures The signatures representing the actions.
      */
-    function provideRewardsForActions(SignatureVerifier.Action[] memory actions, bytes[] memory signatures) external {
+    function provideRewardsForActions(SignatureVerifier.Action[] memory actions, bytes[] memory signatures) external nonReentrant() {
         require(staking.getEligibilityForActionProvision(msg.sender), "Must be at least lvl2 staker");
         require(actions.length == signatures.length, "Invalid length");
         require(actions.length <= maxActionsPerProvision, "Too many actions");
