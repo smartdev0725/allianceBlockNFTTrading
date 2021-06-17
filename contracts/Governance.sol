@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IRegistry.sol";
 import "./interfaces/IStaking.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 /**
  * @title AllianceBlock Governance contract
@@ -29,6 +30,7 @@ contract Governance is Initializable, SuperGovernance {
         uint256 lateApplicationsForInvestmentDuration_
     ) public initializer {
         __Ownable_init();
+        __ReentrancyGuard_init();
 
         superDelegator = superDelegator_;
 
@@ -57,7 +59,7 @@ contract Governance is Initializable, SuperGovernance {
      */
     function requestApproval(
         uint256 investmentId
-    ) external onlyRegistry() checkCronjob() {
+    ) external onlyRegistry() checkCronjob() nonReentrant() {
         approvalRequests[totalApprovalRequests].investmentId = investmentId;
 
         emit ApprovalRequested(
