@@ -4,6 +4,8 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155HolderUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+
 import "./EscrowDetails.sol";
 import "./rALBT.sol";
 
@@ -13,6 +15,7 @@ import "./rALBT.sol";
  * @dev Extends Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable
  */
 contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable {
+    using SafeERC20 for IERC20;
     /**
      * @notice Initialize
      * @dev Initializes the contract.
@@ -84,7 +87,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         address recipient,
         uint256 amount
     ) external onlyRegistry() {
-        IERC20(projectToken).transfer(recipient, amount);
+        IERC20(projectToken).safeTransfer(recipient, amount);
     }
 
     /**

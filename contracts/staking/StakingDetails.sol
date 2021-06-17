@@ -2,6 +2,8 @@
 pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./StakingTypesAndStorage.sol";
 
 /**
@@ -10,6 +12,7 @@ import "./StakingTypesAndStorage.sol";
  */
 contract StakingDetails is StakingTypesAndStorage {
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     /**
      * @notice Withdraw
@@ -19,7 +22,7 @@ contract StakingDetails is StakingTypesAndStorage {
     function _withdraw(address staker_, uint256 amount_) internal {
         totalSupply = totalSupply.sub(amount_);
         balance[staker_] = balance[staker_].sub(amount_);
-        albt.transfer(staker_, amount_);
+        albt.safeTransfer(staker_, amount_);
         emit Withdrawn(staker_, amount_);
     }
 
@@ -29,7 +32,7 @@ contract StakingDetails is StakingTypesAndStorage {
      * @param amount_ the amount of ALBT to withdraw
      */
     function _stake(address staker_, uint256 amount_) internal {
-        albt.transferFrom(staker_, address(this), amount_);
+        albt.safeTransferFrom(staker_, address(this), amount_);
         totalSupply = totalSupply.add(amount_);
         balance[staker_] = balance[staker_].add(amount_);
         emit Staked(staker_, amount_);

@@ -2,10 +2,11 @@
 pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./InvestmentDetails.sol";
-import "../libs/TokenFormat.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "./InvestmentDetails.sol";
+import "../libs/TokenFormat.sol";
 
 /**
  * @title AllianceBlock Investment contract.
@@ -15,6 +16,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
+    using SafeERC20 for IERC20;
 
     // EVENTS
     event InvestmentRequested(uint256 indexed investmentId, address indexed user, uint256 amount);
@@ -52,7 +54,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             extraInfo
         );
 
-        IERC20(investmentToken).transferFrom(msg.sender, address(escrow), amountOfInvestmentTokens);
+        IERC20(investmentToken).safeTransferFrom(msg.sender, address(escrow), amountOfInvestmentTokens);
 
         fundingNFT.mintGen0(address(escrow), investmentDetails[totalInvestments].totalPartitionsToBePurchased, totalInvestments);
 
@@ -82,7 +84,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         );
         require(amountOfPartitions > 0, "Cannot show interest for 0 partitions");
 
-        lendingToken.transferFrom(msg.sender, address(escrow), amountOfPartitions.mul(baseAmountForEachPartition));
+        lendingToken.safeTransferFrom(msg.sender, address(escrow), amountOfPartitions.mul(baseAmountForEachPartition));
 
         investmentDetails[investmentId].partitionsRequested = investmentDetails[investmentId].partitionsRequested.add(
             amountOfPartitions
