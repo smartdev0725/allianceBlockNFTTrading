@@ -143,7 +143,62 @@ export default async function suite() {
       });
     });
 
-    describe('Loan Id and Generation', () => {
+    describe('Generation Minting', () => {
+      it('only minter role should be able to mint a new NFT', async function () {
+        await expectRevert(
+          this.fundingNFTContract
+            .connect(this.lender1Signer)
+            .mintOfGen(this.lender1, 10, 1, 1),
+          'Must have minter role to mint'
+        );
+      });
+
+      it('should get correct balance and generation for lender1', async function () {
+        await this.fundingNFTContract
+          .connect(this.seekerSigner)
+          .mintOfGen(this.lender1, 10, 0, 1); //(to, amount, gen, investId)
+        const balance = await this.fundingNFTContract.balanceOf(
+          this.lender1,
+          1// this should be the proper shifted NFT ID resulting of (gen|id)
+        );
+        expect(balance.toString()).to.be.equal('10');
+      });
+
+      it('new minter should be able to mint a new NFT', async function () {
+        await this.fundingNFTContract
+          .connect(this.deployerSigner)
+          .grantRole(
+            ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
+            this.lender1
+          );
+        await this.fundingNFTContract
+          .connect(this.lender1Signer)
+          .mintOfGen(this.staker1, 20, 0, 1);
+        const balance = await this.fundingNFTContract.balanceOf(
+          this.staker1,
+          1 // this should be the proper shifted NFT ID resulting of (gen|id)
+        );
+        expect(balance.toString()).to.be.equal('20');
+      });
+
+      it('should be able to accumulate multiple mints', async function () {
+        await this.fundingNFTContract
+          .connect(this.seekerSigner)
+          .mintGen0(this.lender1, 10, 1);
+        await this.fundingNFTContract
+          .connect(this.seekerSigner)
+          .mintOfGen(this.lender1, 20, 0, 1);
+
+        const balance = await this.fundingNFTContract.balanceOf(
+          this.lender1,
+          1 // this should be the proper shifted NFT ID resulting of (gen|id)
+        );
+
+        expect(balance.toString()).to.be.equal('30');
+      });
+    });
+
+    describe('Investment Id and Generation', () => {
       it('only minter role should be able to mint gen0', async function () {
         const tx = await this.fundingNFTContract
           .connect(this.seekerSigner)
@@ -173,6 +228,37 @@ export default async function suite() {
         await expect(tx)
           .to.emit(this.fundingNFTContract, 'GenerationIncreased')
           .withArgs('3', this.lender1, '1');
+      });
+
+      it('should be able to increase multiple loan generations', async function () {
+        await this.fundingNFTContract
+          .connect(this.seekerSigner)
+          .mintGen0(this.lender1, 15, 3);
+        const tx = await this.fundingNFTContract
+          .connect(this.seekerSigner)
+          .increaseGenerations(3, this.lender1, 10, 1); // (id,user,amount,gensToAdd)
+
+        // Correct Event. Generation increased
+        await expect(tx)
+          .to.emit(this.fundingNFTContract, 'GenerationIncreased')
+          .withArgs('3', this.lender1, '1');
+      });
+
+      it('should not be able to decrease Gen0', async function () {
+        await this.fundingNFTContract
+          .connect(this.seekerSigner)
+          .mintOfGen(this.lender1, 20, 0, 1);
+
+        await expectRevert(this.fundingNFTContract
+          .connect(this.seekerSigner)
+          .decreaseGenerations( // (id,user,amount,gensToDec)
+            1, // this should be the proper shifted NFT ID resulting of (gen|id)
+            this.lender1,
+            10,
+            1
+          ),
+          'Invalid token ID'
+        )
       });
     });
 
