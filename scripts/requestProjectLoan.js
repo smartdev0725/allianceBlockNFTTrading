@@ -6,7 +6,7 @@ const BN = require('bn.js');
 const {toWei} = require('web3-utils');
 const {getCurrentTimestamp} = require('../tests/helpers/time');
 const {ONE_DAY} = require('../tests/helpers/constants');
-const {LoanStatus} = require('../tests/helpers/registryEnums');
+const {InvestmentStatus} = require('../tests/helpers/registryEnums');
 
 if (!process.env.REGISTRY_ADDRESS)
   throw new Error('REGISTRY_ADDRESS missing from .env file');
@@ -79,9 +79,9 @@ async function main() {
     from: delegators[1],
   });
 
-  const loanStatus = await registry.loanStatus(loanId);
-  if (loanStatus == LoanStatus.APPROVED) {
-    console.log('Requested and approved loan with ID', loanId.toNumber());
+  const loanStatus = await registry.loanStatus(investmentId);
+  if (loanStatus == InvestmentStatus.APPROVED) {
+    console.log('Requested and approved loan with ID', investmentId.toNumber());
   }
 }
 

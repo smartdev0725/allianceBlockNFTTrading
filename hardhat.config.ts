@@ -2,13 +2,25 @@ import * as dotenv from 'dotenv';
 dotenv.config({path: __dirname + '/.env'});
 
 import {HardhatUserConfig} from 'hardhat/types';
-import 'hardhat-deploy';
+import {task} from 'hardhat/config';
 import '@nomiclabs/hardhat-ethers';
+import '@nomiclabs/hardhat-web3';
+
+import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
+import 'hardhat-contract-sizer';
 import '@typechain/hardhat';
 import 'solidity-coverage';
 
 import {node_url, accounts} from './utils/network';
+
+task('accounts', 'Prints the list of accounts', async (args, hre) => {
+  const accounts = await hre.ethers.getSigners();
+
+  for (const account of accounts) {
+    console.log(await account.address);
+  }
+});
 
 const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
@@ -18,6 +30,7 @@ const config: HardhatUserConfig = {
       //   url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
       //   blockNumber: 11589707,
       // },
+      allowUnlimitedContractSize: true,
     },
     ganache: {
       url: node_url('localhost'),
@@ -66,7 +79,7 @@ const config: HardhatUserConfig = {
     deploy: './deploy',
   },
   solidity: {
-    version: '0.7.3',
+    version: '0.7.6',
     settings: {
       optimizer: {
         enabled: true,
@@ -90,6 +103,11 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY || '',
+  },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: true,
+    disambiguatePaths: false,
   },
 };
 

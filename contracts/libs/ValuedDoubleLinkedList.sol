@@ -1,5 +1,9 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
+/**
+ * @title the Valued Double Linked List library
+ */
 library ValuedDoubleLinkedList {
     struct Node {
         uint256 next;
@@ -14,18 +18,39 @@ library ValuedDoubleLinkedList {
         mapping(uint256 => Node) nodes;
     }
 
+    /**
+     * @notice Get Head ID
+     * @param self the LinkedList
+     * @return the first item of the list
+     */
     function getHeadId(LinkedList storage self) internal view returns (uint256) {
         return self.head;
     }
 
+    /**
+     * @notice Get head value
+     * @param self the LinkedList
+     * @return the value of the first node
+     */
     function getHeadValue(LinkedList storage self) internal view returns (uint256) {
         return self.nodes[self.head].value;
     }
 
+    /**
+     * @notice Get list size
+     * @param self the LinkedList
+     * @return the size of the list
+     */
     function getSize(LinkedList storage self) internal view returns (uint256) {
         return self.size;
     }
 
+    /**
+     * @notice Adds node increment
+     * @param self the LinkedList
+     * @param value the value to add
+     * @param id the id of the node
+     */
     function addNodeIncrement(
         LinkedList storage self,
         uint256 value,
@@ -44,20 +69,15 @@ library ValuedDoubleLinkedList {
             self.nodes[self.head].previous = id;
             self.nodes[id] = Node(self.head, 0, value);
             self.head = id;
-        }
-        else {
+        } else {
             //If middle
-            if(self.size > 1) {
+            if (self.size > 1) {
                 for (uint256 i = 1; i < self.size; i++) {
                     node = self.nodes[node.next];
                     if (value < node.value) {
                         uint256 currentId = self.nodes[node.next].previous;
                         self.nodes[node.next].previous = id;
-                        self.nodes[id] = Node(
-                            currentId,
-                            self.nodes[currentId].next,
-                            value
-                        );
+                        self.nodes[id] = Node(currentId, self.nodes[currentId].next, value);
                         self.nodes[currentId].next = id;
                         break;
                     }
@@ -74,6 +94,12 @@ library ValuedDoubleLinkedList {
         self.size += 1;
     }
 
+    /**
+     * @notice Adds node decrement
+     * @param self the LinkedList
+     * @param value the value to decrement
+     * @param id the id of the node
+     */
     function addNodeDecrement(
         LinkedList storage self,
         uint256 value,
@@ -92,8 +118,7 @@ library ValuedDoubleLinkedList {
             self.nodes[self.head].previous = id;
             self.nodes[id] = Node(self.head, 0, value);
             self.head = id;
-        }
-        else {
+        } else {
             //If middle
             if (self.size > 1) {
                 for (uint256 i = 1; i < self.size; i++) {
@@ -101,11 +126,7 @@ library ValuedDoubleLinkedList {
                     if (value > node.value) {
                         uint256 currentId = self.nodes[node.next].previous;
                         self.nodes[node.next].previous = id;
-                        self.nodes[id] = Node(
-                            currentId,
-                            self.nodes[currentId].next,
-                            value
-                        );
+                        self.nodes[id] = Node(currentId, self.nodes[currentId].next, value);
                         self.nodes[currentId].next = id;
                         break;
                     }
@@ -122,76 +143,95 @@ library ValuedDoubleLinkedList {
         self.size += 1;
     }
 
+    /**
+     * @notice Removes a node
+     * @param self the LinkedList
+     * @param id the id of the node to remove
+     */
     function removeNode(LinkedList storage self, uint256 id) internal {
         if (self.size == 1) {
             self.head = 0;
             self.tail = 0;
-        }
-        else if (id == self.head) {
+        } else if (id == self.head) {
             self.head = self.nodes[self.head].next;
             self.nodes[self.head].previous = 0;
-        }
-        else if (id == self.tail) {
+        } else if (id == self.tail) {
             self.tail = self.nodes[self.tail].previous;
             self.nodes[self.tail].next = 0;
-        }
-        else {
+        } else {
             self.nodes[self.nodes[id].next].previous = self.nodes[id].previous;
             self.nodes[self.nodes[id].previous].next = self.nodes[id].next;
-        }       
+        }
 
         self.size -= 1;
     }
 
-    function popHead(LinkedList storage self) internal returns(uint256 head) {
+    /**
+     * @notice Pops the head of the list
+     * @param self the LinkedList
+     * @return head the first item of the list
+     */
+    function popHead(LinkedList storage self) internal returns (uint256 head) {
         head = self.head;
 
-        if(self.size == 1) {
+        if (self.size == 1) {
             self.head = 0;
             self.tail = 0;
-        }
-        else {
+        } else {
             self.head = self.nodes[self.head].next;
             self.nodes[self.head].previous = 0;
-        }      
+        }
 
         self.size -= 1;
     }
 
-    function popHeadAndValue(LinkedList storage self) internal returns(uint256 head, uint256 value) {
+    /**
+     * @notice Pops the head and value of the list
+     * @param self the LinkedList
+     * @return head
+     * @return value
+     */
+    function popHeadAndValue(LinkedList storage self) internal returns (uint256 head, uint256 value) {
         head = self.head;
         value = self.nodes[self.head].value;
 
-        if(self.size == 1) {
+        if (self.size == 1) {
             self.head = 0;
             self.tail = 0;
-        }
-        else {
+        } else {
             self.head = self.nodes[self.head].next;
             self.nodes[self.head].previous = 0;
-        }      
+        }
 
         self.size -= 1;
     }
 
+    /**
+     * @notice Removes multiple nodes
+     * @param self the LinkedList
+     * @param amountOfNodes the number of nodes to remove starting from Head
+     */
     function removeMultipleFromHead(LinkedList storage self, uint256 amountOfNodes) internal {
         for (uint256 i = 0; i < amountOfNodes; i++) {
-            uint256 head = self.head;
-
-            if(self.size == 1) {
+            if (self.size == 1) {
                 self.head = 0;
                 self.tail = 0;
-            }
-            else {
+            } else {
                 self.head = self.nodes[self.head].next;
                 self.nodes[self.head].previous = 0;
-            }      
+            }
 
             self.size -= 1;
         }
     }
 
-    function getPositionForId(LinkedList storage self, uint256 id) internal view returns(uint256) {
+    /**
+     * @notice Get position from ID
+     * @param self the LinkedList
+     * @param id the id to search
+     * @return the index position for the id provided
+     */
+    function getPositionForId(LinkedList storage self, uint256 id) internal view returns (uint256) {
         uint256 positionCounter;
 
         if (self.nodes[id].value == 0) return 0; // If not in list.
@@ -206,6 +246,11 @@ library ValuedDoubleLinkedList {
         return positionCounter;
     }
 
+    /**
+     * @notice Clones ValuedDoubleLinkedList
+     * @param self the LinkedList
+     * @param listToClone the LinkedList storage to clone the list from
+     */
     function cloneList(LinkedList storage self, LinkedList storage listToClone) internal {
         self.head = listToClone.head;
         self.tail = listToClone.tail;
