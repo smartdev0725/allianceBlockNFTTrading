@@ -42,6 +42,15 @@ export default async function suite() {
       );
     });
 
+    it('reverts when trying to decideForInvestment externally', async function () {
+      await expectRevert(
+        this.registryContract
+          .connect(this.lender1Signer)
+          .decideForInvestment(this.investmentId, true),
+        'Only Governance'
+      );
+    });
+
     it('should revert when sender has no reputational ALBT yet', async function () {
       await expectRevert(
         this.registryContract
