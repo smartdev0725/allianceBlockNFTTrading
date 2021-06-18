@@ -25,7 +25,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
-    args: [10, 10, escrowContractAddress, stakingContractAddress, chainId], // Other possible network 1337
+    args: [ethers.utils.parseEther('10'), 10, escrowContractAddress, stakingContractAddress, chainId], // Other possible network 1337
     log: true,
   });
   return true;
