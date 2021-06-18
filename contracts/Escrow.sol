@@ -76,18 +76,18 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
-     * @notice Transfer Project Token
-     * @dev This function is used to send the project token amount to the seeker.
-     * @param projectToken The project token's contract address.
-     * @param recipient The address to transfer the project tokens to.
-     * @param amount The amount of project tokens to be sent to seeker.
+     * @notice Transfer Investment Token
+     * @dev This function is used to send the investment token amount to the seeker.
+     * @param investmentToken The investment token's contract address.
+     * @param recipient The address to transfer the investment tokens to.
+     * @param amount The amount of investment tokens to be sent to seeker.
      */
-    function transferProjectToken(
-        address projectToken,
+    function transferInvestmentToken(
+        address investmentToken,
         address recipient,
         uint256 amount
     ) external onlyRegistry() {
-        IERC20(projectToken).safeTransfer(recipient, amount);
+        IERC20(investmentToken).safeTransfer(recipient, amount);
     }
 
     /**

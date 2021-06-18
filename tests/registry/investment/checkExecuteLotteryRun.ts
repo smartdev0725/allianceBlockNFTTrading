@@ -271,8 +271,8 @@ export default async function suite() {
         .connect(this.lender3Signer)
         .executeLotteryRun(this.investmentId);
 
-      const balanceProjectTokenBefore =
-        await this.projectTokenContract.balanceOf(this.lender1);
+      const balanceInvestmentTokenBefore =
+        await this.investmentTokenContract.balanceOf(this.lender1);
       await this.registryContract
         .connect(this.lender1Signer)
         .withdrawInvestmentTickets(this.investmentId, 3, 7);
@@ -284,10 +284,10 @@ export default async function suite() {
         'No non-won tickets to withdraw'
       );
 
-      const balanceProjectTokenAfter =
-        await this.projectTokenContract.balanceOf(this.lender1);
-      expect(+balanceProjectTokenAfter.toString()).to.be.greaterThan(
-        +balanceProjectTokenBefore.toString()
+      const balanceInvestmentTokenAfter =
+        await this.investmentTokenContract.balanceOf(this.lender1);
+      expect(+balanceInvestmentTokenAfter.toString()).to.be.greaterThan(
+        +balanceInvestmentTokenBefore.toString()
       );
       const lender1ticketsWonPerAddressAfter =
         await this.registryContract.ticketsWonPerAddress(
@@ -370,7 +370,7 @@ export default async function suite() {
       await this.registryContract
         .connect(this.seekerSigner)
         .requestInvestment(
-          this.projectTokenContract.address,
+          this.investmentTokenContract.address,
           amountOfTokensToBePurchased,
           totalAmountRequested,
           ipfsHash
@@ -458,7 +458,7 @@ export default async function suite() {
         await this.registryContract
           .connect(this.seekerSigner)
           .requestInvestment(
-            this.projectTokenContract.address,
+            this.investmentTokenContract.address,
             amountOfTokensToBePurchased,
             totalAmountRequested,
             ipfsHash
@@ -502,39 +502,39 @@ export default async function suite() {
         const ticketsToLock = 0;
         const ticketsToWithdraw = 10;
 
-        const balanceOfProjectTokensBefore = await this.projectTokenContract.balanceOf(this.lender1);
+        const balanceOfInvestmentTokensBefore = await this.investmentTokenContract.balanceOf(this.lender1);
 
         await this.registryContract
           .connect(this.lender1Signer)
           .withdrawInvestmentTickets(this.investmentId.add(1), ticketsToLock, ticketsToWithdraw);
 
-        const balanceOfProjectTokensAfter = await this.projectTokenContract.balanceOf(this.lender1);
+        const balanceOfInvestmentTokensAfter = await this.investmentTokenContract.balanceOf(this.lender1);
 
-        const projectTokensGot = balanceOfProjectTokensAfter.sub(balanceOfProjectTokensBefore);
-        const projectTokensToGet = ticketsToWin.mul(tokensPerTicket);
+        const investmentTokensGot = balanceOfInvestmentTokensAfter.sub(balanceOfInvestmentTokensBefore);
+        const investmentTokensToGet = ticketsToWin.mul(tokensPerTicket);
 
         // Then
-        expect(projectTokensGot.toString()).to.be.equal(projectTokensToGet.toString());
+        expect(investmentTokensGot.toString()).to.be.equal(investmentTokensToGet.toString());
       });
 
       it('When withdrawing with 0 ticketsToWithdraw', async function () {
         const ticketsToLock = 10;
         const ticketsToWithdraw = 0;
 
-        const balanceOfProjectTokensBefore = await this.projectTokenContract.balanceOf(this.lender1);
+        const balanceOfInvestmentTokensBefore = await this.investmentTokenContract.balanceOf(this.lender1);
         const lockedTicketsBefore = await this.registryContract.lockedTicketsPerAddress(this.lender1);
 
         await this.registryContract
           .connect(this.lender1Signer)
           .withdrawInvestmentTickets(this.investmentId.add(1), ticketsToLock, ticketsToWithdraw);
 
-        const balanceOfProjectTokensAfter = await this.projectTokenContract.balanceOf(this.lender1);
+        const balanceOfInvestmentTokensAfter = await this.investmentTokenContract.balanceOf(this.lender1);
         const lockedTicketsAfter = await this.registryContract.lockedTicketsPerAddress(this.lender1);
 
-        const projectTokensGot = balanceOfProjectTokensAfter.sub(balanceOfProjectTokensBefore);
+        const investmentTokensGot = balanceOfInvestmentTokensAfter.sub(balanceOfInvestmentTokensBefore);
 
         // Then
-        expect(projectTokensGot.toString()).to.be.equal('0');
+        expect(investmentTokensGot.toString()).to.be.equal('0');
         expect(lockedTicketsAfter.sub(lockedTicketsBefore).toString()).to.be.equal(ticketsToLock.toString());
       });
 
@@ -576,7 +576,7 @@ export default async function suite() {
         await this.registryContract
           .connect(this.seekerSigner)
           .requestInvestment(
-            this.projectTokenContract.address,
+            this.investmentTokenContract.address,
             amountOfTokensToBePurchased,
             totalAmountRequested,
             ipfsHash
@@ -623,7 +623,7 @@ export default async function suite() {
         await this.registryContract
           .connect(this.seekerSigner)
           .requestInvestment(
-            this.projectTokenContract.address,
+            this.investmentTokenContract.address,
             amountOfTokensToBePurchased,
             totalAmountRequested,
             ipfsHash
@@ -651,9 +651,9 @@ export default async function suite() {
         expect(Number(balanceUpdate)).to.be.greaterThan(0);
       });
 
-      it('When withdrawing locked tokens should have more rALBT and projectTokens', async function () {
+      it('When withdrawing locked tokens should have more rALBT and investmentTokens', async function () {
         const balanceOfReputationalTokensBefore = await this.rALBTContract.balanceOf(this.lender1);
-        const balanceOfProjectTokensBefore = await this.projectTokenContract.balanceOf(this.lender1);
+        const balanceOfInvestmentTokensBefore = await this.investmentTokenContract.balanceOf(this.lender1);
 
         const numberOfPartitions = BigNumber.from(10);
         const tokensPerTicket = ethers.utils.parseEther('100');
@@ -663,15 +663,15 @@ export default async function suite() {
           .withdrawLockedInvestmentTickets(this.investmentId.add(1), numberOfPartitions);
 
         const balanceOfReputationalTokensAfter = await this.rALBTContract.balanceOf(this.lender1);
-        const balanceOfProjectTokensAfter = await this.projectTokenContract.balanceOf(this.lender1);
+        const balanceOfInvestmentTokensAfter = await this.investmentTokenContract.balanceOf(this.lender1);
 
         const reputationalBalanceUpdate = balanceOfReputationalTokensAfter.sub(balanceOfReputationalTokensBefore);
-        const projectTokensGot = balanceOfProjectTokensAfter.sub(balanceOfProjectTokensBefore);
-        const projectTokensToGet = numberOfPartitions.mul(tokensPerTicket);
+        const investmentTokensGot = balanceOfInvestmentTokensAfter.sub(balanceOfInvestmentTokensBefore);
+        const investmentTokensToGet = numberOfPartitions.mul(tokensPerTicket);
 
         // Then
         expect(Number(reputationalBalanceUpdate)).to.be.greaterThan(0);
-        expect(projectTokensGot.toString()).to.be.equal(projectTokensToGet.toString());
+        expect(investmentTokensGot.toString()).to.be.equal(investmentTokensToGet.toString());
       });
 
       it('Should revert when trying to withdraw more than locked tickets', async function () {

@@ -27,7 +27,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
     /**
      * @notice Requests investment
-     * @dev This function is used for projects to request investment in exchange for project tokens.
+     * @dev This function is used for seekers to request investment in exchange for investment tokens.
      * @dev require valid amount
      * @param investmentToken The token that will be purchased by investors.
      * @param amountOfInvestmentTokens The amount of investment tokens to be purchased.
@@ -72,7 +72,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
     /**
      * @notice user show interest for investment
-     * @dev This function is called by the investors who are interested to invest in a specific project.
+     * @dev This function is called by the investors who are interested to invest in a specific investment token.
      * @dev require Approval state and valid partition
      * @param investmentId The id of the investment.
      * @param amountOfPartitions The amount of partitions this specific investor wanna invest in.
@@ -141,7 +141,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
     /**
      * @notice Executes lottery run
-     * @dev This function is called by any investor interested in a project to run part of the lottery.
+     * @dev This function is called by any investor interested in an Investment Token to run part of the lottery.
      * @dev requires Started state and available tickets
      * @param investmentId The id of the investment.
      */
@@ -225,7 +225,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         if (ticketsToWithdraw > 0) {
             uint256 amountToWithdraw = investmentTokensPerTicket[investmentId].mul(ticketsToWithdraw);
-            escrow.transferProjectToken(investmentDetails[investmentId].projectToken, msg.sender, amountToWithdraw);
+            escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountToWithdraw);
         }
 
         if (remainingTicketsPerAddress[investmentId][msg.sender] > 0) {
@@ -268,7 +268,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].sub(ticketsToWithdraw);
 
         uint256 amountToWithdraw = investmentTokensPerTicket[investmentId].mul(ticketsToWithdraw);
-        escrow.transferProjectToken(investmentDetails[investmentId].projectToken, msg.sender, amountToWithdraw);
+        escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountToWithdraw);
     }
 
     /**

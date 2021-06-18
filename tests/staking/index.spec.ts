@@ -55,7 +55,7 @@ describe('Staking', function () {
       fundingNFTContract,
       escrowContract,
       lendingTokenContract,
-      projectTokenContract,
+      investmentTokenContract,
       collateralTokenContract,
       ALBTContract,
       stakingContract,
@@ -65,7 +65,7 @@ describe('Staking', function () {
     this.fundingNFTContract = fundingNFTContract;
     this.escrowContract = escrowContract;
     this.lendingTokenContract = lendingTokenContract;
-    this.projectTokenContract = projectTokenContract;
+    this.investmentTokenContract = investmentTokenContract;
     this.collateralTokenContract = collateralTokenContract;
     this.ALBTContract = ALBTContract;
     this.stakingContract = stakingContract;

@@ -1,4 +1,4 @@
-// Project
+// Investment
 import checkInvestmentRequest from './checkInvestmentRequest';
 import checkInterestForInvestment from './checkInterestForInvestment';
 import checkExecuteLotteryRun from './checkExecuteLotteryRun';
@@ -53,7 +53,7 @@ describe('Registry Investments', function () {
       fundingNFTContract,
       escrowContract,
       lendingTokenContract,
-      projectTokenContract,
+      investmentTokenContract,
       collateralTokenContract,
       stakingContract,
       ALBTContract,
@@ -63,7 +63,7 @@ describe('Registry Investments', function () {
     this.fundingNFTContract = fundingNFTContract;
     this.escrowContract = escrowContract;
     this.lendingTokenContract = lendingTokenContract;
-    this.projectTokenContract = projectTokenContract;
+    this.investmentTokenContract = investmentTokenContract;
     this.collateralTokenContract = collateralTokenContract;
     this.stakingContract = stakingContract;
     this.ALBTContract = ALBTContract;
@@ -76,7 +76,7 @@ describe('Registry Investments', function () {
       {
         registryContract,
         lendingTokenContract,
-        projectTokenContract,
+        investmentTokenContract,
         collateralTokenContract,
       },
       {deployer, lender1, lender2, lender3, seeker},
@@ -92,8 +92,8 @@ describe('Registry Investments', function () {
     this.approvalRequest = await governanceContract.totalApprovalRequests();
 
     this.investmentId = await this.registryContract.totalInvestments();
-    this.startingEscrowProjectTokenBalance =
-      await projectTokenContract.balanceOf(escrowContract.address);
+    this.startingEscrowInvestmentTokenBalance =
+      await investmentTokenContract.balanceOf(escrowContract.address);
 
     this.amountOfTokensToBePurchased = ethers.utils.parseEther('1000');
     this.totalAmountRequested = ethers.utils.parseEther('200');
@@ -102,7 +102,7 @@ describe('Registry Investments', function () {
     await this.registryContract
       .connect(this.seekerSigner)
       .requestInvestment(
-        this.projectTokenContract.address,
+        this.investmentTokenContract.address,
         this.amountOfTokensToBePurchased,
         this.totalAmountRequested,
         this.ipfsHash

@@ -33,7 +33,7 @@ export const getContracts = async () => {
 
   const lendingTokenContract = await ethers.getContract('LendingToken');
 
-  const projectTokenContract = await ethers.getContract('ProjectToken');
+  const investmentTokenContract = await ethers.getContract('InvestmentToken');
 
   const collateralTokenContract = await ethers.getContract('CollateralToken');
 
@@ -51,7 +51,7 @@ export const getContracts = async () => {
     fundingNFTContract,
     escrowContract,
     lendingTokenContract,
-    projectTokenContract,
+    investmentTokenContract,
     collateralTokenContract,
     ALBTContract,
     stakingContract,
@@ -68,7 +68,7 @@ export const initializeTransfers = async (
   const {
     registryContract,
     lendingTokenContract,
-    projectTokenContract,
+    investmentTokenContract,
     collateralTokenContract,
   } = contracts;
 
@@ -121,10 +121,10 @@ export const initializeTransfers = async (
   await collateralTokenContract
     .connect(seekerSigner)
     .approve(registryContract.address, amountToTransfer);
-  await projectTokenContract
+  await investmentTokenContract
     .connect(deployerSigner)
     .mint(seeker, amountToTransfer);
-  await projectTokenContract
+  await investmentTokenContract
     .connect(seekerSigner)
     .approve(registryContract.address, amountToTransfer);
 };

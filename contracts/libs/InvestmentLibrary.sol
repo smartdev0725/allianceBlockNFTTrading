@@ -18,8 +18,8 @@ library InvestmentLibrary {
         uint256 investmentId; // The Id of the investment.
         uint256 approvalDate; // The timestamp in which investment was approved.
         uint256 startingDate; // The timestamp in which investment was funded.
-        address projectToken; // The address of the token that will be sold to investors.
-        uint256 projectTokensAmount; // The amount of project tokens that are deposited for investors by the seeker.
+        address investmentToken; // The address of the token that will be sold to investors.
+        uint256 investmentTokensAmount; // The amount of investment tokens that are deposited for investors by the seeker.
         uint256 totalAmountToBeRaised; // The amount of tokens that seeker of investment will raise after all tickets are purchased.
         uint256 totalPartitionsToBePurchased; // The total partitions or ERC1155 tokens, in which investment is splitted.
         string extraInfo; // The ipfs hash, where all extra info about the investment are stored.

@@ -115,10 +115,10 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
      */
     function _rejectInvestment(uint256 investmentId_) internal {
         investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.REJECTED;
-        escrow.transferProjectToken(
-            investmentDetails[investmentId_].projectToken,
+        escrow.transferInvestmentToken(
+            investmentDetails[investmentId_].investmentToken,
             investmentSeeker[investmentId_],
-            investmentDetails[investmentId_].projectTokensAmount
+            investmentDetails[investmentId_].investmentTokensAmount
         );
         emit InvestmentRejected(investmentId_);
     }

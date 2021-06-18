@@ -23,20 +23,20 @@ contract InvestmentDetails is Storage {
      * @notice Stores Investment Details
      * @dev require a valid interest percentage
      * @param amountRequestedToBeRaised_ the amount requested
-     * @param projectToken_ the project token
-     * @param projectTokensAmount_ the amount of project tokens provided
+     * @param investmentToken_ the investment token address
+     * @param investmentTokensAmount_ the amount of investment tokens provided by the seeker
      * @param extraInfo_ the IPFS hard data provided
      */
     function _storeInvestmentDetails(
         uint256 amountRequestedToBeRaised_,
-        address projectToken_,
-        uint256 projectTokensAmount_,
+        address investmentToken_,
+        uint256 investmentTokensAmount_,
         string memory extraInfo_
     ) internal {
         InvestmentLibrary.InvestmentDetails memory investment;
         investment.investmentId = totalInvestments;
-        investment.projectToken = projectToken_;
-        investment.projectTokensAmount = projectTokensAmount_;
+        investment.investmentToken = investmentToken_;
+        investment.investmentTokensAmount = investmentTokensAmount_;
         investment.totalAmountToBeRaised = amountRequestedToBeRaised_;
         investment.extraInfo = extraInfo_;
         investment.totalPartitionsToBePurchased = amountRequestedToBeRaised_.div(baseAmountForEachPartition);

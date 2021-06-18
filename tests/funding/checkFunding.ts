@@ -216,7 +216,7 @@ export default async function suite() {
           );
       });
 
-      it('should be able to increase loan generation', async function () {
+      it('should be able to increase investment generation', async function () {
         await this.fundingNFTContract
           .connect(this.seekerSigner)
           .mintGen0(this.lender1, 15, 3);
@@ -230,7 +230,7 @@ export default async function suite() {
           .withArgs('3', this.lender1, '1');
       });
 
-      it('should be able to increase multiple loan generations', async function () {
+      it('should be able to increase multiple investment generations', async function () {
         await this.fundingNFTContract
           .connect(this.seekerSigner)
           .mintGen0(this.lender1, 15, 3);

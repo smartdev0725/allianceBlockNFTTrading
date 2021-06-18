@@ -6,7 +6,7 @@ import "../../Registry.sol";
 
 /**
  * @title AllianceBlock Registry contract
- * @notice Responsible for loan transactions.
+ * @notice Responsible for investment transactions.
  */
 contract RegistryV2Test is Registry {
     // Only for test upgrade

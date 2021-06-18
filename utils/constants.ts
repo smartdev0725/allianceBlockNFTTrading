@@ -1,4 +1,4 @@
-export const DAO_LOAN_APPROVAL_REQUEST_DURATION = 2 * 24 * 60 * 60; // Two days
+export const DAO_INVESTMENT_APPROVAL_REQUEST_DURATION = 2 * 24 * 60 * 60; // Two days
 export const DAO_MILESTONE_APPROVAL_REQUEST_DURATION = 24 * 60 * 60; // One day
 export const DAO_UPDATE_REQUEST_DURATION = 24 * 60 * 60; // One day
 export const VESTING_TIME_INTERVAL = 30 * 24 * 60 * 60; // One month
