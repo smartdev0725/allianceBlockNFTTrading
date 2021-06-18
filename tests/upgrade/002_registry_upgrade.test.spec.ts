@@ -25,7 +25,7 @@ describe('Registry upgrade test', () => {
 
     const registryContract = await ethers.getContract('Registry');
     const governanceContract = await ethers.getContract('Governance');
-    const projectTokenContract = await ethers.getContract('ProjectToken');
+    const investmentTokenContract = await ethers.getContract('InvestmentToken');
     const lendingTokenContract = await ethers.getContract('LendingToken');
     const collateralTokenContract = await ethers.getContract('CollateralToken');
 
@@ -34,7 +34,7 @@ describe('Registry upgrade test', () => {
       {
         registryContract,
         lendingTokenContract,
-        projectTokenContract,
+        investmentTokenContract,
         collateralTokenContract,
       },
       {deployer, lender1, lender2, lender3, seeker},
@@ -58,7 +58,7 @@ describe('Registry upgrade test', () => {
     await registryContract
       .connect(seekerSigner)
       .requestInvestment(
-        projectTokenContract.address,
+        investmentTokenContract.address,
         amountOfInvestmentTokens,
         amountRequested,
         ipfsHash
@@ -81,7 +81,7 @@ describe('Registry upgrade test', () => {
     // Then
     expect(investmentDetails.investmentId.toNumber()).to.equal(investmentIdBefore.toNumber());
     expect(amountOfInvestmentTokens.toString()).to.equal(
-      investmentDetails.projectTokensAmount.toString()
+      investmentDetails.investmentTokensAmount.toString()
     );
     // Check new method don't exist
     expect(() => registryContract.getSomething2()).to.throw(
@@ -126,7 +126,7 @@ describe('Registry upgrade test', () => {
       investmentIdBefore.toNumber()
     );
     expect(amountOfInvestmentTokens.toString()).to.equal(
-      investmentDetailsAfterUpdate.projectTokensAmount.toString()
+      investmentDetailsAfterUpdate.investmentTokensAmount.toString()
     );
   });
 });

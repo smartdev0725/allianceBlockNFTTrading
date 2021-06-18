@@ -1,4 +1,4 @@
-// Project
+// Investment
 import checkGovernance from './checkGovernance';
 
 import {
@@ -48,11 +48,11 @@ describe('Governance', function () {
       registryContract,
       governanceContract,
       lendingTokenContract,
-      projectTokenContract,
+      investmentTokenContract,
       collateralTokenContract,
     } = await getContracts();
     this.governanceContract = governanceContract;
-    this.projectTokenContract = projectTokenContract;
+    this.investmentTokenContract = investmentTokenContract;
     this.registryContract = registryContract;
 
     // Initialize Transfers
@@ -60,7 +60,7 @@ describe('Governance', function () {
       {
         registryContract,
         lendingTokenContract,
-        projectTokenContract,
+        investmentTokenContract,
         collateralTokenContract,
       },
       {deployer, lender1, lender2, lender3, seeker},

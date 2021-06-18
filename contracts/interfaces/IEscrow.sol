@@ -6,7 +6,7 @@ pragma solidity >=0.6.0 <0.8.0;
  * @title Interface of the Escrow.
  */
 interface IEscrow {
-    function receiveFunding(uint256 loanId, uint256 amount) external;
+    function receiveFunding(uint256 investmentId, uint256 amount) external;
 
     function transferFundingNFT(
         uint256 investmentId,
@@ -16,8 +16,8 @@ interface IEscrow {
 
     function transferLendingToken(address seeker, uint256 amount) external;
 
-    function transferProjectToken(
-        address projectToken,
+    function transferInvestmentToken(
+        address investmentToken,
         address seeker,
         uint256 amount
     ) external;

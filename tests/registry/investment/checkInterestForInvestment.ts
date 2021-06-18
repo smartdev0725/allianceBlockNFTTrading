@@ -19,7 +19,7 @@ export default async function suite() {
       await this.registryContract
         .connect(this.seekerSigner)
         .requestInvestment(
-          this.projectTokenContract.address,
+          this.investmentTokenContract.address,
           amountOfTokensToBePurchased,
           totalAmountRequested,
           ipfsHash
@@ -282,7 +282,7 @@ export default async function suite() {
       await this.registryContract
         .connect(this.seekerSigner)
         .requestInvestment(
-          this.projectTokenContract.address,
+          this.investmentTokenContract.address,
           this.amountOfTokensToBePurchased,
           this.totalAmountRequested,
           this.ipfsHash
