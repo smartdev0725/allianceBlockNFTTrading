@@ -28,15 +28,20 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
      * @param reputationalStakingTypeAmounts_ the array of Reputation Staking Type Amounts
      */
     function initialize(
-        IERC20 albt_,
+        address albt_,
         address escrow_,
         uint256[] memory stakingTypeAmounts_,
         uint256[] memory reputationalStakingTypeAmounts_
-    ) public initializer {
+    ) external initializer {
+        require(albt_ != address(0), "Cannot initialize albt with 0 address");
+        require(escrow_ != address(0), "Cannot initialize escrow_ with 0 address");
+        require(stakingTypeAmounts_.length != 0, "Cannot initialize stakingTypeAmounts_ with 0");
+        require(reputationalStakingTypeAmounts_.length != 0, "Cannot initialize reputationalStakingTypeAmounts_ with 0");
+
         __Ownable_init();
         __ReentrancyGuard_init();
 
-        albt = albt_;
+        albt = IERC20(albt_);
         escrow = IEscrow(escrow_);
 
         for (uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
@@ -53,7 +58,7 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
      * @param stakingType The staking type
      * @dev requires not Delegator and cannot repeat staking type
      */
-    function stake(StakingType stakingType) public nonReentrant() {
+    function stake(StakingType stakingType) external nonReentrant() {
         require(balance[msg.sender] < stakingTypeAmounts[uint256(stakingType)], "Cannot stake for same type again");
         uint256 amount = stakingTypeAmounts[uint256(stakingType)];
 

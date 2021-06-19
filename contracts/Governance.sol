@@ -28,9 +28,12 @@ contract Governance is Initializable, SuperGovernance {
         address superDelegator_,
         uint256 applicationsForInvestmentDuration_,
         uint256 lateApplicationsForInvestmentDuration_
-    ) public initializer {
-        __Ownable_init();
-        __ReentrancyGuard_init();
+    ) external initializer {
+        require(superDelegator_ != address(0), "Cannot initialize with 0 addresses");
+        require(applicationsForInvestmentDuration_ != 0, "Cannot initialize applicationsForInvestmentDuration_ with 0");
+        require(lateApplicationsForInvestmentDuration_ != 0, "Cannot initialize lateApplicationsForInvestmentDuration_ with 0");
+
+        __SuperGovernance_init();
 
         superDelegator = superDelegator_;
 
