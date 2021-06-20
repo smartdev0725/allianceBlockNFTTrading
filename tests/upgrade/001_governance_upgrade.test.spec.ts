@@ -48,9 +48,11 @@ describe('Governance upgrade test', () => {
 
     // Then
     // Old Governance variables
-    const superGovernanceUpgradedAddress = await governanceContractUpgraded.superDelegator();
-    expect(ethers.utils.isAddress(superGovernanceUpgradedAddress)).to.equal(true);
-
+    const superGovernanceUpgradedAddress =
+      await governanceContractUpgraded.superDelegator();
+    expect(ethers.utils.isAddress(superGovernanceUpgradedAddress)).to.equal(
+      true
+    );
 
     // Check new Governance variables exist
     expect(foo.toNumber()).to.equal(0);

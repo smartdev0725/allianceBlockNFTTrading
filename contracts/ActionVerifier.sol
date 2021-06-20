@@ -121,7 +121,10 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
      * @param actions The actions provided.
      * @param signatures The signatures representing the actions.
      */
-    function provideRewardsForActions(SignatureVerifier.Action[] memory actions, bytes[] memory signatures) external nonReentrant() {
+    function provideRewardsForActions(SignatureVerifier.Action[] memory actions, bytes[] memory signatures)
+        external
+        nonReentrant()
+    {
         require(staking.getEligibilityForActionProvision(msg.sender), "Must be at least lvl2 staker");
         require(actions.length == signatures.length, "Invalid length");
         require(actions.length <= maxActionsPerProvision, "Too many actions");

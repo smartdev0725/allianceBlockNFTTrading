@@ -31,7 +31,10 @@ contract Governance is Initializable, SuperGovernance {
     ) external initializer {
         require(superDelegator_ != address(0), "Cannot initialize with 0 addresses");
         require(applicationsForInvestmentDuration_ != 0, "Cannot initialize applicationsForInvestmentDuration_ with 0");
-        require(lateApplicationsForInvestmentDuration_ != 0, "Cannot initialize lateApplicationsForInvestmentDuration_ with 0");
+        require(
+            lateApplicationsForInvestmentDuration_ != 0,
+            "Cannot initialize lateApplicationsForInvestmentDuration_ with 0"
+        );
 
         __SuperGovernance_init();
 
@@ -60,15 +63,10 @@ contract Governance is Initializable, SuperGovernance {
      * @dev Executes cronJob()
      * @param investmentId The id of the investment or investment to approve
      */
-    function requestApproval(
-        uint256 investmentId
-    ) external onlyRegistry() checkCronjob() nonReentrant() {
+    function requestApproval(uint256 investmentId) external onlyRegistry() checkCronjob() nonReentrant() {
         approvalRequests[totalApprovalRequests].investmentId = investmentId;
 
-        emit ApprovalRequested(
-            approvalRequests[totalApprovalRequests].investmentId,
-            msg.sender
-        );
+        emit ApprovalRequested(approvalRequests[totalApprovalRequests].investmentId, msg.sender);
 
         totalApprovalRequests = totalApprovalRequests.add(1);
     }

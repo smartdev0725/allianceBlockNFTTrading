@@ -159,7 +159,7 @@ export default async function suite() {
           .mintOfGen(this.lender1, 10, 0, 1); //(to, amount, gen, investId)
         const balance = await this.fundingNFTContract.balanceOf(
           this.lender1,
-          1// this should be the proper shifted NFT ID resulting of (gen|id)
+          1 // this should be the proper shifted NFT ID resulting of (gen|id)
         );
         expect(balance.toString()).to.be.equal('10');
       });
@@ -249,16 +249,18 @@ export default async function suite() {
           .connect(this.seekerSigner)
           .mintOfGen(this.lender1, 20, 0, 1);
 
-        await expectRevert(this.fundingNFTContract
-          .connect(this.seekerSigner)
-          .decreaseGenerations( // (id,user,amount,gensToDec)
-            1, // this should be the proper shifted NFT ID resulting of (gen|id)
-            this.lender1,
-            10,
-            1
-          ),
+        await expectRevert(
+          this.fundingNFTContract
+            .connect(this.seekerSigner)
+            .decreaseGenerations(
+              // (id,user,amount,gensToDec)
+              1, // this should be the proper shifted NFT ID resulting of (gen|id)
+              this.lender1,
+              10,
+              1
+            ),
           'Invalid token ID'
-        )
+        );
       });
     });
 

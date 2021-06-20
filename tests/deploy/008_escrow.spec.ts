@@ -29,7 +29,6 @@ describe('Contract Escrow', () => {
     ).to.not.equal('0x');
   });
 
-
   it('should revert if parameters are wrongs', async function () {
     const {deploy} = deployments;
     const {deployer, proxyOwner} = await getNamedAccounts();

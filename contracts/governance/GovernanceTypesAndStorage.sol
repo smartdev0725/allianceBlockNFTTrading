@@ -21,10 +21,7 @@ contract GovernanceTypesAndStorage {
 
     // EVENTS
     event VotedForRequest(uint256 indexed investmentId, uint256 indexed requestId, bool decision, address indexed user);
-    event ApprovalRequested(
-        uint256 indexed investmentId,
-        address indexed user
-    );
+    event ApprovalRequested(uint256 indexed investmentId, address indexed user);
     event InitGovernance(address indexed registryAddress_, address indexed user);
 
     uint256 public totalApprovalRequests; // The total amount of approvals requested.

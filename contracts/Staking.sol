@@ -36,7 +36,10 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
         require(albt_ != address(0), "Cannot initialize albt with 0 address");
         require(escrow_ != address(0), "Cannot initialize escrow_ with 0 address");
         require(stakingTypeAmounts_.length != 0, "Cannot initialize stakingTypeAmounts_ with 0");
-        require(reputationalStakingTypeAmounts_.length != 0, "Cannot initialize reputationalStakingTypeAmounts_ with 0");
+        require(
+            reputationalStakingTypeAmounts_.length != 0,
+            "Cannot initialize reputationalStakingTypeAmounts_ with 0"
+        );
 
         __Ownable_init();
         __ReentrancyGuard_init();

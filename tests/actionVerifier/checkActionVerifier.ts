@@ -389,8 +389,12 @@ export default async function suite() {
         .connect(this.lender2Signer)
         .stake(StakingType.STAKER_LVL_2);
 
-      const actionAccountBalanceBefore = await this.rALBTContract.balanceOf(this.lender1);
-      const provisionAccountBalanceBefore = await this.rALBTContract.balanceOf(this.lender2);
+      const actionAccountBalanceBefore = await this.rALBTContract.balanceOf(
+        this.lender1
+      );
+      const provisionAccountBalanceBefore = await this.rALBTContract.balanceOf(
+        this.lender2
+      );
 
       // When
       await this.actionVerifierContract
@@ -398,12 +402,20 @@ export default async function suite() {
         .provideRewardsForActions(actions, signatures);
 
       // Then
-      const actionAccountBalanceAfter = await this.rALBTContract.balanceOf(this.lender1);
-      const provisionAccountBalanceAfter = await this.rALBTContract.balanceOf(this.lender2);
+      const actionAccountBalanceAfter = await this.rALBTContract.balanceOf(
+        this.lender1
+      );
+      const provisionAccountBalanceAfter = await this.rALBTContract.balanceOf(
+        this.lender2
+      );
 
-      expect(actionAccountBalanceAfter.sub(actionAccountBalanceBefore).toString()
+      expect(
+        actionAccountBalanceAfter.sub(actionAccountBalanceBefore).toString()
       ).to.be.equal(ethers.utils.parseEther('10'));
-      expect(provisionAccountBalanceAfter.sub(provisionAccountBalanceBefore).toString()
+      expect(
+        provisionAccountBalanceAfter
+          .sub(provisionAccountBalanceBefore)
+          .toString()
       ).to.be.equal(ethers.utils.parseEther('10'));
     });
   });

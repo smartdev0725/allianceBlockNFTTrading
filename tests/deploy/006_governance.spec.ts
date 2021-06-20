@@ -21,8 +21,8 @@ describe('Contract Governance', () => {
   it('should revert if parameters are wrongs', async function () {
     const {deploy} = deployments;
     const {deployer, proxyOwner} = await getNamedAccounts();
-    const dummyAddress = "0x856608655f8b6932993fda56dda36db77c896269";
-    const oneDay =  24 * 60 * 60;
+    const dummyAddress = '0x856608655f8b6932993fda56dda36db77c896269';
+    const oneDay = 24 * 60 * 60;
 
     await expectRevert.unspecified(
       deploy('GovernanceTest', {
@@ -66,5 +66,4 @@ describe('Contract Governance', () => {
       })
     );
   });
-
 });

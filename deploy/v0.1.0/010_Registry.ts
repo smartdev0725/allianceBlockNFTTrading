@@ -15,14 +15,15 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const chainId = await getChainId();
   if (+chainId === 1 && !process.env.LENDING_TOKEN_ADDRESS) {
-    throw new Error("LENDING_TOKEN_ADDRESS env var should not be empty");
+    throw new Error('LENDING_TOKEN_ADDRESS env var should not be empty');
   }
 
   const escrowAddress = (await get('Escrow')).address;
   const governanceAddress = (await get('Governance')).address;
-  const lendingTokenAddress = (+chainId === 1)
-    ? process.env.LENDING_TOKEN_ADDRESS
-    : (await get('LendingToken')).address;
+  const lendingTokenAddress =
+    +chainId === 1
+      ? process.env.LENDING_TOKEN_ADDRESS
+      : (await get('LendingToken')).address;
   const fundingNFTAddress = (await get('FundingNFT')).address;
 
   await deploy(contractName, {

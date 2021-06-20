@@ -3,7 +3,10 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import '@nomiclabs/hardhat-ethers';
 import {ethers} from 'hardhat';
 
-import {APPLICATION_FOR_INVESTMENT_DURATION, LATE_APPLICATION_FOR_INVESTMENT_DURATION} from '../../utils/constants';
+import {
+  APPLICATION_FOR_INVESTMENT_DURATION,
+  LATE_APPLICATION_FOR_INVESTMENT_DURATION,
+} from '../../utils/constants';
 
 const version = 'v0.1.0';
 const contractName = 'Governance';

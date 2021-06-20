@@ -96,10 +96,10 @@ export default async function suite() {
     it('increments the number of purchased partitions', async function () {
       // Given
       const numberOfPartitions = BigNumber.from(5);
-      const investmentDetailsBefore = await this.registryContract.investmentDetails(
-        this.investmentId
-      );
-      const partitionsRequestedBefore = investmentDetailsBefore.partitionsRequested;
+      const investmentDetailsBefore =
+        await this.registryContract.investmentDetails(this.investmentId);
+      const partitionsRequestedBefore =
+        investmentDetailsBefore.partitionsRequested;
 
       // When
       await this.stakingContract
@@ -110,10 +110,10 @@ export default async function suite() {
         .showInterestForInvestment(this.investmentId, numberOfPartitions);
 
       // Then
-      const investmentDetailsAfter = await this.registryContract.investmentDetails(
-        this.investmentId
-      );
-      const partitionsRequestedAfter = investmentDetailsAfter.partitionsRequested;
+      const investmentDetailsAfter =
+        await this.registryContract.investmentDetails(this.investmentId);
+      const partitionsRequestedAfter =
+        investmentDetailsAfter.partitionsRequested;
       expect(partitionsRequestedAfter).to.be.equal(
         partitionsRequestedBefore.add(numberOfPartitions)
       );
@@ -131,20 +131,20 @@ export default async function suite() {
         .connect(this.lender1Signer)
         .showInterestForInvestment(this.investmentId, numberOfPartitions);
 
-      const investmentDetailsBefore = await this.registryContract.investmentDetails(
-        this.investmentId
-      );
-      const partitionsRequestedBefore = investmentDetailsBefore.partitionsRequested;
+      const investmentDetailsBefore =
+        await this.registryContract.investmentDetails(this.investmentId);
+      const partitionsRequestedBefore =
+        investmentDetailsBefore.partitionsRequested;
 
       await this.registryContract
         .connect(this.lender1Signer)
         .showInterestForInvestment(this.investmentId, numberOfPartitions);
 
       // Then
-      const investmentDetailsAfter = await this.registryContract.investmentDetails(
-        this.investmentId
-      );
-      const partitionsRequestedAfter = investmentDetailsAfter.partitionsRequested;
+      const investmentDetailsAfter =
+        await this.registryContract.investmentDetails(this.investmentId);
+      const partitionsRequestedAfter =
+        investmentDetailsAfter.partitionsRequested;
       expect(partitionsRequestedAfter).to.be.equal(
         partitionsRequestedBefore.add(numberOfPartitions)
       );
@@ -159,21 +159,24 @@ export default async function suite() {
         .connect(this.lender1Signer)
         .stake(StakingType.STAKER_LVL_3);
 
-      const ticketsRemainingBefore = await this.registryContract.ticketsRemaining(this.investmentId);
+      const ticketsRemainingBefore =
+        await this.registryContract.ticketsRemaining(this.investmentId);
 
       await this.registryContract
         .connect(this.lender1Signer)
         .showInterestForInvestment(this.investmentId, numberOfPartitions);
 
       // Then
-      const ticketsRemainingAfter = await this.registryContract.ticketsRemaining(this.investmentId);
-      const ticketsWon = await this.registryContract.ticketsWonPerAddress(this.investmentId, this.lender1);
-      expect(ticketsWon.toString()).to.be.equal(
-        '2'
+      const ticketsRemainingAfter =
+        await this.registryContract.ticketsRemaining(this.investmentId);
+      const ticketsWon = await this.registryContract.ticketsWonPerAddress(
+        this.investmentId,
+        this.lender1
       );
-      expect(ticketsRemainingBefore.sub(ticketsRemainingAfter).toString()).to.be.equal(
-        '2'
-      );
+      expect(ticketsWon.toString()).to.be.equal('2');
+      expect(
+        ticketsRemainingBefore.sub(ticketsRemainingAfter).toString()
+      ).to.be.equal('2');
     });
 
     it('when showing interest but applying for less tickets than immediate tickets eligible', async function () {
@@ -185,21 +188,24 @@ export default async function suite() {
         .connect(this.lender1Signer)
         .stake(StakingType.STAKER_LVL_3);
 
-      const ticketsRemainingBefore = await this.registryContract.ticketsRemaining(this.investmentId);
+      const ticketsRemainingBefore =
+        await this.registryContract.ticketsRemaining(this.investmentId);
 
       await this.registryContract
         .connect(this.lender1Signer)
         .showInterestForInvestment(this.investmentId, numberOfPartitions);
 
       // Then
-      const ticketsRemainingAfter = await this.registryContract.ticketsRemaining(this.investmentId);
-      const ticketsWon = await this.registryContract.ticketsWonPerAddress(this.investmentId, this.lender1);
-      expect(ticketsWon.toString()).to.be.equal(
-        '1'
+      const ticketsRemainingAfter =
+        await this.registryContract.ticketsRemaining(this.investmentId);
+      const ticketsWon = await this.registryContract.ticketsWonPerAddress(
+        this.investmentId,
+        this.lender1
       );
-      expect(ticketsRemainingBefore.sub(ticketsRemainingAfter).toString()).to.be.equal(
-        '1'
-      );
+      expect(ticketsWon.toString()).to.be.equal('1');
+      expect(
+        ticketsRemainingBefore.sub(ticketsRemainingAfter).toString()
+      ).to.be.equal('1');
     });
 
     it('should give tickets for reputational ALBT', async function () {
@@ -301,38 +307,48 @@ export default async function suite() {
         .connect(this.lender2Signer)
         .stake(StakingType.STAKER_LVL_3);
 
-      const ticketsRemainingBefore = await this.registryContract.ticketsRemaining(this.investmentId.add(1));
+      const ticketsRemainingBefore =
+        await this.registryContract.ticketsRemaining(this.investmentId.add(1));
 
       const numberOfPartitions = 3;
 
       await this.registryContract
         .connect(this.lender1Signer)
-        .showInterestForInvestment(this.investmentId.add(1), numberOfPartitions);
+        .showInterestForInvestment(
+          this.investmentId.add(1),
+          numberOfPartitions
+        );
 
       await this.registryContract
         .connect(this.lender2Signer)
-        .showInterestForInvestment(this.investmentId.add(1), numberOfPartitions);
+        .showInterestForInvestment(
+          this.investmentId.add(1),
+          numberOfPartitions
+        );
 
       // Then
-      const ticketsRemainingAfter = await this.registryContract.ticketsRemaining(this.investmentId.add(1));
-      const ticketsWonForLender1 = await this.registryContract.ticketsWonPerAddress(this.investmentId.add(1), this.lender1);
-      const ticketsWonForLender2 = await this.registryContract.ticketsWonPerAddress(this.investmentId.add(1), this.lender2);
-      const status = await this.registryContract.investmentStatus(this.investmentId.add(1));
-      expect(ticketsWonForLender1.toString()).to.be.equal(
-        '2'
+      const ticketsRemainingAfter =
+        await this.registryContract.ticketsRemaining(this.investmentId.add(1));
+      const ticketsWonForLender1 =
+        await this.registryContract.ticketsWonPerAddress(
+          this.investmentId.add(1),
+          this.lender1
+        );
+      const ticketsWonForLender2 =
+        await this.registryContract.ticketsWonPerAddress(
+          this.investmentId.add(1),
+          this.lender2
+        );
+      const status = await this.registryContract.investmentStatus(
+        this.investmentId.add(1)
       );
-      expect(ticketsWonForLender2.toString()).to.be.equal(
-        '2'
-      );
-      expect(ticketsRemainingBefore.sub(ticketsRemainingAfter).toString()).to.be.equal(
-        '4'
-      );
-      expect(ticketsRemainingAfter.toString()).to.be.equal(
-        '0'
-      );
-      expect(status.toString()).to.be.equal(
-        InvestmentStatus.SETTLED
-      );
+      expect(ticketsWonForLender1.toString()).to.be.equal('2');
+      expect(ticketsWonForLender2.toString()).to.be.equal('2');
+      expect(
+        ticketsRemainingBefore.sub(ticketsRemainingAfter).toString()
+      ).to.be.equal('4');
+      expect(ticketsRemainingAfter.toString()).to.be.equal('0');
+      expect(status.toString()).to.be.equal(InvestmentStatus.SETTLED);
     });
   });
 }

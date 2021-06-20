@@ -76,10 +76,14 @@ describe('Registry upgrade test', () => {
     const registryContract = await ethers.getContract('Registry');
 
     // When
-    const investmentDetails = await registryContract.investmentDetails(investmentIdBefore);
+    const investmentDetails = await registryContract.investmentDetails(
+      investmentIdBefore
+    );
 
     // Then
-    expect(investmentDetails.investmentId.toNumber()).to.equal(investmentIdBefore.toNumber());
+    expect(investmentDetails.investmentId.toNumber()).to.equal(
+      investmentIdBefore.toNumber()
+    );
     expect(amountOfInvestmentTokens.toString()).to.equal(
       investmentDetails.projectTokensAmount.toString()
     );
@@ -119,9 +123,8 @@ describe('Registry upgrade test', () => {
     expect(something1.toNumber()).to.equal(1);
     expect(something2.toNumber()).to.equal(2);
 
-    const investmentDetailsAfterUpdate = await registryContract.investmentDetails(
-      investmentIdBefore
-    );
+    const investmentDetailsAfterUpdate =
+      await registryContract.investmentDetails(investmentIdBefore);
     expect(investmentDetailsAfterUpdate.investmentId.toNumber()).to.equal(
       investmentIdBefore.toNumber()
     );

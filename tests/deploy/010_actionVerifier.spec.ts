@@ -26,7 +26,7 @@ describe('Contract ActionVerifier', () => {
   it('should revert if parameters are wrongs', async function () {
     const {deploy} = deployments;
     const {deployer, proxyOwner} = await getNamedAccounts();
-    const dummyAddress = "0x856608655f8b6932993fda56dda36db77c896269";
+    const dummyAddress = '0x856608655f8b6932993fda56dda36db77c896269';
 
     await expectRevert.unspecified(
       deploy('ActionVerifierTest', {
@@ -63,7 +63,13 @@ describe('Contract ActionVerifier', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [ethers.utils.parseEther('10'), 10, ethers.constants.AddressZero, dummyAddress, 1],
+        args: [
+          ethers.utils.parseEther('10'),
+          10,
+          ethers.constants.AddressZero,
+          dummyAddress,
+          1,
+        ],
       })
     );
 
@@ -76,7 +82,13 @@ describe('Contract ActionVerifier', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [ethers.utils.parseEther('10'), 10, dummyAddress, ethers.constants.AddressZero, 1],
+        args: [
+          ethers.utils.parseEther('10'),
+          10,
+          dummyAddress,
+          ethers.constants.AddressZero,
+          1,
+        ],
       })
     );
 
@@ -89,9 +101,14 @@ describe('Contract ActionVerifier', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [ethers.utils.parseEther('10'), 10, dummyAddress, dummyAddress, 0],
+        args: [
+          ethers.utils.parseEther('10'),
+          10,
+          dummyAddress,
+          dummyAddress,
+          0,
+        ],
       })
     );
   });
-
 });
