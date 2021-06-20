@@ -22,8 +22,13 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param lendingToken_ The token that lenders will be able to lend.
      * @param fundingNFT_ The ERC1155 token contract which will represent the lending amounts.
      */
-    function initialize(address lendingToken_, address fundingNFT_) public initializer {
+    function initialize(address lendingToken_, address fundingNFT_) external initializer {
+        require(lendingToken_ != address(0), "Cannot initialize lendingToken_ with 0 address");
+        require(fundingNFT_ != address(0), "Cannot initialize fundingNFT_ with 0 address");
+
         __Ownable_init();
+        __ERC1155Holder_init(); // This internally calls __ERC1155Receiver_init_unchained
+
         lendingToken = IERC20(lendingToken_);
         fundingNFT = IERC1155Mint(fundingNFT_);
         reputationalALBT = new rALBT();

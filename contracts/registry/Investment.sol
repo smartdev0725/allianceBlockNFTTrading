@@ -106,7 +106,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         if (totalLotteryNumbers == 0) revert("Not eligible for lottery numbers");
 
-        uint256 immediateTickets;
+        uint256 immediateTickets = 0;
 
         if (totalLotteryNumbers > lotteryNumbersForImmediateTicket) {
             uint256 rest = totalLotteryNumbers.mod(lotteryNumbersForImmediateTicket);

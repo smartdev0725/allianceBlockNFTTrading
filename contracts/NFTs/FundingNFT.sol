@@ -43,11 +43,17 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @param baseUri sets the base URI
      * @param contractUri sets the contract URI
      */
-    function initialize(string memory baseUri, string memory contractUri) public initializer {
+    function initialize(string memory baseUri, string memory contractUri) external initializer {
+        require(bytes(baseUri).length != 0, "Cannot initialize baseUri with an empty string");
+        require(bytes(contractUri).length != 0, "Cannot initialize contractUri with an empty string");
+
+        // Added upgradeable initialization
+        __ERC1155_init("");
+        __Context_init();
+        __AccessControl_init();
+
         MINTER_ROLE = keccak256("MINTER_ROLE");
         PAUSER_ROLE = keccak256("PAUSER_ROLE");
-        __ERC1155_init("");
-        __ERC1155_init_unchained("");
         _baseURI = baseUri;
         _contractURI = contractUri;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());

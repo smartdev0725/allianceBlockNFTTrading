@@ -12,7 +12,7 @@ import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol
 
 /**
  * @title AllianceBlock ActionVerifier contract
- * @dev Extends Initializable, OwnableUpgradeable
+ * @dev Extends Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable
  * @notice Handles user's Actions and Rewards within the protocol
  */
 contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
@@ -49,7 +49,13 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
         address escrow_,
         address staking_,
         uint256 chainId
-    ) public initializer {
+    ) external initializer {
+        require(rewardPerActionProvision_ != 0, "Cannot initialize rewardPerActionProvision_ with 0");
+        require(maxActionsPerProvision_ != 0, "Cannot initialize maxActionsPerProvision_ with 0");
+        require(escrow_ != address(0), "Cannot initialize with escrow_ address");
+        require(staking_ != address(0), "Cannot initialize with staking_ address");
+        require(chainId != 0, "Cannot initialize chainId with 0");
+
         __Ownable_init();
         __ReentrancyGuard_init();
 
@@ -123,7 +129,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
         address[] memory accounts = new address[](actions.length.add(1));
         uint256[] memory rewards = new uint256[](actions.length.add(1));
 
-        uint256 rewardForCaller;
+        uint256 rewardForCaller = 0;
 
         for (uint256 i = 0; i < actions.length; i++) {
             if (
