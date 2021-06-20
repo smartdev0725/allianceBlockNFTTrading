@@ -47,19 +47,18 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             "Token amount and price should result in integer amount of tickets"
         );
 
-        _storeInvestmentDetails(totalAmountRequested_, investmentToken, amountOfInvestmentTokens, extraInfo);
+        _storeInvestmentDetails(
+            totalAmountRequested_,
+            investmentToken,
+            amountOfInvestmentTokens,
+            extraInfo
+        );
 
         IERC20(investmentToken).safeTransferFrom(msg.sender, address(escrow), amountOfInvestmentTokens);
 
-        fundingNFT.mintGen0(
-            address(escrow),
-            investmentDetails[totalInvestments].totalPartitionsToBePurchased,
-            totalInvestments
-        );
+        fundingNFT.mintGen0(address(escrow), investmentDetails[totalInvestments].totalPartitionsToBePurchased, totalInvestments);
 
-        investmentTokensPerTicket[totalInvestments] = amountOfInvestmentTokens.div(
-            investmentDetails[totalInvestments].totalPartitionsToBePurchased
-        );
+        investmentTokensPerTicket[totalInvestments] = amountOfInvestmentTokens.div(investmentDetails[totalInvestments].totalPartitionsToBePurchased);
 
         fundingNFT.pauseTokenTransfer(totalInvestments); //Pause trades for ERC1155s with the specific investment ID.
 
@@ -78,7 +77,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
      * @param investmentId The id of the investment.
      * @param amountOfPartitions The amount of partitions this specific investor wanna invest in.
      */
-    function showInterestForInvestment(uint256 investmentId, uint256 amountOfPartitions) external nonReentrant() {
+    function showInterestForInvestment(uint256 investmentId, uint256 amountOfPartitions) external  nonReentrant() {
         require(
             investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.APPROVED,
             "Can show interest only in Approved state"
@@ -92,13 +91,11 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         );
 
         // if it's not the first time calling the function lucky numbers are not provided again.
-        if (
-            remainingTicketsPerAddress[investmentId][msg.sender] > 0 ||
-            ticketsWonPerAddress[investmentId][msg.sender] > 0
-        ) {
-            remainingTicketsPerAddress[investmentId][msg.sender] = remainingTicketsPerAddress[investmentId][msg.sender]
-                .add(amountOfPartitions);
-        } else {
+        if (remainingTicketsPerAddress[investmentId][msg.sender] > 0 || ticketsWonPerAddress[investmentId][msg.sender] > 0) {
+            remainingTicketsPerAddress[investmentId][msg.sender] =
+                remainingTicketsPerAddress[investmentId][msg.sender].add(amountOfPartitions);
+        }
+        else {
             _applyImmediateTicketsAndProvideLuckyNumbers(investmentId, amountOfPartitions);
         }
     }
@@ -149,10 +146,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
      * @param investmentId The id of the investment.
      */
     function executeLotteryRun(uint256 investmentId) external {
-        require(
-            investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.STARTED,
-            "Can run lottery only in Started state"
-        );
+        require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.STARTED, "Can run lottery only in Started state");
         require(
             remainingTicketsPerAddress[investmentId][msg.sender] > 0,
             "Can run lottery only if has remaining ticket"
@@ -207,11 +201,8 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         uint256 investmentId,
         uint256 ticketsToLock,
         uint256 ticketsToWithdraw
-    ) external nonReentrant() {
-        require(
-            investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED,
-            "Can withdraw only in Settled state"
-        );
+    ) external  nonReentrant() {
+        require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
         require(
             ticketsWonPerAddress[investmentId][msg.sender] > 0 &&
                 ticketsWonPerAddress[investmentId][msg.sender] >= ticketsToLock.add(ticketsToWithdraw),
@@ -247,10 +238,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
      * @param investmentId The id of the investment.
      */
     function withdrawAmountProvidedForNonWonTickets(uint256 investmentId) external nonReentrant() {
-        require(
-            investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED,
-            "Can withdraw only in Settled state"
-        );
+        require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
         require(remainingTicketsPerAddress[investmentId][msg.sender] > 0, "No non-won tickets to withdraw");
 
         _withdrawAmountProvidedForNonWonTickets(investmentId);
@@ -264,10 +252,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
      * @param ticketsToWithdraw The amount of locked tickets to be withdrawn.
      */
     function withdrawLockedInvestmentTickets(uint256 investmentId, uint256 ticketsToWithdraw) external nonReentrant() {
-        require(
-            investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED,
-            "Can withdraw only in Settled state"
-        );
+        require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
         require(
             ticketsToWithdraw > 0 &&
                 lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender] >= ticketsToWithdraw,
@@ -292,9 +277,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
      * @param investmentId The id of the investment type to be checked.
      */
     function getRequestingInterestStatus(uint256 investmentId) external view returns (bool) {
-        return
-            investmentDetails[investmentId].totalPartitionsToBePurchased <=
-            investmentDetails[investmentId].partitionsRequested;
+        return investmentDetails[investmentId].totalPartitionsToBePurchased <= investmentDetails[investmentId].partitionsRequested;
     }
 
     /**

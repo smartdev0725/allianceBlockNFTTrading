@@ -114,4 +114,5 @@ describe('Contract Staking', () => {
       })
     );
   });
+
 });

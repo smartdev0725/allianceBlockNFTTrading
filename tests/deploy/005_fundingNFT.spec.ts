@@ -23,16 +23,16 @@ describe('Contract FundingNFT', () => {
     const {deployer, proxyOwner} = await getNamedAccounts();
 
     await expectRevert.unspecified(
-      deploy('FundingNFTTest', {
-        contract: 'FundingNFT',
-        from: deployer,
-        proxy: {
-          owner: proxyOwner,
-          methodName: 'initialize',
-          proxyContract: 'OpenZeppelinTransparentProxy',
-        },
-        args: ['', 'https://allianceblock.io/'],
-        log: true,
+     deploy('FundingNFTTest', {
+      contract: 'FundingNFT',
+      from: deployer,
+      proxy: {
+        owner: proxyOwner,
+        methodName: 'initialize',
+        proxyContract: 'OpenZeppelinTransparentProxy',
+      },
+      args: ['', 'https://allianceblock.io/'],
+      log: true,
       })
     );
 
@@ -50,4 +50,5 @@ describe('Contract FundingNFT', () => {
       })
     );
   });
+
 });

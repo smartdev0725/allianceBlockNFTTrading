@@ -1,6 +1,6 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {expect} from 'chai';
-import {BASE_AMOUNT} from '../helpers/constants';
+import {BASE_AMOUNT} from "../helpers/constants";
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 describe('Contract Registry', () => {
@@ -33,7 +33,7 @@ describe('Contract Registry', () => {
     const governanceAddress = (await get('Governance')).address;
     const lendingTokenAddress = (await get('LendingToken')).address;
     const fundingNFTAddress = (await get('FundingNFT')).address;
-    const amount = ethers.utils.parseEther(BASE_AMOUNT + '').toString();
+    const amount = ethers.utils.parseEther(BASE_AMOUNT + '').toString()
 
     await expectRevert.unspecified(
       deploy('RegistryTest', {
@@ -134,5 +134,7 @@ describe('Contract Registry', () => {
         log: true,
       })
     );
+
   });
+
 });

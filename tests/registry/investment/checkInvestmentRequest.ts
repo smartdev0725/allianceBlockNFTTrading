@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import {InvestmentStatus} from '../../helpers/registryEnums';
+import { InvestmentStatus} from '../../helpers/registryEnums';
 import {BASE_AMOUNT} from '../../helpers/constants';
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
@@ -56,19 +56,11 @@ export default async function suite() {
           tokenId
         );
 
-      const isPaused = await this.fundingNFTContract.transfersPaused(
-        investmentId
-      );
+      const isPaused = await this.fundingNFTContract.transfersPaused(investmentId);
 
-      const investmentStatus = await this.registryContract.investmentStatus(
-        investmentId
-      );
-      const investmentDetails = await this.registryContract.investmentDetails(
-        investmentId
-      );
-      const investmentSeeker = await this.registryContract.investmentSeeker(
-        investmentId
-      );
+      const investmentStatus = await this.registryContract.investmentStatus(investmentId);
+      const investmentDetails = await this.registryContract.investmentDetails(investmentId);
+      const investmentSeeker = await this.registryContract.investmentSeeker(investmentId);
       const investmentTokensPerTicket =
         await this.registryContract.investmentTokensPerTicket(investmentId);
       const daoApprovalRequest = await this.governanceContract.approvalRequests(
@@ -79,9 +71,7 @@ export default async function suite() {
       );
 
       // Correct Details.
-      expect(investmentDetails.investmentId.toString()).to.be.equal(
-        investmentId.toString()
-      );
+      expect(investmentDetails.investmentId.toString()).to.be.equal(investmentId.toString());
       expect(investmentDetails.projectToken).to.be.equal(
         this.projectTokenContract.address
       );
@@ -89,13 +79,11 @@ export default async function suite() {
         amountOfTokensToBePurchased
       );
       expect(investmentDetails.extraInfo).to.be.equal(ipfsHash);
-      expect(
-        investmentDetails.totalPartitionsToBePurchased.toString()
-      ).to.be.equal(totalPartitions.toString());
-      // Correct Status.
-      expect(investmentStatus.toString()).to.be.equal(
-        InvestmentStatus.REQUESTED
+      expect(investmentDetails.totalPartitionsToBePurchased.toString()).to.be.equal(
+        totalPartitions.toString()
       );
+      // Correct Status.
+      expect(investmentStatus.toString()).to.be.equal(InvestmentStatus.REQUESTED);
       // Correct Seeker.
       expect(investmentSeeker.toString()).to.be.equal(this.seeker);
       // Correct investmentTokensPerTicket.
@@ -185,13 +173,10 @@ export default async function suite() {
         .connect(this.superDelegatorSigner)
         .superVoteForRequest(this.approvalRequest.add(1), false);
 
-      const investmentStatus = (
-        await this.registryContract.getInvestmentMetadata(investmentId)
-      )[1];
+
+      const investmentStatus = (await this.registryContract.getInvestmentMetadata(investmentId))[1];
       // Correct Status.
-      expect(investmentStatus.toString()).to.be.equal(
-        InvestmentStatus.REJECTED
-      );
+      expect(investmentStatus.toString()).to.be.equal(InvestmentStatus.REJECTED);
     });
   });
 }

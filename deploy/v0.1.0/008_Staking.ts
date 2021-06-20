@@ -13,13 +13,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const chainId = await getChainId();
   if (+chainId === 1 && !process.env.ALBT_TOKEN_ADDRESS) {
-    throw new Error('ALBT_TOKEN_ADDRESS env var should not be empty');
+    throw new Error("ALBT_TOKEN_ADDRESS env var should not be empty");
   }
 
-  const albtContractAddress =
-    +chainId === 1
-      ? process.env.ALBT_TOKEN_ADDRESS
-      : (await get('ALBT')).address;
+  const albtContractAddress = (+chainId === 1)
+    ? process.env.ALBT_TOKEN_ADDRESS
+    : (await get('ALBT')).address;
   const escrowContractAddress = (await get('Escrow')).address;
 
   const stakingTypeAmounts = [

@@ -154,5 +154,8 @@ describe('Registry Investments', function () {
     'When checking execute lottery run',
     checkExecuteLotteryRun.bind(this)
   );
-  describe('When checking initialization', checkInitialization.bind(this));
+  describe(
+    'When checking initialization',
+    checkInitialization.bind(this)
+  );
 });
