@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/GSN/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../utils/Strings.sol";
 import "../libs/TokenFormat.sol";
+import "hardhat/console.sol";
 
 /**
  * @title Alliance Block Funding NFTs
