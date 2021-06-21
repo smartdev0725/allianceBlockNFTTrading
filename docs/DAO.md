@@ -72,7 +72,7 @@ Every month this cycle repeats:
 
 * If someone is voted for becoming an Active DAO Delegator but is not voted to become Active DAO Member for next month, they will become eligible to become both Active DAO Member and Active DAO Delegator, since a DAO Delegator must also be a DAO Member.
 
-* If an **Active DAO Delegators** won't vote for the project requests, **they lose their rewards and they cannot become Active DAO Delegator next month**.
+* If an **Active DAO Delegators** won't vote for the [Investment requests](Glossary.md#investment-request), **they lose their rewards and they cannot become Active DAO Delegator next month**.
 
 * The *end-to-end* Financing process is documented [here](Financing.md)
 
