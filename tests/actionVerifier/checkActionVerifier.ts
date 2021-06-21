@@ -59,7 +59,7 @@ export default async function suite() {
       // Then
       expect(this.escrowContract.address).to.be.equal(escrowAddress);
       expect(this.stakingContract.address).to.be.equal(stakingAddress);
-      expect(rewardPerActionProvision.toNumber()).to.be.equal(10);
+      expect(rewardPerActionProvision.toString()).to.be.equal(ethers.utils.parseEther('10').toString());
       expect(maxActionsPerProvision.toNumber()).to.be.equal(10);
     });
 
