@@ -37,3 +37,5 @@ The Protocol is backed by audited Smart Contracts that are currently currently b
 * Read more about the stages for [Financing](Financing.md) and *Investment Mechanics*.
 * For any definitions you may need, check out our [Glossary](Glossary.md)
 * There is also a *FAQ* section [here](FAQ.md)
+* There is an automated documentation for each function [here](../doc-gen/README.md)
+* There is a Smart Contract inheritance graph [here](img/mvp-inheritance-graph.png)
