@@ -31,6 +31,8 @@ export const getContracts = async () => {
 
   const stakingContract = await ethers.getContract('Staking');
 
+  const stakerMedalNFTContract = await ethers.getContract('StakerMedalNFT');
+
   const lendingTokenContract = await ethers.getContract('LendingToken');
 
   const investmentTokenContract = await ethers.getContract('InvestmentToken');
@@ -57,6 +59,7 @@ export const getContracts = async () => {
     stakingContract,
     rALBTContract,
     actionVerifierContract,
+    stakerMedalNFTContract,
   };
 };
 
