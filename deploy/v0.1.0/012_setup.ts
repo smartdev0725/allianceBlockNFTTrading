@@ -12,6 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const registryContract = await ethers.getContract('Registry');
   const fundingNFTContract = await ethers.getContract('FundingNFT');
+  const stakerMedalNFTContract = await ethers.getContract('StakerMedalNFT');
   const governanceContract = await ethers.getContract('Governance');
   const escrowContract = await ethers.getContract('Escrow');
   const actionVerifierContract = await ethers.getContract('ActionVerifier');
@@ -61,6 +62,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       .connect(deployerSigner)
       .grantRole(
         ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
+        registryContract.address
+      );
+  }
+
+  // Setup StakerMedalNFT
+  const hasRoleMinterMedalContract = await stakerMedalNFTContract.hasRole(
+    ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
+    registryContract.address
+  );
+  if (!hasRoleMinterMedalContract) {
+    await stakerMedalNFTContract
+      .connect(deployerSigner)
+      .grantRole(
+        ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
         registryContract.address
       );
   }
