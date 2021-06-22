@@ -120,6 +120,6 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
         if(balanceOfStakerMedalBronce == 1) {
             return uint(StakingType.STAKER_LVL_3);
         }
-        return 0;
+        return uint(StakingType.STAKER_LVL_0);
     }
 }
