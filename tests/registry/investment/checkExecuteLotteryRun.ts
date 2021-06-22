@@ -4,6 +4,7 @@ import {solidity} from 'ethereum-waffle';
 import {StakingType, InvestmentStatus} from '../../helpers/registryEnums';
 import {BigNumber} from 'ethers';
 import {increaseTime} from '../../helpers/time';
+import {getContracts} from "../../helpers/utils";
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 chai.use(solidity);
@@ -52,6 +53,23 @@ export default async function suite() {
       await expectRevert(
         this.registryContract.executeLotteryRun(this.investmentId),
         'Can run lottery only in Started state'
+      );
+    });
+
+    it('when try to convert nft and the state is not settled should revert  ', async function () {
+      // Given and When
+      const numberOfPartitions = BigNumber.from(5);
+      await this.stakingContract
+        .connect(this.lender1Signer)
+        .stake(StakingType.STAKER_LVL_2);
+      await this.registryContract
+        .connect(this.lender1Signer)
+        .showInterestForInvestment(this.investmentId, numberOfPartitions);
+
+      // Then
+      await expectRevert(
+        this.registryContract.convertNFTToInvestmentTokens(this.investmentId, 10),
+        'Can withdraw only in Settled state'
       );
     });
 
@@ -271,8 +289,8 @@ export default async function suite() {
         .connect(this.lender3Signer)
         .executeLotteryRun(this.investmentId);
 
-      const balanceInvestmentTokenBefore =
-        await this.investmentTokenContract.balanceOf(this.lender1);
+      const balanceFundingNFTTokenBefore =
+        await this.fundingNFTContract.balanceOf(this.lender1, this.investmentId.toNumber());
       await this.registryContract
         .connect(this.lender1Signer)
         .withdrawInvestmentTickets(this.investmentId, 3, 7);
@@ -284,10 +302,10 @@ export default async function suite() {
         'No non-won tickets to withdraw'
       );
 
-      const balanceInvestmentTokenAfter =
-        await this.investmentTokenContract.balanceOf(this.lender1);
-      expect(+balanceInvestmentTokenAfter.toString()).to.be.greaterThan(
-        +balanceInvestmentTokenBefore.toString()
+      const balanceFundingNFTTokenAfter =
+        await this.fundingNFTContract.balanceOf(this.lender1, this.investmentId.toNumber());
+      expect(+balanceFundingNFTTokenAfter.toString()).to.be.greaterThan(
+        +balanceFundingNFTTokenBefore.toString()
       );
       const lender1ticketsWonPerAddressAfter =
         await this.registryContract.ticketsWonPerAddress(
@@ -497,45 +515,49 @@ export default async function suite() {
       });
 
       it('When withdrawing with 0 ticketsToLock', async function () {
-        const tokensPerTicket = ethers.utils.parseEther('100');
-        const ticketsToWin = BigNumber.from(10);
         const ticketsToLock = 0;
         const ticketsToWithdraw = 10;
+        const investmentId = this.investmentId.add(1);
 
-        const balanceOfInvestmentTokensBefore = await this.investmentTokenContract.balanceOf(this.lender1);
+        const balanceOfNFTTokensBefore = await this.fundingNFTContract.balanceOf(this.lender1, investmentId.toNumber());
 
         await this.registryContract
           .connect(this.lender1Signer)
-          .withdrawInvestmentTickets(this.investmentId.add(1), ticketsToLock, ticketsToWithdraw);
+          .withdrawInvestmentTickets(investmentId, ticketsToLock, ticketsToWithdraw);
 
-        const balanceOfInvestmentTokensAfter = await this.investmentTokenContract.balanceOf(this.lender1);
+        const balanceOfNFTTokensAfter = await this.fundingNFTContract.balanceOf(this.lender1, investmentId.toNumber());
 
-        const investmentTokensGot = balanceOfInvestmentTokensAfter.sub(balanceOfInvestmentTokensBefore);
-        const investmentTokensToGet = ticketsToWin.mul(tokensPerTicket);
+        const nftTokensGot = balanceOfNFTTokensAfter.sub(balanceOfNFTTokensBefore);
 
         // Then
-        expect(investmentTokensGot.toString()).to.be.equal(investmentTokensToGet.toString());
+        expect(nftTokensGot.toNumber()).to.be.equal(ticketsToWithdraw);
       });
 
       it('When withdrawing with 0 ticketsToWithdraw', async function () {
         const ticketsToLock = 10;
         const ticketsToWithdraw = 0;
+        const investmentId = this.investmentId.add(1);
 
-        const balanceOfInvestmentTokensBefore = await this.investmentTokenContract.balanceOf(this.lender1);
+        const balanceOfNFTTokensBefore = await this.fundingNFTContract.balanceOf(this.lender1, investmentId);
         const lockedTicketsBefore = await this.registryContract.lockedTicketsPerAddress(this.lender1);
 
         await this.registryContract
           .connect(this.lender1Signer)
-          .withdrawInvestmentTickets(this.investmentId.add(1), ticketsToLock, ticketsToWithdraw);
+          .withdrawInvestmentTickets(investmentId, ticketsToLock, ticketsToWithdraw);
 
-        const balanceOfInvestmentTokensAfter = await this.investmentTokenContract.balanceOf(this.lender1);
+        const balanceOfNFTTokensAfter = await this.fundingNFTContract.balanceOf(this.lender1, investmentId);
         const lockedTicketsAfter = await this.registryContract.lockedTicketsPerAddress(this.lender1);
 
-        const investmentTokensGot = balanceOfInvestmentTokensAfter.sub(balanceOfInvestmentTokensBefore);
+        const NFTTokensGot = balanceOfNFTTokensAfter.sub(balanceOfNFTTokensBefore);
 
         // Then
-        expect(investmentTokensGot.toString()).to.be.equal('0');
+        expect(NFTTokensGot.toString()).to.be.equal('0');
         expect(lockedTicketsAfter.sub(lockedTicketsBefore).toString()).to.be.equal(ticketsToLock.toString());
+
+        await expectRevert(this.registryContract
+            .connect(this.lender1Signer)
+            .convertNFTToInvestmentTokens(investmentId, 10),
+          'Not enough NFT to convert');
       });
 
       it('When withdrawing only non-won tickets', async function () {
@@ -564,6 +586,63 @@ export default async function suite() {
           .withdrawAmountProvidedForNonWonTickets(this.investmentId),
           'Can withdraw only in Settled state');
       });
+
+      it('When withdrawing with 0 ticketsToLock the user will be able to convert his NFT', async function () {
+        const {investmentTokenContract} = await getContracts();
+
+        const ticketsToLock = 0;
+        const ticketsToWithdraw = 10;
+        const investmentId = this.investmentId.add(1);
+
+        const balanceOfNFTTokensBefore = await this.fundingNFTContract.balanceOf(this.lender1, investmentId.toNumber());
+
+        await this.registryContract
+          .connect(this.lender1Signer)
+          .withdrawInvestmentTickets(investmentId, ticketsToLock, ticketsToWithdraw);
+
+        const balanceOfNFTTokensAfter = await this.fundingNFTContract.balanceOf(this.lender1, investmentId.toNumber());
+
+        const nftTokensGot = balanceOfNFTTokensAfter.sub(balanceOfNFTTokensBefore);
+
+        expect(nftTokensGot.toNumber()).to.be.equal(ticketsToWithdraw);
+
+        await this.registryContract
+          .connect(this.lender1Signer)
+          .convertNFTToInvestmentTokens(investmentId, ticketsToWithdraw);
+
+        const balanceOfInvestmentToken = await investmentTokenContract.balanceOf(this.lender1);
+        const balanceOfNFTTokens = await this.fundingNFTContract.balanceOf(this.lender1, investmentId.toNumber());
+
+        expect(ethers.utils.formatEther(balanceOfInvestmentToken.toString())).to.be.equal("1000.0");
+        expect(balanceOfNFTTokens.toNumber()).to.be.equal(0);
+      });
+
+      it('When withdrawing with 0 ticketsToLock the user will not be able to convert if amount is zero', async function () {
+        const {investmentTokenContract} = await getContracts();
+
+        const ticketsToLock = 0;
+        const ticketsToWithdraw = 10;
+        const investmentId = this.investmentId.add(1);
+
+        const balanceOfNFTTokensBefore = await this.fundingNFTContract.balanceOf(this.lender1, investmentId.toNumber());
+
+        await this.registryContract
+          .connect(this.lender1Signer)
+          .withdrawInvestmentTickets(investmentId, ticketsToLock, ticketsToWithdraw);
+
+        const balanceOfNFTTokensAfter = await this.fundingNFTContract.balanceOf(this.lender1, investmentId.toNumber());
+
+        const nftTokensGot = balanceOfNFTTokensAfter.sub(balanceOfNFTTokensBefore);
+
+        expect(nftTokensGot.toNumber()).to.be.equal(ticketsToWithdraw);
+
+        await expectRevert(this.registryContract
+            .connect(this.lender1Signer)
+            .convertNFTToInvestmentTokens(investmentId, 0),
+          'Amount of nft to convert cannot be 0');
+
+      });
+
     });
 
     context('When doing various withdrawals scenarios after already locked tokens', async function () {

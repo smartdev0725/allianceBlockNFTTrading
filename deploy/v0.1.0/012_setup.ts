@@ -51,6 +51,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
         registryContract.address
       );
+    await fundingNFTContract
+      .connect(deployerSigner)
+      .grantRole(
+        ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
+        escrowContract.address
+      );
   }
   const hasRolePauser = await fundingNFTContract.hasRole(
     ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),

@@ -27,4 +27,7 @@ interface IEscrow {
     function burnReputationalToken(address from, uint256 amount) external;
 
     function multiMintReputationalToken(address[] memory recipients, uint256[] memory amounts) external;
+
+    function burnFundingNFT(address account, uint256 investmentId, uint256 amount) external;
+
 }

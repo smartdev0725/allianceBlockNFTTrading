@@ -167,6 +167,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             investmentStatus[investmentId] = InvestmentLibrary.InvestmentStatus.SETTLED;
             counter = ticketsRemaining[investmentId];
             ticketsRemaining[investmentId] = 0;
+            fundingNFT.unpauseTokenTransfer(investmentId); // UnPause trades for ERC1155s with the specific investment ID.
         } else {
             ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(counter);
         }
@@ -226,8 +227,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         }
 
         if (ticketsToWithdraw > 0) {
-            uint256 amountToWithdraw = investmentTokensPerTicket[investmentId].mul(ticketsToWithdraw);
-            escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountToWithdraw);
+            escrow.transferFundingNFT(investmentId, ticketsToWithdraw, msg.sender);
         }
 
         if (remainingTicketsPerAddress[investmentId][msg.sender] > 0) {
@@ -327,5 +327,21 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         remainingTicketsPerAddress[investmentId_][msg.sender] = 0;
 
         escrow.transferLendingToken(msg.sender, amountToReturnForNonWonTickets);
+    }
+
+    /**
+     * @notice Convert NFT to investment tokens
+     * @param investmentId the investmentId
+     * @param amountOfNFTToConvert the amount of nft to convert
+     */
+    function convertNFTToInvestmentTokens (uint256 investmentId, uint256 amountOfNFTToConvert) external {
+        require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
+        require(amountOfNFTToConvert != 0, "Amount of nft to convert cannot be 0");
+        require(amountOfNFTToConvert <= fundingNFT.balanceOf(msg.sender, investmentId), "Not enough NFT to convert");
+
+        uint256 amountOfInvestmentTokenToTransfer = investmentTokensPerTicket[investmentId].mul(amountOfNFTToConvert);
+
+        escrow.burnFundingNFT(msg.sender, investmentId, amountOfNFTToConvert);
+        escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountOfInvestmentTokenToTransfer);
     }
 }
