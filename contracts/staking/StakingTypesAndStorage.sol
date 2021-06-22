@@ -2,6 +2,7 @@
 pragma solidity ^0.7.0;
 
 import "../interfaces/IEscrow.sol";
+import "../interfaces/IERC1155Mint.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
@@ -14,6 +15,7 @@ contract StakingTypesAndStorage {
     // ALBT token
     IERC20 public albt;
     IEscrow public escrow;
+    IERC1155Mint public stakerMedalNFT;
 
     uint256 public totalSupply;
     mapping(address => uint256) public balance;

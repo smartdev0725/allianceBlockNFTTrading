@@ -30,11 +30,13 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
     function initialize(
         address albt_,
         address escrow_,
+        address stakerMedalNFT_,
         uint256[] memory stakingTypeAmounts_,
         uint256[] memory reputationalStakingTypeAmounts_
     ) external initializer {
         require(albt_ != address(0), "Cannot initialize albt with 0 address");
         require(escrow_ != address(0), "Cannot initialize escrow_ with 0 address");
+        require(stakerMedalNFT_ != address(0), "Cannot initialize stakerMedalNFT_ with 0 address");
         require(stakingTypeAmounts_.length != 0, "Cannot initialize stakingTypeAmounts_ with 0");
         require(reputationalStakingTypeAmounts_.length != 0, "Cannot initialize reputationalStakingTypeAmounts_ with 0");
 
@@ -43,6 +45,7 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
 
         albt = IERC20(albt_);
         escrow = IEscrow(escrow_);
+        stakerMedalNFT = IERC1155Mint(stakerMedalNFT_);
 
         for (uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
             stakingTypeAmounts[i] = stakingTypeAmounts_[i];
