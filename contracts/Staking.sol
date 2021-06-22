@@ -68,7 +68,6 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
 
         uint256 amountToStake = amount.sub(balance[msg.sender]);
         _stake(msg.sender, amountToStake);
-        emit Staked(msg.sender, amountToStake);
     }
 
     /**
