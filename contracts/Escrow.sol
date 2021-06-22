@@ -71,6 +71,17 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
+     * @notice Burn Funding NFT
+     * @dev This function is used to burn NFT
+     * @param account The address to burn the funding nft from
+     * @param investmentId The investment id
+     * @param amount The amount of funding nft to be burn
+     */
+    function burnFundingNFT(address account, uint256 investmentId, uint256 amount) external onlyRegistry() {
+        fundingNFT.burn(account, investmentId, amount);
+    }
+
+    /**
      * @notice Transfer Lending Token
      * @dev This function is used to send the lended amount to the seeker.
      * @param seeker Seeker's address.

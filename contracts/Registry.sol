@@ -109,7 +109,6 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
     function _approveInvestment(uint256 investmentId_) internal {
         investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.APPROVED;
         investmentDetails[investmentId_].approvalDate = block.timestamp;
-        fundingNFT.unpauseTokenTransfer(investmentId_); //UnPause trades for ERC1155s with the specific investment ID.
         ticketsRemaining[investmentId_] = investmentDetails[investmentId_].totalPartitionsToBePurchased;
         governance.storeInvestmentTriggering(investmentId_);
         emit InvestmentApproved(investmentId_);
