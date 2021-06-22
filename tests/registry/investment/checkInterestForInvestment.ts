@@ -72,9 +72,12 @@ export default async function suite() {
         await this.lendingTokenContract.balanceOf(this.escrowContract.address);
 
       // When
+
+      // the user needs to have rALBT to show interest, rALBT can be obtained by making stake, but there are also other ways to do it (it is not necessary to make stake at all)
       await this.stakingContract
         .connect(this.lender1Signer)
         .stake(StakingType.STAKER_LVL_1);
+
       await this.registryContract
         .connect(this.lender1Signer)
         .showInterestForInvestment(this.investmentId, numberOfPartitions);
