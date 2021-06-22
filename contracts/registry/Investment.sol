@@ -102,6 +102,8 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
     function _applyImmediateTicketsAndProvideLuckyNumbers(uint256 investmentId_, uint256 amountOfPartitions_) internal {
         uint256 reputationalBalance = _updateReputationalBalanceForPreviouslyLockedTokens();
+        if (rAlbtPerLotteryNumber == 0) revert("Not eligible for lottery numbers");
+
         uint256 totalLotteryNumbers = reputationalBalance.div(rAlbtPerLotteryNumber);
 
         if (totalLotteryNumbers == 0) revert("Not eligible for lottery numbers");
