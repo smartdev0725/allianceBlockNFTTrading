@@ -54,7 +54,19 @@ export default async function suite() {
         this.staker1
       );
 
+      const levelOfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.staker1);
+
+      const balanceStakerMedal1 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 1);
+      const balanceStakerMedal2 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 2);
+      const balanceStakerMedal3 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 3);
+
       // Then
+      expect(balanceStakerMedal1.toString()).to.be.equal('1');
+      expect(balanceStakerMedal2.toString()).to.be.equal('0');
+      expect(balanceStakerMedal3.toString()).to.be.equal('0');
+
+      expect(levelOfStakerAfter.toString()).to.be.equal('1');
+
       expect(Number(staker1StakingAmounAfter)).to.be.greaterThan(
         Number(staker1StakingAmountBefore)
       );
@@ -113,7 +125,19 @@ export default async function suite() {
         this.staker1
       );
 
+      const levelOfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.staker1);
+
+      const balanceStakerMedal1 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 1);
+      const balanceStakerMedal2 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 2);
+      const balanceStakerMedal3 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 3);
+
       // Then
+      expect(balanceStakerMedal1.toString()).to.be.equal('0');
+      expect(balanceStakerMedal2.toString()).to.be.equal('1');
+      expect(balanceStakerMedal3.toString()).to.be.equal('0');
+
+      expect(levelOfStakerAfter.toString()).to.be.equal('2');
+
       expect(Number(staker1StakingAmounAfter)).to.be.greaterThan(
         Number(staker1StakingAmountBefore)
       );
@@ -174,7 +198,20 @@ export default async function suite() {
         this.staker1
       );
 
+      const levelOfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.staker1);
+
+
+      const balanceStakerMedal1 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 1);
+      const balanceStakerMedal2 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 2);
+      const balanceStakerMedal3 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 3);
+
       // Then
+      expect(balanceStakerMedal1.toString()).to.be.equal('0');
+      expect(balanceStakerMedal2.toString()).to.be.equal('0');
+      expect(balanceStakerMedal3.toString()).to.be.equal('1');
+
+      expect(levelOfStakerAfter.toString()).to.be.equal('3');
+
       expect(Number(staker1StakingAmounAfter)).to.be.greaterThan(
         Number(staker1StakingAmountBefore)
       );
@@ -242,7 +279,19 @@ export default async function suite() {
         this.staker1
       );
 
+      const levelOfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.staker1);
+
+      const balanceStakerMedal1 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 1);
+      const balanceStakerMedal2 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 2);
+      const balanceStakerMedal3 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 3);
+
       // Then
+      expect(balanceStakerMedal1.toString()).to.be.equal('0');
+      expect(balanceStakerMedal2.toString()).to.be.equal('0');
+      expect(balanceStakerMedal3.toString()).to.be.equal('0');
+
+      expect(levelOfStakerAfter.toString()).to.be.equal('0');
+
       expect(staker1StakingAmountAfter).to.be.equal(0);
       expect(staker1ALBTBalanceAfter).to.be.equal(
         staker1ALBTBalanceBefore.add(staker1StakingAmountBefore)
@@ -293,7 +342,19 @@ export default async function suite() {
         this.staker1
       );
 
+      const levelOfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.staker1);
+
+      const balanceStakerMedal1 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 1);
+      const balanceStakerMedal2 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 2);
+      const balanceStakerMedal3 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 3);
+
       // Then
+      expect(balanceStakerMedal1.toString()).to.be.equal('0');
+      expect(balanceStakerMedal2.toString()).to.be.equal('0');
+      expect(balanceStakerMedal3.toString()).to.be.equal('0');
+
+      expect(levelOfStakerAfter.toString()).to.be.equal('0');
+
       expect(staker1StakingAmountAfter).to.be.equal(0);
       expect(staker1ALBTBalanceAfter).to.be.equal(
         staker1ALBTBalanceBefore.add(staker1StakingAmountBefore)
@@ -344,7 +405,19 @@ export default async function suite() {
         this.staker1
       );
 
+      const levelOfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.staker1);
+
+      const balanceStakerMedal1 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 1);
+      const balanceStakerMedal2 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 2);
+      const balanceStakerMedal3 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 3);
+
       // Then
+      expect(balanceStakerMedal1.toString()).to.be.equal('0');
+      expect(balanceStakerMedal2.toString()).to.be.equal('0');
+      expect(balanceStakerMedal3.toString()).to.be.equal('0');
+
+      expect(levelOfStakerAfter.toString()).to.be.equal('0');
+
       expect(staker1StakingAmountAfter).to.be.equal(0);
       expect(staker1ALBTBalanceAfter).to.be.equal(
         staker1ALBTBalanceBefore.add(staker1StakingAmountBefore)
@@ -389,7 +462,12 @@ export default async function suite() {
       await this.stakingContract
         .connect(this.staker1Signer)
         .stake(StakingType.STAKER_LVL_2);
+
+      const level2OfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.staker1);
+
       // Then
+      expect(level2OfStakerAfter.toString()).to.be.equal('2');
+
       expectRevert(
         this.stakingContract
           .connect(this.staker1Signer)
@@ -406,7 +484,20 @@ export default async function suite() {
       await this.stakingContract
         .connect(this.staker1Signer)
         .stake(StakingType.STAKER_LVL_3);
+
+      const level3OfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.staker1);
+
+      const balanceStakerMedal1 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 1);
+      const balanceStakerMedal2 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 2);
+      const balanceStakerMedal3 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 3);
+
       // Then
+      expect(balanceStakerMedal1.toString()).to.be.equal('0');
+      expect(balanceStakerMedal2.toString()).to.be.equal('0');
+      expect(balanceStakerMedal3.toString()).to.be.equal('1');
+
+      expect(level3OfStakerAfter.toString()).to.be.equal('3');
+
       expectRevert(
         this.stakingContract
           .connect(this.staker1Signer)
@@ -458,7 +549,19 @@ export default async function suite() {
         this.staker1
       );
 
+      const level3OfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.staker1);
+
+      const balanceStakerMedal1 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 1);
+      const balanceStakerMedal2 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 2);
+      const balanceStakerMedal3 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 3);
+
       // Then
+      expect(balanceStakerMedal1.toString()).to.be.equal('1');
+      expect(balanceStakerMedal2.toString()).to.be.equal('0');
+      expect(balanceStakerMedal3.toString()).to.be.equal('0');
+
+      expect(level3OfStakerAfter.toString()).to.be.equal('1');
+
       expect(staker1StakingAmountAfter).to.be.equal(
         staker1StakingAmountBefore.sub(totalAmountFromStakingToStaker)
       );
@@ -520,7 +623,19 @@ export default async function suite() {
         this.staker1
       );
 
+      const level3OfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.staker1);
+
+      const balanceStakerMedal1 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 1);
+      const balanceStakerMedal2 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 2);
+      const balanceStakerMedal3 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 3);
+
       // Then
+      expect(balanceStakerMedal1.toString()).to.be.equal('0');
+      expect(balanceStakerMedal2.toString()).to.be.equal('1');
+      expect(balanceStakerMedal3.toString()).to.be.equal('0');
+
+      expect(level3OfStakerAfter.toString()).to.be.equal('2');
+
       expect(staker1StakingAmountAfter).to.be.equal(
         staker1StakingAmountBefore.sub(totalAmountFromStakingToStaker)
       );
@@ -582,7 +697,19 @@ export default async function suite() {
         this.staker1
       );
 
+      const level3OfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.staker1);
+
+      const balanceStakerMedal1 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 1);
+      const balanceStakerMedal2 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 2);
+      const balanceStakerMedal3 = await this.stakerMedalNFTContract.balanceOf(this.staker1, 3);
+
       // Then
+      expect(balanceStakerMedal1.toString()).to.be.equal('1');
+      expect(balanceStakerMedal2.toString()).to.be.equal('0');
+      expect(balanceStakerMedal3.toString()).to.be.equal('0');
+
+      expect(level3OfStakerAfter.toString()).to.be.equal('1');
+
       expect(staker1StakingAmountAfter).to.be.equal(
         staker1StakingAmountBefore.sub(amountToUnstake)
       );

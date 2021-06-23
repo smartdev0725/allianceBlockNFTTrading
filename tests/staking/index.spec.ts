@@ -59,6 +59,7 @@ describe('Staking', function () {
       collateralTokenContract,
       ALBTContract,
       stakingContract,
+      stakerMedalNFTContract,
     } = await getContracts();
     this.registryContract = registryContract;
     this.governanceContract = governanceContract;
@@ -69,6 +70,7 @@ describe('Staking', function () {
     this.collateralTokenContract = collateralTokenContract;
     this.ALBTContract = ALBTContract;
     this.stakingContract = stakingContract;
+    this.stakerMedalNFTContract = stakerMedalNFTContract;
     const rALBTFactory = await ethers.getContractFactory('rALBT');
     const rALBTAddress = await this.escrowContract.reputationalALBT();
     this.rALBTContract = await rALBTFactory.attach(rALBTAddress);

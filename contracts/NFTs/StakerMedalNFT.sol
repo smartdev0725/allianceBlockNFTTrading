@@ -22,8 +22,8 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
         _;
     }
 
-    modifier onlyAllowedStakingType(StakingType stakingId) {
-        require(uint(stakingId) >= 1 && uint(stakingId) <= 3, "Staking ID not allowed, must be 1, 2 or 3");
+    modifier onlyAllowedStakingType(uint256 stakingId) {
+        require(stakingId >= 1 && stakingId <= 3, "Staking ID not allowed, must be 1, 2 or 3");
         _;
     }
 
@@ -45,8 +45,8 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
      * @param to The address to mint the tokens to.
      * @param stakingId The medal identifier
      */
-    function mint(address to, StakingType stakingId) public onlyMinter() onlyAllowedStakingType(stakingId) {
-        _mint(to, uint(stakingId), 1, "");
+    function mint(address to, uint256 stakingId) public onlyMinter() onlyAllowedStakingType(stakingId) {
+        _mint(to, stakingId, 1, "");
     }
 
     /**
@@ -54,8 +54,8 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
      * @param account the owner of the tokens
      * @param stakingId The medal identifier
      */
-    function burn(address account, StakingType stakingId) public onlyMinter() onlyAllowedStakingType(stakingId) {
-        _burn(account, uint(stakingId), 1);
+    function burn(address account, uint256 stakingId) public onlyMinter() onlyAllowedStakingType(stakingId) {
+        _burn(account, stakingId, 1);
     }
 
     /**
@@ -112,12 +112,12 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
         }
 
         uint256 balanceOfStakerMedalSilver = balanceOf(account, uint(StakingType.STAKER_LVL_2));
-        if(balanceOfStakerMedalBronce == 1) {
+        if(balanceOfStakerMedalSilver == 1) {
             return uint(StakingType.STAKER_LVL_2);
         }
 
         uint256 balanceOfStakerMedalGold = balanceOf(account, uint(StakingType.STAKER_LVL_3));
-        if(balanceOfStakerMedalBronce == 1) {
+        if(balanceOfStakerMedalGold == 1) {
             return uint(StakingType.STAKER_LVL_3);
         }
         return uint(StakingType.STAKER_LVL_0);
