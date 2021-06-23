@@ -42,7 +42,6 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
         require(governanceAddress_ != address(0), "Cannot initialize governanceAddress_ with 0 address");
         require(fundingNFT_ != address(0), "Cannot initialize fundingNFT_ with 0 address");
         require(baseAmountForEachPartition_ != 0, "Cannot initialize baseAmountForEachPartition_ with 0");
-        require(address(escrow) == address(0), "Cannot initialize second time");
 
         __Ownable_init();
         __Investment_init();
