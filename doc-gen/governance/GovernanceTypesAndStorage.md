@@ -10,23 +10,6 @@ Responsible for governance storage
 
 
 
-### `onlyDaoDelegatorNotVoted(uint256 requestId, uint256 epochSubmitted)`
-
-
-
-
-
-### `onlyBeforeDeadline(uint256 requestId)`
-
-
-
-
-
-### `onlyAfterDeadlineAndNotApproved(uint256 requestId)`
-
-
-
-
 
 
 
@@ -36,13 +19,14 @@ Responsible for governance storage
 
 
 
-### `ApprovalRequested(uint256 investmentId, bool isMilestone, uint256 milestoneNumber, address user)`
+### `ApprovalRequested(uint256 investmentId, address user)`
 
 
 
 
 
-### `InitGovernance(address registryAddress_, address stakingAddress_, address user)`
+
+### `InitGovernance(address registryAddress_, address user)`
 
 
 

@@ -11,7 +11,8 @@
 
 
 
-### `transferFundingNFT(uint256 investmentId, uint256 partitionsToPurchase, address receiver)` (external)
+### `transferFundingNFT(uint256 investmentId, uint256 partitionsPurchased, address receiver)` (external)
+
 
 
 
@@ -23,7 +24,8 @@
 
 
 
-### `transferCollateralToken(address collateralToken, address seeker, uint256 amount)` (external)
+### `transferInvestmentToken(address investmentToken, address seeker, uint256 amount)` (external)
+
 
 
 

@@ -1,6 +1,6 @@
 ## `Storage`
 
-Responsible for loan storage
+Responsible for investment storage
 
 
 
