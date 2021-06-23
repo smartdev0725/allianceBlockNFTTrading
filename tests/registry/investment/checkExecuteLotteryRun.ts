@@ -732,25 +732,27 @@ export default async function suite() {
 
       it('When withdrawing locked tokens should have more rALBT and investmentTokens', async function () {
         const balanceOfReputationalTokensBefore = await this.rALBTContract.balanceOf(this.lender1);
-        const balanceOfInvestmentTokensBefore = await this.investmentTokenContract.balanceOf(this.lender1);
-
+        const investmentId = this.investmentId.add(1);
         const numberOfPartitions = BigNumber.from(10);
-        const tokensPerTicket = ethers.utils.parseEther('100');
+
+        const balanceFundingNFTTokenBefore =
+          await this.fundingNFTContract.balanceOf(this.lender1, investmentId.toNumber());
 
         await this.registryContract
           .connect(this.lender1Signer)
-          .withdrawLockedInvestmentTickets(this.investmentId.add(1), numberOfPartitions);
+          .withdrawLockedInvestmentTickets(investmentId, numberOfPartitions);
 
         const balanceOfReputationalTokensAfter = await this.rALBTContract.balanceOf(this.lender1);
-        const balanceOfInvestmentTokensAfter = await this.investmentTokenContract.balanceOf(this.lender1);
 
         const reputationalBalanceUpdate = balanceOfReputationalTokensAfter.sub(balanceOfReputationalTokensBefore);
-        const investmentTokensGot = balanceOfInvestmentTokensAfter.sub(balanceOfInvestmentTokensBefore);
-        const investmentTokensToGet = numberOfPartitions.mul(tokensPerTicket);
+
+        const balanceFundingNFTTokenAfter =
+          await this.fundingNFTContract.balanceOf(this.lender1, investmentId.toNumber());
 
         // Then
-        expect(Number(reputationalBalanceUpdate)).to.be.greaterThan(0);
-        expect(investmentTokensGot.toString()).to.be.equal(investmentTokensToGet.toString());
+        expect(+reputationalBalanceUpdate.toString()).to.be.greaterThan(0);
+        expect(+balanceFundingNFTTokenAfter.toString()).to.be.greaterThan(+balanceFundingNFTTokenBefore.toString());
+
       });
 
       it('Should revert when trying to withdraw more than locked tickets', async function () {
