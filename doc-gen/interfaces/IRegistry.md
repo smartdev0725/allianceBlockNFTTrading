@@ -11,7 +11,6 @@
 
 
 
-
 ### `getRequestingInterestStatus(uint256 investmentId) → bool` (external)
 
 

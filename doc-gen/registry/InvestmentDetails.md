@@ -12,7 +12,7 @@ Extends Storage
 
 
 
-### `_storeInvestmentDetails(uint256 amountRequestedToBeRaised_, address investmentToken_, uint256 investmentTokensAmount_, string extraInfo_)` (internal)
+### `_storeInvestmentDetails(address lendingToken_, uint256 amountRequestedToBeRaised_, address investmentToken_, uint256 investmentTokensAmount_, string extraInfo_)` (internal)
 
 Stores Investment Details
 

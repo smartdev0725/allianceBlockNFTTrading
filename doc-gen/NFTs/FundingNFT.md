@@ -20,7 +20,6 @@ Extends Initializable, ContextUpgradeable, AccessControlUpgradeable, ERC1155Upgr
 
 ### `initialize(string baseUri, string contractUri)` (external)
 
-
 Initializes the contract
 
 
@@ -40,7 +39,6 @@ Pauses the token transfers
 
 Owner can pause transfers for specific tokens
 pauses all investment ids, no matter the generation
-
 
 
 ### `unpauseTokenTransfer(uint256 investmentId)` (external)

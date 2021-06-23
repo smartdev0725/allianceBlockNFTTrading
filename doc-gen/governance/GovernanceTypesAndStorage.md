@@ -12,7 +12,6 @@ Responsible for governance storage
 
 
 
-
 ### `VotedForRequest(uint256 investmentId, uint256 requestId, bool decision, address user)`
 
 
@@ -20,7 +19,6 @@ Responsible for governance storage
 
 
 ### `ApprovalRequested(uint256 investmentId, address user)`
-
 
 
 

@@ -8,7 +8,6 @@ Extends Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeab
 
 ### `initialize(address lendingToken_, address fundingNFT_)` (external)
 
-
 Initialize
 
 
@@ -32,7 +31,15 @@ Transfer Funding NFT
 This function is used to send the ERC1155 tokens from escrow to the lenders.
 
 
-### `transferLendingToken(address seeker, uint256 amount)` (external)
+### `burnFundingNFT(address account, uint256 investmentId, uint256 amount)` (external)
+
+Burn Funding NFT
+
+
+This function is used to burn NFT
+
+
+### `transferLendingToken(address lendingToken, address seeker, uint256 amount)` (external)
 
 Transfer Lending Token
 
@@ -46,7 +53,6 @@ Transfer Investment Token
 
 
 This function is used to send the investment token amount to the seeker.
-
 
 
 ### `multiMintReputationalToken(address[] recipients, uint256[] amounts)` (external)
