@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import {ethers, getNamedAccounts, web3} from 'hardhat';
 import {StakingType} from '../helpers/registryEnums';
 import {getSignature} from '../helpers/utils';
+import {increaseTime} from '../helpers/time';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
@@ -580,6 +581,194 @@ export default async function suite() {
       ).to.be.equal(ethers.utils.parseEther('1'));
       expect(provisionAccountBalanceAfter.sub(provisionAccountBalanceBefore).toString()
       ).to.be.equal(ethers.utils.parseEther('5'));
+    });
+
+    it('Can provide rewards for same action', async function () {
+      const actions = [
+        {
+          account: this.lender1,
+          actionName: 'Wallet Connect',
+          answer: 'Yes',
+          referralId: '0',
+        },
+      ];
+
+      // Given
+      const reputationalAlbtRewardsPerLevel = [
+        ethers.utils.parseEther('500').toString(),
+        ethers.utils.parseEther('500').toString(),
+        ethers.utils.parseEther('500').toString(),
+        ethers.utils.parseEther('500').toString(),
+      ];
+
+      const reputationalAlbtRewardsPerLevelAfterFirstTime = [
+        ethers.utils.parseEther('10').toString(),
+        ethers.utils.parseEther('10').toString(),
+        ethers.utils.parseEther('10').toString(),
+        ethers.utils.parseEther('10').toString(),
+      ];
+
+      await this.actionVerifierContract
+        .connect(this.deployerSigner)
+        .importAction(
+          'Wallet Connect',
+          reputationalAlbtRewardsPerLevel,
+          reputationalAlbtRewardsPerLevelAfterFirstTime,
+          2,
+          addressZero,
+        );
+
+      let signature = await getSignature(
+        'Wallet Connect',
+        'Yes',
+        this.lender1,
+        0,
+        this.actionVerifierContract.address,
+        web3
+      );
+
+      const signatures = [signature];
+
+      // Mint albt tokens to deployer address
+      const amountToTransfer = ethers.utils.parseEther('1000000');
+      await this.ALBTContract.connect(this.deployerSigner).mint(
+        this.lender2,
+        amountToTransfer
+      );
+      await this.ALBTContract.connect(this.lender2Signer).approve(
+        this.stakingContract.address,
+        amountToTransfer
+      );
+
+      await this.stakingContract
+        .connect(this.lender2Signer)
+        .stake(StakingType.STAKER_LVL_2);
+
+      const actionAccountBalanceBeforeFirstTime = await this.rALBTContract.balanceOf(this.lender1);
+
+      await this.actionVerifierContract
+        .connect(this.lender2Signer)
+        .provideRewardsForActions(actions, signatures);
+
+      const actionAccountBalanceAfterFirstTime = await this.rALBTContract.balanceOf(this.lender1);
+
+      // Move time to 1 day
+      await increaseTime(this.deployerSigner.provider, 1 * 24 * 60 * 60); // 1 day
+
+      // Provide reward second time for Wallet Connect Action
+      await this.actionVerifierContract
+        .connect(this.lender2Signer)
+        .provideRewardsForActions(actions, signatures);
+
+      const actionAccountBalanceAfterSecondTime = await this.rALBTContract.balanceOf(this.lender1);
+
+      // Provide reward third time for Wallet Connect Action without changing epoch
+      await this.actionVerifierContract
+        .connect(this.lender2Signer)
+        .provideRewardsForActions(actions, signatures);
+
+      const actionAccountBalanceAfterThirdTime = await this.rALBTContract.balanceOf(this.lender1);
+
+      expect(actionAccountBalanceAfterFirstTime.sub(actionAccountBalanceBeforeFirstTime).toString()
+        ).to.be.equal(ethers.utils.parseEther('500'));
+      expect(actionAccountBalanceAfterSecondTime.sub(actionAccountBalanceAfterFirstTime).toString()
+        ).to.be.equal(ethers.utils.parseEther('10'));
+      expect(actionAccountBalanceAfterThirdTime.sub(actionAccountBalanceAfterSecondTime).toString()
+        ).to.be.equal(ethers.utils.parseEther('0'));
+    });
+
+    it('Can provide rewards for action with valid referralId', async function () {
+      const actions = [
+        {
+          account: this.lender1,
+          actionName: 'Investment Vote',
+          answer: 'Yes',
+          referralId: '0',
+        },
+      ];
+
+      // Given
+      const reputationalAlbtRewardsPerLevel = [
+        ethers.utils.parseEther('10').toString(),
+        ethers.utils.parseEther('50').toString(),
+        ethers.utils.parseEther('200').toString(),
+        ethers.utils.parseEther('500').toString(),
+      ];
+
+      const reputationalAlbtRewardsPerLevelAfterFirstTime = [
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+      ];
+
+      await this.actionVerifierContract
+        .connect(this.deployerSigner)
+        .importAction(
+          'Investment Vote',
+          reputationalAlbtRewardsPerLevel,
+          reputationalAlbtRewardsPerLevelAfterFirstTime,
+          2,
+          this.registryContract.address,
+        );
+
+      let signature = await getSignature(
+        'Investment Vote',
+        'Yes',
+        this.lender1,
+        0,
+        this.actionVerifierContract.address,
+        web3
+      );
+
+      const signatures = [signature];
+
+      const amountOfTokensToBePurchased = ethers.utils.parseEther('1000');
+      const totalAmountRequested = ethers.utils.parseEther('200');
+      const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
+
+      await this.investmentTokenContract
+        .connect(this.deployerSigner)
+        .mint(this.seeker, amountOfTokensToBePurchased);
+      await this.investmentTokenContract
+        .connect(this.seekerSigner)
+        .approve(this.registryContract.address, amountOfTokensToBePurchased);
+
+      await this.registryContract
+        .connect(this.seekerSigner)
+        .requestInvestment(
+          this.investmentTokenContract.address,
+          amountOfTokensToBePurchased,
+          this.lendingTokenContract.address,
+          totalAmountRequested,
+          ipfsHash
+        );
+
+      // Mint albt tokens to deployer address
+      const amountToTransfer = ethers.utils.parseEther('1000000');
+      await this.ALBTContract.connect(this.deployerSigner).mint(
+        this.lender2,
+        amountToTransfer
+      );
+      await this.ALBTContract.connect(this.lender2Signer).approve(
+        this.stakingContract.address,
+        amountToTransfer
+      );
+
+      await this.stakingContract
+        .connect(this.lender2Signer)
+        .stake(StakingType.STAKER_LVL_2);
+
+      const actionAccountBalanceBefore = await this.rALBTContract.balanceOf(this.lender1);
+
+      await this.actionVerifierContract
+        .connect(this.lender2Signer)
+        .provideRewardsForActions(actions, signatures);
+
+      const actionAccountBalanceAfter = await this.rALBTContract.balanceOf(this.lender1);
+
+      expect(actionAccountBalanceAfter.sub(actionAccountBalanceBefore).toString()
+        ).to.be.equal(ethers.utils.parseEther('10'));
     });
   });
 }

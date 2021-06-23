@@ -62,6 +62,8 @@ describe('Action Verifier', function () {
       ALBTContract,
       registryContract,
       stakerMedalNFTContract,
+      investmentTokenContract,
+      lendingTokenContract,
     } = await getContracts();
     this.actionVerifierContract = actionVerifierContract;
     this.escrowContract = escrowContract;
@@ -70,6 +72,8 @@ describe('Action Verifier', function () {
     this.rALBTContract = rALBTContract;
     this.registryContract = registryContract;
     this.stakerMedalNft = stakerMedalNFTContract;
+    this.investmentTokenContract = investmentTokenContract;
+    this.lendingTokenContract = lendingTokenContract;
   });
 
   describe(
