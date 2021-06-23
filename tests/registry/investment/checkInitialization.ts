@@ -50,10 +50,19 @@ export default async function suite() {
       );
     });
 
-    it('When adding as lending token the zero address', async function () {
+    it('When adding as lending token the zero address should revert', async function () {
       await expectRevert(
         this.registryContract.addLendingToken(ethers.constants.AddressZero),
         'Cannot provide lendingToken_ with 0 address'
+      );
+    });
+
+    it('When adding second time same lending token should revert', async function () {
+      await this.registryContract.addLendingToken(this.collateralTokenContract.address);
+
+      await expectRevert(
+        this.registryContract.addLendingToken(this.collateralTokenContract.address),
+        'Cannot add existing lending token'
       );
     });
   });
