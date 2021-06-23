@@ -112,8 +112,6 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
     function _applyImmediateTicketsAndProvideLuckyNumbers(uint256 investmentId_, uint256 amountOfPartitions_) internal {
         uint256 reputationalBalance = _updateReputationalBalanceForPreviouslyLockedTokens();
-        if (rAlbtPerLotteryNumber == 0) revert("Not eligible for lottery numbers");
-
         uint256 totalLotteryNumbers = reputationalBalance.div(rAlbtPerLotteryNumber);
 
         if (totalLotteryNumbers == 0) revert("Not eligible for lottery numbers");
@@ -130,7 +128,6 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         if (immediateTickets > 0) {
             // Just in case we provided immediate tickets and tickets finished, so there is no lottery in this case.
-            // TODO - Maybe return here.
             if (immediateTickets >= ticketsRemaining[investmentId_]) {
                 immediateTickets = ticketsRemaining[investmentId_];
                 investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.SETTLED;
@@ -279,9 +276,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].sub(ticketsToWithdraw);
 
-        if (ticketsToWithdraw > 0) {
-            escrow.transferFundingNFT(investmentId, ticketsToWithdraw, msg.sender);
-        }
+        escrow.transferFundingNFT(investmentId, ticketsToWithdraw, msg.sender);
     }
 
     /**
