@@ -3,7 +3,7 @@ import {ethers} from 'hardhat';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
-  describe.only('Succeeds', async () => {
+  describe('Succeeds', async () => {
     describe('Initial values', () => {
       it('should get correct role keys', async function () {
         // Given
@@ -220,10 +220,125 @@ export default async function suite() {
           this.stakerMedalNFTContract
             .connect(this.deployerSigner)
             .safeBatchTransferFrom(dummyAddress, dummyAddress, [], [], ethers.utils.formatBytes32String("")),
-          'Method safeTransferFrom disabled'
+          'Method safeBatchTransferFrom disabled'
         );
       });
     });
+
+    describe('Basic scenario', () => {
+      it('should get correct balance for staker level 1', async function () {
+        await this.stakerMedalNFTContract
+          .connect(this.seekerSigner)
+          .mint(this.lender1, 1);
+
+        const balance = await this.stakerMedalNFTContract.balanceOf(
+          this.lender1,
+          1
+        );
+
+        const levelOfStaker = await this.stakerMedalNFTContract.getLevelOfStaker(this.lender1);
+
+        expect(balance.toString()).to.be.equal('1');
+        expect(levelOfStaker.toString()).to.be.equal('1');
+
+        await expectRevert(
+          this.stakerMedalNFTContract
+            .connect(this.seekerSigner)
+            .burn(this.lender1, 2),
+          'ERC1155: burn amount exceeds balance'
+        );
+
+        await this.stakerMedalNFTContract
+          .connect(this.seekerSigner)
+          .burn(this.lender1, 1);
+
+        const balanceAfter = await this.stakerMedalNFTContract.balanceOf(
+          this.lender1,
+          1
+        );
+
+        const levelOfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.lender1);
+
+        expect(balanceAfter.toString()).to.be.equal('0');
+        expect(levelOfStakerAfter.toString()).to.be.equal('0');
+
+      });
+
+      it('should get correct balance for staker level 2', async function () {
+        await this.stakerMedalNFTContract
+          .connect(this.seekerSigner)
+          .mint(this.lender1, 2);
+
+        const balance = await this.stakerMedalNFTContract.balanceOf(
+          this.lender1,
+          2
+        );
+
+        const levelOfStaker = await this.stakerMedalNFTContract.getLevelOfStaker(this.lender1);
+
+        expect(balance.toString()).to.be.equal('1');
+        expect(levelOfStaker.toString()).to.be.equal('2');
+
+        await expectRevert(
+          this.stakerMedalNFTContract
+            .connect(this.seekerSigner)
+            .burn(this.lender1, 1),
+          'ERC1155: burn amount exceeds balance'
+        );
+
+        await this.stakerMedalNFTContract
+          .connect(this.seekerSigner)
+          .burn(this.lender1, 2);
+
+        const balanceAfter = await this.stakerMedalNFTContract.balanceOf(
+          this.lender1,
+          2
+        );
+
+        const levelOfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.lender1);
+
+        expect(balanceAfter.toString()).to.be.equal('0');
+        expect(levelOfStakerAfter.toString()).to.be.equal('0');
+      });
+
+      it('should get correct balance for staker level 3', async function () {
+        await this.stakerMedalNFTContract
+          .connect(this.seekerSigner)
+          .mint(this.lender1, 3);
+
+        const balance = await this.stakerMedalNFTContract.balanceOf(
+          this.lender1,
+          3
+        );
+
+        const levelOfStaker = await this.stakerMedalNFTContract.getLevelOfStaker(this.lender1);
+
+        expect(balance.toString()).to.be.equal('1');
+        expect(levelOfStaker.toString()).to.be.equal('3');
+
+        await expectRevert(
+          this.stakerMedalNFTContract
+            .connect(this.seekerSigner)
+            .burn(this.lender1, 1),
+          'ERC1155: burn amount exceeds balance'
+        );
+
+        await this.stakerMedalNFTContract
+          .connect(this.seekerSigner)
+          .burn(this.lender1, 3);
+
+        const balanceAfter = await this.stakerMedalNFTContract.balanceOf(
+          this.lender1,
+          3
+        );
+
+        const levelOfStakerAfter = await this.stakerMedalNFTContract.getLevelOfStaker(this.lender1);
+
+        expect(balanceAfter.toString()).to.be.equal('0');
+        expect(levelOfStakerAfter.toString()).to.be.equal('0');
+      });
+    });
+
 
   });
 }

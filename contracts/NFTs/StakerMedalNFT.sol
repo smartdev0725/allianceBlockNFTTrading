@@ -112,12 +112,12 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
         }
 
         uint256 balanceOfStakerMedalSilver = balanceOf(account, uint(StakingType.STAKER_LVL_2));
-        if(balanceOfStakerMedalBronce == 1) {
+        if(balanceOfStakerMedalSilver == 1) {
             return uint(StakingType.STAKER_LVL_2);
         }
 
         uint256 balanceOfStakerMedalGold = balanceOf(account, uint(StakingType.STAKER_LVL_3));
-        if(balanceOfStakerMedalBronce == 1) {
+        if(balanceOfStakerMedalGold == 1) {
             return uint(StakingType.STAKER_LVL_3);
         }
         return uint(StakingType.STAKER_LVL_0);
