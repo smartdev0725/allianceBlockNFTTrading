@@ -45,7 +45,7 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
 
         albt = IERC20(albt_);
         escrow = IEscrow(escrow_);
-        stakerMedalNFT = IERC1155Mint(stakerMedalNFT_);
+        stakerMedalNFT = IERC1155StakerNFT(stakerMedalNFT_);
 
         for (uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
             stakingTypeAmounts[i] = stakingTypeAmounts_[i];
@@ -69,6 +69,8 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
 
         _applyReputation(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
 
+        _applyMedal(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
+
         uint256 amountToStake = amount.sub(balance[msg.sender]);
         _stake(msg.sender, amountToStake);
     }
@@ -85,6 +87,8 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
         uint256 amount = stakingTypeAmounts[uint256(stakingType)];
 
         _applyReputation(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
+
+        _applyMedal(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
 
         uint256 amountToWithdraw = balance[msg.sender].sub(amount);
         _withdraw(msg.sender, amountToWithdraw);
@@ -131,7 +135,7 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
      * @notice Apply Reputation
      * @param account the address
      * @param previousLevelIndex The index of the previous level
-     * @param newLevelIndex the index for the new level
+     * @param newLevelIndex The index for the new level
      */
     function _applyReputation(
         address account,
@@ -144,6 +148,26 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
         } else {
             uint256 amountToBurn = _findAmount(previousLevelIndex, newLevelIndex);
             escrow.burnReputationalToken(account, amountToBurn);
+        }
+    }
+
+    /**
+     * @notice Apply Medal
+     * @param account the address
+     * @param previousLevelIndex The index of the previous level
+     * @param newLevelIndex The index for the new level
+     */
+    function _applyMedal(
+        address account,
+        uint256 previousLevelIndex,
+        uint256 newLevelIndex
+    ) internal {
+        if(newLevelIndex > 0) {
+            stakerMedalNFT.mint(account, newLevelIndex);
+        }
+
+        if(previousLevelIndex > 0) {
+            stakerMedalNFT.burn(account, previousLevelIndex);
         }
     }
 
