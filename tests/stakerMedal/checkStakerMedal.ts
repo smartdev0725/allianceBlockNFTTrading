@@ -337,6 +337,13 @@ export default async function suite() {
         expect(balanceAfter.toString()).to.be.equal('0');
         expect(levelOfStakerAfter.toString()).to.be.equal('0');
       });
+
+      it('account zero should revert', async function () {
+        await expectRevert(
+          this.stakerMedalNFTContract.getLevelOfStaker(ethers.constants.AddressZero),
+          'Account is a zero address'
+        );
+      });
     });
 
 
