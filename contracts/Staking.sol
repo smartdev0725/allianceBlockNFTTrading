@@ -8,13 +8,14 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./staking/StakingDetails.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 /**
  * @title AllianceBlock Staking contract
  * @notice Responsible for ALBT Staking
  * @dev Extends  Initializable, StakingDetails, OwnableUpgradeable
  */
-contract Staking is Initializable, StakingDetails, OwnableUpgradeable {
+contract Staking is Initializable, StakingDetails, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -27,13 +28,20 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable {
      * @param reputationalStakingTypeAmounts_ the array of Reputation Staking Type Amounts
      */
     function initialize(
-        IERC20 albt_,
+        address albt_,
         address escrow_,
         uint256[] memory stakingTypeAmounts_,
         uint256[] memory reputationalStakingTypeAmounts_
-    ) public initializer {
+    ) external initializer {
+        require(albt_ != address(0), "Cannot initialize albt with 0 address");
+        require(escrow_ != address(0), "Cannot initialize escrow_ with 0 address");
+        require(stakingTypeAmounts_.length != 0, "Cannot initialize stakingTypeAmounts_ with 0");
+        require(reputationalStakingTypeAmounts_.length != 0, "Cannot initialize reputationalStakingTypeAmounts_ with 0");
+
         __Ownable_init();
-        albt = albt_;
+        __ReentrancyGuard_init();
+
+        albt = IERC20(albt_);
         escrow = IEscrow(escrow_);
 
         for (uint256 i = 0; i < stakingTypeAmounts_.length; i++) {
@@ -50,7 +58,7 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable {
      * @param stakingType The staking type
      * @dev requires not Delegator and cannot repeat staking type
      */
-    function stake(StakingType stakingType) public {
+    function stake(StakingType stakingType) external nonReentrant() {
         require(balance[msg.sender] < stakingTypeAmounts[uint256(stakingType)], "Cannot stake for same type again");
         uint256 amount = stakingTypeAmounts[uint256(stakingType)];
 
@@ -68,7 +76,7 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable {
      * @param stakingType The staking type to drop to
      * @dev msg.sender withdraws till reaching stakingType
      */
-    function unstake(StakingType stakingType) external {
+    function unstake(StakingType stakingType) external nonReentrant() {
         require(balance[msg.sender] > stakingTypeAmounts[uint256(stakingType)], "Can only drop to lower level");
 
         uint256 stakingTypeIndex = _getStakingType(msg.sender);
@@ -84,7 +92,7 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable {
      * @notice Exit
      * @dev msg.sender withdraws and exits
      */
-    function exit() external {
+    function exit() external nonReentrant() {
         uint256 stakingTypeIndex = _getStakingType(msg.sender);
 
         _applyReputation(msg.sender, stakingTypeIndex, 0);

@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IRegistry.sol";
 import "./interfaces/IStaking.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 /**
  * @title AllianceBlock Governance contract
@@ -27,8 +28,12 @@ contract Governance is Initializable, SuperGovernance {
         address superDelegator_,
         uint256 applicationsForInvestmentDuration_,
         uint256 lateApplicationsForInvestmentDuration_
-    ) public initializer {
-        __Ownable_init();
+    ) external initializer {
+        require(superDelegator_ != address(0), "Cannot initialize with 0 addresses");
+        require(applicationsForInvestmentDuration_ != 0, "Cannot initialize applicationsForInvestmentDuration_ with 0");
+        require(lateApplicationsForInvestmentDuration_ != 0, "Cannot initialize lateApplicationsForInvestmentDuration_ with 0");
+
+        __SuperGovernance_init();
 
         superDelegator = superDelegator_;
 
@@ -46,6 +51,7 @@ contract Governance is Initializable, SuperGovernance {
      * @param superDelegator_ The address of the upgraded super delegator.
      */
     function updateSuperDelegator(address superDelegator_) external onlyOwner() {
+        require(superDelegator_ != address(0), "Cannot initialize with 0 addresses");
         superDelegator = superDelegator_;
     }
 
@@ -56,7 +62,7 @@ contract Governance is Initializable, SuperGovernance {
      */
     function requestApproval(
         uint256 investmentId
-    ) external onlyRegistry() checkCronjob() {
+    ) external onlyRegistry() checkCronjob() nonReentrant() {
         approvalRequests[totalApprovalRequests].investmentId = investmentId;
 
         emit ApprovalRequested(

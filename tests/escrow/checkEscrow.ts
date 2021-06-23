@@ -153,7 +153,7 @@ export default async function suite() {
       );
       await this.escrowContract
         .connect(deployerSigner)
-        .transferProjectToken(
+        .transferInvestmentToken(
           this.collateralTokenContract.address,
           seeker,
           amount
@@ -177,7 +177,7 @@ export default async function suite() {
 
       // When and Then
       await expectRevert(
-        this.escrowContract.transferProjectToken(
+        this.escrowContract.transferInvestmentToken(
           this.collateralTokenContract.address,
           seeker,
           amount
@@ -202,7 +202,7 @@ export default async function suite() {
       await expectRevert(
         this.escrowContract
           .connect(seekerSigner)
-          .transferProjectToken(
+          .transferInvestmentToken(
             this.collateralTokenContract.address,
             seeker,
             amount

@@ -1,18 +1,18 @@
 import {ethers, deployments} from 'hardhat';
 import {expect} from 'chai';
 
-describe('Contract ProjectToken', () => {
+describe('Contract InvestmentToken', () => {
   beforeEach(async () => {
     await deployments.fixture();
   });
 
   it('should be deployed', async function () {
     // Given
-    const projectTokenContract = await ethers.getContract('ProjectToken');
+    const investmentTokenContract = await ethers.getContract('InvestmentToken');
 
     // When
-    const name = await projectTokenContract.name();
-    const symbol = await projectTokenContract.symbol();
+    const name = await investmentTokenContract.name();
+    const symbol = await investmentTokenContract.symbol();
 
     // Then
     expect(name).to.equal('Project Token');

@@ -4,6 +4,8 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155HolderUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+
 import "./EscrowDetails.sol";
 import "./rALBT.sol";
 
@@ -13,14 +15,20 @@ import "./rALBT.sol";
  * @dev Extends Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable
  */
 contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable {
+    using SafeERC20 for IERC20;
     /**
      * @notice Initialize
      * @dev Initializes the contract.
      * @param lendingToken_ The token that lenders will be able to lend.
      * @param fundingNFT_ The ERC1155 token contract which will represent the lending amounts.
      */
-    function initialize(address lendingToken_, address fundingNFT_) public initializer {
+    function initialize(address lendingToken_, address fundingNFT_) external initializer {
+        require(lendingToken_ != address(0), "Cannot initialize lendingToken_ with 0 address");
+        require(fundingNFT_ != address(0), "Cannot initialize fundingNFT_ with 0 address");
+
         __Ownable_init();
+        __ERC1155Holder_init(); // This internally calls __ERC1155Receiver_init_unchained
+
         lendingToken = IERC20(lendingToken_);
         fundingNFT = IERC1155Mint(fundingNFT_);
         reputationalALBT = new rALBT();
@@ -41,7 +49,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     ) external onlyOwner() {
         require(registryAddress_ != address(0) && actionVerifierAddress_ != address(0) && stakingAddress_ != address(0)
             , "Cannot initialize with 0 addresses");
-        require(address(registry) == address(0) || address(actionVerifier) == address(0) || address(staking) == address(0), "Cannot initialize second time");
+        require(address(registry) == address(0) && address(actionVerifier) == address(0) && address(staking) == address(0), "Cannot initialize second time");
         registry = IRegistry(registryAddress_);
         actionVerifier = actionVerifierAddress_;
         staking = stakingAddress_;
@@ -73,18 +81,18 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
-     * @notice Transfer Project Token
-     * @dev This function is used to send the project token amount to the seeker.
-     * @param projectToken The project token's contract address.
-     * @param recipient The address to transfer the project tokens to.
-     * @param amount The amount of project tokens to be sent to seeker.
+     * @notice Transfer Investment Token
+     * @dev This function is used to send the investment token amount to the seeker.
+     * @param investmentToken The investment token's contract address.
+     * @param recipient The address to transfer the investment tokens to.
+     * @param amount The amount of investment tokens to be sent to seeker.
      */
-    function transferProjectToken(
-        address projectToken,
+    function transferInvestmentToken(
+        address investmentToken,
         address recipient,
         uint256 amount
     ) external onlyRegistry() {
-        IERC20(projectToken).transfer(recipient, amount);
+        IERC20(investmentToken).safeTransfer(recipient, amount);
     }
 
     /**

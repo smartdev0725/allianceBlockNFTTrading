@@ -28,7 +28,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
     // base url for each token metadata. Concatenates with ipfsHash for full path
     string private _baseURI;
 
-    // Mapping from loan ID to paused condition
+    // Mapping from investment ID to paused condition
     mapping(uint256 => bool) public transfersPaused;
 
     // Mapping from token ID to IPFS hash (token metadata)
@@ -43,11 +43,17 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @param baseUri sets the base URI
      * @param contractUri sets the contract URI
      */
-    function initialize(string memory baseUri, string memory contractUri) public initializer {
+    function initialize(string memory baseUri, string memory contractUri) external initializer {
+        require(bytes(baseUri).length != 0, "Cannot initialize baseUri with an empty string");
+        require(bytes(contractUri).length != 0, "Cannot initialize contractUri with an empty string");
+
+        // Added upgradeable initialization
+        __ERC1155_init("");
+        __Context_init();
+        __AccessControl_init();
+
         MINTER_ROLE = keccak256("MINTER_ROLE");
         PAUSER_ROLE = keccak256("PAUSER_ROLE");
-        __ERC1155_init("");
-        __ERC1155_init_unchained("");
         _baseURI = baseUri;
         _contractURI = contractUri;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -76,7 +82,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
     /**
      * @notice Pauses the token transfers
      * @dev Owner can pause transfers for specific tokens
-     * @dev pauses all loan ids, no matter the generation
+     * @dev pauses all investment ids, no matter the generation
      * @param investmentId the investment ID to be paused
      */
     function pauseTokenTransfer(uint256 investmentId) external onlyPauser {
@@ -113,8 +119,8 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
      * @notice Mint tokens of a specific generation directly
      * @param to The address to mint the tokens to.
      * @param amount The amount of tokens to mint.
-     * @param generation The generation of the tokens. The id of the tokens will be composed of the loan id and this generation number.
-     * @param investmentId The loan identifier
+     * @param generation The generation of the tokens. The id of the tokens will be composed of the investment id and this generation number.
+     * @param investmentId The investment identifier
      */
     function mintOfGen(
         address to,

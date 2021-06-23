@@ -15,11 +15,11 @@ export default async function suite() {
       const investmentId = await this.registryContract.totalInvestments();
       const approvalRequest =
         await this.governanceContract.totalApprovalRequests();
-      const initSeekerProjectTokenBalance =
-        await this.projectTokenContract.balanceOf(this.seeker);
+      const initSeekerInvestmentTokenBalance =
+        await this.investmentTokenContract.balanceOf(this.seeker);
 
-      const initEscrowProjectTokenBalance =
-        await this.projectTokenContract.balanceOf(this.escrowContract.address);
+      const initEscrowInvestmentTokenBalance =
+        await this.investmentTokenContract.balanceOf(this.escrowContract.address);
       const initEscrowFundingNftBalance =
         await this.fundingNFTContract.balanceOf(
           this.escrowContract.address,
@@ -34,7 +34,7 @@ export default async function suite() {
         this.registryContract
           .connect(this.seekerSigner)
           .requestInvestment(
-            this.projectTokenContract.address,
+            this.investmentTokenContract.address,
             amountOfTokensToBePurchased,
             totalAmountRequested,
             ipfsHash
@@ -43,10 +43,10 @@ export default async function suite() {
         .to.emit(this.registryContract, 'InvestmentRequested')
         .withArgs(investmentId, this.seeker, totalAmountRequested);
 
-      const newSeekerProjectTokenBalance =
-        await this.projectTokenContract.balanceOf(this.seeker);
-      const newEscrowProjectTokenBalance =
-        await this.projectTokenContract.balanceOf(this.escrowContract.address);
+      const newSeekerInvestmentTokenBalance =
+        await this.investmentTokenContract.balanceOf(this.seeker);
+      const newEscrowInvestmentTokenBalance =
+        await this.investmentTokenContract.balanceOf(this.escrowContract.address);
       const tokenId = BigNumber.from(
         new BN(0).ishln(128).or(new BN(investmentId.toNumber())).toString()
       );
@@ -72,10 +72,10 @@ export default async function suite() {
 
       // Correct Details.
       expect(investmentDetails.investmentId.toString()).to.be.equal(investmentId.toString());
-      expect(investmentDetails.projectToken).to.be.equal(
-        this.projectTokenContract.address
+      expect(investmentDetails.investmentToken).to.be.equal(
+        this.investmentTokenContract.address
       );
-      expect(investmentDetails.projectTokensAmount.toString()).to.be.equal(
+      expect(investmentDetails.investmentTokensAmount.toString()).to.be.equal(
         amountOfTokensToBePurchased
       );
       expect(investmentDetails.extraInfo).to.be.equal(ipfsHash);
@@ -97,13 +97,13 @@ export default async function suite() {
 
       // Correct Balances.
       expect(
-        initSeekerProjectTokenBalance
-          .sub(newSeekerProjectTokenBalance)
+        initSeekerInvestmentTokenBalance
+          .sub(newSeekerInvestmentTokenBalance)
           .toString()
       ).to.be.equal(amountOfTokensToBePurchased.toString());
       expect(
-        newEscrowProjectTokenBalance
-          .sub(initEscrowProjectTokenBalance)
+        newEscrowInvestmentTokenBalance
+          .sub(initEscrowInvestmentTokenBalance)
           .toString()
       ).to.be.equal(amountOfTokensToBePurchased.toString());
       expect(
@@ -130,7 +130,7 @@ export default async function suite() {
         this.registryContract
           .connect(this.seekerSigner)
           .requestInvestment(
-            this.projectTokenContract.address,
+            this.investmentTokenContract.address,
             amountOfTokensToBePurchased,
             totalAmountRequested,
             ipfsHash
@@ -148,7 +148,7 @@ export default async function suite() {
         this.registryContract
           .connect(this.seekerSigner)
           .requestInvestment(
-            this.projectTokenContract.address,
+            this.investmentTokenContract.address,
             amountOfTokensToBePurchased,
             totalAmountRequested,
             ipfsHash
@@ -163,7 +163,7 @@ export default async function suite() {
       await this.registryContract
         .connect(this.seekerSigner)
         .requestInvestment(
-          this.projectTokenContract.address,
+          this.investmentTokenContract.address,
           this.amountOfTokensToBePurchased,
           this.totalAmountRequested,
           this.ipfsHash

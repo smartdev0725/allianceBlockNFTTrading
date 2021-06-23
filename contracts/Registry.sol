@@ -37,8 +37,16 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
         address lendingToken_,
         address fundingNFT_,
         uint256 baseAmountForEachPartition_
-    ) public initializer {
+    ) external initializer {
+        require(escrowAddress != address(0), "Cannot initialize escrowAddress with 0 address");
+        require(governanceAddress_ != address(0), "Cannot initialize governanceAddress_ with 0 address");
+        require(lendingToken_ != address(0), "Cannot initialize lendingToken_ with 0 address");
+        require(fundingNFT_ != address(0), "Cannot initialize fundingNFT_ with 0 address");
+        require(baseAmountForEachPartition_ != 0, "Cannot initialize baseAmountForEachPartition_ with 0");
+
         __Ownable_init();
+        __Investment_init();
+
         escrow = IEscrow(escrowAddress);
         baseAmountForEachPartition = baseAmountForEachPartition_;
         governance = IGovernance(governanceAddress_);
@@ -64,7 +72,7 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
     ) external onlyOwner() {
         require(reputationalAlbt != address(0), "Cannot initialize with 0 addresses");
         require(totalTicketsPerRun_ != 0 && rAlbtPerLotteryNumber_ != 0 && blocksLockedForReputation_ != 0 && lotteryNumbersForImmediateTicket_ != 0, "Cannot initialize with 0 values");
-        require(address(rALBT) == address(0) || totalTicketsPerRun == 0 || rAlbtPerLotteryNumber == 0 || blocksLockedForReputation == 0 || lotteryNumbersForImmediateTicket == 0,
+        require(address(rALBT) == address(0) && totalTicketsPerRun == 0 && rAlbtPerLotteryNumber == 0 && blocksLockedForReputation == 0 && lotteryNumbersForImmediateTicket == 0,
             "Cannot initialize second time");
 
         rALBT = IERC20(reputationalAlbt);
@@ -113,10 +121,10 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
      */
     function _rejectInvestment(uint256 investmentId_) internal {
         investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.REJECTED;
-        escrow.transferProjectToken(
-            investmentDetails[investmentId_].projectToken,
+        escrow.transferInvestmentToken(
+            investmentDetails[investmentId_].investmentToken,
             investmentSeeker[investmentId_],
-            investmentDetails[investmentId_].projectTokensAmount
+            investmentDetails[investmentId_].investmentTokensAmount
         );
         emit InvestmentRejected(investmentId_);
     }

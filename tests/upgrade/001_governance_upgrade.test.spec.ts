@@ -1,6 +1,6 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {
-  DAO_LOAN_APPROVAL_REQUEST_DURATION,
+  DAO_INVESTMENT_APPROVAL_REQUEST_DURATION,
   DAO_MILESTONE_APPROVAL_REQUEST_DURATION,
 } from '../../utils/constants';
 import {expect} from 'chai';

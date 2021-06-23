@@ -17,31 +17,31 @@ export default async function suite() {
     const actions = [
       {
         account: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955',
-        actionName: 'Project Vote',
+        actionName: 'Investment Vote',
         answer: 'Yes',
         referralId: '5',
       },
       {
         account: '0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f',
-        actionName: 'Project Vote',
+        actionName: 'Investment Vote',
         answer: 'No',
         referralId: '3',
       },
       {
         account: '0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f',
         actionName: 'Create Thread',
-        answer: 'Project Analysis',
+        answer: 'Investment Analysis',
         referralId: '3',
       },
       {
         account: '0xa0Ee7A142d267C1f36714E4a8F75612F20a79720',
         actionName: 'Create Thread',
-        answer: 'Project Analysis',
+        answer: 'Investment Analysis',
         referralId: '2',
       },
       {
         account: '0xa0Ee7A142d267C1f36714E4a8F75612F20a79720',
-        actionName: 'Project Vote',
+        actionName: 'Investment Vote',
         answer: 'Yes',
         referralId: '2',
       },
@@ -59,7 +59,7 @@ export default async function suite() {
       // Then
       expect(this.escrowContract.address).to.be.equal(escrowAddress);
       expect(this.stakingContract.address).to.be.equal(stakingAddress);
-      expect(rewardPerActionProvision.toNumber()).to.be.equal(10);
+      expect(rewardPerActionProvision.toString()).to.be.equal(ethers.utils.parseEther('10').toString());
       expect(maxActionsPerProvision.toNumber()).to.be.equal(10);
     });
 
@@ -147,7 +147,7 @@ export default async function suite() {
       await expectRevert(
         this.actionVerifierContract
           .connect(this.deployerSigner)
-          .updateAction('Project Vote', ethers.utils.parseEther('10')),
+          .updateAction('Investment Vote', ethers.utils.parseEther('10')),
         'Action should already exist'
       );
     });
@@ -183,7 +183,7 @@ export default async function suite() {
       // Given
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Project Vote', ethers.utils.parseEther('10'));
+        .importAction('Investment Vote', ethers.utils.parseEther('10'));
       await this.actionVerifierContract
         .connect(this.deployerSigner)
         .importAction('Create Thread', ethers.utils.parseEther('10'));
@@ -204,7 +204,7 @@ export default async function suite() {
       // Given
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Project Vote', ethers.utils.parseEther('10'));
+        .importAction('Investment Vote', ethers.utils.parseEther('10'));
       await this.actionVerifierContract
         .connect(this.deployerSigner)
         .importAction('Create Thread', ethers.utils.parseEther('10'));
@@ -223,7 +223,7 @@ export default async function suite() {
       const actions = [
         {
           account: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955',
-          actionName: 'Project Vote',
+          actionName: 'Investment Vote',
           answer: 'Yes',
           referralId: '5',
         },
@@ -257,7 +257,7 @@ export default async function suite() {
       // Given
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Project Vote', ethers.utils.parseEther('10'));
+        .importAction('Investment Vote', ethers.utils.parseEther('10'));
       await this.actionVerifierContract
         .connect(this.deployerSigner)
         .importAction('Create Thread', ethers.utils.parseEther('10'));
@@ -293,7 +293,7 @@ export default async function suite() {
       // Given
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Project Vote', ethers.utils.parseEther('10'));
+        .importAction('Investment Vote', ethers.utils.parseEther('10'));
       await this.actionVerifierContract
         .connect(this.deployerSigner)
         .importAction('Create Thread', ethers.utils.parseEther('10'));
@@ -308,7 +308,7 @@ export default async function suite() {
       const actions = [
         {
           account: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955',
-          actionName: 'Project Vote',
+          actionName: 'Investment Vote',
           answer: 'Yes',
           referralId: '5',
         },
@@ -346,7 +346,7 @@ export default async function suite() {
       const actions = [
         {
           account: this.lender1,
-          actionName: 'Project Vote',
+          actionName: 'Investment Vote',
           answer: 'Yes',
           referralId: '5',
         },
@@ -355,7 +355,7 @@ export default async function suite() {
       // Given
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Project Vote', ethers.utils.parseEther('10'));
+        .importAction('Investment Vote', ethers.utils.parseEther('10'));
       await this.actionVerifierContract
         .connect(this.deployerSigner)
         .importAction('Create Thread', ethers.utils.parseEther('10'));
@@ -364,7 +364,7 @@ export default async function suite() {
         .updateVariables(ethers.utils.parseEther('10'), 10);
 
       let signature = await getSignature(
-        'Project Vote',
+        'Investment Vote',
         'Yes',
         this.lender1,
         5,

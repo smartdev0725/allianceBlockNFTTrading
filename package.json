@@ -6,7 +6,6 @@
   "scripts": {
     "deploy-factory": "hardhat run scripts/uniswap/deploy-factory.js",
     "deploy-pair": "hardhat run scripts/uniswap/deploy-pair.js",
-    "request-loan-g": "hardhat run scripts/requestProjectLoan.js --network fork",
     "prepare": "hardhat typechain",
     "lint": "eslint \"**/*.{js,ts}\" && solhint contracts/**/*.sol",
     "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix contracts/**/*.sol",

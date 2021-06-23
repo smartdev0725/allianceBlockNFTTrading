@@ -2,25 +2,32 @@
 pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./InvestmentDetails.sol";
 import "../libs/TokenFormat.sol";
-import "hardhat/console.sol";
 
 /**
  * @title AllianceBlock Investment contract.
  * @notice Functionality for Investment.
  * @dev Extends InvestmentDetails.
  */
-contract Investment is InvestmentDetails {
+contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
+    using SafeERC20 for IERC20;
 
     // EVENTS
     event InvestmentRequested(uint256 indexed investmentId, address indexed user, uint256 amount);
 
+    function __Investment_init() public initializer {
+        __ReentrancyGuard_init();
+    }
+
     /**
      * @notice Requests investment
-     * @dev This function is used for projects to request investment in exchange for project tokens.
+     * @dev This function is used for seekers to request investment in exchange for investment tokens.
      * @dev require valid amount
      * @param investmentToken The token that will be purchased by investors.
      * @param amountOfInvestmentTokens The amount of investment tokens to be purchased.
@@ -32,7 +39,7 @@ contract Investment is InvestmentDetails {
         uint256 amountOfInvestmentTokens,
         uint256 totalAmountRequested_,
         string memory extraInfo
-    ) external {
+    ) external nonReentrant() {
         // TODO - Change 10 ** 18 to decimals if needed.
         require(
             totalAmountRequested_.mod(baseAmountForEachPartition) == 0 &&
@@ -47,7 +54,7 @@ contract Investment is InvestmentDetails {
             extraInfo
         );
 
-        IERC20(investmentToken).transferFrom(msg.sender, address(escrow), amountOfInvestmentTokens);
+        IERC20(investmentToken).safeTransferFrom(msg.sender, address(escrow), amountOfInvestmentTokens);
 
         fundingNFT.mintGen0(address(escrow), investmentDetails[totalInvestments].totalPartitionsToBePurchased, totalInvestments);
 
@@ -65,19 +72,19 @@ contract Investment is InvestmentDetails {
 
     /**
      * @notice user show interest for investment
-     * @dev This function is called by the investors who are interested to invest in a specific project.
+     * @dev This function is called by the investors who are interested to invest in a specific investment token.
      * @dev require Approval state and valid partition
      * @param investmentId The id of the investment.
      * @param amountOfPartitions The amount of partitions this specific investor wanna invest in.
      */
-    function showInterestForInvestment(uint256 investmentId, uint256 amountOfPartitions) external {
+    function showInterestForInvestment(uint256 investmentId, uint256 amountOfPartitions) external  nonReentrant() {
         require(
             investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.APPROVED,
             "Can show interest only in Approved state"
         );
         require(amountOfPartitions > 0, "Cannot show interest for 0 partitions");
 
-        lendingToken.transferFrom(msg.sender, address(escrow), amountOfPartitions.mul(baseAmountForEachPartition));
+        lendingToken.safeTransferFrom(msg.sender, address(escrow), amountOfPartitions.mul(baseAmountForEachPartition));
 
         investmentDetails[investmentId].partitionsRequested = investmentDetails[investmentId].partitionsRequested.add(
             amountOfPartitions
@@ -99,7 +106,7 @@ contract Investment is InvestmentDetails {
 
         if (totalLotteryNumbers == 0) revert("Not eligible for lottery numbers");
 
-        uint256 immediateTickets;
+        uint256 immediateTickets = 0;
 
         if (totalLotteryNumbers > lotteryNumbersForImmediateTicket) {
             uint256 rest = totalLotteryNumbers.mod(lotteryNumbersForImmediateTicket);
@@ -112,7 +119,7 @@ contract Investment is InvestmentDetails {
         if (immediateTickets > 0) {
             // Just in case we provided immediate tickets and tickets finished, so there is no lottery in this case.
             // TODO - Maybe return here.
-            if (immediateTickets > ticketsRemaining[investmentId_]) {
+            if (immediateTickets >= ticketsRemaining[investmentId_]) {
                 immediateTickets = ticketsRemaining[investmentId_];
                 investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.SETTLED;
             }
@@ -134,7 +141,7 @@ contract Investment is InvestmentDetails {
 
     /**
      * @notice Executes lottery run
-     * @dev This function is called by any investor interested in a project to run part of the lottery.
+     * @dev This function is called by any investor interested in an Investment Token to run part of the lottery.
      * @dev requires Started state and available tickets
      * @param investmentId The id of the investment.
      */
@@ -194,7 +201,7 @@ contract Investment is InvestmentDetails {
         uint256 investmentId,
         uint256 ticketsToLock,
         uint256 ticketsToWithdraw
-    ) external {
+    ) external  nonReentrant() {
         require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
         require(
             ticketsWonPerAddress[investmentId][msg.sender] > 0 &&
@@ -218,7 +225,7 @@ contract Investment is InvestmentDetails {
 
         if (ticketsToWithdraw > 0) {
             uint256 amountToWithdraw = investmentTokensPerTicket[investmentId].mul(ticketsToWithdraw);
-            escrow.transferProjectToken(investmentDetails[investmentId].projectToken, msg.sender, amountToWithdraw);
+            escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountToWithdraw);
         }
 
         if (remainingTicketsPerAddress[investmentId][msg.sender] > 0) {
@@ -230,7 +237,7 @@ contract Investment is InvestmentDetails {
      * @dev This function is called by an investor to withdraw lending tokens provided for non-won tickets.
      * @param investmentId The id of the investment.
      */
-    function withdrawAmountProvidedForNonWonTickets(uint256 investmentId) external {
+    function withdrawAmountProvidedForNonWonTickets(uint256 investmentId) external nonReentrant() {
         require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
         require(remainingTicketsPerAddress[investmentId][msg.sender] > 0, "No non-won tickets to withdraw");
 
@@ -244,7 +251,7 @@ contract Investment is InvestmentDetails {
      * @param investmentId The id of the investment.
      * @param ticketsToWithdraw The amount of locked tickets to be withdrawn.
      */
-    function withdrawLockedInvestmentTickets(uint256 investmentId, uint256 ticketsToWithdraw) external {
+    function withdrawLockedInvestmentTickets(uint256 investmentId, uint256 ticketsToWithdraw) external nonReentrant() {
         require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
         require(
             ticketsToWithdraw > 0 &&
@@ -261,7 +268,7 @@ contract Investment is InvestmentDetails {
         lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].sub(ticketsToWithdraw);
 
         uint256 amountToWithdraw = investmentTokensPerTicket[investmentId].mul(ticketsToWithdraw);
-        escrow.transferProjectToken(investmentDetails[investmentId].projectToken, msg.sender, amountToWithdraw);
+        escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountToWithdraw);
     }
 
     /**

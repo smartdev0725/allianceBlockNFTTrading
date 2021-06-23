@@ -8,13 +8,14 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IEscrow.sol";
 import "./interfaces/IStaking.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 /**
  * @title AllianceBlock ActionVerifier contract
- * @dev Extends Initializable, OwnableUpgradeable
+ * @dev Extends Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable
  * @notice Handles user's Actions and Rewards within the protocol
  */
-contract ActionVerifier is Initializable, OwnableUpgradeable {
+contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
     using SignatureVerifier for SignatureVerifier.Action;
 
@@ -48,8 +49,16 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
         address escrow_,
         address staking_,
         uint256 chainId
-    ) public initializer {
+    ) external initializer {
+        require(rewardPerActionProvision_ != 0, "Cannot initialize rewardPerActionProvision_ with 0");
+        require(maxActionsPerProvision_ != 0, "Cannot initialize maxActionsPerProvision_ with 0");
+        require(escrow_ != address(0), "Cannot initialize with escrow_ address");
+        require(staking_ != address(0), "Cannot initialize with staking_ address");
+        require(chainId != 0, "Cannot initialize chainId with 0");
+
         __Ownable_init();
+        __ReentrancyGuard_init();
+
         escrow = IEscrow(escrow_);
         staking = IStaking(staking_);
         rewardPerActionProvision = rewardPerActionProvision_;
@@ -112,7 +121,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
      * @param actions The actions provided.
      * @param signatures The signatures representing the actions.
      */
-    function provideRewardsForActions(SignatureVerifier.Action[] memory actions, bytes[] memory signatures) external {
+    function provideRewardsForActions(SignatureVerifier.Action[] memory actions, bytes[] memory signatures) external nonReentrant() {
         require(staking.getEligibilityForActionProvision(msg.sender), "Must be at least lvl2 staker");
         require(actions.length == signatures.length, "Invalid length");
         require(actions.length <= maxActionsPerProvision, "Too many actions");
@@ -120,7 +129,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable {
         address[] memory accounts = new address[](actions.length.add(1));
         uint256[] memory rewards = new uint256[](actions.length.add(1));
 
-        uint256 rewardForCaller;
+        uint256 rewardForCaller = 0;
 
         for (uint256 i = 0; i < actions.length; i++) {
             if (
