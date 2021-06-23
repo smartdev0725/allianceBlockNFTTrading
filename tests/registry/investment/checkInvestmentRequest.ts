@@ -141,6 +141,25 @@ export default async function suite() {
       );
     });
 
+    it('when the lending token does not exist', async function () {
+      const amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
+      const totalAmountRequested = ethers.utils.parseEther('30001');
+      const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
+
+      await expectRevert(
+        this.registryContract
+          .connect(this.seekerSigner)
+          .requestInvestment(
+            this.investmentTokenContract.address,
+            amountOfTokensToBePurchased,
+            this.investmentTokenContract.address,
+            totalAmountRequested,
+            ipfsHash
+          ),
+        'Lending token not supported'
+      );
+    });
+
     it('when the requested amount is not a multiple of the investment tokens amount', async function () {
       const amountOfTokensToBePurchased = ethers.utils.parseEther('100001');
       const totalAmountRequested = ethers.utils.parseEther('30000');

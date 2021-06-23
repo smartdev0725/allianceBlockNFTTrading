@@ -50,5 +50,11 @@ export default async function suite() {
       );
     });
 
+    it('When adding as lending token the zero address', async function () {
+      await expectRevert(
+        this.registryContract.addLendingToken(ethers.constants.AddressZero),
+        'Cannot provide lendingToken_ with 0 address'
+      );
+    });
   });
 }

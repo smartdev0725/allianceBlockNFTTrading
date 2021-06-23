@@ -42,6 +42,7 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
         require(governanceAddress_ != address(0), "Cannot initialize governanceAddress_ with 0 address");
         require(fundingNFT_ != address(0), "Cannot initialize fundingNFT_ with 0 address");
         require(baseAmountForEachPartition_ != 0, "Cannot initialize baseAmountForEachPartition_ with 0");
+        require(address(escrow) == address(0), "Cannot initialize second time");
 
         __Ownable_init();
         __Investment_init();
@@ -75,8 +76,7 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
     ) external onlyOwner() {
         require(reputationalAlbt != address(0), "Cannot initialize with 0 addresses");
         require(totalTicketsPerRun_ != 0 && rAlbtPerLotteryNumber_ != 0 && blocksLockedForReputation_ != 0 && lotteryNumbersForImmediateTicket_ != 0, "Cannot initialize with 0 values");
-        require(address(rALBT) == address(0) && totalTicketsPerRun == 0 && rAlbtPerLotteryNumber == 0 && blocksLockedForReputation == 0 && lotteryNumbersForImmediateTicket == 0,
-            "Cannot initialize second time");
+        require(address(rALBT) == address(0), "Cannot initialize second time");
 
         rALBT = IERC20(reputationalAlbt);
         totalTicketsPerRun = totalTicketsPerRun_;
