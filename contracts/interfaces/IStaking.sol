@@ -2,9 +2,19 @@
 pragma solidity >=0.6.0 <0.8.0;
 
 /**
- * @dev Interface of the Staking contract.
+ * @title Interface of the Staking contract.
  */
 interface IStaking {
-	function provideStakingForDaoMembership(address staker) external;
-	function provideStakingForDaoDelegator(address staker) external;
+    function getBalance(address staker_) external view returns (uint256);
+
+    function getAmountsToStake()
+        external
+        view
+        returns (
+            uint256,
+            uint256,
+            uint256
+        );
+
+    function getEligibilityForActionProvision(address account) external view returns (bool);
 }

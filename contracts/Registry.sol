@@ -1,196 +1,164 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 
-import "hardhat/console.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./registry/PersonalLoan.sol";
-import "./registry/ProjectLoan.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "./registry/Investment.sol";
 import "./libs/TokenFormat.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title AllianceBlock Registry contract
- * @notice Responsible for loan transactions.
+ * @notice Responsible for investment transactions.
+ * @dev Extends Initializable, Investment, OwnableUpgradeable
  */
-contract Registry is PersonalLoan, ProjectLoan, Ownable {
+contract Registry is Initializable, Investment, OwnableUpgradeable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 
     // Events
-    event LoanDecisionMade(uint indexed loanId, bool decision);
-    event LoanPartitionsPurchased(uint indexed loanId, uint256 partitionsToPurchase);
-    event LoanStarted(uint indexed loanId);
-    event LoanApproved(uint indexed loanId);
-    event LoanRejected(uint indexed loanId);
-    event LoanChallanged(uint indexed loanId);
-    event PaymentReceived(uint indexed loanId, uint256 amountOfTokens, uint256 generation);
-    event PaymentExecuted(uint indexed loanId);
+    event InvestmentStarted(uint256 indexed investmentId);
+    event InvestmentApproved(uint256 indexed investmentId);
+    event InvestmentRejected(uint256 indexed investmentId);
 
     /**
+     * @notice Initialize
      * @dev Constructor of the contract.
+     * @param escrowAddress address of the escrow contract
+     * @param governanceAddress_ address of the DAO contract
+     * @param lendingToken_ address of the Lending Token
+     * @param fundingNFT_ address of the Funding NFT
+     * @param baseAmountForEachPartition_ The base amount for each partition
      */
-    constructor(
+    function initialize(
         address escrowAddress,
         address governanceAddress_,
         address lendingToken_,
-        address mainNFT_,
-        address loanNFT_,
-        uint256 baseAmountForEachPartition_,
-        uint256 minimumInterestPercentage_,
-        uint256 maxMilestones_,
-        uint256 milestoneExtensionInterval_,
-        uint256 vestingBatches_,
-        uint256 vestingTimeInterval_
-    )
-    {
+        address fundingNFT_,
+        uint256 baseAmountForEachPartition_
+    ) external initializer {
+        require(escrowAddress != address(0), "Cannot initialize escrowAddress with 0 address");
+        require(governanceAddress_ != address(0), "Cannot initialize governanceAddress_ with 0 address");
+        require(lendingToken_ != address(0), "Cannot initialize lendingToken_ with 0 address");
+        require(fundingNFT_ != address(0), "Cannot initialize fundingNFT_ with 0 address");
+        require(baseAmountForEachPartition_ != 0, "Cannot initialize baseAmountForEachPartition_ with 0");
+
+        __Ownable_init();
+        __Investment_init();
+
         escrow = IEscrow(escrowAddress);
         baseAmountForEachPartition = baseAmountForEachPartition_;
         governance = IGovernance(governanceAddress_);
         lendingToken = IERC20(lendingToken_);
-        minimumInterestPercentage = minimumInterestPercentage_;
-        mainNFT = IERC721Mint(mainNFT_);
-        loanNFT = IERC1155Mint(loanNFT_);
-        maxMilestones = maxMilestones_;
-        milestoneExtensionInterval = milestoneExtensionInterval_;
-        vestingBatches = vestingBatches_;
-        vestingTimeInterval = vestingTimeInterval_;
+        fundingNFT = IERC1155Mint(fundingNFT_);
     }
 
     /**
-     * @dev This function is called by governance to approve or reject a loan request.
-     * @param loanId The id of the loan.
+     * @notice Initialize Investment
+     * @dev This function is called by the owner to initialize the investment type.
+     * @param reputationalAlbt The address of the rALBT contract.
+     * @param totalTicketsPerRun_ The amount of tickets that will be provided from each run of the lottery.
+     * @param rAlbtPerLotteryNumber_ The amount of rALBT needed to allocate one lucky number.
+     * @param blocksLockedForReputation_ The amount of blocks needed for a ticket to be locked,
+     *        so as investor to get 1 rALBT for locking it.
+     */
+    function initializeInvestment(
+        address reputationalAlbt,
+        uint256 totalTicketsPerRun_,
+        uint256 rAlbtPerLotteryNumber_,
+        uint256 blocksLockedForReputation_,
+        uint256 lotteryNumbersForImmediateTicket_
+    ) external onlyOwner() {
+        require(reputationalAlbt != address(0), "Cannot initialize with 0 addresses");
+        require(totalTicketsPerRun_ != 0 && rAlbtPerLotteryNumber_ != 0 && blocksLockedForReputation_ != 0 && lotteryNumbersForImmediateTicket_ != 0, "Cannot initialize with 0 values");
+        require(address(rALBT) == address(0) && totalTicketsPerRun == 0 && rAlbtPerLotteryNumber == 0 && blocksLockedForReputation == 0 && lotteryNumbersForImmediateTicket == 0,
+            "Cannot initialize second time");
+
+        rALBT = IERC20(reputationalAlbt);
+        totalTicketsPerRun = totalTicketsPerRun_;
+        rAlbtPerLotteryNumber = rAlbtPerLotteryNumber_;
+        blocksLockedForReputation = blocksLockedForReputation_;
+        lotteryNumbersForImmediateTicket = lotteryNumbersForImmediateTicket_;
+    }
+
+    /**
+     * @notice Decide For Investment
+     * @dev This function is called by governance to approve or reject a investment request.
+     * @param investmentId The id of the investment.
      * @param decision The decision of the governance. [true -> approved] [false -> rejected]
      */
-    function decideForLoan(
-        uint256 loanId,
-        bool decision
-    )
-    external
-    onlyGovernance()
-    {
-        if(decision) _approveLoan(loanId);
-        else _rejectLoan(loanId);
-        emit LoanDecisionMade(loanId, decision);
+    function decideForInvestment(uint256 investmentId, bool decision) external onlyGovernance() {
+        if (decision) _approveInvestment(investmentId);
+        else _rejectInvestment(investmentId);
     }
 
     /**
-     * @dev This function is called by the lenders to fund a loan.
-     * @param loanId The id of the loan.
-     * @param partitionsToPurchase The amount of ERC1155 tokens (which represent partitions of the loan) to be purchased.
+     * @notice Start Lottery Phase
+     * @dev This function is called by governance to start the lottery phase for an investment.
+     * @param investmentId The id of the investment.
      */
-    function fundLoan(
-        uint256 loanId,
-        uint256 partitionsToPurchase
-    )
-    external
-    onlyActivelyFundedLoan(loanId)
-    {
-        require(partitionsToPurchase <= loanDetails[loanId].totalPartitions.sub(loanDetails[loanId].partitionsPurchased),
-            "Not enough partitions left for purchase");
-
-        if(loanStatus[loanId] == LoanLibrary.LoanStatus.APPROVED) {
-            loanStatus[loanId] = LoanLibrary.LoanStatus.FUNDING;
-        }
-
-        IERC20(lendingToken).transferFrom(msg.sender, address(escrow), partitionsToPurchase.mul(baseAmountForEachPartition));
-        escrow.transferLoanNFT(loanId, partitionsToPurchase, msg.sender);
-
-        loanDetails[loanId].partitionsPurchased = loanDetails[loanId].partitionsPurchased.add(partitionsToPurchase);
-
-        emit LoanPartitionsPurchased(loanId, partitionsToPurchase);
-        if(loanDetails[loanId].partitionsPurchased == loanDetails[loanId].totalPartitions) {
-            _startLoan(loanId);
-        }
+    function startLotteryPhase(uint256 investmentId) external onlyGovernance() {
+        _startInvestment(investmentId);
     }
 
     /**
-     * @dev This function is called by the borrower to return part of or whole owed amount for a loan (depending on agreement).
-     * @param loanId The id of the loan.
+     * @notice Approve Investment
+     * @param investmentId_ The id of the investment.
      */
-    function executePayment(
-        uint256 loanId
-    )
-    external
-    onlyBorrower(loanId)
-    {
-        if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
-            _executePersonalLoanPayment(loanId);
-        } else {
-            _executeProjectLoanPayment(loanId);
-        }
-        emit PaymentExecuted(loanId);
+    function _approveInvestment(uint256 investmentId_) internal {
+        investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.APPROVED;
+        investmentDetails[investmentId_].approvalDate = block.timestamp;
+        fundingNFT.unpauseTokenTransfer(investmentId_); //UnPause trades for ERC1155s with the specific investment ID.
+        ticketsRemaining[investmentId_] = investmentDetails[investmentId_].totalPartitionsToBePurchased;
+        governance.storeInvestmentTriggering(investmentId_);
+        emit InvestmentApproved(investmentId_);
     }
 
     /**
-     * @dev This function is called by ERC1155 holders to receive a payment (after borrower has repaid part of loan).
-     * @param tokenId The token id of the ERC1155 tokens, which is eligible for the payment.
-     * @param amountOfTokens The amount of tokens to receive payment for.
-     * @param onProjectTokens Only used in project loans. [true -> repayment in collateral token] [false -> repayment in lending token]
+     * @notice Reject Investment
+     * @param investmentId_ The id of the investment.
      */
-    function receivePayment(
-        uint256 tokenId,
-        uint256 amountOfTokens,
-        bool onProjectTokens
-    )
-    external
-    onlyEnoughERC1155Balance(tokenId, amountOfTokens)
-    {
-        (uint256 loanId, uint256 generation) = tokenId.formatTokenId();
-        if (loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) {
-            _receivePersonalLoanPayment(loanId, generation, amountOfTokens);
-        } else {
-            _receiveProjectLoanPayment(loanId, amountOfTokens, onProjectTokens);
-        }
-        emit PaymentReceived(loanId, amountOfTokens, generation);
+    function _rejectInvestment(uint256 investmentId_) internal {
+        investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.REJECTED;
+        escrow.transferInvestmentToken(
+            investmentDetails[investmentId_].investmentToken,
+            investmentSeeker[investmentId_],
+            investmentDetails[investmentId_].investmentTokensAmount
+        );
+        emit InvestmentRejected(investmentId_);
     }
 
     /**
-     * @dev Through this function any address can challenge a loan in case of rules breaking by the borrower.
-            If challenging succeeds it can end up to either small penalty or whole collateral loss.
-     * @param loanId The id of the loan.
+     * @notice Start Investment
+     * @param investmentId_ The id of the investment.
      */
-    function challengeLoan(
-        uint256 loanId
-    )
-    external
-    onlyActiveLoan(loanId)
-    onlyAfterDeadlineReached(loanId)
-    {
-        if(loanDetails[loanId].loanType == LoanLibrary.LoanType.PERSONAL) _challengePersonalLoan(loanId);
-        else _challengeProjectLoan(loanId);
-        emit LoanChallanged(loanId);
+    function _startInvestment(uint256 investmentId_) internal {
+        investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.STARTED;
+        investmentDetails[investmentId_].startingDate = block.timestamp;
+
+        emit InvestmentStarted(investmentId_);
     }
 
-    function _approveLoan(
-        uint256 loanId_
-    )
-    internal
+    /**
+     * @notice Get Investment Metadata
+     * @dev This helper function provides a single point for querying the Investment metadata
+     * @param investmentId The id of the investment.
+     * @dev returns Investment Details, Investment Status, Investment Seeker Address and Repayment Batch Type
+     */
+    function getInvestmentMetadata(uint256 investmentId)
+        public
+        view
+        returns (
+            InvestmentLibrary.InvestmentDetails memory, // the investmentDetails
+            InvestmentLibrary.InvestmentStatus, // the investmentStatus
+            address // the investmentSeeker
+        )
     {
-        loanStatus[loanId_] = LoanLibrary.LoanStatus.APPROVED;
-        loanNFT.unpauseTokenTransfer(loanId_); //UnPause trades for ERC1155s with the specific loan ID.
-        emit LoanApproved(loanId_);
-    }
-
-    function _rejectLoan(
-        uint256 loanId_
-    )
-    internal
-    {
-        loanStatus[loanId_] = LoanLibrary.LoanStatus.REJECTED;
-        escrow.transferCollateralToken(loanDetails[loanId_].collateralToken, loanBorrower[loanId_], loanDetails[loanId_].collateralAmount);
-        emit LoanRejected(loanId_);
-    }
-
-    function _startLoan(
-        uint256 loanId_
-    )
-    internal
-    {
-        loanStatus[loanId_] = LoanLibrary.LoanStatus.STARTED;
-        loanDetails[loanId_].startingDate = block.timestamp;
-
-        if(loanDetails[loanId_].loanType == LoanLibrary.LoanType.PERSONAL) _startPersonalLoan(loanId_);
-        else _startProjectLoan(loanId_);
-        emit LoanStarted(loanId_);
+        return (
+            investmentDetails[investmentId],
+            investmentStatus[investmentId],
+            investmentSeeker[investmentId]
+        );
     }
 }

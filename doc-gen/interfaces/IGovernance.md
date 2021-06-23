@@ -11,6 +11,7 @@
 
 
 
+
 ### `storeInvestmentTriggering(uint256 investmentId)` (external)
 
 

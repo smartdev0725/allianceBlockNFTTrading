@@ -8,3 +8,9 @@ package-lock.json
 .vscode
 yarn-error.log
 yarn.lock
+.idea
+dist/
+deployments/localhost/
+contractsInfo.json
+coverage/
+coverage.json

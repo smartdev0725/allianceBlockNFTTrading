@@ -17,6 +17,7 @@
 
 
 
+
 ### `transferLendingToken(address seeker, uint256 amount)` (external)
 
 
@@ -24,6 +25,7 @@
 
 
 ### `transferInvestmentToken(address investmentToken, address seeker, uint256 amount)` (external)
+
 
 
 

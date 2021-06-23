@@ -8,6 +8,7 @@ Extends Initializable, Investment, OwnableUpgradeable
 
 ### `initialize(address escrowAddress, address governanceAddress_, address lendingToken_, address fundingNFT_, uint256 baseAmountForEachPartition_)` (external)
 
+
 Initialize
 
 
@@ -30,6 +31,7 @@ Decide For Investment
 This function is called by governance to approve or reject a investment request.
 
 
+
 ### `startLotteryPhase(uint256 investmentId)` (external)
 
 Start Lottery Phase
@@ -44,7 +46,6 @@ Approve Investment
 
 
 
-
 ### `_rejectInvestment(uint256 investmentId_)` (internal)
 
 Reject Investment
@@ -55,6 +56,7 @@ Reject Investment
 ### `_startInvestment(uint256 investmentId_)` (internal)
 
 Start Investment
+
 
 
 
@@ -73,16 +75,11 @@ returns Investment Details, Investment Status, Investment Seeker Address and Rep
 
 
 
-
 ### `InvestmentApproved(uint256 investmentId)`
 
 
 
-
-
 ### `InvestmentRejected(uint256 investmentId)`
-
-
 
 
 

@@ -8,6 +8,7 @@ Extends Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeab
 
 ### `initialize(address lendingToken_, address fundingNFT_)` (external)
 
+
 Initialize
 
 
@@ -45,6 +46,7 @@ Transfer Investment Token
 
 
 This function is used to send the investment token amount to the seeker.
+
 
 
 ### `multiMintReputationalToken(address[] recipients, uint256[] amounts)` (external)

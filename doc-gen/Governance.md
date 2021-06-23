@@ -8,6 +8,7 @@ Extends Initializable, SuperGovernance
 
 ### `initialize(address superDelegator_, uint256 applicationsForInvestmentDuration_, uint256 lateApplicationsForInvestmentDuration_)` (external)
 
+
 Initialize the contract.
 
 
@@ -27,6 +28,7 @@ Request a investment or investment approval
 
 
 Executes cronJob()
+
 
 
 ### `storeInvestmentTriggering(uint256 investmentId)` (external)

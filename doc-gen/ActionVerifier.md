@@ -26,6 +26,7 @@ Initializer of the ActionVerifier contract.
 This function is used by the owner to update variables.
 
 
+
 ### `importAction(string action, uint256 reputationalAlbtReward)` (external)
 
 
@@ -38,6 +39,7 @@ This function is used by the owner to add more actions.
 
 
 This function is used by the owner to update actions.
+
 
 
 ### `provideRewardsForActions(struct SignatureVerifier.Action[] actions, bytes[] signatures)` (external)
@@ -53,6 +55,7 @@ Check Action
 
 
 checks if given action has a reward
+
 
 
 

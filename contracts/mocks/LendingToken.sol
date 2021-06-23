@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
 
 /**
- * @title Mock contract for ALBT ERC20 Token
+ * @title Mock contract for Lending ERC20 Token
+ * @dev Extends ERC20PresetMinterPauser
  */
 contract LendingToken is ERC20PresetMinterPauser {
-    constructor() ERC20PresetMinterPauser("Lending Token", "LGT"){}
+    constructor() ERC20PresetMinterPauser("Lending Token USDC", "USDC") {}
 }

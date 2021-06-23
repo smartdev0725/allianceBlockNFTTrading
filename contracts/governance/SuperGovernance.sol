@@ -1,80 +1,57 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 
-import "hardhat/console.sol";
-import "./GovernanceStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./interfaces/IRegistry.sol";
-import "./interfaces/IStaking.sol";
+import "./DaoCronjob.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 /**
  * @title AllianceBlock Governance contract
+ * @dev Extends OwnableUpgradeable, DaoCronjob
  * @notice Responsible for govern AllianceBlock's ecosystem
  */
-contract SuperGovernance is Ownable, GovernanceStorage {
-    function initialize(
-        address registryAddress_,
-        address stakingAddress_
-    )
-    external
-    onlyOwner()
-    {
-        require(address(registry) == address(0), "Cannot initialize second time");
-        registry = IRegistry(registryAddress_);
-        staking = IStaking(stakingAddress_);
+contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, ReentrancyGuardUpgradeable {
+    using SafeMath for uint256;
+
+    function __SuperGovernance_init() public initializer {
+        __Ownable_init();
+        __ReentrancyGuard_init();
     }
 
-    function superVoteForRequest(
-        uint256 requestId,
-        bool decision
-    )
-    external
-    {
+    /**
+     * @notice Sets Registry contract
+     * @dev used to initialize SuperGovernance
+     * @dev requires not already initialized
+     * @param registryAddress_ the Registry address
+     */
+    function setRegistry(address registryAddress_) external onlyOwner() {
+        require(registryAddress_ != address(0), "Cannot initialize with 0 addresses");
+        require(address(registry) == address(0), "Cannot initialize second time");
+        registry = IRegistry(registryAddress_);
+
+        emit InitGovernance(registryAddress_, msg.sender);
+    }
+
+    /**
+     * @notice Votes for Request
+     * @dev Executes cronJob
+     * @dev requires msg.sender to be Super Delegator
+     * @dev requires current epoch to be 0 or 1
+     * @param requestId the Request ID
+     * @param decision the decision (Approve / Deny)
+     */
+    function superVoteForRequest(uint256 requestId, bool decision) external checkCronjob() nonReentrant() {
         require(msg.sender == superDelegator, "Only super delegator can call this function");
+        require(approvalRequests[requestId].approvalsProvided == 0, "Cannot approve again same investment");
 
-        if(approvalRequests[requestId].isMilestone) {
-            registry.decideForMilestone(approvalRequests[requestId].loanId, decision);                
-        } else {
-            registry.decideForLoan(approvalRequests[requestId].loanId, decision);
-        }
+        registry.decideForInvestment(approvalRequests[requestId].investmentId, decision);
 
-        if(decision) {
+        if (decision) {
             approvalRequests[requestId].approvalsProvided = approvalRequests[requestId].approvalsProvided.add(1);
             approvalRequests[requestId].isApproved = true;
         }
-    }
 
-    function openDaoMembershipSubscriptions()
-    external
-    onlyOwner()
-    {
-        openedDaoMembershipSubscriptions = true;
-    }
-
-    function openDaoMembershipVoting()
-    external
-    onlyOwner()
-    {
-        openedDaoMembershipVoting = true;
-    }
-
-    function openDaoDelegatingSubscriptions(uint256 amountOfDaoMembers_)
-    external
-    onlyOwner()
-    {
-        amountOfDaoMembers = amountOfDaoMembers_;
-
-        // TODO - State for dao members is going to claim membership
-        amountOfEpochDaoMembersNeededPerEpoch[currentEpoch.add(1)] = amountOfDaoMembers_;
-        openedDaoMembershipVoting = true;
-        openedDaoDelegatorsSubscriptions = true;
-    }
-
-    function openDaoDelegatingVoting()
-    external
-    onlyOwner()
-    {
-        openedDaoDelegatorsVoting = true;
+        emit VotedForRequest(approvalRequests[requestId].investmentId, requestId, decision, msg.sender);
     }
 }

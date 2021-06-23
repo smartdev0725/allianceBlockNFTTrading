@@ -8,6 +8,7 @@ Extends  Initializable, StakingDetails, OwnableUpgradeable
 
 ### `initialize(address albt_, address escrow_, uint256[] stakingTypeAmounts_, uint256[] reputationalStakingTypeAmounts_)` (external)
 
+
 Initialize
 
 
@@ -28,6 +29,7 @@ Unstake
 
 msg.sender withdraws till reaching stakingType
 
+
 ### `exit()` (external)
 
 Exit
@@ -38,6 +40,7 @@ msg.sender withdraws and exits
 ### `getEligibilityForActionProvision(address account) → bool` (external)
 
 Returns true if account is staker Lvl2 or more
+
 
 
 
@@ -57,6 +60,7 @@ Apply Reputation
 
 
 ### `_findAmount(uint256 bigIndex, uint256 smallIndex) → uint256 amount` (internal)
+
 
 Find Amount
 

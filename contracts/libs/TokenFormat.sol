@@ -1,24 +1,33 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.7.0;
+pragma solidity ^0.7.0;
 
+/**
+ * @title The Token Format library
+ */
 library TokenFormat {
     // Use a split bit implementation.
     // Store the generation in the upper 128 bits..
-    // ..and the non-fungible loan id in the lower 128
-    uint256 private constant _LOAN_ID_MASK = uint128(~0);
+    // ..and the non-fungible investment id in the lower 128
+    uint256 private constant _INVESTMENT_ID_MASK = uint128(~0);
 
     /**
-     * @dev Format tokenId into generation and index
+     * @notice Format tokenId into generation and index
+     * @param tokenId The Id of the token
+     * @return generation
+     * @return investmentId
      */
-    function formatTokenId(uint tokenId) internal pure returns(uint generation, uint loanId) {
+    function formatTokenId(uint256 tokenId) internal pure returns (uint256 generation, uint256 investmentId) {
         generation = tokenId >> 128;
-        loanId = tokenId & _LOAN_ID_MASK;
+        investmentId = tokenId & _INVESTMENT_ID_MASK;
     }
 
     /**
-     * @dev get tokenId from generation and loanId
+     * @notice get tokenId from generation and investmentId
+     * @param gen the generation
+     * @param investmentId the investmentID
+     * @return tokenId the token id
      */
-    function getTokenId(uint gen, uint loanId) internal pure returns(uint tokenId) {
-        return (gen << 128) | loanId;
+    function getTokenId(uint256 gen, uint256 investmentId) internal pure returns (uint256 tokenId) {
+        return (gen << 128) | investmentId;
     }
 }
