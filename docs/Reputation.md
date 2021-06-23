@@ -16,6 +16,8 @@
 
 ![Investment Interactions](img/forum.png)
 
+These functionalities are provided by the [ActionVerifier](Glossary.md#actions) Smart Contract.
+
 ## Incentives
 Users receive a *reputation reward* when participating in evaluations. Their reward is relative to the **rALBT** tokens staked, and the quality of the answers provided. **Reputation** is highly influential in the [Investment Ticket Lottery](Glossary.md#investment-ticket-lottery), since users with higher *reputation score* will have better chances of winning the lottery and take part in investment opportunities.
 

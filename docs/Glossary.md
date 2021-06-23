@@ -40,8 +40,20 @@ Fungibility is an asset’s interchangeability with other individual goods or as
 ## IDO
 An *Initial DEX Offering* is similar to an **ICO** or **IPO**, but is based on a Distributed Exchange
 
-## Reputation (rALBT)
-*Reputation* is earned by performing actions, completing quests and participating in the protocol. *Reputation* is represented by the [rALBT](Reputation.md) token.
+## Reputation
+*Reputation* is earned by performing **actions**, completing quests and participating in the protocol. *Reputation* is represented by the [rALBT](Reputation.md) token.
+
+## Actions
+Users can earn **Reputation** by performing these actions
+* Applying for an Investment [IDO](Glossary.md#ido)
+* Locking their investment (instead of instantly claiming)
+* Staking *ALBT*
+* Signing messages
+* Upvoting / Downvoting Investment opportunities
+* Commenting on threads or creating new ones
+* Sharing Investment Opportunities and helping them reach more people
+* Broadcasting messages on-chain (paying gas fees)
+* Playing mini-games (like Trivia)
 
 ## Investment Funds
 The assets a **Funder** utilizes to support an **Investment**. The protocol requires them to be a [Lending Token](Glossary.md#lending-token). See [Financial](Financing.md) for more information on this process.
