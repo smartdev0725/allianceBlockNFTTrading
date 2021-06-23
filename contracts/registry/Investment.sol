@@ -20,6 +20,12 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
     // EVENTS
     event InvestmentRequested(uint256 indexed investmentId, address indexed user, uint256 amount);
+    event InvestmentInterest(uint256 indexed investmentId, uint amount);
+    event LotteryExecuted(uint256 indexed investmentId);
+    event WithdrawInvestment(uint256 indexed investmentId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
+    event WithdrawAmountForNonTickets(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets);
+    event WithdrawLockedInvestmentTickets(uint256 indexedinvestmentId, uint256 ticketsToWithdraw);
+    event ConvertNFTToInvestmentTokens(uint256 indexedinvestmentId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
 
     function __Investment_init() public initializer {
         __ReentrancyGuard_init();
@@ -108,6 +114,10 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         else {
             _applyImmediateTicketsAndProvideLuckyNumbers(investmentId, amountOfPartitions);
         }
+
+        // Add event for investment interest
+        emit InvestmentInterest(investmentId, amountOfPartitions);
+
     }
 
     function _applyImmediateTicketsAndProvideLuckyNumbers(uint256 investmentId_, uint256 amountOfPartitions_) internal {
@@ -197,6 +207,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
                 counter--;
             }
         }
+
+        // Add event for lottery executed
+        emit LotteryExecuted(investmentId);
     }
 
     /**
@@ -240,6 +253,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         if (remainingTicketsPerAddress[investmentId][msg.sender] > 0) {
             _withdrawAmountProvidedForNonWonTickets(investmentId);
         }
+
+        // Add event for withdraw investment
+        emit WithdrawInvestment(investmentId, ticketsToLock, ticketsToWithdraw);
     }
 
     /**
@@ -277,6 +293,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].sub(ticketsToWithdraw);
 
         escrow.transferFundingNFT(investmentId, ticketsToWithdraw, msg.sender);
+
+        // Add event for withdraw locked investment tickets
+        emit WithdrawLockedInvestmentTickets(investmentId, ticketsToWithdraw);
     }
 
     /**
@@ -333,6 +352,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         remainingTicketsPerAddress[investmentId_][msg.sender] = 0;
 
         escrow.transferLendingToken(investmentDetails[investmentId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
+
+        // Add event for withdraw amount provided for non tickets
+        emit WithdrawAmountForNonTickets(investmentId_, amountToReturnForNonWonTickets);
     }
 
     /**
@@ -349,5 +371,8 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         escrow.burnFundingNFT(msg.sender, investmentId, amountOfNFTToConvert);
         escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountOfInvestmentTokenToTransfer);
+
+        // Add event for convert nft to investment tokens
+        emit ConvertNFTToInvestmentTokens(investmentId, amountOfNFTToConvert, amountOfInvestmentTokenToTransfer);
     }
 }
