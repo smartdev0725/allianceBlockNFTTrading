@@ -1,4 +1,5 @@
-import {ethers} from 'hardhat';
+import {deployments, ethers} from 'hardhat';
+import {expect} from "chai";
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
@@ -71,6 +72,34 @@ export default async function suite() {
         this.registryContract.setEscrowAddress(ethers.constants.AddressZero),
         'Cannot provide escrowAddress_ with 0 address'
       );
+    });
+
+    it('When adding escrow address with zero address should revert', async function () {
+      // Given
+      const {deploy} = deployments;
+
+      await deploy('Escrow2', {
+        contract: 'Escrow',
+        from: this.deployer,
+        proxy: {
+          owner: this.proxyOwner,
+          methodName: 'initialize',
+          proxyContract: 'OpenZeppelinTransparentProxy',
+        },
+        args: [this.lendingTokenContract.address, this.fundingNFTContract.address],
+        log: true,
+      });
+
+      this.escrowContract = await ethers.getContract('Escrow2');
+
+      // When
+      await this.registryContract.connect(this.deployerSigner).setEscrowAddress(this.escrowContract.address);
+      const escrowAddress = await this.registryContract.escrow();
+
+      // Then
+      expect(true).to.be.equal(true);
+
+      expect(escrowAddress).to.be.equal(this.escrowContract.address);
     });
   });
 }
