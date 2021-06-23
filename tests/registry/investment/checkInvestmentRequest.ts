@@ -182,15 +182,19 @@ export default async function suite() {
     it('when investment request is rejected', async function () {
       const investmentId = await this.registryContract.totalInvestments();
 
-      await this.registryContract
-        .connect(this.seekerSigner)
-        .requestInvestment(
-          this.investmentTokenContract.address,
-          this.amountOfTokensToBePurchased,
-          this.lendingTokenContract.address,
-          this.totalAmountRequested,
-          this.ipfsHash
-        );
+      await expect(
+        this.registryContract
+          .connect(this.seekerSigner)
+          .requestInvestment(
+            this.investmentTokenContract.address,
+            this.amountOfTokensToBePurchased,
+            this.lendingTokenContract.address,
+            this.totalAmountRequested,
+            this.ipfsHash
+          )
+      )
+        .to.emit(this.registryContract, 'InvestmentRequested')
+        .withArgs(investmentId, this.seeker, this.totalAmountRequested);
 
       await this.governanceContract
         .connect(this.superDelegatorSigner)
