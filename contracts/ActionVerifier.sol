@@ -20,17 +20,27 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     using SafeMath for uint256;
     using SignatureVerifier for SignatureVerifier.Action;
 
+    // The rewards for doing actions per staker level.
     mapping(bytes32 => mapping(uint256 => uint256)) public rewardPerActionPerLevel;
+    // The rewards for doing actions not for first time per staker level (not all actions give rewards for this).
     mapping(bytes32 => mapping(uint256 => uint256)) public rewardPerActionPerLevelAfterFirstTime;
+    // The minimum staker level that the account providing the action should be to be able to provide it.
     mapping(bytes32 => uint256) public minimumLevelForActionProvision;
+    // The referral contract (if any) that verifys referralId of an action is valid.
     mapping(bytes32 => IReferralContract) public referralContract;
+    // The reward that an action provider takes for each action provision depending on provider's staking level.
     mapping(uint256 => uint256) public rewardPerActionProvisionPerLevel;
+    // The amount of action provisions a provider can do per day depending on provider's staking level.
     mapping(uint256 => uint256) public maxActionsPerDayPerLevel;
-
+    // The amount of action provisions an action provider has done for a specific epoch.
     mapping(address => mapping(uint256 => uint256)) public actionsProvidedPerAccountPerEpoch;
+    // The last epoch a specific account has done a specific action.
     mapping(address => mapping(bytes32 => uint256)) public lastEpochActionDonePerAccount;
 
+    // The current epoch of ActionVerifier
+    // (actions that provide rewards multiple times can only provide only in different epochs).
     uint256 currentEpoch;
+    // The ending timestamp for the current epoch
     uint256 endingTimestampForCurrentEpoch;
 
     uint256 constant private ONE_DAY = 1 days;
@@ -49,6 +59,9 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
         address verifyingContract;
     }
 
+    /**
+     * @dev Modifier that checks if time has come to change epoch.
+     */
     modifier checkEpoch() {
         while (block.timestamp >= endingTimestampForCurrentEpoch){
             currentEpoch = currentEpoch.add(1);
@@ -232,6 +245,13 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
         return rewardPerActionPerLevel[keccak256(abi.encodePacked(action))][stakingLevel] > 0;
     }
 
+    /**
+     * @dev Checks if an action provision is valid
+     * @param action The action to check.
+     * @param signature The signature provided for this specific action.
+     * @param stakingLevelOfProvider The staking level action provider has.
+     * @dev returns true if action is ok and also the reward for the account done the action.
+     */
     function _checkValidActionProvision(
         SignatureVerifier.Action memory action,
         bytes memory signature,
@@ -271,6 +291,10 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
         return (false, 0);
     }
 
+    /**
+     * @notice Store action
+     * @dev This function is storing all specs for an action.
+     */
     function _storeAction(
         string memory action,
         uint256[4] memory reputationalAlbtRewardsPerLevel,
