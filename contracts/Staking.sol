@@ -103,6 +103,8 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
 
         _applyReputation(msg.sender, stakingTypeIndex, 0);
 
+        _applyMedal(msg.sender, stakingTypeIndex, 0);
+
         uint256 amountToWithdraw = balance[msg.sender];
 
         _withdraw(msg.sender, amountToWithdraw);
@@ -166,7 +168,7 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
             stakerMedalNFT.mint(account, newLevelIndex);
         }
 
-        if(previousLevelIndex > 0) {
+        if(previousLevelIndex > 0 || newLevelIndex == 0) {
             stakerMedalNFT.burn(account, previousLevelIndex);
         }
     }
