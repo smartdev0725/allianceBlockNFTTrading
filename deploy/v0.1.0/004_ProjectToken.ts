@@ -17,6 +17,21 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       contract: contractName,
       from: deployer,
       log: true,
+      args:["Project Token", "PT"]
+    });
+
+    await deploy("ProjectToken2", {
+      contract: contractName,
+      from: deployer,
+      log: true,
+      args:["Project Token2", "PT2"]
+    });
+
+    await deploy("ProjectToken3", {
+      contract: contractName,
+      from: deployer,
+      log: true,
+      args:["Project Token3", "PT3"]
     });
   }
   return true;

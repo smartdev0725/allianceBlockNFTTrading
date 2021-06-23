@@ -15,7 +15,7 @@ describe('Contract InvestmentToken', () => {
     const symbol = await investmentTokenContract.symbol();
 
     // Then
-    expect(name).to.equal('Investment Token');
-    expect(symbol).to.equal('IT');
+    expect(name).to.equal('Project Token');
+    expect(symbol).to.equal('PT');
   });
 });
