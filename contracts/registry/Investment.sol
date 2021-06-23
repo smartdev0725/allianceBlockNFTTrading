@@ -269,8 +269,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].sub(ticketsToWithdraw);
 
-        uint256 amountToWithdraw = investmentTokensPerTicket[investmentId].mul(ticketsToWithdraw);
-        escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountToWithdraw);
+        if (ticketsToWithdraw > 0) {
+            escrow.transferFundingNFT(investmentId, ticketsToWithdraw, msg.sender);
+        }
     }
 
     /**
