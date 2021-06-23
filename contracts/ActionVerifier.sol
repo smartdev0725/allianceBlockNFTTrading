@@ -20,6 +20,12 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
     using SafeMath for uint256;
     using SignatureVerifier for SignatureVerifier.Action;
 
+    // Events
+    event EpochChanged(uint256 indexed epochId, uint256 endingTimestamp);
+    event ActionImported(string indexed actionName);
+    event ActionUpdated(string indexed actionName);
+    event ActionsProvided(SignatureVerifier.Action[] actions, bytes[] signatures, address indexed provider);
+
     // The rewards for doing actions per staker level.
     mapping(bytes32 => mapping(uint256 => uint256)) public rewardPerActionPerLevel;
     // The rewards for doing actions not for first time per staker level (not all actions give rewards for this).
@@ -66,6 +72,8 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
         while (block.timestamp >= endingTimestampForCurrentEpoch){
             currentEpoch = currentEpoch.add(1);
             endingTimestampForCurrentEpoch = endingTimestampForCurrentEpoch.add(ONE_DAY);
+
+            emit EpochChanged(currentEpoch, endingTimestampForCurrentEpoch);
         }
         _;
     }
@@ -165,6 +173,8 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
             minimumLevelForProvision,
             referralContract_
         );
+
+        emit ActionImported(action);
     }
 
     /**
@@ -192,6 +202,8 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
             minimumLevelForProvision,
             referralContract_
         );
+
+        emit ActionUpdated(action);
     }
 
     /**
@@ -225,6 +237,8 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
                 actionsProvidedPerAccountPerEpoch[msg.sender][currentEpoch] = 
                     actionsProvidedPerAccountPerEpoch[msg.sender][currentEpoch].add(1);
             } else {
+                actions[i] = SignatureVerifier.Action("", "", address(0), 0);
+                signatures[i] = "";
                 accounts[i] = address(0);
                 rewards[i] = 0;
             }
@@ -234,6 +248,8 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
         rewards[actions.length] = rewardForCaller;
 
         escrow.multiMintReputationalToken(accounts, rewards);
+
+        emit ActionsProvided(actions, signatures, msg.sender);
     }
 
     /**
