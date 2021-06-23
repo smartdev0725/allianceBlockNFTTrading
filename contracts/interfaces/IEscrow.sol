@@ -14,7 +14,11 @@ interface IEscrow {
         address receiver
     ) external;
 
-    function transferLendingToken(address seeker, uint256 amount) external;
+    function transferLendingToken(
+        address lendingToken,
+        address seeker,
+        uint256 amount
+    ) external;
 
     function transferInvestmentToken(
         address investmentToken,

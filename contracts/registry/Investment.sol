@@ -4,8 +4,8 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./InvestmentDetails.sol";
+import "../libs/SafeERC20.sol";
 import "../libs/TokenFormat.sol";
 
 /**
@@ -37,17 +37,24 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
     function requestInvestment(
         address investmentToken,
         uint256 amountOfInvestmentTokens,
+        address lendingToken,
         uint256 totalAmountRequested_,
         string memory extraInfo
     ) external nonReentrant() {
-        // TODO - Change 10 ** 18 to decimals if needed.
+        require(isValidLendingToken[lendingToken], "Lending token not supported");
+
+        uint256 investmentDecimals = IERC20(investmentToken).decimals();
+        uint256 lendingDecimals = IERC20(lendingToken).decimals();
+        uint256 power = investmentDecimals.mul(2).sub(lendingDecimals);
+
         require(
             totalAmountRequested_.mod(baseAmountForEachPartition) == 0 &&
-                totalAmountRequested_.mul(10**18).mod(amountOfInvestmentTokens) == 0,
+                totalAmountRequested_.mul(10**power).mod(amountOfInvestmentTokens) == 0,
             "Token amount and price should result in integer amount of tickets"
         );
 
         _storeInvestmentDetails(
+            lendingToken,
             totalAmountRequested_,
             investmentToken,
             amountOfInvestmentTokens,
@@ -84,7 +91,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         );
         require(amountOfPartitions > 0, "Cannot show interest for 0 partitions");
 
-        lendingToken.safeTransferFrom(msg.sender, address(escrow), amountOfPartitions.mul(baseAmountForEachPartition));
+        IERC20(investmentDetails[investmentId].lendingToken).safeTransferFrom(
+            msg.sender, address(escrow), amountOfPartitions.mul(baseAmountForEachPartition)
+        );
 
         investmentDetails[investmentId].partitionsRequested = investmentDetails[investmentId].partitionsRequested.add(
             amountOfPartitions
@@ -327,7 +336,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             remainingTicketsPerAddress[investmentId_][msg.sender].mul(baseAmountForEachPartition);
         remainingTicketsPerAddress[investmentId_][msg.sender] = 0;
 
-        escrow.transferLendingToken(msg.sender, amountToReturnForNonWonTickets);
+        escrow.transferLendingToken(investmentDetails[investmentId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
     }
 
     /**

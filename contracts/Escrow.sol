@@ -84,11 +84,16 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     /**
      * @notice Transfer Lending Token
      * @dev This function is used to send the lended amount to the seeker.
+     * @param lendingToken The lending token's contract address.
      * @param seeker Seeker's address.
      * @param amount The amount of lending tokens to be sent to seeker.
      */
-    function transferLendingToken(address seeker, uint256 amount) external onlyRegistry() {
-        lendingToken.transfer(seeker, amount);
+    function transferLendingToken(
+        address lendingToken,
+        address seeker,
+        uint256 amount
+    ) external onlyRegistry() {
+        IERC20(lendingToken).safeTransfer(seeker, amount);
     }
 
     /**

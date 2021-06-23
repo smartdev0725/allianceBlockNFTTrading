@@ -28,6 +28,7 @@ contract InvestmentDetails is Storage {
      * @param extraInfo_ the IPFS hard data provided
      */
     function _storeInvestmentDetails(
+        address lendingToken_,
         uint256 amountRequestedToBeRaised_,
         address investmentToken_,
         uint256 investmentTokensAmount_,
@@ -40,6 +41,7 @@ contract InvestmentDetails is Storage {
         investment.totalAmountToBeRaised = amountRequestedToBeRaised_;
         investment.extraInfo = extraInfo_;
         investment.totalPartitionsToBePurchased = amountRequestedToBeRaised_.div(baseAmountForEachPartition);
+        investment.lendingToken = lendingToken_;
 
         investmentDetails[totalInvestments] = investment;
 

@@ -27,20 +27,19 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
      * @dev Constructor of the contract.
      * @param escrowAddress address of the escrow contract
      * @param governanceAddress_ address of the DAO contract
-     * @param lendingToken_ address of the Lending Token
+     * @param lendingTokens_ addresses of the Lending Tokens
      * @param fundingNFT_ address of the Funding NFT
      * @param baseAmountForEachPartition_ The base amount for each partition
      */
     function initialize(
         address escrowAddress,
         address governanceAddress_,
-        address lendingToken_,
+        address[] memory lendingTokens_,
         address fundingNFT_,
         uint256 baseAmountForEachPartition_
     ) external initializer {
         require(escrowAddress != address(0), "Cannot initialize escrowAddress with 0 address");
         require(governanceAddress_ != address(0), "Cannot initialize governanceAddress_ with 0 address");
-        require(lendingToken_ != address(0), "Cannot initialize lendingToken_ with 0 address");
         require(fundingNFT_ != address(0), "Cannot initialize fundingNFT_ with 0 address");
         require(baseAmountForEachPartition_ != 0, "Cannot initialize baseAmountForEachPartition_ with 0");
 
@@ -50,8 +49,12 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
         escrow = IEscrow(escrowAddress);
         baseAmountForEachPartition = baseAmountForEachPartition_;
         governance = IGovernance(governanceAddress_);
-        lendingToken = IERC20(lendingToken_);
         fundingNFT = IERC1155Mint(fundingNFT_);
+
+        for (uint256 i = 0; i < lendingTokens_.length; i++) {
+            require(lendingTokens_[i] != address(0), "Cannot initialize lendingToken_ with 0 address");
+            isValidLendingToken[lendingTokens_[i]] = true;
+        }
     }
 
     /**
@@ -80,6 +83,19 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
         rAlbtPerLotteryNumber = rAlbtPerLotteryNumber_;
         blocksLockedForReputation = blocksLockedForReputation_;
         lotteryNumbersForImmediateTicket = lotteryNumbersForImmediateTicket_;
+    }
+
+    /**
+     * @notice Add lending token
+     * @dev This function is called by the owner to add another lending token.
+     * @param lendingToken_ The address of lending token that will be added.
+     */
+    function addLendingToken(
+        address lendingToken_
+    ) external onlyOwner() {
+        require(lendingToken_ != address(0), "Cannot provide lendingToken_ with 0 address");
+        require(!isValidLendingToken[lendingToken_], "Cannot add existing lending token");
+        isValidLendingToken[lendingToken_] = true;
     }
 
     /**
