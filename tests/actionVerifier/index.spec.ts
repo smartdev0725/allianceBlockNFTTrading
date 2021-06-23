@@ -3,7 +3,7 @@ import checkActionVerifier from './checkActionVerifier';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {getContracts, getSigners} from '../helpers/utils';
 
-describe.skip('Action Verifier', function () {
+describe('Action Verifier', function () {
   beforeEach(async function () {
     // Deploy fixtures
     const {deploy, fixture, get} = deployments;
@@ -60,12 +60,16 @@ describe.skip('Action Verifier', function () {
       rALBTContract,
       stakingContract,
       ALBTContract,
+      registryContract,
+      stakerMedalNFTContract,
     } = await getContracts();
     this.actionVerifierContract = actionVerifierContract;
     this.escrowContract = escrowContract;
     this.stakingContract = stakingContract;
     this.ALBTContract = ALBTContract;
     this.rALBTContract = rALBTContract;
+    this.registryContract = registryContract;
+    this.stakerMedalNft = stakerMedalNFTContract;
   });
 
   describe(

@@ -47,171 +47,327 @@ export default async function suite() {
       },
     ];
 
+    const addressZero = '0x0000000000000000000000000000000000000000';
+
     it('check initial values', async function () {
       // Given and When
       const escrowAddress = await this.actionVerifierContract.escrow();
-      const stakingAddress = await this.actionVerifierContract.staking();
-      const rewardPerActionProvision =
-        await this.actionVerifierContract.rewardPerActionProvision();
-      const maxActionsPerProvision =
-        await this.actionVerifierContract.maxActionsPerProvision();
+      const stakerMedalNftAddress = await this.actionVerifierContract.stakerMedalNft();
+      const rewardPerActionProvisionLvl0 =
+        await this.actionVerifierContract.rewardPerActionProvisionPerLevel(0);
+      const rewardPerActionProvisionLvl1 =
+        await this.actionVerifierContract.rewardPerActionProvisionPerLevel(1);
+      const rewardPerActionProvisionLvl2 =
+        await this.actionVerifierContract.rewardPerActionProvisionPerLevel(2);
+      const rewardPerActionProvisionLvl3 =
+        await this.actionVerifierContract.rewardPerActionProvisionPerLevel(3);
+      const maxActionsPerDayLvl0 =
+        await this.actionVerifierContract.maxActionsPerDayPerLevel(0);
+      const maxActionsPerDayLvl1 =
+        await this.actionVerifierContract.maxActionsPerDayPerLevel(1);
+      const maxActionsPerDayLvl2 =
+        await this.actionVerifierContract.maxActionsPerDayPerLevel(2);
+      const maxActionsPerDayLvl3 =
+        await this.actionVerifierContract.maxActionsPerDayPerLevel(3);
 
       // Then
       expect(this.escrowContract.address).to.be.equal(escrowAddress);
-      expect(this.stakingContract.address).to.be.equal(stakingAddress);
-      expect(rewardPerActionProvision.toString()).to.be.equal(ethers.utils.parseEther('10').toString());
-      expect(maxActionsPerProvision.toNumber()).to.be.equal(10);
+      expect(this.stakerMedalNft.address).to.be.equal(stakerMedalNftAddress);
+      expect(rewardPerActionProvisionLvl0.toString()).to.be.equal(ethers.utils.parseEther('0').toString());
+      expect(rewardPerActionProvisionLvl1.toString()).to.be.equal(ethers.utils.parseEther('0').toString());
+      expect(rewardPerActionProvisionLvl2.toString()).to.be.equal(ethers.utils.parseEther('5').toString());
+      expect(rewardPerActionProvisionLvl3.toString()).to.be.equal(ethers.utils.parseEther('10').toString());
+      expect(maxActionsPerDayLvl0.toNumber()).to.be.equal(0);
+      expect(maxActionsPerDayLvl1.toNumber()).to.be.equal(0);
+      expect(maxActionsPerDayLvl2.toNumber()).to.be.equal(5);
+      expect(maxActionsPerDayLvl3.toNumber()).to.be.equal(10);
     });
 
     it('Should revert when update variables with another user', async function () {
+      const rewardsPerLevel = [
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('2').toString(),
+        ethers.utils.parseEther('5').toString(),
+      ];
+
+      const actionsPerDayPerLevel = ['0', '0', '2', '5'];
+
       await expectRevert(
         this.actionVerifierContract
           .connect(this.seekerSigner)
-          .updateVariables(5, 10),
+          .updateVariables(rewardsPerLevel, actionsPerDayPerLevel),
         'Ownable: caller is not the owner'
       );
     });
 
     it('Update variables', async function () {
       // Given and When
+      const rewardsPerLevel = [
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('2').toString(),
+        ethers.utils.parseEther('5').toString(),
+      ];
+
+      const actionsPerDayPerLevel = ['0', '0', '2', '5'];
+
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .updateVariables(5, 10);
+        .updateVariables(rewardsPerLevel, actionsPerDayPerLevel);
 
       // Then
-      const rewardPerActionProvision =
-        await this.actionVerifierContract.rewardPerActionProvision();
-      const maxActionsPerProvision =
-        await this.actionVerifierContract.maxActionsPerProvision();
-      expect(rewardPerActionProvision.toNumber()).to.be.equal(5);
-      expect(maxActionsPerProvision.toNumber()).to.be.equal(10);
+      const rewardPerActionProvisionLvl0 =
+        await this.actionVerifierContract.rewardPerActionProvisionPerLevel(0);
+      const rewardPerActionProvisionLvl1 =
+        await this.actionVerifierContract.rewardPerActionProvisionPerLevel(1);
+      const rewardPerActionProvisionLvl2 =
+        await this.actionVerifierContract.rewardPerActionProvisionPerLevel(2);
+      const rewardPerActionProvisionLvl3 =
+        await this.actionVerifierContract.rewardPerActionProvisionPerLevel(3);
+      const maxActionsPerDayLvl0 =
+        await this.actionVerifierContract.maxActionsPerDayPerLevel(0);
+      const maxActionsPerDayLvl1 =
+        await this.actionVerifierContract.maxActionsPerDayPerLevel(1);
+      const maxActionsPerDayLvl2 =
+        await this.actionVerifierContract.maxActionsPerDayPerLevel(2);
+      const maxActionsPerDayLvl3 =
+        await this.actionVerifierContract.maxActionsPerDayPerLevel(3);
+
+      expect(rewardPerActionProvisionLvl0.toString()).to.be.equal(ethers.utils.parseEther('0').toString());
+      expect(rewardPerActionProvisionLvl1.toString()).to.be.equal(ethers.utils.parseEther('0').toString());
+      expect(rewardPerActionProvisionLvl2.toString()).to.be.equal(ethers.utils.parseEther('2').toString());
+      expect(rewardPerActionProvisionLvl3.toString()).to.be.equal(ethers.utils.parseEther('5').toString());
+      expect(maxActionsPerDayLvl0.toNumber()).to.be.equal(0);
+      expect(maxActionsPerDayLvl1.toNumber()).to.be.equal(0);
+      expect(maxActionsPerDayLvl2.toNumber()).to.be.equal(2);
+      expect(maxActionsPerDayLvl3.toNumber()).to.be.equal(5);
     });
 
     it('Should revert when import action with another user', async function () {
+      const reputationalAlbtRewardsPerLevel = [
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('2').toString(),
+        ethers.utils.parseEther('5').toString(),
+      ];
+
       await expectRevert(
         this.actionVerifierContract
           .connect(this.seekerSigner)
-          .importAction('Test', 10),
+          .importAction(
+            'Test',
+            reputationalAlbtRewardsPerLevel,
+            reputationalAlbtRewardsPerLevel,
+            1,
+            this.registryContract.address,
+          ),
         'Ownable: caller is not the owner'
       );
     });
 
     it('Should import action', async function () {
+      const reputationalAlbtRewardsPerLevel = [
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('2').toString(),
+        ethers.utils.parseEther('5').toString(),
+      ];
+
       // Given and When
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Action', 10);
+        .importAction(
+            'Action',
+            reputationalAlbtRewardsPerLevel,
+            reputationalAlbtRewardsPerLevel,
+            2,
+            addressZero,
+        );
 
       // Then
       const action = ethers.utils.keccak256(
         ethers.utils.solidityPack(['string'], ['Action'])
       );
-      const rewardPerAction = await this.actionVerifierContract.rewardPerAction(
-        action
+      const rewardPerAction = await this.actionVerifierContract.rewardPerActionPerLevel(
+        action, 2
       );
-      expect(rewardPerAction.toNumber()).to.be.equal(10);
+      expect(rewardPerAction.toString()).to.be.equal(ethers.utils.parseEther('2').toString());
     });
 
     it('Should revert when update action with another user', async function () {
+      const reputationalAlbtRewardsPerLevel = [
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('2').toString(),
+        ethers.utils.parseEther('5').toString(),
+      ];
+
       await expectRevert(
         this.actionVerifierContract
           .connect(this.seekerSigner)
-          .updateAction('Test', 10),
+          .updateAction(
+            'Action',
+            reputationalAlbtRewardsPerLevel,
+            reputationalAlbtRewardsPerLevel,
+            2,
+            addressZero,
+          ),
         'Ownable: caller is not the owner'
       );
     });
 
     it('Should update action', async function () {
+      const reputationalAlbtRewardsPerLevel = [
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('2').toString(),
+        ethers.utils.parseEther('5').toString(),
+      ];
+
       // Given and When
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Action', 10);
+        .importAction(
+          'Action',
+          reputationalAlbtRewardsPerLevel,
+          reputationalAlbtRewardsPerLevel,
+          2,
+          addressZero,
+        );
 
       // Then
       const action = ethers.utils.keccak256(
         ethers.utils.solidityPack(['string'], ['Action'])
       );
       const rewardPerActionBefore =
-        await this.actionVerifierContract.rewardPerAction(action);
-      expect(rewardPerActionBefore.toNumber()).to.be.equal(10);
+        await this.actionVerifierContract.rewardPerActionPerLevel(action, 2);
+      expect(rewardPerActionBefore.toString()).to.be.equal(ethers.utils.parseEther('2').toString());
+
+      const newReputationalAlbtRewardsPerLevel = [
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('4').toString(),
+        ethers.utils.parseEther('10').toString(),
+      ];
 
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .updateAction('Action', 20);
+        .updateAction(
+          'Action',
+          newReputationalAlbtRewardsPerLevel,
+          newReputationalAlbtRewardsPerLevel,
+          2,
+          addressZero,
+        );
+
       const rewardPerActionAfter =
-        await this.actionVerifierContract.rewardPerAction(action);
-      expect(rewardPerActionAfter.toNumber()).to.be.equal(20);
+        await this.actionVerifierContract.rewardPerActionPerLevel(action, 2);
+      expect(rewardPerActionAfter.toString()).to.be.equal(ethers.utils.parseEther('4').toString());
     });
 
     it('Update action should revert if action does not exist', async function () {
+      const reputationalAlbtRewardsPerLevel = [
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('2').toString(),
+        ethers.utils.parseEther('5').toString(),
+      ];
+
       await expectRevert(
         this.actionVerifierContract
           .connect(this.deployerSigner)
-          .updateAction('Investment Vote', ethers.utils.parseEther('10')),
+          .updateAction(
+          'Investment Vote',
+          reputationalAlbtRewardsPerLevel,
+          reputationalAlbtRewardsPerLevel,
+          2,
+          addressZero,
+        ),
         'Action should already exist'
       );
     });
 
     it('Check for an existing action for true', async function () {
+      const reputationalAlbtRewardsPerLevel = [
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('2').toString(),
+        ethers.utils.parseEther('5').toString(),
+      ];
+
       // Given and When
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Action', 10);
+        .importAction(
+          'Action',
+          reputationalAlbtRewardsPerLevel,
+          reputationalAlbtRewardsPerLevel,
+          2,
+          addressZero,
+        );
 
       // Then
       const action = ethers.utils.keccak256(
         ethers.utils.solidityPack(['string'], ['Action'])
       );
-      const rewardPerActionBefore =
-        await this.actionVerifierContract.rewardPerAction(action);
-      expect(rewardPerActionBefore.toNumber()).to.be.equal(10);
+      const rewardPerActionLvl2 =
+        await this.actionVerifierContract.rewardPerActionPerLevel(action, 2);
+      expect(rewardPerActionLvl2.toString()).to.be.equal(ethers.utils.parseEther('2').toString());
 
       const existAction = await this.actionVerifierContract
         .connect(this.seekerSigner)
-        .checkAction('Action');
+        .checkAction('Action', 2);
       expect(existAction).to.be.equal(true);
     });
 
     it('Check for an existing action for false', async function () {
       const existAction = await this.actionVerifierContract
         .connect(this.seekerSigner)
-        .checkAction('Test');
+        .checkAction('Test', 2);
       expect(existAction).to.be.equal(false);
     });
 
     it('Provide rewards should revert with stake level error', async function () {
+      const reputationalAlbtRewardsPerLevel = [
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('2').toString(),
+        ethers.utils.parseEther('5').toString(),
+      ];
+
       // Given
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Investment Vote', ethers.utils.parseEther('10'));
+        .importAction(
+          'Investment Vote',
+          reputationalAlbtRewardsPerLevel,
+          reputationalAlbtRewardsPerLevel,
+          2,
+          addressZero,
+        );
+
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Create Thread', ethers.utils.parseEther('10'));
-      await this.actionVerifierContract
-        .connect(this.deployerSigner)
-        .updateVariables(ethers.utils.parseEther('10'), 10);
+        .importAction(
+          'Create Thread',
+          reputationalAlbtRewardsPerLevel,
+          reputationalAlbtRewardsPerLevel,
+          2,
+          addressZero,
+        );
 
       // When and Then
       await expectRevert(
         this.actionVerifierContract
           .connect(this.lender1Signer)
           .provideRewardsForActions(actions, signatures),
-        'Must be at least lvl2 staker'
+        'Staking level not enough to provide rewards for actions'
       );
     });
 
     it('Provide rewards should revert with wrong length', async function () {
       // Given
-      await this.actionVerifierContract
-        .connect(this.deployerSigner)
-        .importAction('Investment Vote', ethers.utils.parseEther('10'));
-      await this.actionVerifierContract
-        .connect(this.deployerSigner)
-        .importAction('Create Thread', ethers.utils.parseEther('10'));
-      await this.actionVerifierContract
-        .connect(this.deployerSigner)
-        .updateVariables(ethers.utils.parseEther('10'), 10);
-
       const signatures = [
         '0x951663526a6d560d2a96eb59a186c154bc5366ceae61689736199047e936cff3308e6528c95cfba26b55721c6ccd95e7df59d955a3236b2ecb25e1fbbda012c31c',
         '0xde3ff46a7d2e34a664324563ad97be5bb2a75b8d417d6744963469d9d8e58439019856215da25c025b7f718c45ee036cd94301fbfbd1ef4197691bd4ce1ad9351b',
@@ -255,15 +411,18 @@ export default async function suite() {
 
     it('Provide rewards should revert with wrong length', async function () {
       // Given
+      const rewardsPerLevel = [
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('0').toString(),
+        ethers.utils.parseEther('2').toString(),
+        ethers.utils.parseEther('5').toString(),
+      ];
+
+      const actionsPerDayPerLevel = ['0', '0', '2', '5'];
+
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Investment Vote', ethers.utils.parseEther('10'));
-      await this.actionVerifierContract
-        .connect(this.deployerSigner)
-        .importAction('Create Thread', ethers.utils.parseEther('10'));
-      await this.actionVerifierContract
-        .connect(this.deployerSigner)
-        .updateVariables(ethers.utils.parseEther('10'), 2);
+        .updateVariables(rewardsPerLevel, actionsPerDayPerLevel);
 
       // Mint albt tokens to deployer address
       const amountToTransfer = ethers.utils.parseEther('1000000');
@@ -291,15 +450,23 @@ export default async function suite() {
 
     it('Provide rewards should be zero if signature is wrong', async function () {
       // Given
+      const reputationalAlbtRewardsPerLevel = [
+        ethers.utils.parseEther('1').toString(),
+        ethers.utils.parseEther('2').toString(),
+        ethers.utils.parseEther('3').toString(),
+        ethers.utils.parseEther('4').toString(),
+      ];
+
+      // Given
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Investment Vote', ethers.utils.parseEther('10'));
-      await this.actionVerifierContract
-        .connect(this.deployerSigner)
-        .importAction('Create Thread', ethers.utils.parseEther('10'));
-      await this.actionVerifierContract
-        .connect(this.deployerSigner)
-        .updateVariables(ethers.utils.parseEther('10'), 10);
+        .importAction(
+          'Investment Vote',
+          reputationalAlbtRewardsPerLevel,
+          reputationalAlbtRewardsPerLevel,
+          2,
+          addressZero,
+        );
 
       const signatures = [
         '0x9955af11969a2d2a7f860cb00e6a00cfa7c581f5df2dbe8ea16700b33f4b4b9b69f945012f7ea7d3febf11eb1b78e1adc2d1c14c2cf48b25000938cc1860c83e01',
@@ -353,15 +520,23 @@ export default async function suite() {
       ];
 
       // Given
+      const reputationalAlbtRewardsPerLevel = [
+        ethers.utils.parseEther('1').toString(),
+        ethers.utils.parseEther('2').toString(),
+        ethers.utils.parseEther('3').toString(),
+        ethers.utils.parseEther('4').toString(),
+      ];
+
+      // Given
       await this.actionVerifierContract
         .connect(this.deployerSigner)
-        .importAction('Investment Vote', ethers.utils.parseEther('10'));
-      await this.actionVerifierContract
-        .connect(this.deployerSigner)
-        .importAction('Create Thread', ethers.utils.parseEther('10'));
-      await this.actionVerifierContract
-        .connect(this.deployerSigner)
-        .updateVariables(ethers.utils.parseEther('10'), 10);
+        .importAction(
+          'Investment Vote',
+          reputationalAlbtRewardsPerLevel,
+          reputationalAlbtRewardsPerLevel,
+          2,
+          addressZero,
+        );
 
       let signature = await getSignature(
         'Investment Vote',
@@ -402,9 +577,9 @@ export default async function suite() {
       const provisionAccountBalanceAfter = await this.rALBTContract.balanceOf(this.lender2);
 
       expect(actionAccountBalanceAfter.sub(actionAccountBalanceBefore).toString()
-      ).to.be.equal(ethers.utils.parseEther('10'));
+      ).to.be.equal(ethers.utils.parseEther('1'));
       expect(provisionAccountBalanceAfter.sub(provisionAccountBalanceBefore).toString()
-      ).to.be.equal(ethers.utils.parseEther('10'));
+      ).to.be.equal(ethers.utils.parseEther('5'));
     });
   });
 }

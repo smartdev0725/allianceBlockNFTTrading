@@ -260,7 +260,6 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
             }
         }
 
-
         if (action.isValidSignature(signature, DOMAIN_SEPARATOR) &&
             minimumLevelForActionProvision[actionHash] <= stakingLevelOfProvider &&
             rewardForAction != 0 && isValidReferralId)
