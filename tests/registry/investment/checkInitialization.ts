@@ -65,5 +65,12 @@ export default async function suite() {
         'Cannot add existing lending token'
       );
     });
+
+    it('When adding escrow address with zero address should revert', async function () {
+      await expectRevert(
+        this.registryContract.setEscrowAddress(ethers.constants.AddressZero),
+        'Cannot provide escrowAddress_ with 0 address'
+      );
+    });
   });
 }

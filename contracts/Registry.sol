@@ -84,6 +84,19 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
         lotteryNumbersForImmediateTicket = lotteryNumbersForImmediateTicket_;
     }
 
+
+    /**
+     * @notice Update escrow address
+     * @dev This function is called by the owner to update the escrow address
+     * @param escrowAddress_ The address of escrow that will be updated.
+     */
+    function setEscrowAddress(
+        address escrowAddress_
+    ) external onlyOwner() {
+        require(escrowAddress_ != address(0), "Cannot provide escrowAddress_ with 0 address");
+        escrow = IEscrow(escrowAddress_);
+    }
+
     /**
      * @notice Add lending token
      * @dev This function is called by the owner to add another lending token.
