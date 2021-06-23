@@ -4,7 +4,7 @@ import {getSigners} from '../helpers/utils';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
-  describe('Success', async () => {
+  describe('FundingNFT', async () => {
     it('When initialize again should revert', async function () {
       const registryAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
       const actionVerifierAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
@@ -223,7 +223,7 @@ export default async function suite() {
       await this.lendingTokenContract.mint(this.escrowContract.address, amount);
       await this.escrowContract
         .connect(deployerSigner)
-        .transferLendingToken(seeker, amount);
+        .transferLendingToken(this.lendingTokenContract.address, seeker, amount);
 
       // Then
       const escrowBalance = await this.lendingTokenContract.balanceOf(
@@ -241,7 +241,7 @@ export default async function suite() {
 
       // When and Then
       await expectRevert(
-        this.escrowContract.transferLendingToken(seeker, amount),
+        this.escrowContract.transferLendingToken(this.lendingTokenContract.address, seeker, amount),
         'ERC20: transfer amount exceeds balance'
       );
     });
@@ -259,7 +259,7 @@ export default async function suite() {
       await expectRevert(
         this.escrowContract
           .connect(seekerSigner)
-          .transferLendingToken(seeker, amount),
+          .transferLendingToken(this.lendingTokenContract.address, seeker, amount),
         'Only Registry'
       );
     });
@@ -398,6 +398,59 @@ export default async function suite() {
         lender1
       );
       expect(balanceLender1AfterBurn.toNumber()).to.be.equal(0);
+    });
+  });
+
+  describe('burn funding token', async () => {
+    it('when burn funding token with an invalid user should revert', async function () {
+      // Given
+      const {lender1} = await getNamedAccounts();
+      const {seekerSigner} = await getSigners();
+      const amount = ethers.utils.parseEther('1');
+
+      // When and Then
+      await expectRevert(
+        this.escrowContract
+          .connect(seekerSigner)
+          .burnFundingNFT(lender1, 1, amount),
+        'Only Registry'
+      );
+    });
+
+    it('when burn funding tokens should success', async function () {
+      // Given and When
+      const {lender1, staker1, deployer} = await getNamedAccounts();
+      const {deployerSigner, lender1Signer, staker2Signer} = await getSigners();
+
+      await this.fundingNFTContract
+        .connect(deployerSigner)
+        .grantRole(
+          ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
+          lender1
+        );
+      await this.fundingNFTContract
+        .connect(deployerSigner)
+        .grantRole(
+          ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
+          this.escrowContract.address
+        );
+
+      await this.fundingNFTContract
+        .connect(lender1Signer)
+        .mintGen0(staker1, 20, 1);
+      const balance = await this.fundingNFTContract.balanceOf(
+        staker1,
+        1
+      );
+
+      expect(balance.toString()).to.be.equal('20');
+
+      // Then
+      await this.escrowContract
+        .connect(deployerSigner)
+        .burnFundingNFT(staker1, 1, 20);
+      const balanceAfterBurn = await this.fundingNFTContract.balanceOf(staker1, 1);
+      expect(balanceAfterBurn.toNumber()).to.be.equal(0);
     });
   });
 }

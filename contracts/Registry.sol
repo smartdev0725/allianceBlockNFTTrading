@@ -27,20 +27,19 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
      * @dev Constructor of the contract.
      * @param escrowAddress address of the escrow contract
      * @param governanceAddress_ address of the DAO contract
-     * @param lendingToken_ address of the Lending Token
+     * @param lendingTokens_ addresses of the Lending Tokens
      * @param fundingNFT_ address of the Funding NFT
      * @param baseAmountForEachPartition_ The base amount for each partition
      */
     function initialize(
         address escrowAddress,
         address governanceAddress_,
-        address lendingToken_,
+        address[] memory lendingTokens_,
         address fundingNFT_,
         uint256 baseAmountForEachPartition_
     ) external initializer {
         require(escrowAddress != address(0), "Cannot initialize escrowAddress with 0 address");
         require(governanceAddress_ != address(0), "Cannot initialize governanceAddress_ with 0 address");
-        require(lendingToken_ != address(0), "Cannot initialize lendingToken_ with 0 address");
         require(fundingNFT_ != address(0), "Cannot initialize fundingNFT_ with 0 address");
         require(baseAmountForEachPartition_ != 0, "Cannot initialize baseAmountForEachPartition_ with 0");
 
@@ -50,8 +49,12 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
         escrow = IEscrow(escrowAddress);
         baseAmountForEachPartition = baseAmountForEachPartition_;
         governance = IGovernance(governanceAddress_);
-        lendingToken = IERC20(lendingToken_);
         fundingNFT = IERC1155Mint(fundingNFT_);
+
+        for (uint256 i = 0; i < lendingTokens_.length; i++) {
+            require(lendingTokens_[i] != address(0), "Cannot initialize lendingToken_ with 0 address");
+            isValidLendingToken[lendingTokens_[i]] = true;
+        }
     }
 
     /**
@@ -72,14 +75,39 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
     ) external onlyOwner() {
         require(reputationalAlbt != address(0), "Cannot initialize with 0 addresses");
         require(totalTicketsPerRun_ != 0 && rAlbtPerLotteryNumber_ != 0 && blocksLockedForReputation_ != 0 && lotteryNumbersForImmediateTicket_ != 0, "Cannot initialize with 0 values");
-        require(address(rALBT) == address(0) && totalTicketsPerRun == 0 && rAlbtPerLotteryNumber == 0 && blocksLockedForReputation == 0 && lotteryNumbersForImmediateTicket == 0,
-            "Cannot initialize second time");
+        require(address(rALBT) == address(0), "Cannot initialize second time");
 
         rALBT = IERC20(reputationalAlbt);
         totalTicketsPerRun = totalTicketsPerRun_;
         rAlbtPerLotteryNumber = rAlbtPerLotteryNumber_;
         blocksLockedForReputation = blocksLockedForReputation_;
         lotteryNumbersForImmediateTicket = lotteryNumbersForImmediateTicket_;
+    }
+
+
+    /**
+     * @notice Update escrow address
+     * @dev This function is called by the owner to update the escrow address
+     * @param escrowAddress_ The address of escrow that will be updated.
+     */
+    function setEscrowAddress(
+        address escrowAddress_
+    ) external onlyOwner() {
+        require(escrowAddress_ != address(0), "Cannot provide escrowAddress_ with 0 address");
+        escrow = IEscrow(escrowAddress_);
+    }
+
+    /**
+     * @notice Add lending token
+     * @dev This function is called by the owner to add another lending token.
+     * @param lendingToken_ The address of lending token that will be added.
+     */
+    function addLendingToken(
+        address lendingToken_
+    ) external onlyOwner() {
+        require(lendingToken_ != address(0), "Cannot provide lendingToken_ with 0 address");
+        require(!isValidLendingToken[lendingToken_], "Cannot add existing lending token");
+        isValidLendingToken[lendingToken_] = true;
     }
 
     /**
@@ -109,7 +137,6 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
     function _approveInvestment(uint256 investmentId_) internal {
         investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.APPROVED;
         investmentDetails[investmentId_].approvalDate = block.timestamp;
-        fundingNFT.unpauseTokenTransfer(investmentId_); //UnPause trades for ERC1155s with the specific investment ID.
         ticketsRemaining[investmentId_] = investmentDetails[investmentId_].totalPartitionsToBePurchased;
         governance.storeInvestmentTriggering(investmentId_);
         emit InvestmentApproved(investmentId_);
@@ -160,5 +187,14 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
             investmentStatus[investmentId],
             investmentSeeker[investmentId]
         );
+    }
+
+    /**
+     * @notice IsValidReferralId
+     * @param investmentId The id of the investment.
+     * @dev returns true if investment id exists (so also seeker exists), otherwise returns false
+     */
+    function isValidReferralId(uint256 investmentId) external view returns (bool) {
+        return investmentSeeker[investmentId] != address(0);
     }
 }

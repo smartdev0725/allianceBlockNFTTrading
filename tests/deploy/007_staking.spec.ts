@@ -26,6 +26,7 @@ describe('Contract Staking', () => {
 
     const albtContractAddress = (await get('ALBT')).address;
     const escrowContractAddress = (await get('Escrow')).address;
+    const stakerMedalNFTContractAddress = (await get('StakerMedalNFT')).address;
 
     const stakingTypeAmounts = [
       ethers.utils.parseEther('5000'),
@@ -50,6 +51,7 @@ describe('Contract Staking', () => {
         args: [
           ethers.constants.AddressZero,
           escrowContractAddress,
+          stakerMedalNFTContractAddress,
           stakingTypeAmounts,
           reputationalStakingTypeAmounts,
         ],
@@ -68,6 +70,27 @@ describe('Contract Staking', () => {
         },
         args: [
           albtContractAddress,
+          ethers.constants.AddressZero,
+          stakerMedalNFTContractAddress,
+          stakingTypeAmounts,
+          reputationalStakingTypeAmounts,
+        ],
+        log: true,
+      })
+    );
+
+    await expectRevert.unspecified(
+      deploy('StakingTest', {
+        contract: 'Staking',
+        from: deployer,
+        proxy: {
+          owner: proxyOwner,
+          methodName: 'initialize',
+          proxyContract: 'OpenZeppelinTransparentProxy',
+        },
+        args: [
+          albtContractAddress,
+          stakerMedalNFTContractAddress,
           ethers.constants.AddressZero,
           stakingTypeAmounts,
           reputationalStakingTypeAmounts,
@@ -88,6 +111,7 @@ describe('Contract Staking', () => {
         args: [
           albtContractAddress,
           escrowContractAddress,
+          stakerMedalNFTContractAddress,
           [],
           reputationalStakingTypeAmounts,
         ],
@@ -107,6 +131,7 @@ describe('Contract Staking', () => {
         args: [
           albtContractAddress,
           escrowContractAddress,
+          stakerMedalNFTContractAddress,
           stakingTypeAmounts,
           [],
         ],

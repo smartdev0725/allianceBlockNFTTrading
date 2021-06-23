@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../libs/InvestmentLibrary.sol";
+import "../interfaces/IERC20.sol";
 import "../interfaces/IERC1155Mint.sol";
 import "../interfaces/IGovernance.sol";
 import "../interfaces/IEscrow.sol";
@@ -38,9 +38,10 @@ contract Storage {
     mapping(address => uint256) public lockedTicketsPerAddress;
     // The last block checked for rewards for the tickets locked per address.
     mapping(address => uint256) public lastBlockCheckedForLockedTicketsPerAddress;
+    // All supported lending tokens are giving true, while unsupported are giving false.
+    mapping(address => bool) public isValidLendingToken;
 
     IGovernance public governance; // Governance's contract address.
-    IERC20 public lendingToken; // Lending token's contract address.
     IERC1155Mint public fundingNFT; // Funding nft's contract address.
     IEscrow public escrow; // Escrow's contract address.
     IERC20 public rALBT; // rALBT's contract address.

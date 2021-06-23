@@ -49,7 +49,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     ) external onlyOwner() {
         require(registryAddress_ != address(0) && actionVerifierAddress_ != address(0) && stakingAddress_ != address(0)
             , "Cannot initialize with 0 addresses");
-        require(address(registry) == address(0) && address(actionVerifier) == address(0) && address(staking) == address(0), "Cannot initialize second time");
+        require(address(registry) == address(0), "Cannot initialize second time");
         registry = IRegistry(registryAddress_);
         actionVerifier = actionVerifierAddress_;
         staking = stakingAddress_;
@@ -71,13 +71,29 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
+     * @notice Burn Funding NFT
+     * @dev This function is used to burn NFT
+     * @param account The address to burn the funding nft from
+     * @param investmentId The investment id
+     * @param amount The amount of funding nft to be burn
+     */
+    function burnFundingNFT(address account, uint256 investmentId, uint256 amount) external onlyRegistry() {
+        fundingNFT.burn(account, investmentId, amount);
+    }
+
+    /**
      * @notice Transfer Lending Token
      * @dev This function is used to send the lended amount to the seeker.
+     * @param lendingToken The lending token's contract address.
      * @param seeker Seeker's address.
      * @param amount The amount of lending tokens to be sent to seeker.
      */
-    function transferLendingToken(address seeker, uint256 amount) external onlyRegistry() {
-        lendingToken.transfer(seeker, amount);
+    function transferLendingToken(
+        address lendingToken,
+        address seeker,
+        uint256 amount
+    ) external onlyRegistry() {
+        IERC20(lendingToken).safeTransfer(seeker, amount);
     }
 
     /**

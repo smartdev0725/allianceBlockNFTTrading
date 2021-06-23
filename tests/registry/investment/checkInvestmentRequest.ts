@@ -36,6 +36,7 @@ export default async function suite() {
           .requestInvestment(
             this.investmentTokenContract.address,
             amountOfTokensToBePurchased,
+            this.lendingTokenContract.address,
             totalAmountRequested,
             ipfsHash
           )
@@ -132,10 +133,30 @@ export default async function suite() {
           .requestInvestment(
             this.investmentTokenContract.address,
             amountOfTokensToBePurchased,
+            this.lendingTokenContract.address,
             totalAmountRequested,
             ipfsHash
           ),
         'Token amount and price should result in integer amount of tickets'
+      );
+    });
+
+    it('when the lending token does not exist', async function () {
+      const amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
+      const totalAmountRequested = ethers.utils.parseEther('30001');
+      const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
+
+      await expectRevert(
+        this.registryContract
+          .connect(this.seekerSigner)
+          .requestInvestment(
+            this.investmentTokenContract.address,
+            amountOfTokensToBePurchased,
+            this.investmentTokenContract.address,
+            totalAmountRequested,
+            ipfsHash
+          ),
+        'Lending token not supported'
       );
     });
 
@@ -150,6 +171,7 @@ export default async function suite() {
           .requestInvestment(
             this.investmentTokenContract.address,
             amountOfTokensToBePurchased,
+            this.lendingTokenContract.address,
             totalAmountRequested,
             ipfsHash
           ),
@@ -160,14 +182,19 @@ export default async function suite() {
     it('when investment request is rejected', async function () {
       const investmentId = await this.registryContract.totalInvestments();
 
-      await this.registryContract
-        .connect(this.seekerSigner)
-        .requestInvestment(
-          this.investmentTokenContract.address,
-          this.amountOfTokensToBePurchased,
-          this.totalAmountRequested,
-          this.ipfsHash
-        );
+      await expect(
+        this.registryContract
+          .connect(this.seekerSigner)
+          .requestInvestment(
+            this.investmentTokenContract.address,
+            this.amountOfTokensToBePurchased,
+            this.lendingTokenContract.address,
+            this.totalAmountRequested,
+            this.ipfsHash
+          )
+      )
+        .to.emit(this.registryContract, 'InvestmentRequested')
+        .withArgs(investmentId, this.seeker, this.totalAmountRequested);
 
       await this.governanceContract
         .connect(this.superDelegatorSigner)

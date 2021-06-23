@@ -54,6 +54,7 @@ describe('Governance', function () {
     this.governanceContract = governanceContract;
     this.investmentTokenContract = investmentTokenContract;
     this.registryContract = registryContract;
+    this.lendingTokenContract = lendingTokenContract;
 
     // Initialize Transfers
     await initializeTransfers(

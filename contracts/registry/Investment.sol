@@ -4,8 +4,8 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./InvestmentDetails.sol";
+import "../libs/SafeERC20.sol";
 import "../libs/TokenFormat.sol";
 
 /**
@@ -20,6 +20,12 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
     // EVENTS
     event InvestmentRequested(uint256 indexed investmentId, address indexed user, uint256 amount);
+    event InvestmentInterest(uint256 indexed investmentId, uint amount);
+    event LotteryExecuted(uint256 indexed investmentId);
+    event WithdrawInvestment(uint256 indexed investmentId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
+    event WithdrawAmountForNonTickets(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets);
+    event WithdrawLockedInvestmentTickets(uint256 indexedinvestmentId, uint256 ticketsToWithdraw);
+    event ConvertNFTToInvestmentTokens(uint256 indexedinvestmentId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
 
     function __Investment_init() public initializer {
         __ReentrancyGuard_init();
@@ -31,23 +37,31 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
      * @dev require valid amount
      * @param investmentToken The token that will be purchased by investors.
      * @param amountOfInvestmentTokens The amount of investment tokens to be purchased.
+     * @param investmentToken The token that investors will pay with.
      * @param totalAmountRequested_ The total amount requested so as all investment tokens to be sold.
      * @param extraInfo The ipfs hash where more specific details for investment request are stored.
      */
     function requestInvestment(
         address investmentToken,
         uint256 amountOfInvestmentTokens,
+        address lendingToken,
         uint256 totalAmountRequested_,
         string memory extraInfo
     ) external nonReentrant() {
-        // TODO - Change 10 ** 18 to decimals if needed.
+        require(isValidLendingToken[lendingToken], "Lending token not supported");
+
+        uint256 investmentDecimals = IERC20(investmentToken).decimals();
+        uint256 lendingDecimals = IERC20(lendingToken).decimals();
+        uint256 power = investmentDecimals.mul(2).sub(lendingDecimals);
+
         require(
             totalAmountRequested_.mod(baseAmountForEachPartition) == 0 &&
-                totalAmountRequested_.mul(10**18).mod(amountOfInvestmentTokens) == 0,
+                totalAmountRequested_.mul(10**power).mod(amountOfInvestmentTokens) == 0,
             "Token amount and price should result in integer amount of tickets"
         );
 
         _storeInvestmentDetails(
+            lendingToken,
             totalAmountRequested_,
             investmentToken,
             amountOfInvestmentTokens,
@@ -84,7 +98,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         );
         require(amountOfPartitions > 0, "Cannot show interest for 0 partitions");
 
-        lendingToken.safeTransferFrom(msg.sender, address(escrow), amountOfPartitions.mul(baseAmountForEachPartition));
+        IERC20(investmentDetails[investmentId].lendingToken).safeTransferFrom(
+            msg.sender, address(escrow), amountOfPartitions.mul(baseAmountForEachPartition)
+        );
 
         investmentDetails[investmentId].partitionsRequested = investmentDetails[investmentId].partitionsRequested.add(
             amountOfPartitions
@@ -98,6 +114,10 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         else {
             _applyImmediateTicketsAndProvideLuckyNumbers(investmentId, amountOfPartitions);
         }
+
+        // Add event for investment interest
+        emit InvestmentInterest(investmentId, amountOfPartitions);
+
     }
 
     function _applyImmediateTicketsAndProvideLuckyNumbers(uint256 investmentId_, uint256 amountOfPartitions_) internal {
@@ -118,7 +138,6 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         if (immediateTickets > 0) {
             // Just in case we provided immediate tickets and tickets finished, so there is no lottery in this case.
-            // TODO - Maybe return here.
             if (immediateTickets >= ticketsRemaining[investmentId_]) {
                 immediateTickets = ticketsRemaining[investmentId_];
                 investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.SETTLED;
@@ -165,6 +184,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             investmentStatus[investmentId] = InvestmentLibrary.InvestmentStatus.SETTLED;
             counter = ticketsRemaining[investmentId];
             ticketsRemaining[investmentId] = 0;
+            fundingNFT.unpauseTokenTransfer(investmentId); // UnPause trades for ERC1155s with the specific investment ID.
         } else {
             ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(counter);
         }
@@ -187,6 +207,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
                 counter--;
             }
         }
+
+        // Add event for lottery executed
+        emit LotteryExecuted(investmentId);
     }
 
     /**
@@ -224,13 +247,15 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         }
 
         if (ticketsToWithdraw > 0) {
-            uint256 amountToWithdraw = investmentTokensPerTicket[investmentId].mul(ticketsToWithdraw);
-            escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountToWithdraw);
+            escrow.transferFundingNFT(investmentId, ticketsToWithdraw, msg.sender);
         }
 
         if (remainingTicketsPerAddress[investmentId][msg.sender] > 0) {
             _withdrawAmountProvidedForNonWonTickets(investmentId);
         }
+
+        // Add event for withdraw investment
+        emit WithdrawInvestment(investmentId, ticketsToLock, ticketsToWithdraw);
     }
 
     /**
@@ -267,8 +292,10 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].sub(ticketsToWithdraw);
 
-        uint256 amountToWithdraw = investmentTokensPerTicket[investmentId].mul(ticketsToWithdraw);
-        escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountToWithdraw);
+        escrow.transferFundingNFT(investmentId, ticketsToWithdraw, msg.sender);
+
+        // Add event for withdraw locked investment tickets
+        emit WithdrawLockedInvestmentTickets(investmentId, ticketsToWithdraw);
     }
 
     /**
@@ -324,6 +351,28 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             remainingTicketsPerAddress[investmentId_][msg.sender].mul(baseAmountForEachPartition);
         remainingTicketsPerAddress[investmentId_][msg.sender] = 0;
 
-        escrow.transferLendingToken(msg.sender, amountToReturnForNonWonTickets);
+        escrow.transferLendingToken(investmentDetails[investmentId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
+
+        // Add event for withdraw amount provided for non tickets
+        emit WithdrawAmountForNonTickets(investmentId_, amountToReturnForNonWonTickets);
+    }
+
+    /**
+     * @notice Convert NFT to investment tokens
+     * @param investmentId the investmentId
+     * @param amountOfNFTToConvert the amount of nft to convert
+     */
+    function convertNFTToInvestmentTokens (uint256 investmentId, uint256 amountOfNFTToConvert) external {
+        require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
+        require(amountOfNFTToConvert != 0, "Amount of nft to convert cannot be 0");
+        require(amountOfNFTToConvert <= fundingNFT.balanceOf(msg.sender, investmentId), "Not enough NFT to convert");
+
+        uint256 amountOfInvestmentTokenToTransfer = investmentTokensPerTicket[investmentId].mul(amountOfNFTToConvert);
+
+        escrow.burnFundingNFT(msg.sender, investmentId, amountOfNFTToConvert);
+        escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountOfInvestmentTokenToTransfer);
+
+        // Add event for convert nft to investment tokens
+        emit ConvertNFTToInvestmentTokens(investmentId, amountOfNFTToConvert, amountOfInvestmentTokenToTransfer);
     }
 }

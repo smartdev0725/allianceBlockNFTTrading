@@ -1,18 +1,16 @@
-import checkActionVerifier from './checkActionVerifier';
+import checkStakerMedal from './checkStakerMedal';
 
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {getContracts, getSigners} from '../helpers/utils';
 
-describe('Action Verifier', function () {
+describe('Staker Medal', function () {
   beforeEach(async function () {
     // Deploy fixtures
-    const {deploy, fixture, get} = deployments;
-    await fixture();
+    await deployments.fixture();
 
     // Get accounts
     const {
       deployer,
-      proxyOwner,
       seeker,
       lender1,
       lender2,
@@ -21,7 +19,6 @@ describe('Action Verifier', function () {
       rewardDistributor,
     } = await getNamedAccounts();
     this.deployer = deployer;
-    this.proxyOwner = proxyOwner;
     this.seeker = seeker;
     this.lender1 = lender1;
     this.lender2 = lender2;
@@ -32,7 +29,6 @@ describe('Action Verifier', function () {
     // Get signers
     const {
       deployerSigner,
-      proxyOwnerSigner,
       delegator1Signer,
       delegator2Signer,
       lender1Signer,
@@ -43,7 +39,6 @@ describe('Action Verifier', function () {
       staker2Signer,
     } = await getSigners();
     this.deployerSigner = deployerSigner;
-    this.proxyOwnerSigner = proxyOwnerSigner;
     this.delegator1Signer = delegator1Signer;
     this.delegator2Signer = delegator2Signer;
     this.lender1Signer = lender1Signer;
@@ -54,30 +49,16 @@ describe('Action Verifier', function () {
     this.staker2Signer = staker2Signer;
 
     // Get contracts
-    const {
-      actionVerifierContract,
-      escrowContract,
-      rALBTContract,
-      stakingContract,
-      ALBTContract,
-      registryContract,
-      stakerMedalNFTContract,
-      investmentTokenContract,
-      lendingTokenContract,
-    } = await getContracts();
-    this.actionVerifierContract = actionVerifierContract;
-    this.escrowContract = escrowContract;
+    const {stakerMedalNFTContract, stakingContract} = await getContracts();
+    this.stakerMedalNFTContract = stakerMedalNFTContract;
     this.stakingContract = stakingContract;
-    this.ALBTContract = ALBTContract;
-    this.rALBTContract = rALBTContract;
-    this.registryContract = registryContract;
-    this.stakerMedalNft = stakerMedalNFTContract;
-    this.investmentTokenContract = investmentTokenContract;
-    this.lendingTokenContract = lendingTokenContract;
+
+    await this.stakerMedalNFTContract.grantRole(
+      ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
+      seeker
+    );
+
   });
 
-  describe(
-    'When checking action verifier functionalities',
-    checkActionVerifier.bind(this)
-  );
+  describe('When checking staker medal', checkStakerMedal.bind(this));
 });

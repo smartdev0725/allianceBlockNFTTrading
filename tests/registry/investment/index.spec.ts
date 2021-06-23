@@ -17,9 +17,10 @@ describe('Registry Investments', function () {
     await deployments.fixture();
 
     // Get accounts
-    const {deployer, seeker, lender1, lender2, lender3, superDelegator} =
+    const {deployer, proxyOwner, seeker, lender1, lender2, lender3, superDelegator} =
       await getNamedAccounts();
     this.deployer = deployer;
+    this.proxyOwner = proxyOwner;
     this.seeker = seeker;
     this.lender1 = lender1;
     this.lender2 = lender2;
@@ -104,6 +105,7 @@ describe('Registry Investments', function () {
       .requestInvestment(
         this.investmentTokenContract.address,
         this.amountOfTokensToBePurchased,
+        this.lendingTokenContract.address,
         this.totalAmountRequested,
         this.ipfsHash
       );

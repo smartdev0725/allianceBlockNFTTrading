@@ -20,6 +20,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     ? process.env.ALBT_TOKEN_ADDRESS
     : (await get('ALBT')).address;
   const escrowContractAddress = (await get('Escrow')).address;
+  const stakerMedalNFTContractAddress = (await get('StakerMedalNFT')).address;
 
   const stakingTypeAmounts = [
     ethers.utils.parseEther('5000'),
@@ -43,6 +44,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     args: [
       albtContractAddress,
       escrowContractAddress,
+      stakerMedalNFTContractAddress,
       stakingTypeAmounts,
       reputationalStakingTypeAmounts,
     ],
@@ -55,5 +57,5 @@ const id = contractName + version;
 
 export default func;
 func.tags = [id, version];
-func.dependencies = ['Escrow'];
+func.dependencies = ['Escrow', 'StakerMedalNFT'];
 func.id = id;
