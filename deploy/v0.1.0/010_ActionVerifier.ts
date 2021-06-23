@@ -13,9 +13,18 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployer, proxyOwner} = await getNamedAccounts();
 
   const escrowContractAddress = (await get('Escrow')).address;
-  const stakingContractAddress = (await get('Staking')).address;
+  const stakerMedalNFTContractAddress = (await get('StakerMedalNFT')).address;
 
   const chainId = await getChainId();
+
+  const rewardsPerLevel = [
+    ethers.utils.parseEther('0').toString(),
+    ethers.utils.parseEther('0').toString(),
+    ethers.utils.parseEther('5').toString(),
+    ethers.utils.parseEther('10').toString(),
+  ];
+
+  const actionsPerDayPerLevel = ['0', '0', '5', '10'];
 
   await deploy(contractName, {
     contract: contractName,
@@ -25,7 +34,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
-    args: [ethers.utils.parseEther('10'), 10, escrowContractAddress, stakingContractAddress, chainId], // Other possible network 1337
+    args: [
+      rewardsPerLevel,
+      actionsPerDayPerLevel,
+      escrowContractAddress,
+      stakerMedalNFTContractAddress,
+      chainId,
+    ], // Other possible network 1337
     log: true,
   });
   return true;
@@ -35,5 +50,5 @@ const id = contractName + version;
 
 export default func;
 func.tags = [id, version];
-func.dependencies = ['Escrow', 'Staking'];
+func.dependencies = ['Escrow', 'StakerMedalNFT'];
 func.id = id;

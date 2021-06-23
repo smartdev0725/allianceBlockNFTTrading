@@ -72,8 +72,8 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
         address stakerMedalNft_,
         uint256 chainId
     ) external initializer {
-        require(rewardPerActionProvisionPerLevel[3] != 0, "Cannot initialize rewardPerActionProvisionPerLevel_ with 0");
-        require(maxActionsPerDayPerLevel[3] != 0, "Cannot initialize maxActionsPerDayPerLevel_ with 0");
+        require(rewardsPerActionProvisionPerLevel_[3] != 0, "Cannot initialize rewardPerActionProvisionPerLevel_ with 0");
+        require(maxActionsPerDayPerLevel_[3] != 0, "Cannot initialize maxActionsPerDayPerLevel_ with 0");
         require(escrow_ != address(0), "Cannot initialize with escrow_ address");
         require(stakerMedalNft_ != address(0), "Cannot initialize with stakerMedalNft_ address");
         require(chainId != 0, "Cannot initialize chainId with 0");

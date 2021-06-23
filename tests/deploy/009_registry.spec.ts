@@ -13,14 +13,11 @@ describe('Contract Registry', () => {
     const registryContract = await ethers.getContract('Registry');
 
     const fundingNFTProxyContract = await deployments.get('FundingNFT_Proxy');
-    const lendingTokenContract = await deployments.get('LendingToken');
 
     // When
-    const lendingToken = await registryContract.lendingToken();
     const fundingNFT = await registryContract.fundingNFT();
 
     // Then
-    expect(lendingToken).to.equal(lendingTokenContract.address);
     expect(fundingNFT).to.equal(fundingNFTProxyContract.address);
   });
 
@@ -47,7 +44,7 @@ describe('Contract Registry', () => {
         args: [
           ethers.constants.AddressZero,
           governanceAddress,
-          lendingTokenAddress,
+          [lendingTokenAddress],
           fundingNFTAddress,
           amount,
         ],
@@ -67,7 +64,7 @@ describe('Contract Registry', () => {
         args: [
           escrowAddress,
           ethers.constants.AddressZero,
-          lendingTokenAddress,
+          [lendingTokenAddress],
           fundingNFTAddress,
           amount,
         ],
@@ -87,7 +84,7 @@ describe('Contract Registry', () => {
         args: [
           escrowAddress,
           governanceAddress,
-          ethers.constants.AddressZero,
+          [ethers.constants.AddressZero],
           fundingNFTAddress,
           amount,
         ],
@@ -107,7 +104,7 @@ describe('Contract Registry', () => {
         args: [
           escrowAddress,
           governanceAddress,
-          lendingTokenAddress,
+          [lendingTokenAddress],
           ethers.constants.AddressZero,
           amount,
         ],
@@ -127,7 +124,7 @@ describe('Contract Registry', () => {
         args: [
           escrowAddress,
           governanceAddress,
-          lendingTokenAddress,
+          [lendingTokenAddress],
           fundingNFTAddress,
           0,
         ],

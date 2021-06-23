@@ -3,7 +3,7 @@ import checkActionVerifier from './checkActionVerifier';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {getContracts, getSigners} from '../helpers/utils';
 
-describe('Action Verifier', function () {
+describe.skip('Action Verifier', function () {
   beforeEach(async function () {
     // Deploy fixtures
     const {deploy, fixture, get} = deployments;

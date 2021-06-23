@@ -12,15 +12,15 @@ describe('Contract ActionVerifier', () => {
     const actionVerifierContract = await ethers.getContract('ActionVerifier');
 
     const escrowContract = await deployments.get('Escrow');
-    const stakingContract = await deployments.get('Staking');
+    const stakerMedalNFTContract = await deployments.get('StakerMedalNFT');
 
     // When
     const escrowAddress = await actionVerifierContract.escrow();
-    const stakingAddress = await actionVerifierContract.staking();
+    const stakerMedalNFTAddress = await actionVerifierContract.stakerMedalNft();
 
     // Then
     expect(escrowAddress).to.equal(escrowContract.address);
-    expect(stakingAddress).to.equal(stakingContract.address);
+    expect(stakerMedalNFTAddress).to.equal(stakerMedalNFTContract.address);
   });
 
   it('should revert if parameters are wrongs', async function () {
@@ -28,6 +28,24 @@ describe('Contract ActionVerifier', () => {
     const {deployer, proxyOwner} = await getNamedAccounts();
     const dummyAddress = "0x856608655f8b6932993fda56dda36db77c896269";
 
+    const rewardsPerLevel = [
+      ethers.utils.parseEther('0').toString(),
+      ethers.utils.parseEther('0').toString(),
+      ethers.utils.parseEther('5').toString(),
+      ethers.utils.parseEther('10').toString(),
+    ];
+
+    const actionsPerDayPerLevel = ['0', '0', '5', '10'];
+
+    const dummyRewardsPerLevel = [
+      ethers.utils.parseEther('0').toString(),
+      ethers.utils.parseEther('0').toString(),
+      ethers.utils.parseEther('0').toString(),
+      ethers.utils.parseEther('0').toString(),
+    ];
+
+    const dummyActionsPerDayPerLevel = ['0', '0', '0', '0'];
+
     await expectRevert.unspecified(
       deploy('ActionVerifierTest', {
         contract: 'ActionVerifier',
@@ -37,7 +55,7 @@ describe('Contract ActionVerifier', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [0, 10, dummyAddress, dummyAddress, 1],
+        args: [dummyRewardsPerLevel, actionsPerDayPerLevel, dummyAddress, dummyAddress, 1],
       })
     );
 
@@ -50,7 +68,7 @@ describe('Contract ActionVerifier', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [ethers.utils.parseEther('10'), 0, dummyAddress, dummyAddress, 1],
+        args: [rewardsPerLevel, dummyActionsPerDayPerLevel, dummyAddress, dummyAddress, 1],
       })
     );
 
@@ -63,7 +81,7 @@ describe('Contract ActionVerifier', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [ethers.utils.parseEther('10'), 10, ethers.constants.AddressZero, dummyAddress, 1],
+        args: [rewardsPerLevel, actionsPerDayPerLevel, ethers.constants.AddressZero, dummyAddress, 1],
       })
     );
 
@@ -76,7 +94,7 @@ describe('Contract ActionVerifier', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [ethers.utils.parseEther('10'), 10, dummyAddress, ethers.constants.AddressZero, 1],
+        args: [rewardsPerLevel, actionsPerDayPerLevel, dummyAddress, ethers.constants.AddressZero, 1],
       })
     );
 
@@ -89,7 +107,7 @@ describe('Contract ActionVerifier', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [ethers.utils.parseEther('10'), 10, dummyAddress, dummyAddress, 0],
+        args: [rewardsPerLevel, actionsPerDayPerLevel, dummyAddress, dummyAddress, 0],
       })
     );
   });

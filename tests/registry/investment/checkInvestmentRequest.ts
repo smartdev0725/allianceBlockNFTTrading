@@ -36,6 +36,7 @@ export default async function suite() {
           .requestInvestment(
             this.investmentTokenContract.address,
             amountOfTokensToBePurchased,
+            this.lendingTokenContract.address,
             totalAmountRequested,
             ipfsHash
           )
@@ -132,6 +133,7 @@ export default async function suite() {
           .requestInvestment(
             this.investmentTokenContract.address,
             amountOfTokensToBePurchased,
+            this.lendingTokenContract.address,
             totalAmountRequested,
             ipfsHash
           ),
@@ -150,6 +152,7 @@ export default async function suite() {
           .requestInvestment(
             this.investmentTokenContract.address,
             amountOfTokensToBePurchased,
+            this.lendingTokenContract.address,
             totalAmountRequested,
             ipfsHash
           ),
@@ -165,6 +168,7 @@ export default async function suite() {
         .requestInvestment(
           this.investmentTokenContract.address,
           this.amountOfTokensToBePurchased,
+          this.lendingTokenContract.address,
           this.totalAmountRequested,
           this.ipfsHash
         );

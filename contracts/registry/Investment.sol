@@ -31,6 +31,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
      * @dev require valid amount
      * @param investmentToken The token that will be purchased by investors.
      * @param amountOfInvestmentTokens The amount of investment tokens to be purchased.
+     * @param investmentToken The token that investors will pay with.
      * @param totalAmountRequested_ The total amount requested so as all investment tokens to be sold.
      * @param extraInfo The ipfs hash where more specific details for investment request are stored.
      */

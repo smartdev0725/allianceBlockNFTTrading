@@ -60,6 +60,7 @@ describe('Registry upgrade test', () => {
       .requestInvestment(
         investmentTokenContract.address,
         amountOfInvestmentTokens,
+        lendingTokenContract.address,
         amountRequested,
         ipfsHash
       );

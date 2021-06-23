@@ -36,7 +36,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     args: [
       escrowAddress,
       governanceAddress,
-      lendingTokenAddress,
+      [lendingTokenAddress],
       fundingNFTAddress,
       ethers.utils.parseEther(BASE_AMOUNT + '').toString(), // Same as toWei in web3
     ],

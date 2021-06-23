@@ -223,7 +223,7 @@ export default async function suite() {
       await this.lendingTokenContract.mint(this.escrowContract.address, amount);
       await this.escrowContract
         .connect(deployerSigner)
-        .transferLendingToken(seeker, amount);
+        .transferLendingToken(this.lendingTokenContract.address, seeker, amount);
 
       // Then
       const escrowBalance = await this.lendingTokenContract.balanceOf(
@@ -241,7 +241,7 @@ export default async function suite() {
 
       // When and Then
       await expectRevert(
-        this.escrowContract.transferLendingToken(seeker, amount),
+        this.escrowContract.transferLendingToken(this.lendingTokenContract.address, seeker, amount),
         'ERC20: transfer amount exceeds balance'
       );
     });
@@ -259,7 +259,7 @@ export default async function suite() {
       await expectRevert(
         this.escrowContract
           .connect(seekerSigner)
-          .transferLendingToken(seeker, amount),
+          .transferLendingToken(this.lendingTokenContract.address, seeker, amount),
         'Only Registry'
       );
     });

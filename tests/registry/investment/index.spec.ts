@@ -104,6 +104,7 @@ describe('Registry Investments', function () {
       .requestInvestment(
         this.investmentTokenContract.address,
         this.amountOfTokensToBePurchased,
+        this.lendingTokenContract.address,
         this.totalAmountRequested,
         this.ipfsHash
       );
