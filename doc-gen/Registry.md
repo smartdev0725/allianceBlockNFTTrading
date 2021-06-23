@@ -6,8 +6,7 @@ Responsible for investment transactions.
 Extends Initializable, Investment, OwnableUpgradeable
 
 
-### `initialize(address escrowAddress, address governanceAddress_, address lendingToken_, address fundingNFT_, uint256 baseAmountForEachPartition_)` (external)
-
+### `initialize(address escrowAddress, address governanceAddress_, address[] lendingTokens_, address fundingNFT_, uint256 baseAmountForEachPartition_)` (external)
 
 Initialize
 
@@ -23,13 +22,28 @@ Initialize Investment
 This function is called by the owner to initialize the investment type.
 
 
+### `setEscrowAddress(address escrowAddress_)` (external)
+
+Update escrow address
+
+
+This function is called by the owner to update the escrow address
+
+
+### `addLendingToken(address lendingToken_)` (external)
+
+Add lending token
+
+
+This function is called by the owner to add another lending token.
+
+
 ### `decideForInvestment(uint256 investmentId, bool decision)` (external)
 
 Decide For Investment
 
 
 This function is called by governance to approve or reject a investment request.
-
 
 
 ### `startLotteryPhase(uint256 investmentId)` (external)
@@ -43,6 +57,7 @@ This function is called by governance to start the lottery phase for an investme
 ### `_approveInvestment(uint256 investmentId_)` (internal)
 
 Approve Investment
+
 
 
 
@@ -60,7 +75,6 @@ Start Investment
 
 
 
-
 ### `getInvestmentMetadata(uint256 investmentId) → struct InvestmentLibrary.InvestmentDetails, enum InvestmentLibrary.InvestmentStatus, address` (public)
 
 Get Investment Metadata
@@ -69,8 +83,16 @@ Get Investment Metadata
 This helper function provides a single point for querying the Investment metadata
 returns Investment Details, Investment Status, Investment Seeker Address and Repayment Batch Type
 
+### `isValidReferralId(uint256 investmentId) → bool` (external)
+
+IsValidReferralId
+
+
+returns true if investment id exists (so also seeker exists), otherwise returns false
+
 
 ### `InvestmentStarted(uint256 investmentId)`
+
 
 
 
@@ -79,7 +101,11 @@ returns Investment Details, Investment Status, Investment Seeker Address and Rep
 
 
 
+
+
 ### `InvestmentRejected(uint256 investmentId)`
+
+
 
 
 

@@ -17,7 +17,6 @@ Extends OwnableUpgradeable, DaoCronjob
 Sets Registry contract
 
 
-
 used to initialize SuperGovernance
 requires not already initialized
 
