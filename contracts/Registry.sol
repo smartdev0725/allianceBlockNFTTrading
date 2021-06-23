@@ -160,4 +160,13 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
             investmentSeeker[investmentId]
         );
     }
+
+    /**
+     * @notice IsValidReferralId
+     * @param investmentId The id of the investment.
+     * @dev returns true if investment id exists (so also seeker exists), otherwise returns false
+     */
+    function isValidReferralId(uint256 investmentId) external view returns (bool) {
+        return investmentSeeker[investmentId] != address(0);
+    }
 }

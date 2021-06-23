@@ -105,15 +105,6 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
     }
 
     /**
-     * @notice Returns true if account is staker Lvl2 or more
-     * @param account The staker to check for
-     */
-    function getEligibilityForActionProvision(address account) external view returns (bool) {
-        if (balance[account] >= stakingTypeAmounts[1]) return true;
-        return false;
-    }
-
-    /**
      * @notice Get Staking Type
      * @param account the address
      * @return the staking type
