@@ -26,6 +26,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
     event WithdrawAmountForNonTickets(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets);
     event WithdrawLockedInvestmentTickets(uint256 indexedinvestmentId, uint256 ticketsToWithdraw);
     event ConvertNFTToInvestmentTokens(uint256 indexedinvestmentId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
+    event InvestmentSettled(uint256 investmentId);
 
     function __Investment_init() public initializer {
         __ReentrancyGuard_init();
@@ -185,6 +186,8 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             counter = ticketsRemaining[investmentId];
             ticketsRemaining[investmentId] = 0;
             fundingNFT.unpauseTokenTransfer(investmentId); // UnPause trades for ERC1155s with the specific investment ID.
+            emit InvestmentSettled(investmentId);
+
         } else {
             ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(counter);
         }
