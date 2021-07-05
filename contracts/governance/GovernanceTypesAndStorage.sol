@@ -35,8 +35,6 @@ contract GovernanceTypesAndStorage {
 
     IRegistry public registry;
 
-    uint256 public totalIds;
-
     mapping(bytes32 => uint256) public updatableVariables;
 
     // CRONJOB types and variables
