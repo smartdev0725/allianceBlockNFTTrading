@@ -47,7 +47,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         uint256 amountOfInvestmentTokens,
         address lendingToken,
         uint256 totalAmountRequested_,
-        string memory extraInfo
+        string calldata extraInfo
     ) external nonReentrant() {
         require(isValidLendingToken[lendingToken], "Lending token not supported");
 
