@@ -21,7 +21,7 @@ contract rALBT is Ownable {
 
     string constant NAME = "Reputational AllianceBlock Token"; // The name of the token
     string constant SYMBOL = "rALBT"; // The symbol of the token
-    uint256 _totalSupply;
+    uint256 public _totalSupply;
 
     mapping(address => uint256) private _balances;
 
