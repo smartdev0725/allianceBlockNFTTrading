@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 import "../interfaces/IEscrow.sol";
 import "../interfaces/IERC1155StakerNFT.sol";
