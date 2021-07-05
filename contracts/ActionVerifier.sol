@@ -45,9 +45,9 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
 
     // The current epoch of ActionVerifier
     // (actions that provide rewards multiple times can only provide only in different epochs).
-    uint256 currentEpoch;
+    uint256 private currentEpoch;
     // The ending timestamp for the current epoch
-    uint256 endingTimestampForCurrentEpoch;
+    uint256 private endingTimestampForCurrentEpoch;
 
     uint256 constant private ONE_DAY = 1 days;
 
