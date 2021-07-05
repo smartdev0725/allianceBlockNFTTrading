@@ -124,18 +124,28 @@ export default async function suite() {
       );
     });
 
+    it('when change registry with zero address should not revert', async function () {
+      // Given
+      const { deployerSigner } = await getSigners();
+      // When and Then
+      await expectRevert(this.escrowContract
+        .connect(deployerSigner)
+        .changeRegistry(ethers.constants.AddressZero), 'Registry should not be zero address');
+    });
+
     it('when change registry from owner account should not revert', async function () {
       // Given
       const {deployerSigner} = await getSigners();
+      const dummyAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
 
       // When
       await this.escrowContract
         .connect(deployerSigner)
-        .changeRegistry(ethers.constants.AddressZero);
+        .changeRegistry(dummyAddress);
 
       // Then
       const registryAddress = await this.escrowContract.registry();
-      expect(registryAddress).to.be.equal(ethers.constants.AddressZero);
+      expect(registryAddress.toLowerCase()).to.be.equal(dummyAddress.toLowerCase());
     });
   });
 
