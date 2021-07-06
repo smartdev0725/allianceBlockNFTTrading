@@ -13,7 +13,8 @@ contract GovernanceTypesAndStorage {
     struct ApprovalRequest {
         uint256 investmentId; // The investment id for which approcal is requested.
         uint256 approvalsProvided; // The number of approvals that this request has gathered.
-        bool isApproved; // True if request is approved, false if not.
+        bool isApproved; // True if request was approved, false if not.
+        bool isProcessed; // True if request was processed, false if not.
     }
 
     // EVENTS
