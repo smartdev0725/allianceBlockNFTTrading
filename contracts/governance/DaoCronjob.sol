@@ -13,8 +13,6 @@ import "../interfaces/IRegistry.sol";
  */
 contract DaoCronjob is GovernanceTypesAndStorage {
     using SafeMath for uint256;
-    using ValuedDoubleLinkedList for ValuedDoubleLinkedList.LinkedList;
-    using DoubleLinkedList for DoubleLinkedList.LinkedList;
 
     modifier checkCronjob() {
         checkCronjobs();
