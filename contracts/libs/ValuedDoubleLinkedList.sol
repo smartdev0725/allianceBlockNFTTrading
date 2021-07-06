@@ -212,6 +212,7 @@ library ValuedDoubleLinkedList {
      * @param amountOfNodes the number of nodes to remove starting from Head
      */
     function removeMultipleFromHead(LinkedList storage self, uint256 amountOfNodes) internal {
+        require(amountOfNodes <= self.size, "amountOfNodes should be less than or equal to self.size");
         for (uint256 i = 0; i < amountOfNodes; i++) {
             if (self.size == 1) {
                 self.head = 0;
