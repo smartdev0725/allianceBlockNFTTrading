@@ -220,7 +220,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
         uint256 newTokenId = generation.getTokenId(investmentId);
 
         // Burn previous gen tokens
-        burn(user, tokenId, amount);
+        _burn(user, tokenId, amount);
 
         // Mint new generation tokens
         _mint(user, newTokenId, amount, "");
@@ -252,7 +252,7 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
         uint256 newTokenId = generation.getTokenId(investmentId);
 
         // Burn previous gen tokens
-        burn(user, tokenId, amount);
+        _burn(user, tokenId, amount);
 
         // Mint new generation tokens
         _mint(user, newTokenId, amount, "");
