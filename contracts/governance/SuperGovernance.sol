@@ -43,7 +43,7 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
      */
     function superVoteForRequest(uint256 requestId, bool decision) external checkCronjob() nonReentrant() {
         require(msg.sender == superDelegator, "Only super delegator can call this function");
-        require(approvalRequests[requestId].approvalsProvided == 0, "Cannot approve again same investment");
+        require(!approvalRequests[requestId].isProcessed, "Cannot process again same investment");
 
         registry.decideForInvestment(approvalRequests[requestId].investmentId, decision);
 
@@ -51,6 +51,8 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
             approvalRequests[requestId].approvalsProvided = 1;
             approvalRequests[requestId].isApproved = true;
         }
+
+        approvalRequests[requestId].isProcessed = true;
 
         emit VotedForRequest(approvalRequests[requestId].investmentId, requestId, decision, msg.sender);
     }
