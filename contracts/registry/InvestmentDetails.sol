@@ -45,7 +45,6 @@ contract InvestmentDetails is Storage {
 
         investmentDetails[totalInvestments] = investment;
 
-        investmentStatus[totalInvestments] = InvestmentLibrary.InvestmentStatus.REQUESTED;
         investmentSeeker[totalInvestments] = msg.sender;
     }
 }
