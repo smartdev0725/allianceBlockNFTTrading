@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 import "../interfaces/IRegistry.sol";
 import "../libs/ValuedDoubleLinkedList.sol";
@@ -34,8 +34,6 @@ contract GovernanceTypesAndStorage {
     mapping(uint256 => ApprovalRequest) public approvalRequests;
 
     IRegistry public registry;
-
-    uint256 public totalIds;
 
     mapping(bytes32 => uint256) public updatableVariables;
 

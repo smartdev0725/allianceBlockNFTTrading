@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
@@ -47,7 +47,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         uint256 amountOfInvestmentTokens,
         address lendingToken,
         uint256 totalAmountRequested_,
-        string memory extraInfo
+        string calldata extraInfo
     ) external nonReentrant() {
         require(isValidLendingToken[lendingToken], "Lending token not supported");
 
