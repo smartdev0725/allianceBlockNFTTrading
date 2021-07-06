@@ -3,15 +3,12 @@ pragma solidity ^0.7.0;
 
 import "../interfaces/IRegistry.sol";
 import "../libs/ValuedDoubleLinkedList.sol";
-import "../libs/DoubleLinkedList.sol";
 
 /**
  * @title AllianceBlock GovernanceStorage contract
  * @notice Responsible for governance storage
  */
 contract GovernanceTypesAndStorage {
-    using ValuedDoubleLinkedList for ValuedDoubleLinkedList.LinkedList;
-    using DoubleLinkedList for DoubleLinkedList.LinkedList;
 
     struct ApprovalRequest {
         uint256 investmentId; // The investment id for which approcal is requested.

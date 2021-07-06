@@ -5,6 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./GovernanceTypesAndStorage.sol";
 import "../interfaces/IRegistry.sol";
+import "../libs/ValuedDoubleLinkedList.sol";
+import "../libs/DoubleLinkedList.sol";
 
 /**
  * @title AllianceBlock Governance contract
@@ -13,6 +15,8 @@ import "../interfaces/IRegistry.sol";
  */
 contract DaoCronjob is GovernanceTypesAndStorage {
     using SafeMath for uint256;
+    using ValuedDoubleLinkedList for ValuedDoubleLinkedList.LinkedList;
+    using DoubleLinkedList for DoubleLinkedList.LinkedList;
 
     modifier checkCronjob() {
         checkCronjobs();
