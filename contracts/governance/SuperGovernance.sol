@@ -48,7 +48,7 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
         registry.decideForInvestment(approvalRequests[requestId].investmentId, decision);
 
         if (decision) {
-            approvalRequests[requestId].approvalsProvided = approvalRequests[requestId].approvalsProvided.add(1);
+            approvalRequests[requestId].approvalsProvided = 1;
             approvalRequests[requestId].isApproved = true;
         }
 

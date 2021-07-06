@@ -142,6 +142,8 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             if (immediateTickets >= ticketsRemaining[investmentId_]) {
                 immediateTickets = ticketsRemaining[investmentId_];
                 investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.SETTLED;
+                fundingNFT.unpauseTokenTransfer(investmentId_); // UnPause trades for ERC1155s with the specific investment ID.
+                emit InvestmentSettled(investmentId_);
             }
 
             ticketsWonPerAddress[investmentId_][msg.sender] = immediateTickets;
@@ -187,7 +189,6 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             ticketsRemaining[investmentId] = 0;
             fundingNFT.unpauseTokenTransfer(investmentId); // UnPause trades for ERC1155s with the specific investment ID.
             emit InvestmentSettled(investmentId);
-
         } else {
             ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(counter);
         }

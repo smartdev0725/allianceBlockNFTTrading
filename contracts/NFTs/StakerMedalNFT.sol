@@ -106,9 +106,9 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
     function getLevelOfStaker(address account) external view returns (uint256) {
         require(account != address(0), "Account is a zero address");
 
-        uint256 balanceOfStakerMedalBronce = balanceOf(account, uint(StakingType.STAKER_LVL_1));
-        if(balanceOfStakerMedalBronce == 1) {
-            return uint(StakingType.STAKER_LVL_1);
+        uint256 balanceOfStakerMedalGold = balanceOf(account, uint(StakingType.STAKER_LVL_3));
+        if(balanceOfStakerMedalGold == 1) {
+            return uint(StakingType.STAKER_LVL_3);
         }
 
         uint256 balanceOfStakerMedalSilver = balanceOf(account, uint(StakingType.STAKER_LVL_2));
@@ -116,10 +116,11 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
             return uint(StakingType.STAKER_LVL_2);
         }
 
-        uint256 balanceOfStakerMedalGold = balanceOf(account, uint(StakingType.STAKER_LVL_3));
-        if(balanceOfStakerMedalGold == 1) {
-            return uint(StakingType.STAKER_LVL_3);
+        uint256 balanceOfStakerMedalBronce = balanceOf(account, uint(StakingType.STAKER_LVL_1));
+        if(balanceOfStakerMedalBronce == 1) {
+            return uint(StakingType.STAKER_LVL_1);
         }
+
         return uint(StakingType.STAKER_LVL_0);
     }
 }
