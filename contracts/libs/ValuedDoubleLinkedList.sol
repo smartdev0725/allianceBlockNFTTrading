@@ -151,6 +151,8 @@ library ValuedDoubleLinkedList {
      * @param id the id of the node to remove
      */
     function removeNode(LinkedList storage self, uint256 id) internal {
+        require(id != 0, "Id should be different from zero");
+
         if (self.size == 1) {
             self.head = 0;
             self.tail = 0;
