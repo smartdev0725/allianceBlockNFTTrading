@@ -50,6 +50,17 @@ task('mint:USDC', 'Mints USDC tokens (lending) to address', async ({target, amou
 }).addParam("target", "The address to mint to")
   .addParam("amount", "amount of USDC to mint")
 
+task('mint:', 'Mints tokens to address', async ({target, amount, tokenName}, {ethers}) => {
+  try {
+    console.log(`Minting ${amount} ${tokenName} to ${target}...`);
+    const token = await ethers.getContract(tokenName);
+    await token.mint(target, ethers.utils.parseEther(amount))
+  } catch (error) {
+    console.log(error.message)
+  }  
+}).addParam("target", "The address to mint to")
+  .addParam("amount", "amount of USDC to mint")
+
 
 const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
