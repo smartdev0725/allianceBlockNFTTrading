@@ -195,15 +195,7 @@ library ValuedDoubleLinkedList {
         head = self.head;
         value = self.nodes[self.head].value;
 
-        if (self.size == 1) {
-            self.head = 0;
-            self.tail = 0;
-        } else {
-            self.head = self.nodes[self.head].next;
-            self.nodes[self.head].previous = 0;
-        }
-
-        self.size -= 1;
+        popHead(self);
     }
 
     /**
