@@ -172,6 +172,8 @@ library ValuedDoubleLinkedList {
      * @return head the first item of the list
      */
     function popHead(LinkedList storage self) internal returns (uint256 head) {
+        require(self.size <= 0, "Cannot pop an item from an empty list");
+
         head = self.head;
 
         if (self.size == 1) {
