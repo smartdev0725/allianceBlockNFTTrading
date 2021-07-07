@@ -63,6 +63,8 @@ library DoubleLinkedList {
      * @param id the id of the node to remove
      */
     function removeNode(LinkedList storage self, uint256 id) internal {
+        require(self.size > 0, "Cannot remove an item from an empty list");
+
         if (self.size == 1) {
             self.head = 0;
             self.tail = 0;
@@ -86,6 +88,8 @@ library DoubleLinkedList {
      * @return head the first item of the list
      */
     function popHead(LinkedList storage self) internal returns (uint256 head) {
+        require(self.size > 0, "Cannot pop an item from an empty list");
+
         head = self.head;
 
         if (self.size == 1) {
