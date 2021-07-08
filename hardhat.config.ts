@@ -59,7 +59,7 @@ task('mint:', 'Mints tokens to address', async ({target, amount, tokenName}, {et
     console.log(error.message)
   }  
 }).addParam("target", "The address to mint to")
-  .addParam("amount", "amount of USDC to mint")
+  .addParam("amount", "amount to mint")
   .addParam("tokenName", "The token contract name")
 
 
