@@ -28,6 +28,8 @@ library TokenFormat {
      * @return tokenId the token id
      */
     function getTokenId(uint256 gen, uint256 investmentId) internal pure returns (uint256 tokenId) {
+        uint128 maxGen= type(uint128).max;
+        require(gen < maxGen, "Can't go over the max number of generations available");
         return (gen << 128) | investmentId;
     }
 }
