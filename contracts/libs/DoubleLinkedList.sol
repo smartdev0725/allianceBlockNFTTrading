@@ -45,7 +45,6 @@ library DoubleLinkedList {
         if (self.head == 0) {
             self.head = id;
             self.tail = id;
-            self.nodes[id] = Node(0, 0);
         }
         //Else push in tail
         else {
