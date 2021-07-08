@@ -105,6 +105,8 @@ library ValuedDoubleLinkedList {
         uint256 value,
         uint256 id
     ) internal {
+        require(id != 0, "Id should be different from zero");
+
         Node memory node = self.nodes[self.head];
 
         //If empty
@@ -150,6 +152,7 @@ library ValuedDoubleLinkedList {
      */
     function removeNode(LinkedList storage self, uint256 id) internal {
         require(self.size > 0, "Cannot remove an item from an empty list");
+        require(id != 0, "Id should be different from zero");
 
         if (self.size == 1) {
             self.head = 0;
