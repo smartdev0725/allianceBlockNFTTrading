@@ -15,7 +15,7 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
     enum StakingType {STAKER_LVL_0, STAKER_LVL_1, STAKER_LVL_2, STAKER_LVL_3}
 
     // Access Roles
-    bytes32 public MINTER_ROLE;
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     modifier onlyMinter() {
         require(hasRole(MINTER_ROLE, _msgSender()), "Must have minter role to mint");
@@ -33,8 +33,6 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
     function initialize() external initializer {
         __ERC1155_init("");
         __AccessControl_init();
-
-        MINTER_ROLE = keccak256("MINTER_ROLE");
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(MINTER_ROLE, _msgSender());
