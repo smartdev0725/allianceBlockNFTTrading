@@ -116,13 +116,15 @@ library DoubleLinkedList {
      * @param self the LinkedList
      * @param index the id of the index
      * @return id the item in index position
+     * @return found boolean whether or not the entry was found
      */
-    function getIndexedId(LinkedList storage self, uint256 index) internal view returns (uint256 id) {
+    function getIndexedId(LinkedList storage self, uint256 index) internal view returns (uint256 id, bool found) {
         id = self.head;
 
         for (uint256 i = 1; i < index; i++) {
             id = self.nodes[id].next;
         }
+        found = id != 0;
     }
 
     /**
