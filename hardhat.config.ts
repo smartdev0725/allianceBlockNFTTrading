@@ -60,6 +60,7 @@ task('mint:', 'Mints tokens to address', async ({target, amount, tokenName}, {et
   }  
 }).addParam("target", "The address to mint to")
   .addParam("amount", "amount of USDC to mint")
+  .addParam("tokenName", "The token contract name")
 
 
 const config: HardhatUserConfig = {
