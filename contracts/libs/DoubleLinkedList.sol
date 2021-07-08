@@ -41,6 +41,8 @@ library DoubleLinkedList {
      * @param id the node to add
      */
     function addNode(LinkedList storage self, uint256 id) internal {
+        require(id != 0, "Id should be different from zero");
+
         //If empty
         if (self.head == 0) {
             self.head = id;
@@ -63,8 +65,11 @@ library DoubleLinkedList {
      * @param id the id of the node to remove
      */
     function removeNode(LinkedList storage self, uint256 id) internal {
+        require(id != 0, "Id should be different from zero");
+
         uint256 head = self.head;
         uint256 tail = self.tail;
+
         if (self.size == 1) {
             self.head = 0;
             self.tail = 0;
