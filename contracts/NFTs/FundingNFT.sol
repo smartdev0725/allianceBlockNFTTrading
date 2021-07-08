@@ -212,6 +212,8 @@ contract FundingNFT is Initializable, ContextUpgradeable, AccessControlUpgradeab
         uint256 generationsToAdd
     ) internal {
         (uint256 generation, uint256 investmentId) = tokenId.formatTokenId();
+        uint128 maxGen= type(uint128).max;
+        require(generation + generationsToAdd < maxGen, "Can't increase that many generations");
 
         // Increase generation, leave investmentId same
         generation += generationsToAdd;
