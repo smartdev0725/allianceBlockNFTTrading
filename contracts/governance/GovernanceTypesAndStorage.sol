@@ -2,7 +2,7 @@
 pragma solidity 0.7.6;
 
 import "../interfaces/IRegistry.sol";
-import "../libs/ValuedDoubleLinkedList.sol";
+import "../libs/OrderedDoubleLinkedList.sol";
 
 /**
  * @title AllianceBlock GovernanceStorage contract
@@ -46,7 +46,7 @@ contract GovernanceTypesAndStorage {
     }
 
     // TODO - Make this simple linked list, not double (we don't need to remove anything else than head MAYBE).
-    ValuedDoubleLinkedList.LinkedList public cronjobList;
+    OrderedDoubleLinkedList.LinkedList public cronjobList;
     uint256 public totalCronjobs;
 
     mapping(uint256 => Cronjob) public cronjobs; // cronjobId to Cronjob.
