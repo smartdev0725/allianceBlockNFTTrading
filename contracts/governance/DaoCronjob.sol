@@ -76,7 +76,7 @@ contract DaoCronjob is GovernanceTypesAndStorage {
             registry.startLotteryPhase(investmentId);
         } else {
             uint256 nextCronjobTimestamp =
-                timestamp.add(updatableVariables[keccak256(abi.encode("lateApplicationsForInvestmentDuration"))]);
+                timestamp.add(updatableVariables[LATE_APPLICATIONS_FOR_INVESTMENT_DURATION]);
             addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, investmentId);
         }
     }
