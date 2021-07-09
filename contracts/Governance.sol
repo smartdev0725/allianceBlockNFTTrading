@@ -18,6 +18,9 @@ contract Governance is Initializable, SuperGovernance {
     using SafeMath for uint256;
     using DoubleLinkedList for DoubleLinkedList.LinkedList;
 
+    bytes32 public constant APPLICATIONS_FOR_INVESTMENT_DURATION = keccak256("applicationsForInvestmentDuration");
+    bytes32 public constant LATE_APPLICATIONS_FOR_INVESTMENT_DURATION = keccak256("lateApplicationsForInvestmentDuration");
+
     /**
      * @notice Initialize the contract.
      * @param superDelegator_ The address of the admin in charge during the first epoch
@@ -37,12 +40,8 @@ contract Governance is Initializable, SuperGovernance {
 
         superDelegator = superDelegator_;
 
-        updatableVariables[
-            keccak256(abi.encode("applicationsForInvestmentDuration"))
-        ] = applicationsForInvestmentDuration_;
-        updatableVariables[
-            keccak256(abi.encode("lateApplicationsForInvestmentDuration"))
-        ] = lateApplicationsForInvestmentDuration_;
+        updatableVariables[APPLICATIONS_FOR_INVESTMENT_DURATION] = applicationsForInvestmentDuration_;
+        updatableVariables[LATE_APPLICATIONS_FOR_INVESTMENT_DURATION] = lateApplicationsForInvestmentDuration_;
     }
 
     /**
@@ -80,7 +79,7 @@ contract Governance is Initializable, SuperGovernance {
      */
     function storeInvestmentTriggering(uint256 investmentId) external onlyRegistry() {
         uint256 nextCronjobTimestamp =
-            block.timestamp.add(updatableVariables[keccak256(abi.encode("applicationsForInvestmentDuration"))]);
+            block.timestamp.add(updatableVariables[APPLICATIONS_FOR_INVESTMENT_DURATION]);
         addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, investmentId);
     }
 }
