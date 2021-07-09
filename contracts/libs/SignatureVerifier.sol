@@ -16,6 +16,8 @@ library SignatureVerifier {
         address account;
         uint256 referralId;
     }
+
+    // keccak256("Action(string actionName,string answer,address account,uint256 referralId)");
     bytes32 constant ACTION_TYPEHASH = 0x1f76bf6993440811cef7b51dc00dee9d4e8fa911023c7f2d088ce4e46ac2346f;
 
     /**
@@ -75,7 +77,12 @@ library SignatureVerifier {
 
         address recovered = ecrecover(hash, v, r, s);
 
-        require(recovered != address(0), "Recovered address should not be zero");
+        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0 || 
+            (v != 27 && v != 28) ||
+            recovered == address(0))
+        {
+            return false;
+        }
 
         return action.account == recovered;
     }

@@ -498,12 +498,9 @@ export default async function suite() {
         .stake(StakingType.STAKER_LVL_2);
 
       // When
-      await expectRevert(
-        this.actionVerifierContract
-          .connect(this.lender1Signer)
-          .provideRewardsForActions(actions, signatures),
-        'Recovered address should not be zero'
-      );
+      await this.actionVerifierContract
+        .connect(this.lender1Signer)
+        .provideRewardsForActions(actions, signatures)
 
       // Then
       const balanceAfter1 = await this.rALBTContract.balanceOf(this.lender1);

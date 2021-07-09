@@ -87,6 +87,7 @@ library DoubleLinkedList {
             self.nodes[self.nodes[id].previous].next = self.nodes[id].next;
         }
 
+        delete self.nodes[id];
         self.size -= 1;
     }
 
@@ -108,6 +109,7 @@ library DoubleLinkedList {
             self.nodes[self.head].previous = 0;
         }
 
+        delete self.nodes[head];
         self.size -= 1;
     }
 

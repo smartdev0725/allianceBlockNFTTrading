@@ -15,8 +15,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const escrowContractAddress = (await get('Escrow')).address;
   const stakerMedalNFTContractAddress = (await get('StakerMedalNFT')).address;
 
-  const chainId = await getChainId();
-
   const rewardsPerLevel = [
     ethers.utils.parseEther('0').toString(),
     ethers.utils.parseEther('0').toString(),
@@ -39,7 +37,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       actionsPerDayPerLevel,
       escrowContractAddress,
       stakerMedalNFTContractAddress,
-      chainId,
     ], // Other possible network 1337
     log: true,
   });

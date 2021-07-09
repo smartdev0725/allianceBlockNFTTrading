@@ -56,6 +56,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
 
     bytes32 public DOMAIN_SEPARATOR;
 
+    // keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
     bytes32 public constant EIP712DOMAIN_TYPEHASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
 
     struct EIP712Domain {
@@ -69,9 +70,11 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
      * @dev Modifier that checks if time has come to change epoch.
      */
     modifier checkEpoch() {
-        while (block.timestamp >= endingTimestampForCurrentEpoch){
-            currentEpoch = currentEpoch.add(1);
-            endingTimestampForCurrentEpoch = endingTimestampForCurrentEpoch.add(ONE_DAY);
+        if (block.timestamp >= endingTimestampForCurrentEpoch){
+            uint256 timePassedSinceEpochStarted = block.timestamp.add(ONE_DAY).sub(endingTimestampForCurrentEpoch);
+            uint256 epochsPassed = timePassedSinceEpochStarted.div(ONE_DAY);
+            currentEpoch = currentEpoch.add(epochsPassed);
+            endingTimestampForCurrentEpoch = endingTimestampForCurrentEpoch.add(ONE_DAY.mul(epochsPassed));
 
             emit EpochChanged(currentEpoch, endingTimestampForCurrentEpoch);
         }
@@ -84,20 +87,17 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
      * @param maxActionsPerDayPerLevel_ The max actions that an account can take rewards for in one day.
      * @param escrow_ The address of the escrow.
      * @param stakerMedalNft_ The address of the stakerMedalNft.
-     * @param chainId The chain id.
      */
     function initialize(
         uint256[4] memory rewardsPerActionProvisionPerLevel_,
         uint256[4] memory maxActionsPerDayPerLevel_,
         address escrow_,
-        address stakerMedalNft_,
-        uint256 chainId
+        address stakerMedalNft_
     ) external initializer {
         require(rewardsPerActionProvisionPerLevel_[3] != 0, "Cannot initialize rewardPerActionProvisionPerLevel_ with 0");
         require(maxActionsPerDayPerLevel_[3] != 0, "Cannot initialize maxActionsPerDayPerLevel_ with 0");
         require(escrow_ != address(0), "Cannot initialize with escrow_ address");
         require(stakerMedalNft_ != address(0), "Cannot initialize with stakerMedalNft_ address");
-        require(chainId != 0, "Cannot initialize chainId with 0");
 
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -110,11 +110,16 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
             maxActionsPerDayPerLevel[i] = maxActionsPerDayPerLevel_[i];
         }
 
+        uint256 id;
+        assembly {
+            id := chainid()
+        }
+
         DOMAIN_SEPARATOR = hash(
             EIP712Domain({
                 name: "AllianceBlock Verifier",
                 version: "1.0",
-                chainId: chainId,
+                chainId: id,
                 verifyingContract: address(this)
             })
         );

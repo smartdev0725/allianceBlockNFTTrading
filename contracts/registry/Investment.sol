@@ -51,13 +51,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
     ) external nonReentrant() {
         require(isValidLendingToken[lendingToken], "Lending token not supported");
 
-        uint256 investmentDecimals = IERC20(investmentToken).decimals();
-        uint256 lendingDecimals = IERC20(lendingToken).decimals();
-        uint256 power = investmentDecimals.mul(2).sub(lendingDecimals);
-
         require(
             totalAmountRequested_.mod(baseAmountForEachPartition) == 0 &&
-                totalAmountRequested_.mul(10**power).mod(amountOfInvestmentTokens) == 0,
+                amountOfInvestmentTokens.mod(totalAmountRequested_.div(baseAmountForEachPartition)) == 0,
             "Token amount and price should result in integer amount of tickets"
         );
 
@@ -129,7 +125,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         uint256 immediateTickets = 0;
 
         if (totalLotteryNumbers > lotteryNumbersForImmediateTicket) {
-            uint256 rest = totalLotteryNumbers.mod(lotteryNumbersForImmediateTicket);
+            // Calculated this way so as to avoid users from taking immediateTickets without lottery numbers in case
+            // totalLotteryNumbers.mod(lotteryNumbersForImmediateTicket) == 0
+            uint256 rest = (totalLotteryNumbers.sub(1)).mod(lotteryNumbersForImmediateTicket).add(1);
             immediateTickets = totalLotteryNumbers.sub(rest).div(lotteryNumbersForImmediateTicket);
             totalLotteryNumbers = rest;
         }
