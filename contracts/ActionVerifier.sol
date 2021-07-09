@@ -56,6 +56,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
 
     bytes32 public DOMAIN_SEPARATOR;
 
+    // keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
     bytes32 public constant EIP712DOMAIN_TYPEHASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
 
     struct EIP712Domain {
@@ -69,9 +70,11 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
      * @dev Modifier that checks if time has come to change epoch.
      */
     modifier checkEpoch() {
-        while (block.timestamp >= endingTimestampForCurrentEpoch){
-            currentEpoch = currentEpoch.add(1);
-            endingTimestampForCurrentEpoch = endingTimestampForCurrentEpoch.add(ONE_DAY);
+        if (block.timestamp >= endingTimestampForCurrentEpoch){
+            uint256 timePassed = block.timestamp - endingTimestampForCurrentEpoch;
+            uint256 epochsPassed = timePassed.div(ONE_DAY);
+            currentEpoch = currentEpoch.add(epochsPassed);
+            endingTimestampForCurrentEpoch = endingTimestampForCurrentEpoch.add(ONE_DAY.mul(epochsPassed));
 
             emit EpochChanged(currentEpoch, endingTimestampForCurrentEpoch);
         }

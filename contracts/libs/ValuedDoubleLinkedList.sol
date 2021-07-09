@@ -75,10 +75,11 @@ library ValuedDoubleLinkedList {
                 for (uint256 i = 1; i < self.size; i++) {
                     node = self.nodes[node.next];
                     if (value < node.value) {
-                        uint256 currentId = self.nodes[node.next].previous;
-                        self.nodes[node.next].previous = id;
-                        self.nodes[id] = Node(currentId, self.nodes[currentId].next, value);
-                        self.nodes[currentId].next = id;
+                        uint256 nextId = self.nodes[node.next].previous;
+                        uint256 previousId = self.nodes[nextId].previous;
+                        self.nodes[id] = Node(nextId, previousId, value);
+                        self.nodes[previousId].next = id;
+                        self.nodes[nextId].previous = id;
                         break;
                     }
                 }
@@ -124,10 +125,11 @@ library ValuedDoubleLinkedList {
                 for (uint256 i = 1; i < self.size; i++) {
                     node = self.nodes[node.next];
                     if (value > node.value) {
-                        uint256 currentId = self.nodes[node.next].previous;
-                        self.nodes[node.next].previous = id;
-                        self.nodes[id] = Node(currentId, self.nodes[currentId].next, value);
-                        self.nodes[currentId].next = id;
+                        uint256 nextId = self.nodes[node.next].previous;
+                        uint256 previousId = self.nodes[nextId].previous;
+                        self.nodes[id] = Node(nextId, previousId, value);
+                        self.nodes[previousId].next = id;
+                        self.nodes[nextId].previous = id;
                         break;
                     }
                 }
@@ -182,6 +184,7 @@ library ValuedDoubleLinkedList {
             self.nodes[self.head].previous = 0;
         }
 
+        delete self.nodes[head];
         self.size -= 1;
     }
 
@@ -203,6 +206,7 @@ library ValuedDoubleLinkedList {
             self.nodes[self.head].previous = 0;
         }
 
+        delete self.nodes[head];
         self.size -= 1;
     }
 
@@ -212,7 +216,10 @@ library ValuedDoubleLinkedList {
      * @param amountOfNodes the number of nodes to remove starting from Head
      */
     function removeMultipleFromHead(LinkedList storage self, uint256 amountOfNodes) internal {
+        require(self.size >= amountOfNodes, "Size not enough");
+
         for (uint256 i = 0; i < amountOfNodes; i++) {
+            uint256 nodeToRemove = self.head;
             if (self.size == 1) {
                 self.head = 0;
                 self.tail = 0;
@@ -221,6 +228,7 @@ library ValuedDoubleLinkedList {
                 self.nodes[self.head].previous = 0;
             }
 
+            delete self.nodes[nodeToRemove];
             self.size -= 1;
         }
     }
