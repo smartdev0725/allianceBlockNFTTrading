@@ -79,9 +79,9 @@ library SignatureVerifier {
 
         if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0 || 
             (v != 27 && v != 28) ||
-            signer == address(0))
+            recovered == address(0))
         {
-            return false
+            return false;
         }
 
         return action.account == recovered;
