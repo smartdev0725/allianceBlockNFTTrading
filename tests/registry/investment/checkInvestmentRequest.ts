@@ -27,7 +27,7 @@ export default async function suite() {
         );
 
       const amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
-      const totalAmountRequested = ethers.utils.parseEther('30000');
+      const totalAmountRequested = ethers.utils.parseEther('10000');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
       await expect(

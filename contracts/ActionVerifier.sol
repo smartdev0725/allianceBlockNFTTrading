@@ -71,8 +71,8 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
      */
     modifier checkEpoch() {
         if (block.timestamp >= endingTimestampForCurrentEpoch){
-            uint256 timePassed = block.timestamp - endingTimestampForCurrentEpoch;
-            uint256 epochsPassed = timePassed.div(ONE_DAY);
+            uint256 timePassedSinceEpochStarted = block.timestamp.add(ONE_DAY).sub(endingTimestampForCurrentEpoch);
+            uint256 epochsPassed = timePassedSinceEpochStarted.div(ONE_DAY);
             currentEpoch = currentEpoch.add(epochsPassed);
             endingTimestampForCurrentEpoch = endingTimestampForCurrentEpoch.add(ONE_DAY.mul(epochsPassed));
 
@@ -87,20 +87,17 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
      * @param maxActionsPerDayPerLevel_ The max actions that an account can take rewards for in one day.
      * @param escrow_ The address of the escrow.
      * @param stakerMedalNft_ The address of the stakerMedalNft.
-     * @param chainId The chain id.
      */
     function initialize(
         uint256[4] memory rewardsPerActionProvisionPerLevel_,
         uint256[4] memory maxActionsPerDayPerLevel_,
         address escrow_,
-        address stakerMedalNft_,
-        uint256 chainId
+        address stakerMedalNft_
     ) external initializer {
         require(rewardsPerActionProvisionPerLevel_[3] != 0, "Cannot initialize rewardPerActionProvisionPerLevel_ with 0");
         require(maxActionsPerDayPerLevel_[3] != 0, "Cannot initialize maxActionsPerDayPerLevel_ with 0");
         require(escrow_ != address(0), "Cannot initialize with escrow_ address");
         require(stakerMedalNft_ != address(0), "Cannot initialize with stakerMedalNft_ address");
-        require(chainId != 0, "Cannot initialize chainId with 0");
 
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -113,11 +110,16 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
             maxActionsPerDayPerLevel[i] = maxActionsPerDayPerLevel_[i];
         }
 
+        uint256 id;
+        assembly {
+            id := chainid()
+        }
+
         DOMAIN_SEPARATOR = hash(
             EIP712Domain({
                 name: "AllianceBlock Verifier",
                 version: "1.0",
-                chainId: chainId,
+                chainId: id,
                 verifyingContract: address(this)
             })
         );

@@ -55,7 +55,7 @@ describe('Contract ActionVerifier', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [dummyRewardsPerLevel, actionsPerDayPerLevel, dummyAddress, dummyAddress, 1],
+        args: [dummyRewardsPerLevel, actionsPerDayPerLevel, dummyAddress, dummyAddress],
       })
     );
 
@@ -68,7 +68,7 @@ describe('Contract ActionVerifier', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [rewardsPerLevel, dummyActionsPerDayPerLevel, dummyAddress, dummyAddress, 1],
+        args: [rewardsPerLevel, dummyActionsPerDayPerLevel, dummyAddress, dummyAddress],
       })
     );
 
@@ -81,7 +81,7 @@ describe('Contract ActionVerifier', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [rewardsPerLevel, actionsPerDayPerLevel, ethers.constants.AddressZero, dummyAddress, 1],
+        args: [rewardsPerLevel, actionsPerDayPerLevel, ethers.constants.AddressZero, dummyAddress],
       })
     );
 
@@ -94,20 +94,7 @@ describe('Contract ActionVerifier', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [rewardsPerLevel, actionsPerDayPerLevel, dummyAddress, ethers.constants.AddressZero, 1],
-      })
-    );
-
-    await expectRevert.unspecified(
-      deploy('ActionVerifierTest', {
-        contract: 'ActionVerifier',
-        from: deployer,
-        proxy: {
-          owner: proxyOwner,
-          methodName: 'initialize',
-          proxyContract: 'OpenZeppelinTransparentProxy',
-        },
-        args: [rewardsPerLevel, actionsPerDayPerLevel, dummyAddress, dummyAddress, 0],
+        args: [rewardsPerLevel, actionsPerDayPerLevel, dummyAddress, ethers.constants.AddressZero],
       })
     );
   });
