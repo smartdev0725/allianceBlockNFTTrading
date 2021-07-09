@@ -2,9 +2,9 @@
 pragma solidity 0.7.6;
 
 /**
- * @title the Valued Double Linked List library
+ * @title the Ordered Double Linked List library
  */
-library ValuedDoubleLinkedList {
+library OrderedDoubleLinkedList {
     struct Node {
         uint256 next;
         uint256 previous;
@@ -252,7 +252,7 @@ library ValuedDoubleLinkedList {
     }
 
     /**
-     * @notice Clones ValuedDoubleLinkedList
+     * @notice Clones OrderedDoubleLinkedList
      * @param self the LinkedList
      * @param listToClone the LinkedList storage to clone the list from
      */

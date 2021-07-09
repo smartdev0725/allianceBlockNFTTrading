@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./GovernanceTypesAndStorage.sol";
 import "../interfaces/IRegistry.sol";
-import "../libs/ValuedDoubleLinkedList.sol";
+import "../libs/OrderedDoubleLinkedList.sol";
 import "../libs/DoubleLinkedList.sol";
 
 /**
@@ -15,7 +15,7 @@ import "../libs/DoubleLinkedList.sol";
  */
 contract DaoCronjob is GovernanceTypesAndStorage {
     using SafeMath for uint256;
-    using ValuedDoubleLinkedList for ValuedDoubleLinkedList.LinkedList;
+    using OrderedDoubleLinkedList for OrderedDoubleLinkedList.LinkedList;
     using DoubleLinkedList for DoubleLinkedList.LinkedList;
 
     modifier checkCronjob() {
@@ -50,7 +50,7 @@ contract DaoCronjob is GovernanceTypesAndStorage {
 
     /**
      * @notice Adds a cronJob to the queue
-     * @dev Adds a node to the cronjobList (ValuedDoubleLinkedList)
+     * @dev Adds a node to the cronjobList (OrderedDoubleLinkedList)
      * @param cronjobType The type of cronJob
      * @param timestamp The current block height
      * @param externalId Id of the request in case of dao approval, change voting request or investment
