@@ -75,6 +75,8 @@ library SignatureVerifier {
 
         address recovered = ecrecover(hash, v, r, s);
 
+        require(recovered != address(0), "Recovered address should not be zero");
+
         return action.account == recovered;
     }
 }
