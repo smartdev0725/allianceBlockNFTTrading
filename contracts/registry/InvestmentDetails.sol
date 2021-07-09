@@ -33,7 +33,7 @@ contract InvestmentDetails is Storage {
         address investmentToken_,
         uint256 investmentTokensAmount_,
         string memory extraInfo_
-    ) internal {
+    ) internal returns (uint256) {
         InvestmentLibrary.InvestmentDetails memory investment;
         investment.investmentId = totalInvestments;
         investment.investmentToken = investmentToken_;
@@ -46,5 +46,10 @@ contract InvestmentDetails is Storage {
         investmentDetails[totalInvestments] = investment;
 
         investmentSeeker[totalInvestments] = msg.sender;
+
+        totalInvestments = totalInvestments.add(1);
+
+        return investment.investmentId;
+
     }
 }

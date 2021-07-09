@@ -61,7 +61,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             "Token amount and price should result in integer amount of tickets"
         );
 
-        _storeInvestmentDetails(
+        uint256 investmentId = _storeInvestmentDetails(
             lendingToken,
             totalAmountRequested_,
             investmentToken,
@@ -71,18 +71,17 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         IERC20(investmentToken).safeTransferFrom(msg.sender, address(escrow), amountOfInvestmentTokens);
 
-        fundingNFT.mintGen0(address(escrow), investmentDetails[totalInvestments].totalPartitionsToBePurchased, totalInvestments);
+        fundingNFT.mintGen0(address(escrow), investmentDetails[investmentId].totalPartitionsToBePurchased, investmentId);
 
-        investmentTokensPerTicket[totalInvestments] = amountOfInvestmentTokens.div(investmentDetails[totalInvestments].totalPartitionsToBePurchased);
+        investmentTokensPerTicket[investmentId] = amountOfInvestmentTokens.div(investmentDetails[investmentId].totalPartitionsToBePurchased);
 
-        fundingNFT.pauseTokenTransfer(totalInvestments); //Pause trades for ERC1155s with the specific investment ID.
+        fundingNFT.pauseTokenTransfer(investmentId); //Pause trades for ERC1155s with the specific investment ID.
 
-        governance.requestApproval(totalInvestments);
+        governance.requestApproval(investmentId);
 
         // Add event for investment request
-        emit InvestmentRequested(totalInvestments, msg.sender, totalAmountRequested_);
+        emit InvestmentRequested(investmentId, msg.sender, totalAmountRequested_);
 
-        totalInvestments = totalInvestments.add(1);
     }
 
     /**
