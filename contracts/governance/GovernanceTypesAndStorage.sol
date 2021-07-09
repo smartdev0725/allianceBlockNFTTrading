@@ -10,6 +10,9 @@ import "../libs/ValuedDoubleLinkedList.sol";
  */
 contract GovernanceTypesAndStorage {
 
+    bytes32 public constant APPLICATIONS_FOR_INVESTMENT_DURATION = keccak256("applicationsForInvestmentDuration");
+    bytes32 public constant LATE_APPLICATIONS_FOR_INVESTMENT_DURATION = keccak256("lateApplicationsForInvestmentDuration");
+
     struct ApprovalRequest {
         uint256 investmentId; // The investment id for which approcal is requested.
         uint256 approvalsProvided; // The number of approvals that this request has gathered.

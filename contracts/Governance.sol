@@ -18,9 +18,6 @@ contract Governance is Initializable, SuperGovernance {
     using SafeMath for uint256;
     using DoubleLinkedList for DoubleLinkedList.LinkedList;
 
-    bytes32 public constant APPLICATIONS_FOR_INVESTMENT_DURATION = keccak256("applicationsForInvestmentDuration");
-    bytes32 public constant LATE_APPLICATIONS_FOR_INVESTMENT_DURATION = keccak256("lateApplicationsForInvestmentDuration");
-
     /**
      * @notice Initialize the contract.
      * @param superDelegator_ The address of the admin in charge during the first epoch
