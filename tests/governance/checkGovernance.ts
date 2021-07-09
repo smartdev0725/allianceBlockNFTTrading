@@ -52,7 +52,34 @@ export default async function suite() {
       // Then
       await expectRevert(
         this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(approvalRequest, true),
-        'Cannot approve again same investment'
+        'Cannot process again same investment'
+      );
+    });
+
+    it('When execute supervote a couple of times for false should revert', async function () {
+      // Given
+      const approvalRequest = await this.governanceContract.totalApprovalRequests();
+      const amountOfTokensToBePurchased = ethers.utils.parseEther('1000');
+      const totalAmountRequested = ethers.utils.parseEther('200');
+      const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
+
+      // When
+      await this.registryContract
+        .connect(this.seekerSigner)
+        .requestInvestment(
+          this.investmentTokenContract.address,
+          amountOfTokensToBePurchased,
+          this.lendingTokenContract.address,
+          totalAmountRequested,
+          ipfsHash
+        );
+
+      await this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(approvalRequest, false);
+
+      // Then
+      await expectRevert(
+        this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(approvalRequest, false),
+        'Cannot process again same investment'
       );
     });
 

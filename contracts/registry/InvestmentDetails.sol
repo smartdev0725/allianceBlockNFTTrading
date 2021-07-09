@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Storage.sol";
@@ -45,7 +45,6 @@ contract InvestmentDetails is Storage {
 
         investmentDetails[totalInvestments] = investment;
 
-        investmentStatus[totalInvestments] = InvestmentLibrary.InvestmentStatus.REQUESTED;
         investmentSeeker[totalInvestments] = msg.sender;
     }
 }

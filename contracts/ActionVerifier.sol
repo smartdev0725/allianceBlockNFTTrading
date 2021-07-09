@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "./libs/SignatureVerifier.sol";
@@ -45,9 +45,9 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
 
     // The current epoch of ActionVerifier
     // (actions that provide rewards multiple times can only provide only in different epochs).
-    uint256 currentEpoch;
+    uint256 private currentEpoch;
     // The ending timestamp for the current epoch
-    uint256 endingTimestampForCurrentEpoch;
+    uint256 private endingTimestampForCurrentEpoch;
 
     uint256 constant private ONE_DAY = 1 days;
 
@@ -237,7 +237,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
                 rewards[i] = reward;
 
                 rewardForCaller = rewardForCaller.add(rewardPerActionProvisionPerLevel[stakingLevel]);
-                actionsProvidedPerAccountPerEpoch[msg.sender][currentEpoch] = 
+                actionsProvidedPerAccountPerEpoch[msg.sender][currentEpoch] =
                     actionsProvidedPerAccountPerEpoch[msg.sender][currentEpoch].add(1);
             } else {
                 actions[i] = SignatureVerifier.Action("", "", address(0), 0);
@@ -260,7 +260,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
      * @dev checks if given action has a reward for specific level
      * @return exist boolean represents checks if action has a reward associated
      */
-    function checkAction(string memory action, uint256 stakingLevel) public view returns (bool exist) {        
+    function checkAction(string memory action, uint256 stakingLevel) public view returns (bool exist) {
         return rewardPerActionPerLevel[keccak256(abi.encodePacked(action))][stakingLevel] > 0;
     }
 
@@ -287,7 +287,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
         if (address(referralContract[actionHash]) != address(0)) {
             isValidReferralId = referralContract[actionHash].isValidReferralId(action.referralId);
             specificActionHash = keccak256(abi.encodePacked(action.actionName, action.referralId));
-        }       
+        }
 
         if (lastEpochActionDonePerAccount[action.account][specificActionHash] != 0) {
             if (rewardPerActionPerLevelAfterFirstTime[actionHash][stakingLevelOfActionAccount] == 0 ||
@@ -320,7 +320,7 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
         uint256[4] memory reputationalAlbtRewardsPerLevelAfterFirstTime,
         uint256 minimumLevelForProvision,
         address referralContract_
-    ) internal {        
+    ) internal {
         bytes32 actionHash = keccak256(abi.encodePacked(action));
         for (uint256 i = 0; i < 4; i++) {
             rewardPerActionPerLevel[actionHash][i] = reputationalAlbtRewardsPerLevel[i];

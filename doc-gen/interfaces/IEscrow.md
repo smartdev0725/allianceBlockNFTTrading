@@ -11,19 +11,19 @@
 
 
 
-### `transferFundingNFT(uint256 investmentId, uint256 partitionsToPurchase, address receiver)` (external)
+### `transferFundingNFT(uint256 investmentId, uint256 partitionsPurchased, address receiver)` (external)
 
 
 
 
 
-### `transferLendingToken(address seeker, uint256 amount)` (external)
+### `transferLendingToken(address lendingToken, address seeker, uint256 amount)` (external)
 
 
 
 
 
-### `transferCollateralToken(address collateralToken, address seeker, uint256 amount)` (external)
+### `transferInvestmentToken(address investmentToken, address seeker, uint256 amount)` (external)
 
 
 
@@ -42,6 +42,12 @@
 
 
 ### `multiMintReputationalToken(address[] recipients, uint256[] amounts)` (external)
+
+
+
+
+
+### `burnFundingNFT(address account, uint256 investmentId, uint256 amount)` (external)
 
 
 

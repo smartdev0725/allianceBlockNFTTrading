@@ -2,31 +2,31 @@
 
 Responsible for governing AllianceBlock's ecosystem
 
-Extends Initializable, DaoSubscriptions
+Extends Initializable, SuperGovernance
 
 
 
-### `initialize(address superDelegator_, uint256 loanApprovalRequestDuration_, uint256 milestoneApprovalRequestDuration_, uint256 daoUpdateRequestDuration_, uint256 approvalsNeededForRegistryRequest_, uint256 approvalsNeededForGovernanceRequest_, uint256 applicationsForInvestmentDuration_, uint256 lateApplicationsForInvestmentDuration_)` (public)
+### `initialize(address superDelegator_, uint256 applicationsForInvestmentDuration_, uint256 lateApplicationsForInvestmentDuration_)` (external)
 
 Initialize the contract.
 
 
 
 
-### `requestApproval(uint256 investmentId, bool isMilestone, uint256 milestoneNumber)` (external)
+### `updateSuperDelegator(address superDelegator_)` (external)
 
-Request a loan or investment approval
+Update Superdelegator
+
+
+This function is used to update the superDelegator address.
+
+
+### `requestApproval(uint256 investmentId)` (external)
+
+Request a investment or investment approval
 
 
 Executes cronJob()
-
-
-### `voteForRequest(uint256 requestId, bool decision)` (external)
-
-Used for voting on a Request
-
-
-Executes cronjob()
 
 
 ### `storeInvestmentTriggering(uint256 investmentId)` (external)
@@ -36,12 +36,5 @@ Stores Investment Duration
 
 Adds cronJob
 
-
-### `getDaoData() → uint256, uint256, uint256, uint256, uint256` (public)
-
-Helper function for querying Governance variables
-
-
-returns internal Governance uint variables
 
 

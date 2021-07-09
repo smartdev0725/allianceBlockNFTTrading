@@ -6,9 +6,15 @@ Extends OwnableUpgradeable, DaoCronjob
 
 
 
-### `setRegistryAndStaking(address registryAddress_, address stakingAddress_)` (external)
+### `__SuperGovernance_init()` (public)
 
-Sets Registry and Staking contracts
+
+
+
+
+### `setRegistry(address registryAddress_)` (external)
+
+Sets Registry contract
 
 
 used to initialize SuperGovernance
@@ -23,43 +29,6 @@ Votes for Request
 Executes cronJob
 requires msg.sender to be Super Delegator
 requires current epoch to be 0 or 1
-
-
-### `openDaoMembershipSubscriptions()` (external)
-
-Opens DAO Membership Subscriptions
-
-
-First step towards transitioning to second epoch
-
-### `openDaoMembershipVoting()` (external)
-
-Opens DAO Membership Voting
-
-
-Second step towards transitioning to second epoch
-
-### `openDaoDelegatingSubscriptions(uint256 amountOfDaoMembers_, uint256 daoClaimingDuration_, uint256 daoLateClaimingDuration_)` (external)
-
-Opens DAO Delegator Subscriptions
-
-
-Third step towards transitioning to second epoch
-
-
-### `openDaoDelegatingVoting()` (external)
-
-Opens DAO Delegator Voting
-
-
-Fourth step towards transitioning to second epoch
-
-### `openDaoDelegating(uint256 amountOfDaoDelegators_, uint256 daoMembershipVotingDuration_, uint256 daoDelegationVotingDuration_, uint256 daoDelegationApprovalDuration_, uint256 daoDelegationSubstituteClaimDuration_)` (external)
-
-Opens DAO Delegator
-
-
-Fifth (last) step towards transitioning to second epoch
 
 
 

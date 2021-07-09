@@ -1,22 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 import "../interfaces/IRegistry.sol";
 import "../libs/ValuedDoubleLinkedList.sol";
-import "../libs/DoubleLinkedList.sol";
 
 /**
  * @title AllianceBlock GovernanceStorage contract
  * @notice Responsible for governance storage
  */
 contract GovernanceTypesAndStorage {
-    using ValuedDoubleLinkedList for ValuedDoubleLinkedList.LinkedList;
-    using DoubleLinkedList for DoubleLinkedList.LinkedList;
 
     struct ApprovalRequest {
         uint256 investmentId; // The investment id for which approcal is requested.
         uint256 approvalsProvided; // The number of approvals that this request has gathered.
-        bool isApproved; // True if request is approved, false if not.
+        bool isApproved; // True if request was approved, false if not.
+        bool isProcessed; // True if request was processed, false if not.
     }
 
     // EVENTS
@@ -34,8 +32,6 @@ contract GovernanceTypesAndStorage {
     mapping(uint256 => ApprovalRequest) public approvalRequests;
 
     IRegistry public registry;
-
-    uint256 public totalIds;
 
     mapping(bytes32 => uint256) public updatableVariables;
 

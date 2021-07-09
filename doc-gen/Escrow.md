@@ -6,7 +6,7 @@ Responsible for handling the funds in AllianceBlock's ecosystem.
 Extends Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable
 
 
-### `initialize(address lendingToken_, address mainNFT_, address fundingNFT_)` (public)
+### `initialize(address lendingToken_, address fundingNFT_)` (external)
 
 Initialize
 
@@ -31,7 +31,15 @@ Transfer Funding NFT
 This function is used to send the ERC1155 tokens from escrow to the lenders.
 
 
-### `transferLendingToken(address seeker, uint256 amount)` (external)
+### `burnFundingNFT(address account, uint256 investmentId, uint256 amount)` (external)
+
+Burn Funding NFT
+
+
+This function is used to burn NFT
+
+
+### `transferLendingToken(address lendingToken, address seeker, uint256 amount)` (external)
 
 Transfer Lending Token
 
@@ -39,12 +47,12 @@ Transfer Lending Token
 This function is used to send the lended amount to the seeker.
 
 
-### `transferCollateralToken(address collateralToken, address recipient, uint256 amount)` (external)
+### `transferInvestmentToken(address investmentToken, address recipient, uint256 amount)` (external)
 
-Transfer Collateral Token
+Transfer Investment Token
 
 
-This function is used to send the collateral amount to the seeker.
+This function is used to send the investment token amount to the seeker.
 
 
 ### `multiMintReputationalToken(address[] recipients, uint256[] amounts)` (external)

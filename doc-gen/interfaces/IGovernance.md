@@ -5,7 +5,7 @@
 
 
 
-### `requestApproval(uint256 investmentId, bool isMilestone, uint256 milestoneNumber)` (external)
+### `requestApproval(uint256 investmentId)` (external)
 
 
 

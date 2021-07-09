@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -15,7 +15,7 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
     enum StakingType {STAKER_LVL_0, STAKER_LVL_1, STAKER_LVL_2, STAKER_LVL_3}
 
     // Access Roles
-    bytes32 public MINTER_ROLE;
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     modifier onlyMinter() {
         require(hasRole(MINTER_ROLE, _msgSender()), "Must have minter role to mint");
@@ -33,8 +33,6 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
     function initialize() external initializer {
         __ERC1155_init("");
         __AccessControl_init();
-
-        MINTER_ROLE = keccak256("MINTER_ROLE");
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(MINTER_ROLE, _msgSender());
@@ -106,9 +104,9 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
     function getLevelOfStaker(address account) external view returns (uint256) {
         require(account != address(0), "Account is a zero address");
 
-        uint256 balanceOfStakerMedalBronce = balanceOf(account, uint(StakingType.STAKER_LVL_1));
-        if(balanceOfStakerMedalBronce == 1) {
-            return uint(StakingType.STAKER_LVL_1);
+        uint256 balanceOfStakerMedalGold = balanceOf(account, uint(StakingType.STAKER_LVL_3));
+        if(balanceOfStakerMedalGold == 1) {
+            return uint(StakingType.STAKER_LVL_3);
         }
 
         uint256 balanceOfStakerMedalSilver = balanceOf(account, uint(StakingType.STAKER_LVL_2));
@@ -116,10 +114,11 @@ contract StakerMedalNFT is Initializable, AccessControlUpgradeable, ERC1155Upgra
             return uint(StakingType.STAKER_LVL_2);
         }
 
-        uint256 balanceOfStakerMedalGold = balanceOf(account, uint(StakingType.STAKER_LVL_3));
-        if(balanceOfStakerMedalGold == 1) {
-            return uint(StakingType.STAKER_LVL_3);
+        uint256 balanceOfStakerMedalBronce = balanceOf(account, uint(StakingType.STAKER_LVL_1));
+        if(balanceOfStakerMedalBronce == 1) {
+            return uint(StakingType.STAKER_LVL_1);
         }
+
         return uint(StakingType.STAKER_LVL_0);
     }
 }

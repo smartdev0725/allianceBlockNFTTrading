@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./GovernanceTypesAndStorage.sol";
 import "../interfaces/IRegistry.sol";
+import "../libs/ValuedDoubleLinkedList.sol";
+import "../libs/DoubleLinkedList.sol";
 
 /**
  * @title AllianceBlock Governance contract

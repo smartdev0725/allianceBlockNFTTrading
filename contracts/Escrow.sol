@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
@@ -150,6 +150,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param registryAddress The address of the upgraded Registry contract.
      */
     function changeRegistry(address registryAddress) external onlyOwner() {
+        require(registryAddress != address(0), "Registry should not be zero address");
         registry = IRegistry(registryAddress);
     }
 }

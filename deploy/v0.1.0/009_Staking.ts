@@ -57,5 +57,5 @@ const id = contractName + version;
 
 export default func;
 func.tags = [id, version];
-func.dependencies = ['Escrow', 'StakerMedalNFT'];
+func.dependencies = ['Escrowv0.1.0', 'StakerMedalNFTv0.1.0'];
 func.id = id;

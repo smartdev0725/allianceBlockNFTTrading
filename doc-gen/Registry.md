@@ -1,12 +1,12 @@
 ## `Registry`
 
-Responsible for loan transactions.
+Responsible for investment transactions.
 
 
-Extends Initializable, PersonalLoan, ProjectLoan, OwnableUpgradeable
+Extends Initializable, Investment, OwnableUpgradeable
 
 
-### `initialize(address escrowAddress, address governanceAddress_, address lendingToken_, address mainNFT_, address fundingNFT_, uint256 baseAmountForEachPartition_, uint256 minimumInterestPercentage_, uint256 maxMilestones_, uint256 milestoneExtensionInterval_, uint256 vestingBatches_, uint256 vestingTimeInterval_, uint256 fundingTimeInterval_)` (public)
+### `initialize(address escrowAddress, address governanceAddress_, address[] lendingTokens_, address fundingNFT_, uint256 baseAmountForEachPartition_)` (external)
 
 Initialize
 
@@ -22,37 +22,28 @@ Initialize Investment
 This function is called by the owner to initialize the investment type.
 
 
-### `decideForLoan(uint256 investmentId, bool decision)` (external)
+### `setEscrowAddress(address escrowAddress_)` (external)
 
-Decide For Loan
-
-
-This function is called by governance to approve or reject a loan request.
+Update escrow address
 
 
-### `fundLoan(uint256 investmentId, uint256 partitionsToPurchase)` (external)
-
-Fund Loan
+This function is called by the owner to update the escrow address
 
 
-This function is called by the lenders to fund a loan.
-requires enough purchasable partitions
+### `addLendingToken(address lendingToken_)` (external)
+
+Add lending token
 
 
-### `executePayment(uint256 investmentId)` (external)
-
-Execute Payment
+This function is called by the owner to add another lending token.
 
 
-This function is called by the seeker to return part of or whole owed amount for a loan (depending on agreement).
+### `decideForInvestment(uint256 investmentId, bool decision)` (external)
+
+Decide For Investment
 
 
-### `receivePayment(uint256 tokenId, uint256 amountOfTokens, bool onProjectTokens)` (external)
-
-Receive Payment
-
-
-This function is called by ERC1155 holders to receive a payment (after seeker has repaid part of loan).
+This function is called by governance to approve or reject a investment request.
 
 
 ### `startLotteryPhase(uint256 investmentId)` (external)
@@ -63,82 +54,56 @@ Start Lottery Phase
 This function is called by governance to start the lottery phase for an investment.
 
 
-### `challengeLoan(uint256 investmentId)` (external)
+### `_approveInvestment(uint256 investmentId_)` (internal)
 
-Challenge Loan
-
-
-Through this function any address can challenge a loan in case of rules breaking by the borrower.
-            If challenging succeeds it can end up to either small penalty or whole collateral loss.
-
-
-### `_approveLoan(uint256 loanId_)` (internal)
-
-Approve Loan
+Approve Investment
 
 
 
 
-### `_rejectLoan(uint256 loanId_)` (internal)
+### `_rejectInvestment(uint256 investmentId_)` (internal)
 
-Reject Loan
-
-
-
-
-### `_startLoan(uint256 loanId_)` (internal)
-
-Start Loan
+Reject Investment
 
 
 
 
-### `getLoanMetadata(uint256 investmentId) → struct LoanLibrary.LoanDetails, enum LoanLibrary.InvestmentStatus, address, enum LoanLibrary.RepaymentBatchType` (public)
+### `_startInvestment(uint256 investmentId_)` (internal)
 
-Get Loan Metadata
-
-
-This helper function provides a single point for querying the Loan metadata
-returns Loan Details, Loan Status, Loan Seeker Address and Repayment Batch Type
+Start Investment
 
 
-### `LoanPartitionsPurchased(uint256 investmentId, uint256 partitionsToPurchase, address lender)`
+
+
+### `getInvestmentMetadata(uint256 investmentId) → struct InvestmentLibrary.InvestmentDetails, enum InvestmentLibrary.InvestmentStatus, address` (public)
+
+Get Investment Metadata
+
+
+This helper function provides a single point for querying the Investment metadata
+returns Investment Details, Investment Status, Investment Seeker Address and Repayment Batch Type
+
+### `isValidReferralId(uint256 investmentId) → bool` (external)
+
+IsValidReferralId
+
+
+returns true if investment id exists (so also seeker exists), otherwise returns false
+
+
+### `InvestmentStarted(uint256 investmentId)`
 
 
 
 
 
-### `LoanStarted(uint256 investmentId, enum LoanLibrary.LoanType loanType)`
+### `InvestmentApproved(uint256 investmentId)`
 
 
 
 
 
-### `LoanApproved(uint256 investmentId, enum LoanLibrary.LoanType loanType)`
-
-
-
-
-
-### `LoanRejected(uint256 investmentId, enum LoanLibrary.LoanType loanType)`
-
-
-
-
-
-### `LoanChallenged(uint256 investmentId, enum LoanLibrary.LoanType loanType, address user)`
-
-
-
-
-
-### `PaymentReceived(uint256 investmentId, uint256 amountOfTokens, uint256 generation, bool onProjectTokens, address user)`
-
-
-
-
-
-### `PaymentExecuted(uint256 investmentId, enum LoanLibrary.LoanType loanType, address seeker)`
+### `InvestmentRejected(uint256 investmentId)`
 
 
 

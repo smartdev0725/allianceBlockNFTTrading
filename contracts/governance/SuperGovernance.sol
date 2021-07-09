@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 import "./DaoCronjob.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -43,14 +43,16 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
      */
     function superVoteForRequest(uint256 requestId, bool decision) external checkCronjob() nonReentrant() {
         require(msg.sender == superDelegator, "Only super delegator can call this function");
-        require(approvalRequests[requestId].approvalsProvided == 0, "Cannot approve again same investment");
+        require(!approvalRequests[requestId].isProcessed, "Cannot process again same investment");
 
         registry.decideForInvestment(approvalRequests[requestId].investmentId, decision);
 
         if (decision) {
-            approvalRequests[requestId].approvalsProvided = approvalRequests[requestId].approvalsProvided.add(1);
+            approvalRequests[requestId].approvalsProvided = 1;
             approvalRequests[requestId].isApproved = true;
         }
+
+        approvalRequests[requestId].isProcessed = true;
 
         emit VotedForRequest(approvalRequests[requestId].investmentId, requestId, decision, msg.sender);
     }

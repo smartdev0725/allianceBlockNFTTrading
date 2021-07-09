@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 /**
  * @title Double linked-list
@@ -41,16 +41,18 @@ library DoubleLinkedList {
      * @param id the node to add
      */
     function addNode(LinkedList storage self, uint256 id) internal {
+        require(id != 0, "Id should be different from zero");
+
         //If empty
         if (self.head == 0) {
             self.head = id;
             self.tail = id;
-            self.nodes[id] = Node(0, 0);
         }
         //Else push in tail
         else {
-            self.nodes[self.tail].next = id;
-            self.nodes[id] = Node(0, self.tail);
+            uint256 tail = self.tail;
+            self.nodes[tail].next = id;
+            self.nodes[id] = Node(0, tail);
             self.tail = id;
         }
 
@@ -63,14 +65,22 @@ library DoubleLinkedList {
      * @param id the id of the node to remove
      */
     function removeNode(LinkedList storage self, uint256 id) internal {
+        require(self.size > 0, "Cannot remove an item from an empty list");
+        require(id != 0, "Id should be different from zero");
+
+        uint256 head = self.head;
+        uint256 tail = self.tail;
+
         if (self.size == 1) {
             self.head = 0;
             self.tail = 0;
-        } else if (id == self.head) {
-            self.head = self.nodes[self.head].next;
+        } else if (id == head) {
+            self.head = self.nodes[head].next;
+            // head was updated previously, so we can't use the memory variable here
             self.nodes[self.head].previous = 0;
-        } else if (id == self.tail) {
-            self.tail = self.nodes[self.tail].previous;
+        } else if (id == tail) {
+            self.tail = self.nodes[tail].previous;
+            // tail was updated previously, so we can't use the memory variable here
             self.nodes[self.tail].next = 0;
         } else {
             self.nodes[self.nodes[id].next].previous = self.nodes[id].previous;
@@ -87,6 +97,8 @@ library DoubleLinkedList {
      * @return head the first item of the list
      */
     function popHead(LinkedList storage self) internal returns (uint256 head) {
+        require(self.size > 0, "Cannot pop an item from an empty list");
+
         head = self.head;
 
         if (self.size == 1) {
@@ -106,13 +118,15 @@ library DoubleLinkedList {
      * @param self the LinkedList
      * @param index the id of the index
      * @return id the item in index position
+     * @return found boolean whether or not the entry was found
      */
-    function getIndexedId(LinkedList storage self, uint256 index) internal view returns (uint256 id) {
+    function getIndexedId(LinkedList storage self, uint256 index) internal view returns (uint256 id, bool found) {
         id = self.head;
 
         for (uint256 i = 1; i < index; i++) {
             id = self.nodes[id].next;
         }
+        found = id != 0;
     }
 
     /**

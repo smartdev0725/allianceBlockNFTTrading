@@ -5,13 +5,7 @@
 
 
 
-### `decideForLoan(uint256 investmentId, bool decision)` (external)
-
-
-
-
-
-### `decideForMilestone(uint256 investmentId, bool decision)` (external)
+### `decideForInvestment(uint256 investmentId, bool decision)` (external)
 
 
 

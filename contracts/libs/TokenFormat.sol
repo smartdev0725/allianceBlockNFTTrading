@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 /**
  * @title The Token Format library
@@ -28,6 +28,9 @@ library TokenFormat {
      * @return tokenId the token id
      */
     function getTokenId(uint256 gen, uint256 investmentId) internal pure returns (uint256 tokenId) {
+        uint128 maxGen= type(uint128).max;
+        require(gen < maxGen, "Can't go over the max number of generations available");
+        require(investmentId < maxGen, "Can't have more than the max number of investmentIds");
         return (gen << 128) | investmentId;
     }
 }

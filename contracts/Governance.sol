@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 import "./governance/SuperGovernance.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
@@ -22,7 +22,7 @@ contract Governance is Initializable, SuperGovernance {
      * @notice Initialize the contract.
      * @param superDelegator_ The address of the admin in charge during the first epoch
      * @param applicationsForInvestmentDuration_ duration for applications for investment
-     * @param lateApplicationsForInvestmentDuration_ duration forlate applications for investment
+     * @param lateApplicationsForInvestmentDuration_ duration for late applications for investment
      */
     function initialize(
         address superDelegator_,

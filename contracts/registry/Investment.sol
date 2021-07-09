@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
@@ -20,6 +20,13 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
     // EVENTS
     event InvestmentRequested(uint256 indexed investmentId, address indexed user, uint256 amount);
+    event InvestmentInterest(uint256 indexed investmentId, uint amount);
+    event LotteryExecuted(uint256 indexed investmentId);
+    event WithdrawInvestment(uint256 indexed investmentId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
+    event WithdrawAmountForNonTickets(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets);
+    event WithdrawLockedInvestmentTickets(uint256 indexedinvestmentId, uint256 ticketsToWithdraw);
+    event ConvertNFTToInvestmentTokens(uint256 indexedinvestmentId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
+    event InvestmentSettled(uint256 investmentId);
 
     function __Investment_init() public initializer {
         __ReentrancyGuard_init();
@@ -31,7 +38,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
      * @dev require valid amount
      * @param investmentToken The token that will be purchased by investors.
      * @param amountOfInvestmentTokens The amount of investment tokens to be purchased.
-     * @param investmentToken The token that investors will pay with.
+     * @param lendingToken The token that investors will pay with.
      * @param totalAmountRequested_ The total amount requested so as all investment tokens to be sold.
      * @param extraInfo The ipfs hash where more specific details for investment request are stored.
      */
@@ -40,7 +47,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         uint256 amountOfInvestmentTokens,
         address lendingToken,
         uint256 totalAmountRequested_,
-        string memory extraInfo
+        string calldata extraInfo
     ) external nonReentrant() {
         require(isValidLendingToken[lendingToken], "Lending token not supported");
 
@@ -104,6 +111,10 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         else {
             _applyImmediateTicketsAndProvideLuckyNumbers(investmentId, amountOfPartitions);
         }
+
+        // Add event for investment interest
+        emit InvestmentInterest(investmentId, amountOfPartitions);
+
     }
 
     function _applyImmediateTicketsAndProvideLuckyNumbers(uint256 investmentId_, uint256 amountOfPartitions_) internal {
@@ -129,6 +140,8 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             if (immediateTickets >= ticketsRemaining[investmentId_]) {
                 immediateTickets = ticketsRemaining[investmentId_];
                 investmentStatus[investmentId_] = InvestmentLibrary.InvestmentStatus.SETTLED;
+                fundingNFT.unpauseTokenTransfer(investmentId_); // UnPause trades for ERC1155s with the specific investment ID.
+                emit InvestmentSettled(investmentId_);
             }
 
             ticketsWonPerAddress[investmentId_][msg.sender] = immediateTickets;
@@ -173,6 +186,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             counter = ticketsRemaining[investmentId];
             ticketsRemaining[investmentId] = 0;
             fundingNFT.unpauseTokenTransfer(investmentId); // UnPause trades for ERC1155s with the specific investment ID.
+            emit InvestmentSettled(investmentId);
         } else {
             ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(counter);
         }
@@ -195,6 +209,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
                 counter--;
             }
         }
+
+        // Add event for lottery executed
+        emit LotteryExecuted(investmentId);
     }
 
     /**
@@ -238,6 +255,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         if (remainingTicketsPerAddress[investmentId][msg.sender] > 0) {
             _withdrawAmountProvidedForNonWonTickets(investmentId);
         }
+
+        // Add event for withdraw investment
+        emit WithdrawInvestment(investmentId, ticketsToLock, ticketsToWithdraw);
     }
 
     /**
@@ -275,6 +295,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].sub(ticketsToWithdraw);
 
         escrow.transferFundingNFT(investmentId, ticketsToWithdraw, msg.sender);
+
+        // Add event for withdraw locked investment tickets
+        emit WithdrawLockedInvestmentTickets(investmentId, ticketsToWithdraw);
     }
 
     /**
@@ -331,6 +354,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         remainingTicketsPerAddress[investmentId_][msg.sender] = 0;
 
         escrow.transferLendingToken(investmentDetails[investmentId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
+
+        // Add event for withdraw amount provided for non tickets
+        emit WithdrawAmountForNonTickets(investmentId_, amountToReturnForNonWonTickets);
     }
 
     /**
@@ -347,5 +373,8 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         escrow.burnFundingNFT(msg.sender, investmentId, amountOfNFTToConvert);
         escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountOfInvestmentTokenToTransfer);
+
+        // Add event for convert nft to investment tokens
+        emit ConvertNFTToInvestmentTokens(investmentId, amountOfNFTToConvert, amountOfInvestmentTokenToTransfer);
     }
 }

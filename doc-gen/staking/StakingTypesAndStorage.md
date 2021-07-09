@@ -4,24 +4,6 @@ Responsible for staking storage
 
 
 
-### `onlyRewardDistribution()`
-
-
-
-
-
-### `onlyGovernance()`
-
-
-
-
-
-
-
-### `RewardAdded(uint256 reward)`
-
-
-
 
 
 ### `Staked(address user, uint256 amount)`
@@ -31,12 +13,6 @@ Responsible for staking storage
 
 
 ### `Withdrawn(address user, uint256 amount)`
-
-
-
-
-
-### `RewardPaid(address user, uint256 reward)`
 
 
 

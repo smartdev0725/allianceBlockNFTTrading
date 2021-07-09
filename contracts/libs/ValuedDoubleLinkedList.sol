@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 
 /**
  * @title the Valued Double Linked List library
@@ -106,6 +106,8 @@ library ValuedDoubleLinkedList {
         uint256 value,
         uint256 id
     ) internal {
+        require(id != 0, "Id should be different from zero");
+
         Node memory node = self.nodes[self.head];
 
         //If empty
@@ -151,6 +153,9 @@ library ValuedDoubleLinkedList {
      * @param id the id of the node to remove
      */
     function removeNode(LinkedList storage self, uint256 id) internal {
+        require(self.size > 0, "Cannot remove an item from an empty list");
+        require(id != 0, "Id should be different from zero");
+
         if (self.size == 1) {
             self.head = 0;
             self.tail = 0;
@@ -174,6 +179,8 @@ library ValuedDoubleLinkedList {
      * @return head the first item of the list
      */
     function popHead(LinkedList storage self) internal returns (uint256 head) {
+        require(self.size > 0, "Cannot pop an item from an empty list");
+
         head = self.head;
 
         if (self.size == 1) {
@@ -198,16 +205,7 @@ library ValuedDoubleLinkedList {
         head = self.head;
         value = self.nodes[self.head].value;
 
-        if (self.size == 1) {
-            self.head = 0;
-            self.tail = 0;
-        } else {
-            self.head = self.nodes[self.head].next;
-            self.nodes[self.head].previous = 0;
-        }
-
-        delete self.nodes[head];
-        self.size -= 1;
+        popHead(self);
     }
 
     /**
@@ -216,8 +214,7 @@ library ValuedDoubleLinkedList {
      * @param amountOfNodes the number of nodes to remove starting from Head
      */
     function removeMultipleFromHead(LinkedList storage self, uint256 amountOfNodes) internal {
-        require(self.size >= amountOfNodes, "Size not enough");
-
+        require(amountOfNodes <= self.size, "amountOfNodes should be less than or equal to self.size");
         for (uint256 i = 0; i < amountOfNodes; i++) {
             uint256 nodeToRemove = self.head;
             if (self.size == 1) {

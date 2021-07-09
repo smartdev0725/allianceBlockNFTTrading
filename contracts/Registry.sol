@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -82,6 +82,19 @@ contract Registry is Initializable, Investment, OwnableUpgradeable {
         rAlbtPerLotteryNumber = rAlbtPerLotteryNumber_;
         blocksLockedForReputation = blocksLockedForReputation_;
         lotteryNumbersForImmediateTicket = lotteryNumbersForImmediateTicket_;
+    }
+
+
+    /**
+     * @notice Update escrow address
+     * @dev This function is called by the owner to update the escrow address
+     * @param escrowAddress_ The address of escrow that will be updated.
+     */
+    function setEscrowAddress(
+        address escrowAddress_
+    ) external onlyOwner() {
+        require(escrowAddress_ != address(0), "Cannot provide escrowAddress_ with 0 address");
+        escrow = IEscrow(escrowAddress_);
     }
 
     /**
