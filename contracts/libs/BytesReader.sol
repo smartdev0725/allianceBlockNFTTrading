@@ -18,7 +18,5 @@ library BytesReader {
         assembly {
             result := mload(add(b, add(index,32)))
         }
-
-        return result;
     }
 }
