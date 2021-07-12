@@ -16,6 +16,12 @@ import "./rALBT.sol";
  */
 contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable {
     using SafeERC20 for IERC20;
+
+    modifier onlyRegistryOrOwner() {
+        require(msg.sender == address(registry) || owner() == msg.sender, "Only Registry or Owner");
+        _;
+    }
+
     /**
      * @notice Initialize
      * @dev Initializes the contract.
@@ -66,7 +72,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         uint256 investmentId,
         uint256 partitionsPurchased,
         address receiver
-    ) external onlyRegistry() {
+    ) external onlyRegistryOrOwner() {
         fundingNFT.safeTransferFrom(address(this), receiver, investmentId, partitionsPurchased, "");
     }
 
