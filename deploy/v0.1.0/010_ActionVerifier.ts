@@ -17,12 +17,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const rewardsPerLevel = [
     ethers.utils.parseEther('0').toString(),
-    ethers.utils.parseEther('0').toString(),
     ethers.utils.parseEther('5').toString(),
     ethers.utils.parseEther('10').toString(),
+    ethers.utils.parseEther('15').toString(),
   ];
 
-  const actionsPerDayPerLevel = ['0', '0', '5', '10'];
+  const actionsPerDayPerLevel = ['0', '5', '10', '15'];
 
   await deploy(contractName, {
     contract: contractName,

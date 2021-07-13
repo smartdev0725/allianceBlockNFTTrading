@@ -62,14 +62,16 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
      * @dev requires not Delegator and cannot repeat staking type
      */
     function stake(StakingType stakingType) external nonReentrant() {
+        require(uint256(stakingType) != 0, "Cannot stake for type zero");
         require(balance[msg.sender] < stakingTypeAmounts[uint256(stakingType)], "Cannot stake for same type again");
+
         uint256 amount = stakingTypeAmounts[uint256(stakingType)];
 
         uint256 stakingTypeIndex = _getStakingType(msg.sender);
 
-        _applyReputation(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
+        _applyReputation(msg.sender, stakingTypeIndex, uint256(stakingType));
 
-        _applyMedal(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
+        _applyMedal(msg.sender, stakingTypeIndex, uint256(stakingType));
 
         uint256 amountToStake = amount.sub(balance[msg.sender]);
         _stake(msg.sender, amountToStake);
@@ -86,9 +88,9 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
         uint256 stakingTypeIndex = _getStakingType(msg.sender);
         uint256 amount = stakingTypeAmounts[uint256(stakingType)];
 
-        _applyReputation(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
+        _applyReputation(msg.sender, stakingTypeIndex, uint256(stakingType));
 
-        _applyMedal(msg.sender, stakingTypeIndex, uint256(stakingType).add(1));
+        _applyMedal(msg.sender, stakingTypeIndex, uint256(stakingType));
 
         uint256 amountToWithdraw = balance[msg.sender].sub(amount);
         _withdraw(msg.sender, amountToWithdraw);
@@ -116,9 +118,9 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
      * @return the staking type
      */
     function _getStakingType(address account) internal view returns (uint256) {
-        for (uint256 i = 0; i < 3; i++) {
+        for (uint256 i = 0; i < 4; i++) {
             if (balance[account] == stakingTypeAmounts[i]) {
-                return i.add(1);
+                return i;
             }
         }
         return 0;
@@ -172,10 +174,10 @@ contract Staking is Initializable, StakingDetails, OwnableUpgradeable, Reentranc
      */
     function _findAmount(uint256 bigIndex, uint256 smallIndex) internal view returns (uint256 amount) {
         if (smallIndex == 0) {
-            amount = reputationalStakingTypeAmounts[bigIndex.sub(1)];
+            amount = reputationalStakingTypeAmounts[bigIndex];
         } else {
-            amount = reputationalStakingTypeAmounts[bigIndex.sub(1)].sub(
-                reputationalStakingTypeAmounts[smallIndex.sub(1)]
+            amount = reputationalStakingTypeAmounts[bigIndex].sub(
+                reputationalStakingTypeAmounts[smallIndex]
             );
         }
     }

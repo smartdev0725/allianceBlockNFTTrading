@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * @notice Responsible for staking storage
  */
 contract StakingTypesAndStorage {
-    enum StakingType {STAKER_LVL_1, STAKER_LVL_2, STAKER_LVL_3}
+    enum StakingType {STAKER_LVL_0, STAKER_LVL_1, STAKER_LVL_2, STAKER_LVL_3}
 
     // ALBT token
     IERC20 public albt;

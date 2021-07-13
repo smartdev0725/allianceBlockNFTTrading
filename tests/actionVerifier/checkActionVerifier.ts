@@ -75,13 +75,13 @@ export default async function suite() {
       expect(this.escrowContract.address).to.be.equal(escrowAddress);
       expect(this.stakerMedalNft.address).to.be.equal(stakerMedalNftAddress);
       expect(rewardPerActionProvisionLvl0.toString()).to.be.equal(ethers.utils.parseEther('0').toString());
-      expect(rewardPerActionProvisionLvl1.toString()).to.be.equal(ethers.utils.parseEther('0').toString());
-      expect(rewardPerActionProvisionLvl2.toString()).to.be.equal(ethers.utils.parseEther('5').toString());
-      expect(rewardPerActionProvisionLvl3.toString()).to.be.equal(ethers.utils.parseEther('10').toString());
+      expect(rewardPerActionProvisionLvl1.toString()).to.be.equal(ethers.utils.parseEther('5').toString());
+      expect(rewardPerActionProvisionLvl2.toString()).to.be.equal(ethers.utils.parseEther('10').toString());
+      expect(rewardPerActionProvisionLvl3.toString()).to.be.equal(ethers.utils.parseEther('15').toString());
       expect(maxActionsPerDayLvl0.toNumber()).to.be.equal(0);
-      expect(maxActionsPerDayLvl1.toNumber()).to.be.equal(0);
-      expect(maxActionsPerDayLvl2.toNumber()).to.be.equal(5);
-      expect(maxActionsPerDayLvl3.toNumber()).to.be.equal(10);
+      expect(maxActionsPerDayLvl1.toNumber()).to.be.equal(5);
+      expect(maxActionsPerDayLvl2.toNumber()).to.be.equal(10);
+      expect(maxActionsPerDayLvl3.toNumber()).to.be.equal(15);
     });
 
     it('Should revert when update variables with another user', async function () {
@@ -580,7 +580,7 @@ export default async function suite() {
       expect(actionAccountBalanceAfter.sub(actionAccountBalanceBefore).toString()
       ).to.be.equal(ethers.utils.parseEther('1'));
       expect(provisionAccountBalanceAfter.sub(provisionAccountBalanceBefore).toString()
-      ).to.be.equal(ethers.utils.parseEther('5'));
+      ).to.be.equal(ethers.utils.parseEther('10'));
     });
 
     it('Can provide rewards for same action', async function () {
