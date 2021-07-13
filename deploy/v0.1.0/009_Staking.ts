@@ -23,11 +23,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const stakerMedalNFTContractAddress = (await get('StakerMedalNFT')).address;
 
   const stakingTypeAmounts = [
+    ethers.utils.parseEther('0'),
     ethers.utils.parseEther('5000'),
     ethers.utils.parseEther('20000'),
     ethers.utils.parseEther('50000'),
   ];
   const reputationalStakingTypeAmounts = [
+    ethers.utils.parseEther('0'),
     ethers.utils.parseEther('1000'),
     ethers.utils.parseEther('5000'),
     ethers.utils.parseEther('13000'),

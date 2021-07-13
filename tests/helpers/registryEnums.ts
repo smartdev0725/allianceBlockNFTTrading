@@ -8,7 +8,8 @@ export enum InvestmentStatus {
 }
 
 export enum StakingType {
-  STAKER_LVL_1 = '0',
-  STAKER_LVL_2 = '1',
-  STAKER_LVL_3 = '2',
+  STAKER_LVL_0 = '0',
+  STAKER_LVL_1 = '1',
+  STAKER_LVL_2 = '2',
+  STAKER_LVL_3 = '3',
 }
