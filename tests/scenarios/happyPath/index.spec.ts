@@ -155,6 +155,12 @@ describe('Happy Path', function () {
       this.stakingContract.address,
       amountToTransfer
     );
+
+    await this.escrowContract.connect(this.deployerSigner).afterInitialize(
+      this.registryContract.address,
+      deployer,
+      this.stakingContract.address,
+    );
   });
 
   describe(

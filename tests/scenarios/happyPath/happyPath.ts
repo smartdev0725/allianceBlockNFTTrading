@@ -241,15 +241,8 @@ export default async function suite() {
       .showInterestForInvestment(this.investmentId, numberOfPartitions);
     
     //simulates lender4 has rALBT from other methods besides staking
-    const escrowContract = await ethers.getContract('Escrow');
-
-    await network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [this.escrowContract.address],
-    })
-    const signer = await ethers.provider.getSigner(this.escrowContract.address)
-  
-    await this.rALBTContract.connect(signer).mintTo(this.lender4, ethers.utils.parseEther('1'));
+    //GET rALBT HERE!!
+    await this.escrowContract.connect(this.deployerSigner).mintReputationalToken(this.lender4, ethers.utils.parseEther('1'));
     await this.registryContract
       .connect(this.lender4Signer)
       .showInterestForInvestment(this.investmentId, numberOfPartitions);
