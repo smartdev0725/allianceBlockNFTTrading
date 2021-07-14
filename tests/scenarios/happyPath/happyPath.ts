@@ -1,9 +1,9 @@
-import {BASE_AMOUNT} from '../helpers/constants';
+import {BASE_AMOUNT} from '../../helpers/constants';
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {StakingType, InvestmentStatus} from '../helpers/registryEnums';
+import {StakingType, InvestmentStatus} from '../../helpers/registryEnums';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 chai.use(solidity);
@@ -27,7 +27,7 @@ export default async function suite() {
       );
 
       const investmentId2 = await this.registryContract.totalInvestments();
-      expect(investmentId2).to.gt(investmentId);
+      expect(Number(investmentId2)).to.be.equal(Number(investmentId)+1);
 
       const status = await this.registryContract.investmentStatus(investmentId);
       expect(String(status)).to.be.equal(String(InvestmentStatus.REQUESTED));

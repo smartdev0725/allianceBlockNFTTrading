@@ -5,7 +5,7 @@ import {
   getContracts,
   getSigners,
   initializeTransfers,
-} from '../helpers/utils';
+} from '../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
 describe('Registry Investments', function () {
