@@ -19,8 +19,9 @@ describe('Registry upgrade test', () => {
       lender1Signer,
       lender2Signer,
       lender3Signer,
+      lender4Signer,
     } = await getSigners();
-    const {deployer, seeker, lender1, lender2, lender3, superDelegator} =
+    const {deployer, seeker, lender1, lender2, lender3, lender4, superDelegator} =
       await getNamedAccounts();
 
     const registryContract = await ethers.getContract('Registry');
@@ -37,12 +38,13 @@ describe('Registry upgrade test', () => {
         investmentTokenContract,
         collateralTokenContract,
       },
-      {deployer, lender1, lender2, lender3, seeker},
+      {deployer, lender1, lender2, lender3, lender4, seeker},
       {
         deployerSigner,
         lender1Signer,
         lender2Signer,
         lender3Signer,
+        lender4Signer,
         seekerSigner,
       }
     );

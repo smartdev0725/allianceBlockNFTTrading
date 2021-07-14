@@ -8,13 +8,13 @@ import {
 } from '../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
-describe('Registry Investments', function () {
+describe('Happy Path', function () {
   beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();
 
     // Get accounts
-    const {deployer, proxyOwner, seeker, lender1, lender2, lender3, superDelegator} =
+    const {deployer, proxyOwner, seeker, lender1, lender2, lender3, lender4, superDelegator} =
       await getNamedAccounts();
     this.deployer = deployer;
     this.proxyOwner = proxyOwner;
@@ -22,6 +22,7 @@ describe('Registry Investments', function () {
     this.lender1 = lender1;
     this.lender2 = lender2;
     this.lender3 = lender3;
+    this.lender4 = lender4;
     this.superDelegator = superDelegator;
 
     // Get signers
@@ -32,6 +33,7 @@ describe('Registry Investments', function () {
       lender1Signer,
       lender2Signer,
       lender3Signer,
+      lender4Signer,
       seekerSigner,
       superDelegatorSigner,
     } = await getSigners();
@@ -41,6 +43,7 @@ describe('Registry Investments', function () {
     this.lender1Signer = lender1Signer;
     this.lender2Signer = lender2Signer;
     this.lender3Signer = lender3Signer;
+    this.lender4Signer = lender4Signer;
     this.seekerSigner = seekerSigner;
     this.superDelegatorSigner = superDelegatorSigner;
 
@@ -55,6 +58,7 @@ describe('Registry Investments', function () {
       collateralTokenContract,
       stakingContract,
       ALBTContract,
+      stakerMedalNFTContract,
     } = await getContracts();
     this.registryContract = registryContract;
     this.governanceContract = governanceContract;
@@ -65,6 +69,7 @@ describe('Registry Investments', function () {
     this.collateralTokenContract = collateralTokenContract;
     this.stakingContract = stakingContract;
     this.ALBTContract = ALBTContract;
+    this.stakerMedalNFTContract = stakerMedalNFTContract;
     const rALBTFactory = await ethers.getContractFactory('rALBT');
     const rALBTAddress = await this.escrowContract.reputationalALBT();
     this.rALBTContract = await rALBTFactory.attach(rALBTAddress);
@@ -77,12 +82,13 @@ describe('Registry Investments', function () {
         investmentTokenContract,
         collateralTokenContract,
       },
-      {deployer, lender1, lender2, lender3, seeker},
+      {deployer, lender1, lender2, lender3, lender4, seeker},
       {
         deployerSigner,
         lender1Signer,
         lender2Signer,
         lender3Signer,
+        lender4Signer,
         seekerSigner,
       }
     );
@@ -136,6 +142,15 @@ describe('Registry Investments', function () {
       amountToTransfer
     );
     await this.ALBTContract.connect(this.lender3Signer).approve(
+      this.stakingContract.address,
+      amountToTransfer
+    );
+
+    await this.ALBTContract.connect(this.deployerSigner).mint(
+      this.lender4,
+      amountToTransfer
+    );
+    await this.ALBTContract.connect(this.lender4Signer).approve(
       this.stakingContract.address,
       amountToTransfer
     );

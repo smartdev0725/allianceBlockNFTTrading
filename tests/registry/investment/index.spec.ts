@@ -17,7 +17,7 @@ describe('Registry Investments', function () {
     await deployments.fixture();
 
     // Get accounts
-    const {deployer, proxyOwner, seeker, lender1, lender2, lender3, superDelegator} =
+    const {deployer, proxyOwner, seeker, lender1, lender2, lender3, lender4, superDelegator} =
       await getNamedAccounts();
     this.deployer = deployer;
     this.proxyOwner = proxyOwner;
@@ -25,6 +25,7 @@ describe('Registry Investments', function () {
     this.lender1 = lender1;
     this.lender2 = lender2;
     this.lender3 = lender3;
+    this.lender4 = lender4;
     this.superDelegator = superDelegator;
 
     // Get signers
@@ -35,6 +36,7 @@ describe('Registry Investments', function () {
       lender1Signer,
       lender2Signer,
       lender3Signer,
+      lender4Signer,
       seekerSigner,
       superDelegatorSigner,
     } = await getSigners();
@@ -44,6 +46,7 @@ describe('Registry Investments', function () {
     this.lender1Signer = lender1Signer;
     this.lender2Signer = lender2Signer;
     this.lender3Signer = lender3Signer;
+    this.lender4Signer = lender4Signer;
     this.seekerSigner = seekerSigner;
     this.superDelegatorSigner = superDelegatorSigner;
 
@@ -80,12 +83,13 @@ describe('Registry Investments', function () {
         investmentTokenContract,
         collateralTokenContract,
       },
-      {deployer, lender1, lender2, lender3, seeker},
+      {deployer, lender1, lender2, lender3, lender4, seeker},
       {
         deployerSigner,
         lender1Signer,
         lender2Signer,
         lender3Signer,
+        lender4Signer,
         seekerSigner,
       }
     );
