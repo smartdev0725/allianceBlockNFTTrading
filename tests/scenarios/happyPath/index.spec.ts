@@ -1,5 +1,5 @@
 // Investment
-import fullFlow from './fullFlow';
+import happyPath from './happyPath';
 
 import {
   getContracts,
@@ -142,7 +142,7 @@ describe('Registry Investments', function () {
   });
 
   describe(
-    'Full flow',
-    fullFlow.bind(this)
+    'Happy Path',
+    happyPath.bind(this)
   );
 });
