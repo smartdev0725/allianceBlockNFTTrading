@@ -150,6 +150,7 @@ describe('Happy Path', function () {
       this.lender4,
       amountToTransfer
     );
+
     await this.ALBTContract.connect(this.lender4Signer).approve(
       this.stakingContract.address,
       amountToTransfer
@@ -157,7 +158,7 @@ describe('Happy Path', function () {
   });
 
   describe(
-    'Happy Path',
+    'Happy Path process',
     happyPath.bind(this)
   );
 });
