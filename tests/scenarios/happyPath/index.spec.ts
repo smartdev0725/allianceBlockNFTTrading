@@ -49,6 +49,7 @@ describe('Happy Path', function () {
 
     // Get contracts
     const {
+      actionVerifierContract,
       registryContract,
       governanceContract,
       fundingNFTContract,
@@ -60,6 +61,7 @@ describe('Happy Path', function () {
       ALBTContract,
       stakerMedalNFTContract,
     } = await getContracts();
+    this.actionVerifierContract = actionVerifierContract;
     this.registryContract = registryContract;
     this.governanceContract = governanceContract;
     this.fundingNFTContract = fundingNFTContract;
@@ -156,11 +158,6 @@ describe('Happy Path', function () {
       amountToTransfer
     );
 
-    await this.escrowContract.connect(this.deployerSigner).afterInitialize(
-      this.registryContract.address,
-      deployer,
-      this.stakingContract.address,
-    );
   });
 
   describe(
