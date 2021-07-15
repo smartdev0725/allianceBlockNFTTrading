@@ -338,7 +338,40 @@ export default async function suite() {
     );
 
     //5) The lottery is run when all the partitions have been covered
-    
+    const investmentDetails =
+      await this.registryContract.investmentDetails(this.investmentId);
 
+    const numberOfPartitionsToBuy = BigNumber.from(Number(investmentDetails.totalPartitionsToBePurchased)-Number(investmentDetails.partitionsRequested));
+
+    await this.registryContract
+      .connect(this.lender1Signer)
+      .showInterestForInvestment(this.investmentId, numberOfPartitionsToBuy);
+
+    await this.governanceContract
+      .connect(this.superDelegatorSigner)
+      .checkCronjobs();
+
+    const investmentStatusAfter =
+      await this.registryContract.investmentStatus(this.investmentId);
+
+    expect(investmentStatusAfter).to.be.equal(2);
+
+    await expect(
+      this.registryContract
+        .connect(this.lender3Signer)
+        .executeLotteryRun(this.investmentId)
+    )
+      .to.emit(this.registryContract, 'LotteryExecuted')
+      .withArgs(this.investmentId);
+
+    const ticketsRemainingAfter =
+      await this.registryContract.ticketsRemaining(this.investmentId);
+    expect(ticketsRemainingAfter.toNumber()).to.be.equal(0);
+
+    //6) FundingNFTs are minted and each Funder either receives their NFT or their funds back in case they did not win the lottery
+
+    //7) Funders with a FundingNFT exchange it for their Investment tokens
+
+    //8) Seeker claims the funding, when all investment tokens have been exchanged.
   });
 }
