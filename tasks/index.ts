@@ -1,8 +1,7 @@
-import {HardhatUserConfig} from 'hardhat/types';
 import {task} from 'hardhat/config';
 import '@nomiclabs/hardhat-ethers';
 
-task('accounts', 'Prints the list of accounts', async (args, hre) => {
+export const TASK_ACCOUNTS = task('accounts', 'Prints the list of accounts', async (args, hre) => {
   const accounts = await hre.ethers.getSigners();
 
   for (const account of accounts) {
@@ -10,13 +9,13 @@ task('accounts', 'Prints the list of accounts', async (args, hre) => {
   }
 });
 
-task('rALBT', 'Gets rALBT token address', async (args, hre) => {
+export const TASK_rALBT = task('rALBT', 'Gets rALBT token address', async (args, hre) => {
   const escrowContract = await hre.ethers.getContract('Escrow');
   const rALBTAddress = await escrowContract.reputationalALBT();
   console.log(rALBTAddress)
 })
 
-task('mint:ALBT', 'Mints ALBT tokens to address', async ({target, amount}, {ethers}) => {
+export const TASK_mintALBT = task('mint:ALBT', 'Mints ALBT tokens to address', async ({target, amount}, {ethers}) => {
   try {
     console.log(`Minting ${amount} ALBT to ${target}...`);
     const albt = await ethers.getContract('ALBT');
@@ -27,7 +26,7 @@ task('mint:ALBT', 'Mints ALBT tokens to address', async ({target, amount}, {ethe
 }).addParam("target", "The address to mint to")
   .addParam("amount", "amount of ALBT to mint")
 
-task('mint:USDC', 'Mints USDC tokens (lending) to address', async ({target, amount}, {ethers}) => {
+export const TASK_mintUSDC = task('mint:USDC', 'Mints USDC tokens (lending) to address', async ({target, amount}, {ethers}) => {
   try {
     console.log(`Minting ${amount} USDC to ${target}...`);
     const usdc = await ethers.getContract('LendingToken');
@@ -38,7 +37,7 @@ task('mint:USDC', 'Mints USDC tokens (lending) to address', async ({target, amou
 }).addParam("target", "The address to mint to")
   .addParam("amount", "amount of USDC to mint")
 
-task('mint:', 'Mints tokens to address', async ({target, amount, tokenName}, {ethers}) => {
+export const TASK_mint = task('mint:', 'Mints tokens to address', async ({target, amount, tokenName}, {ethers}) => {
   try {
     console.log(`Minting ${amount} ${tokenName} to ${target}...`);
     const token = await ethers.getContract(tokenName);
@@ -50,8 +49,14 @@ task('mint:', 'Mints tokens to address', async ({target, amount, tokenName}, {et
   .addParam("amount", "amount to mint")
   .addParam("tokenName", "The token contract name")
 
+export const TASK_addAction = task('Add an action to the verifier:', 'Add an action', async ({action, reputationalAlbtRewardsPerLevel, reputationalAlbtRewardsPerLevelAfterFirstTime, minimumLevelForProvision, referralContract}, {ethers}) => {
+  try {
+    const actionVerifier = await ethers.getContract('ActionVerifier');
+    await actionVerifier.importAction(action, reputationalAlbtRewardsPerLevel, reputationalAlbtRewardsPerLevelAfterFirstTime, minimumLevelForProvision, referralContract)
+  } catch (error) {
+    console.log(error.message)
+  }  
+}).addParam("action", "The action name")
+  .addParam("amount", "amount to mint")
+  .addParam("tokenName", "The token contract name")  
 
-const config: HardhatUserConfig = {
-};
-
-export default config;
