@@ -215,7 +215,7 @@ export default async function suite() {
 
     //4) Funders declare their intention to buy a partition (effectively depositing their funds)
     // Given
-    const numberOfPartitions = BigNumber.from(3);
+    const numberOfPartitions = BigNumber.from(6);
     const amountOfLendingTokens = numberOfPartitions.mul(
       ethers.utils.parseEther(BASE_AMOUNT + '')
     );
@@ -338,14 +338,6 @@ export default async function suite() {
     );
 
     //5) The lottery is run when all the partitions have been covered
-    const investmentDetails =
-      await this.registryContract.investmentDetails(this.investmentId);
-
-    const numberOfPartitionsToBuy = BigNumber.from(Number(investmentDetails.totalPartitionsToBePurchased)-Number(investmentDetails.partitionsRequested));
-
-    await this.registryContract
-      .connect(this.lender1Signer)
-      .showInterestForInvestment(this.investmentId, numberOfPartitionsToBuy);
 
     await this.governanceContract
       .connect(this.superDelegatorSigner)
@@ -364,12 +356,146 @@ export default async function suite() {
       .to.emit(this.registryContract, 'LotteryExecuted')
       .withArgs(this.investmentId);
 
+    //validar rALBT balance e los usuarios cambie (no necesariamente)
+      
     const ticketsRemainingAfter =
       await this.registryContract.ticketsRemaining(this.investmentId);
     expect(ticketsRemainingAfter.toNumber()).to.be.equal(0);
 
     //6) FundingNFTs are minted and each Funder either receives their NFT or their funds back in case they did not win the lottery
 
+    const ticketsBefore1 = await this.registryContract.ticketsWonPerAddress(this.investmentId, this.lender1);
+    console.log("ticketsBefore1", Number(ticketsBefore1));
+    const ticketsBefore2 = await this.registryContract.ticketsWonPerAddress(this.investmentId, this.lender2);
+    console.log("ticketsBefore2", Number(ticketsBefore2));
+    const ticketsBefore3 = await this.registryContract.ticketsWonPerAddress(this.investmentId, this.lender3);
+    console.log("ticketsBefore3", Number(ticketsBefore3));
+    const ticketsBefore4 = await this.registryContract.ticketsWonPerAddress(this.investmentId, this.lender4);
+    console.log("ticketsBefore4", Number(ticketsBefore4));
+
+    const balanceFundingNFTTokenBefore1 =
+      await this.fundingNFTContract.balanceOf(this.lender1, this.investmentId.toNumber());
+    console.log("balanceFundingNFTTokenBefore1", Number(balanceFundingNFTTokenBefore1));
+    const balanceFundingNFTTokenBefore2 =
+      await this.fundingNFTContract.balanceOf(this.lender2, this.investmentId.toNumber());
+    console.log("balanceFundingNFTTokenBefore2", Number(balanceFundingNFTTokenBefore2));
+    const balanceFundingNFTTokenBefore3 =
+      await this.fundingNFTContract.balanceOf(this.lender3, this.investmentId.toNumber());
+    console.log("balanceFundingNFTTokenBefore3", Number(balanceFundingNFTTokenBefore3));
+    const balanceFundingNFTTokenBefore4 =
+      await this.fundingNFTContract.balanceOf(this.lender4, this.investmentId.toNumber());
+    console.log("balanceFundingNFTTokenBefore4", Number(balanceFundingNFTTokenBefore4));
+
+    const lenderLendingTokenBalanceBeforeWithdraw1 =
+      await this.lendingTokenContract.balanceOf(this.lender1);
+    console.log("lenderLendingTokenBalanceBeforeWithdraw1", Number(lenderLendingTokenBalanceBeforeWithdraw1));
+    const lenderLendingTokenBalanceBeforeWithdraw2 =
+      await this.lendingTokenContract.balanceOf(this.lender2);
+    console.log("lenderLendingTokenBalanceBeforeWithdraw2", Number(lenderLendingTokenBalanceBeforeWithdraw2));
+    const lenderLendingTokenBalanceBeforeWithdraw3 =
+      await this.lendingTokenContract.balanceOf(this.lender3);
+    console.log("lenderLendingTokenBalanceBeforeWithdraw3", Number(lenderLendingTokenBalanceBeforeWithdraw3));
+    const lenderLendingTokenBalanceBeforeWithdraw4 =
+      await this.lendingTokenContract.balanceOf(this.lender4);
+    console.log("lenderLendingTokenBalanceBeforeWithdraw4", Number(lenderLendingTokenBalanceBeforeWithdraw4));
+    
+    await expect(
+      this.registryContract
+        .connect(this.lender1Signer)
+        .withdrawInvestmentTickets(this.investmentId, 1, Number(ticketsBefore1)-1)
+    )
+      .to.emit(this.registryContract, 'WithdrawInvestment')
+      .withArgs(this.investmentId, 1, Number(ticketsBefore1)-1);
+
+    await expectRevert(
+      this.registryContract
+        .connect(this.lender1Signer)
+        .withdrawAmountProvidedForNonWonTickets(this.investmentId),
+      'No non-won tickets to withdraw'
+    );
+
+    await expect(
+      this.registryContract
+        .connect(this.lender2Signer)
+        .withdrawInvestmentTickets(this.investmentId, 1, Number(ticketsBefore2)-1)
+    )
+      .to.emit(this.registryContract, 'WithdrawInvestment')
+      .withArgs(this.investmentId, 1, Number(ticketsBefore2)-1);
+
+    await expectRevert(
+      this.registryContract
+        .connect(this.lender2Signer)
+        .withdrawAmountProvidedForNonWonTickets(this.investmentId),
+      'No non-won tickets to withdraw'
+    );
+
+    await expect(
+      this.registryContract
+        .connect(this.lender3Signer)
+        .withdrawInvestmentTickets(this.investmentId, 1, Number(ticketsBefore3)-1)
+    )
+      .to.emit(this.registryContract, 'WithdrawInvestment')
+      .withArgs(this.investmentId, 1, Number(ticketsBefore3)-1);
+
+    await expectRevert(
+      this.registryContract
+        .connect(this.lender3Signer)
+        .withdrawAmountProvidedForNonWonTickets(this.investmentId),
+      'No non-won tickets to withdraw'
+    );
+
+    await expect(
+      this.registryContract
+        .connect(this.lender4Signer)
+        .withdrawInvestmentTickets(this.investmentId, 1, Number(ticketsBefore4)-1)
+    )
+      .to.emit(this.registryContract, 'WithdrawInvestment')
+      .withArgs(this.investmentId, 1, Number(ticketsBefore4)-1);
+
+    await expectRevert(
+      this.registryContract
+        .connect(this.lender4Signer)
+        .withdrawAmountProvidedForNonWonTickets(this.investmentId),
+      'No non-won tickets to withdraw'
+    );
+
+    const ticketsAfter1 = await this.registryContract.ticketsWonPerAddress(this.investmentId, this.lender1);
+    console.log("ticketsAfter1", Number(ticketsAfter1));
+    const ticketsAfter2 = await this.registryContract.ticketsWonPerAddress(this.investmentId, this.lender2);
+    console.log("ticketsAfter2", Number(ticketsAfter2));
+    const ticketsAfter3 = await this.registryContract.ticketsWonPerAddress(this.investmentId, this.lender3);
+    console.log("ticketsAfter3", Number(ticketsAfter3));
+    const ticketsAfter4 = await this.registryContract.ticketsWonPerAddress(this.investmentId, this.lender4);
+    console.log("ticketsAfter4", Number(ticketsAfter4));
+
+    const balanceFundingNFTTokenAfter1 =
+      await this.fundingNFTContract.balanceOf(this.lender1, this.investmentId.toNumber());
+    console.log("balanceFundingNFTTokenAfter1", Number(balanceFundingNFTTokenAfter1));
+    const balanceFundingNFTTokenAfter2 =
+      await this.fundingNFTContract.balanceOf(this.lender2, this.investmentId.toNumber());
+    console.log("balanceFundingNFTTokenAfter2", Number(balanceFundingNFTTokenAfter2));
+    const balanceFundingNFTTokenAfter3 =
+      await this.fundingNFTContract.balanceOf(this.lender3, this.investmentId.toNumber());
+    console.log("balanceFundingNFTTokenAfter3", Number(balanceFundingNFTTokenAfter3));
+    const balanceFundingNFTTokenAfter4 =
+      await this.fundingNFTContract.balanceOf(this.lender4, this.investmentId.toNumber());
+    console.log("balanceFundingNFTTokenAfter4", Number(balanceFundingNFTTokenAfter4));
+
+    const lenderLendingTokenBalanceAfterWithdraw1 =
+      await this.lendingTokenContract.balanceOf(this.lender1);
+    console.log("lenderLendingTokenBalanceAfterWithdraw1", Number(lenderLendingTokenBalanceAfterWithdraw1));
+    const lenderLendingTokenBalanceAfterWithdraw2 =
+      await this.lendingTokenContract.balanceOf(this.lender2);
+    console.log("lenderLendingTokenBalanceAfterWithdraw2", Number(lenderLendingTokenBalanceAfterWithdraw2));
+    const lenderLendingTokenBalanceAfterWithdraw3 =
+      await this.lendingTokenContract.balanceOf(this.lender3);
+    console.log("lenderLendingTokenBalanceAfterWithdraw3", Number(lenderLendingTokenBalanceAfterWithdraw3));
+    const lenderLendingTokenBalanceAfterWithdraw4 =
+      await this.lendingTokenContract.balanceOf(this.lender4);
+    console.log("lenderLendingTokenBalanceAfterWithdraw4", Number(lenderLendingTokenBalanceAfterWithdraw4));
+
+    // expect(balanceFundingNFTTokenAfter1.toNumber()).to.be.gt(balanceFundingNFTTokenBefore1.toNumber());
+    
     //7) Funders with a FundingNFT exchange it for their Investment tokens
 
     //8) Seeker claims the funding, when all investment tokens have been exchanged.

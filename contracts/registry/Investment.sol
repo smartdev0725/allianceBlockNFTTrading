@@ -8,6 +8,8 @@ import "./InvestmentDetails.sol";
 import "../libs/SafeERC20.sol";
 import "../libs/TokenFormat.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title AllianceBlock Investment contract.
  * @notice Functionality for Investment.
@@ -250,7 +252,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         if (ticketsToWithdraw > 0) {
             escrow.transferFundingNFT(investmentId, ticketsToWithdraw, msg.sender);
         }
-
+        console.log("remainingTicketsPerAddress[investmentId][msg.sender]",remainingTicketsPerAddress[investmentId][msg.sender]);
         if (remainingTicketsPerAddress[investmentId][msg.sender] > 0) {
             _withdrawAmountProvidedForNonWonTickets(investmentId);
         }
