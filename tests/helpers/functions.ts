@@ -40,7 +40,7 @@ export const requestInvestment = async (
 };
 
 // SuperGovernance decides if apporve Investment
-export const superGovernanceApprove = async (
+export const handleInvestmentRequest = async (
   investmentId: BigNumber,
   superDelegatorSigner: any,
   approve: boolean
@@ -292,4 +292,34 @@ export const declareIntentionForBuy = async (
       'Not eligible for lottery numbers'
     );
   }
+};
+
+export const runLottery = async (
+  governanceContract: any,
+  superDelegatorSigner: any,
+  registryContract: any,
+  investmentId: number,
+  lotteryRunnerSigner: any
+) => {
+  await governanceContract.connect(superDelegatorSigner).checkCronjobs();
+
+  const investmentStatus = await registryContract.investmentStatus(
+    investmentId
+  );
+
+  expect(investmentStatus).to.be.equal(2);
+
+  await expect(
+    registryContract
+      .connect(lotteryRunnerSigner)
+      .executeLotteryRun(investmentId)
+  )
+    .to.emit(registryContract, 'LotteryExecuted')
+    .withArgs(investmentId);
+
+  const ticketsRemainingAfter = await registryContract.ticketsRemaining(
+    investmentId
+  );
+  console.log('ticketsRemainingAfter', ticketsRemainingAfter);
+  expect(ticketsRemainingAfter.toNumber()).to.be.equal(0);
 };

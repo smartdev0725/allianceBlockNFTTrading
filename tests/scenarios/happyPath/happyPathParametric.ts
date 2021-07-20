@@ -11,7 +11,8 @@ import {
   fundersStake,
   getRALBTWithActions,
   requestInvestment,
-  superGovernanceApprove,
+  handleInvestmentRequest,
+  runLottery,
 } from '../../helpers/functions';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
@@ -20,8 +21,8 @@ chai.use(solidity);
 export default async function suite() {
   it('should do a full flow', async function () {
     // Allows Seeker publishes Investment
-    const amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
-    const totalAmountRequested = ethers.utils.parseEther('10000');
+    const amountOfTokensToBePurchased = ethers.utils.parseEther('10');
+    const totalAmountRequested = ethers.utils.parseEther('10');
     const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
     const investmentId = await requestInvestment(
@@ -34,7 +35,11 @@ export default async function suite() {
     );
 
     // SuperGovernance approves Investment
-    await superGovernanceApprove(investmentId, this.superDelegatorSigner, true);
+    await handleInvestmentRequest(
+      investmentId,
+      this.superDelegatorSigner,
+      true
+    );
 
     // Lender 1,2 and 3 stake
     await fundersStake(
@@ -65,15 +70,25 @@ export default async function suite() {
       investmentId,
       this.lender1,
       this.lender1Signer,
-      BigNumber.from(6),
+      BigNumber.from(10),
       this.lendingTokenContract
     );
     await declareIntentionForBuy(
       investmentId,
       this.lender4,
       this.lender4Signer,
-      BigNumber.from(4),
+      BigNumber.from(10),
       this.lendingTokenContract
+    );
+
+    //5) The lottery is run when all the partitions have been covered
+
+    await runLottery(
+      this.governanceContract,
+      this.superDelegatorSigner,
+      this.registryContract,
+      investmentId,
+      this.lender1
     );
   });
 }
