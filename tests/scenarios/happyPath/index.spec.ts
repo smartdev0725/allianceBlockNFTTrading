@@ -1,5 +1,6 @@
 // Investment
 import happyPath from './happyPath';
+import happyPathParametric from './happyPathParametric';
 
 import {
   getContracts,
@@ -14,8 +15,16 @@ describe('Happy Path', function () {
     await deployments.fixture();
 
     // Get accounts
-    const {deployer, proxyOwner, seeker, lender1, lender2, lender3, lender4, superDelegator} =
-      await getNamedAccounts();
+    const {
+      deployer,
+      proxyOwner,
+      seeker,
+      lender1,
+      lender2,
+      lender3,
+      lender4,
+      superDelegator,
+    } = await getNamedAccounts();
     this.deployer = deployer;
     this.proxyOwner = proxyOwner;
     this.seeker = seeker;
@@ -157,11 +166,7 @@ describe('Happy Path', function () {
       this.stakingContract.address,
       amountToTransfer
     );
-
   });
 
-  describe(
-    'Happy Path process',
-    happyPath.bind(this)
-  );
+  describe('Happy Path process', happyPathParametric.bind(this));
 });
