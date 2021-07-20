@@ -285,6 +285,7 @@ export const declareIntentionForBuy = async (
       initEscrowLendingTokenBalance.add(amountOfLendingTokens)
     );
   } else {
+    console.log('fallo');
     await expectRevert(
       registryContract
         .connect(lenderSigner)
@@ -298,11 +299,10 @@ export const runLottery = async (
   governanceContract: any,
   superDelegatorSigner: any,
   registryContract: any,
-  investmentId: number,
+  investmentId: BigNumber,
   lotteryRunnerSigner: any
 ) => {
   await governanceContract.connect(superDelegatorSigner).checkCronjobs();
-
   const investmentStatus = await registryContract.investmentStatus(
     investmentId
   );
