@@ -260,7 +260,6 @@ export const declareIntentionForBuy = async (
     const initLenderLendingTokenBalance = await lendingTokenContract.balanceOf(
       lender
     );
-
     const initEscrowLendingTokenBalance = await lendingTokenContract.balanceOf(
       escrowContract.address
     );
@@ -285,7 +284,6 @@ export const declareIntentionForBuy = async (
       initEscrowLendingTokenBalance.add(amountOfLendingTokens)
     );
   } else {
-    console.log('fallo');
     await expectRevert(
       registryContract
         .connect(lenderSigner)
@@ -303,7 +301,12 @@ export const runLottery = async (
   lotteryRunnerSigner: any
 ) => {
   await governanceContract.connect(superDelegatorSigner).checkCronjobs();
+  await governanceContract.connect(superDelegatorSigner).checkCronjobs();
+
   const investmentStatus = await registryContract.investmentStatus(
+    investmentId
+  );
+  const ticketsRemainingBefore = await registryContract.ticketsRemaining(
     investmentId
   );
 
@@ -320,6 +323,8 @@ export const runLottery = async (
   const ticketsRemainingAfter = await registryContract.ticketsRemaining(
     investmentId
   );
-  console.log('ticketsRemainingAfter', ticketsRemainingAfter);
-  expect(ticketsRemainingAfter.toNumber()).to.be.equal(0);
+
+  expect(ticketsRemainingAfter.toNumber()).to.be.lessThan(
+    ticketsRemainingBefore.toNumber()
+  );
 };
