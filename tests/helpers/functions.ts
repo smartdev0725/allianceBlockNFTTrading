@@ -295,12 +295,12 @@ export const declareIntentionForBuy = async (
 };
 
 export const runLottery = async (
-  governanceContract: any,
-  superDelegatorSigner: any,
-  registryContract: any,
   investmentId: BigNumber,
-  lotteryRunnerSigner: any
+  lotteryRunnerSigner: any,
+  superDelegatorSigner: any
 ) => {
+  const {registryContract, governanceContract} = await getContracts();
+
   await governanceContract.connect(superDelegatorSigner).checkCronjobs();
 
   const investmentStatus = await registryContract.investmentStatus(
@@ -327,4 +327,86 @@ export const runLottery = async (
   expect(ticketsRemainingAfter.toNumber()).to.be.lessThan(
     ticketsRemainingBefore.toNumber()
   );
+  return ticketsRemainingAfter;
+};
+
+// FundingNFTs are minted and each Funder either receives their NFT or their funds back in case they did not win the lottery
+export const funderClaimLotteryReward = async (
+  investmentId: BigNumber,
+  lender: any,
+  lenderSigner: any,
+  lendingTokenContract: any
+) => {
+  const {registryContract, fundingNFTContract} = await getContracts();
+
+  const ticketsRemaining = await registryContract.ticketsRemaining(
+    investmentId
+  );
+
+  if (ticketsRemaining.toNumber() === 0) {
+    const ticketsWonBefore = await registryContract.ticketsWonPerAddress(
+      investmentId,
+      lender
+    );
+    const ticketsRemainBefore =
+      await registryContract.remainingTicketsPerAddress(investmentId, lender);
+
+    const balanceFundingNFTTokenBefore = await fundingNFTContract.balanceOf(
+      lender,
+      investmentId.toNumber()
+    );
+
+    const lenderLendingTokenBalanceBeforeWithdraw =
+      await lendingTokenContract.balanceOf(lender);
+
+    if (Number(ticketsWonBefore) > 0) {
+      await expect(
+        registryContract
+          .connect(lenderSigner)
+          .withdrawInvestmentTickets(
+            investmentId,
+            1,
+            Number(ticketsWonBefore) - 1
+          )
+      )
+        .to.emit(registryContract, 'WithdrawInvestment')
+        .withArgs(investmentId, 1, Number(ticketsWonBefore) - 1);
+
+      await expectRevert(
+        registryContract
+          .connect(lenderSigner)
+          .withdrawAmountProvidedForNonWonTickets(investmentId),
+        'No non-won tickets to withdraw'
+      );
+    }
+
+    const ticketsAfter = await registryContract.ticketsWonPerAddress(
+      investmentId,
+      lender
+    );
+
+    expect(ticketsAfter.toNumber()).to.be.equal(0);
+
+    const balanceFundingNFTTokenAfter = await fundingNFTContract.balanceOf(
+      lender,
+      investmentId.toNumber()
+    );
+
+    if (Number(ticketsWonBefore) > 0) {
+      expect(balanceFundingNFTTokenAfter).to.be.gt(
+        balanceFundingNFTTokenBefore
+      );
+    }
+
+    const lenderLendingTokenBalanceAfterWithdraw =
+      await lendingTokenContract.balanceOf(lender);
+
+    expect(lenderLendingTokenBalanceAfterWithdraw).to.be.equal(
+      lenderLendingTokenBalanceBeforeWithdraw.add(
+        ethers.utils.parseEther(BASE_AMOUNT + '').mul(ticketsRemainBefore)
+      )
+    );
+  } else {
+    console.log('There are tickets remaining', ticketsRemaining.toNumber());
+  }
 };
