@@ -46,7 +46,7 @@ export const handleInvestmentRequest = async (
   approve: boolean
 ) => {
   const {registryContract, governanceContract} = await getContracts();
-
+  
   const status = await registryContract.investmentStatus(investmentId);
   expect(String(status)).to.be.equal(String(InvestmentStatus.REQUESTED));
 
@@ -55,6 +55,7 @@ export const handleInvestmentRequest = async (
     .superVoteForRequest(investmentId, approve);
 
   const status2 = await registryContract.investmentStatus(investmentId);
+  console.log(`handleInvestRequest, approve: ${approve}`);
   if (approve) {
     expect(String(status2)).to.be.equal(String(InvestmentStatus.APPROVED));
   } else {
@@ -300,7 +301,6 @@ export const runLottery = async (
   investmentId: BigNumber,
   lotteryRunnerSigner: any
 ) => {
-  await governanceContract.connect(superDelegatorSigner).checkCronjobs();
   await governanceContract.connect(superDelegatorSigner).checkCronjobs();
 
   const investmentStatus = await registryContract.investmentStatus(
