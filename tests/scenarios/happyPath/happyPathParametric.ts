@@ -14,6 +14,7 @@ import {
   handleInvestmentRequest,
   runLottery,
   funderClaimLotteryReward,
+  exchangeNFTForInvestmentToken,
 } from '../../helpers/functions';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
@@ -43,25 +44,13 @@ export default async function suite() {
     );
 
     // Lender 1,2 and 3 stake
-    await fundersStake(
-      this.lender1,
-      this.lender1Signer,
-      StakingType.STAKER_LVL_1
-    );
-    await fundersStake(
-      this.lender2,
-      this.lender2Signer,
-      StakingType.STAKER_LVL_2
-    );
-    await fundersStake(
-      this.lender3,
-      this.lender3Signer,
-      StakingType.STAKER_LVL_3
-    );
+    await fundersStake(this.lender1Signer, StakingType.STAKER_LVL_1);
+    await fundersStake(this.lender2Signer, StakingType.STAKER_LVL_2);
+    await fundersStake(this.lender3Signer, StakingType.STAKER_LVL_3);
 
     // Lender4 get rALDT from actions
     await getRALBTWithActions(
-      this.lender4,
+      this.lender4Signer,
       this.lender3Signer,
       this.deployerSigner
     );
@@ -69,30 +58,26 @@ export default async function suite() {
     // Lenders declare their intention to buy a partition (effectively depositing their funds)
     await declareIntentionForBuy(
       investmentId,
-      this.lender1,
       this.lender1Signer,
-      BigNumber.from(10),
+      BigNumber.from(6),
       this.lendingTokenContract
     );
     await declareIntentionForBuy(
       investmentId,
-      this.lender2,
       this.lender2Signer,
-      BigNumber.from(10),
+      BigNumber.from(6),
       this.lendingTokenContract
     );
     await declareIntentionForBuy(
       investmentId,
-      this.lender3,
       this.lender3Signer,
-      BigNumber.from(10),
+      BigNumber.from(6),
       this.lendingTokenContract
     );
     await declareIntentionForBuy(
       investmentId,
-      this.lender4,
       this.lender4Signer,
-      BigNumber.from(10),
+      BigNumber.from(6),
       this.lendingTokenContract
     );
 
@@ -116,30 +101,47 @@ export default async function suite() {
     //6) FundingNFTs are minted and each Funder either receives their NFT or their funds back in case they did not win the lottery
     await funderClaimLotteryReward(
       investmentId,
-      this.lender1,
       this.lender1Signer,
       this.lendingTokenContract
     );
 
     await funderClaimLotteryReward(
       investmentId,
-      this.lender2,
       this.lender2Signer,
       this.lendingTokenContract
     );
 
     await funderClaimLotteryReward(
       investmentId,
-      this.lender3,
       this.lender3Signer,
       this.lendingTokenContract
     );
 
     await funderClaimLotteryReward(
       investmentId,
-      this.lender4,
       this.lender4Signer,
       this.lendingTokenContract
+    );
+    //7) Funders with a FundingNFT exchange it for their Investment tokens.
+    await exchangeNFTForInvestmentToken(
+      investmentId,
+      this.lender1Signer,
+      this.investmentTokenContract
+    );
+    await exchangeNFTForInvestmentToken(
+      investmentId,
+      this.lender2Signer,
+      this.investmentTokenContract
+    );
+    await exchangeNFTForInvestmentToken(
+      investmentId,
+      this.lender3Signer,
+      this.investmentTokenContract
+    );
+    await exchangeNFTForInvestmentToken(
+      investmentId,
+      this.lender4Signer,
+      this.investmentTokenContract
     );
   });
 }

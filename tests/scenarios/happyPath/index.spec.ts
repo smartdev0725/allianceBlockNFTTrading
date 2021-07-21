@@ -1,5 +1,6 @@
 // Investment
 import happyPathParametric from './happyPathParametric';
+import happyPathParametricInBatches from './happyPathParametricInBatches';
 
 import {
   getContracts,
@@ -167,5 +168,5 @@ describe('Happy Path', function () {
     );
   });
 
-  describe('Happy Path process', happyPathParametric.bind(this));
+  describe('Happy Path process', happyPathParametricInBatches.bind(this));
 });
