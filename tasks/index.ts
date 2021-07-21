@@ -49,7 +49,7 @@ export const TASK_mint = task('mint:', 'Mints tokens to address', async ({target
   .addParam("amount", "amount to mint")
   .addParam("tokenName", "The token contract name")
 
-export const TASK_addAction = task('Add an action to the verifier:', 'Add an action', async ({action, reputationalAlbtRewardsPerLevel, reputationalAlbtRewardsPerLevelAfterFirstTime, minimumLevelForProvision, referralContract}, {ethers}) => {
+export const TASK_addAction = task('add:Action', 'Add an action', async ({action, reputationalAlbtRewardsPerLevel, reputationalAlbtRewardsPerLevelAfterFirstTime, minimumLevelForProvision, referralContract}, {ethers}) => {
   try {
     const actionVerifier = await ethers.getContract('ActionVerifier');
     await actionVerifier.importAction(action, reputationalAlbtRewardsPerLevel, reputationalAlbtRewardsPerLevelAfterFirstTime, minimumLevelForProvision, referralContract)
