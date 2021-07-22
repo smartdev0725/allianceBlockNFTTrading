@@ -1,20 +1,11 @@
-import {BASE_AMOUNT} from '../../helpers/constants';
-import {ethers, web3} from 'hardhat';
+import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
-import chai, {expect} from 'chai';
+import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {StakingType, InvestmentStatus} from '../../helpers/registryEnums';
-import {getSignature} from '../../helpers/utils';
-import {increaseTime} from '../../helpers/time';
+import {StakingType} from '../../helpers/registryEnums';
+
 import {
-  declareIntentionForBuy,
-  fundersStake,
-  getRALBTWithActions,
   batchRequestInvestment,
-  handleInvestmentRequest,
-  runLottery,
-  funderClaimLotteryReward,
-  exchangeNFTForInvestmentToken,
   batchHandleInvestmentRequest,
   batchFundersStake,
   batchGetRALBTWithActions,
@@ -22,8 +13,7 @@ import {
   batchRunLottery,
   batchFunderClaimLotteryReward,
   batchExchangeNFTForInvestmentToken,
-} from '../../helpers/functions';
-const {expectRevert} = require('@openzeppelin/test-helpers');
+} from '../../helpers/modularTests';
 
 chai.use(solidity);
 
@@ -49,12 +39,12 @@ export default async function suite() {
     const investmentsId: BigNumber[] = await batchRequestInvestment(batchInvestmentData);
 
     const batchApproveInvestmentData: any[] = [];
-    investmentsId.forEach((investment) => {
+    for (let index = 0; index < investmentsId.length; index++) {
       batchApproveInvestmentData.push({
-        investmentId: investment,
+        investmentId: investmentsId[index],
         approve: true,
       });
-    });
+    }
 
     await batchHandleInvestmentRequest(
       batchApproveInvestmentData,
@@ -93,6 +83,7 @@ export default async function suite() {
         actionCallerSigner: this.lender3Signer,
       },
     ];
+
     await batchGetRALBTWithActions(
       getRALBTFromActionsData,
       this.deployerSigner
@@ -130,9 +121,8 @@ export default async function suite() {
 
     const runLotteryData = [];
     for (let index = 0; index < investmentsId.length; index++) {
-      const investment = investmentsId[index];
       runLotteryData.push({
-        investmentId: investment,
+        investmentId: investmentsId[index],
         lotteryRunnerSigner: this.lender3Signer,
       });
     }
