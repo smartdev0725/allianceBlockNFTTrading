@@ -15,7 +15,7 @@ import {
   runLottery,
   funderClaimLotteryReward,
   exchangeNFTForInvestmentToken,
-} from '../../helpers/functions';
+} from '../../helpers/modularTests';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 chai.use(solidity);
