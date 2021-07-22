@@ -60,3 +60,12 @@ export const TASK_addAction = task('add:Action', 'Add an action', async ({action
   .addParam("amount", "amount to mint")
   .addParam("tokenName", "The token contract name")  
 
+export const TASK_superVote = task('superVoteForApprove', 'super Vote For Approve', async ({requestId, decision}, {ethers}) => {
+  try {
+    const superGovernance = await ethers.getContract('SuperGovernance');
+    await superGovernance.superVoteForRequest(requestId, decision);
+  } catch (error) {
+    console.log(error.message)
+  }  
+}).addParam("requestId", "The request id")
+  .addParam("decision", "The decision")  
