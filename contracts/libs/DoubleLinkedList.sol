@@ -123,10 +123,10 @@ library DoubleLinkedList {
     function getIndexedId(LinkedList storage self, uint256 index) internal view returns (uint256 id, bool found) {
         id = self.head;
 
-        for (uint256 i = 1; i < index; i++) {
+        for (uint256 i = 1; i < index && !found; i++) {
             id = self.nodes[id].next;
+            found = id != 0;
         }
-        found = id != 0;
     }
 
     /**
