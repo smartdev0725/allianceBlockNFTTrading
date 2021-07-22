@@ -1,10 +1,10 @@
 import {getContracts, getSignature} from './utils';
 import {StakingType, InvestmentStatus} from './registryEnums';
 import {BASE_AMOUNT} from './constants';
-
+import {Signer, Contract} from 'ethers';
 import {
   Investment,
-  InvestmentRequest,
+  InvestmentForApproval,
   Stake,
   GetRALBTData,
   ShowInterestData,
@@ -13,8 +13,8 @@ import {
   ExchangeNFTForInvestmentTokenData,
 } from './interfaces';
 
-import {deployments, ethers, getNamedAccounts, web3} from 'hardhat';
-import chai, {expect} from 'chai';
+import {ethers, web3} from 'hardhat';
+import {expect} from 'chai';
 import {BigNumber} from 'ethers';
 import {increaseTime} from './time';
 const {expectRevert} = require('@openzeppelin/test-helpers');
@@ -104,8 +104,8 @@ export const handleInvestmentRequest = async (
 };
 
 export const batchHandleInvestmentRequest = async (
-  investmentsForApprove: any[],
-  superDelegatorSigner: any
+  investmentsForApprove: InvestmentForApproval[],
+  superDelegatorSigner: Signer
 ) => {
   const results = [];
   // investmentForApprove = {investmentId: BigNumber, approve: Bool}
@@ -235,7 +235,7 @@ export const fundersStake = async (
   }
 };
 
-export const batchFundersStake = async (data: any[]) => {
+export const batchFundersStake = async (data: Stake[]) => {
   //  data = {lenderSigner: any, stakingLevel: StakingType}
   for (let i = 0; i < data.length; i++) {
     await fundersStake(data[i].lenderSigner, data[i].stakingLevel);
@@ -315,8 +315,8 @@ export const getRALBTWithActions = async (
   }
 };
 export const batchGetRALBTWithActions = async (
-  data: any[],
-  deployerSigner: any
+  data: GetRALBTData[],
+  deployerSigner: Signer
 ) => {
   //  data = {lenderSigner: any, actionCallerSigner: any}
   for (let i = 0; i < data.length; i++) {
@@ -384,7 +384,7 @@ export const declareIntentionForBuy = async (
     );
   }
 };
-export const batchDeclareIntentionForBuy = async (data: any[]) => {
+export const batchDeclareIntentionForBuy = async (data: ShowInterestData[]) => {
   // data = {
   //   investmentId: BigNumber,
   //   lenderSigner: any,
@@ -439,8 +439,8 @@ export const runLottery = async (
   return ticketsRemainingAfter;
 };
 export const batchRunLottery = async (
-  data: any[],
-  superDelegatorSigner: any
+  data: RunLotteryData[],
+  superDelegatorSigner: Signer
 ) => {
   // data = {
   //   investmentId: BigNumber,
@@ -538,7 +538,9 @@ export const funderClaimLotteryReward = async (
     throw new Error('There are tickets reamining');
   }
 };
-export const batchFunderClaimLotteryReward = async (data: any[]) => {
+export const batchFunderClaimLotteryReward = async (
+  data: FunderClaimRewardData[]
+) => {
   // data = {
   //   investmentId: BigNumber,
   //   lenderSigner: any,
@@ -556,8 +558,8 @@ export const batchFunderClaimLotteryReward = async (data: any[]) => {
 //Funders with a FundingNFT exchange it for their Investment tokens.
 export const exchangeNFTForInvestmentToken = async (
   investmentId: BigNumber,
-  lenderSigner: any,
-  investmentTokenContract: any
+  lenderSigner: Signer,
+  investmentTokenContract: Contract
 ) => {
   const {registryContract, fundingNFTContract} = await getContracts();
 
@@ -603,7 +605,9 @@ export const exchangeNFTForInvestmentToken = async (
     )
   );
 };
-export const batchExchangeNFTForInvestmentToken = async (data: any[]) => {
+export const batchExchangeNFTForInvestmentToken = async (
+  data: ExchangeNFTForInvestmentTokenData[]
+) => {
   // data = {
   //   investmentId: BigNumber,
   //   lenderSigner: any,

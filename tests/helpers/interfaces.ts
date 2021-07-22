@@ -10,7 +10,7 @@ export interface Investment {
   seekerSigner: Signer;
 }
 
-export interface InvestmentRequest {
+export interface InvestmentForApproval {
   investmentId: BigNumber,
   superDelegatorSigner: Signer,
   approve: boolean
@@ -24,7 +24,6 @@ export interface Stake {
 export interface GetRALBTData {
   lenderSigner: Signer,
   actionCallerSigner: Signer,
-  deployerSigner: Signer
 }
 
 export interface ShowInterestData {
