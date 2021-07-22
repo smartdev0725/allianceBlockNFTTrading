@@ -12,12 +12,12 @@ chai.use(solidity);
 
 export default async function suite() {
   it('should do a full flow', async function () {
-    const investmentId = await this.registryContract.totalInvestments();
-    const amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
-    const totalAmountRequested = ethers.utils.parseEther('10000');
-    const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
-
     //1) Seeker publishes Investment
+    // Given
+    const investmentId = await this.registryContract.totalInvestments();
+    const amountOfTokensToBePurchased = ethers.utils.parseEther('1000');
+    const totalAmountRequested = ethers.utils.parseEther('200');
+    const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
     await this.registryContract
       .connect(this.seekerSigner)
       .requestInvestment(
@@ -28,21 +28,27 @@ export default async function suite() {
         ipfsHash
       );
 
+    // When
     const investmentId2 = await this.registryContract.totalInvestments();
+    // Then
     expect(Number(investmentId2)).to.be.equal(Number(investmentId) + 1);
 
     //2) SuperGovernance approves Investment
+    // Given
     const status = await this.registryContract.investmentStatus(investmentId);
     expect(String(status)).to.be.equal(String(InvestmentStatus.REQUESTED));
 
+    // When
     await this.governanceContract
       .connect(this.superDelegatorSigner)
       .superVoteForRequest(investmentId, true);
 
     const status2 = await this.registryContract.investmentStatus(investmentId);
+    // Then
     expect(String(status2)).to.be.equal(String(InvestmentStatus.APPROVED));
 
     //3) 4 Funders stake, one for each tier
+    // Given
     const staker1StakingAmountBefore = await this.stakingContract.getBalance(
       this.lender1
     );
@@ -87,6 +93,7 @@ export default async function suite() {
       this.lender3
     );
 
+    // When
     await expect(
       this.stakingContract
         .connect(this.lender1Signer)
@@ -247,37 +254,13 @@ export default async function suite() {
       Number(rALBTBalanceBefore3)
     );
 
-    //4) Funders declare their intention to buy a partition (effectively depositing their funds)
-    // Given
-    const numberOfPartitions = BigNumber.from(6);
-    const amountOfLendingTokens = numberOfPartitions.mul(
-      ethers.utils.parseEther(BASE_AMOUNT + '')
-    );
-    const initLenderLendingTokenBalance1 =
-      await this.lendingTokenContract.balanceOf(this.lender1);
-    const initLenderLendingTokenBalance2 =
-      await this.lendingTokenContract.balanceOf(this.lender2);
-    const initLenderLendingTokenBalance3 =
-      await this.lendingTokenContract.balanceOf(this.lender3);
-    const initLenderLendingTokenBalance4 =
-      await this.lendingTokenContract.balanceOf(this.lender4);
-    const initEscrowLendingTokenBalance =
-      await this.lendingTokenContract.balanceOf(this.escrowContract.address);
-
-    await this.registryContract
-      .connect(this.lender1Signer)
-      .showInterestForInvestment(this.investmentId, numberOfPartitions);
-
-    await this.registryContract
-      .connect(this.lender2Signer)
-      .showInterestForInvestment(this.investmentId, numberOfPartitions);
-
-    await this.registryContract
-      .connect(this.lender3Signer)
-      .showInterestForInvestment(this.investmentId, numberOfPartitions);
-
-    //simulates lender4 has rALBT from other methods besides staking
+    //Simulates lender4 has rALBT from other methods besides staking
     //GET rALBT HERE!!
+    // Given
+    const rALBTBalanceBefore4 = await this.rALBTContract.balanceOf(
+      this.lender4
+    );
+
     const addressZero = '0x0000000000000000000000000000000000000000';
     const actions = [
       {
@@ -287,8 +270,6 @@ export default async function suite() {
         referralId: '0',
       },
     ];
-
-    // Given
     const reputationalAlbtRewardsPerLevel = [
       ethers.utils.parseEther('500').toString(),
       ethers.utils.parseEther('500').toString(),
@@ -324,6 +305,7 @@ export default async function suite() {
 
     const signatures = [signature];
 
+    // Then
     await this.actionVerifierContract
       .connect(this.lender3Signer)
       .provideRewardsForActions(actions, signatures);
@@ -336,9 +318,46 @@ export default async function suite() {
         .provideRewardsForActions(actions, signatures);
     }
 
+    const rALBTBalanceAfter4 = await this.rALBTContract.balanceOf(this.lender4);
+
+    // Then
+    expect(Number(rALBTBalanceAfter4)).to.be.greaterThan(
+      Number(rALBTBalanceBefore4)
+    );
+
+    //4) Funders declare their intention to buy a partition (effectively depositing their funds)
+    // Given
+    const numberOfPartitions = BigNumber.from(6);
+    const amountOfLendingTokens = numberOfPartitions.mul(
+      ethers.utils.parseEther(BASE_AMOUNT + '')
+    );
+    const initLenderLendingTokenBalance1 =
+      await this.lendingTokenContract.balanceOf(this.lender1);
+    const initLenderLendingTokenBalance2 =
+      await this.lendingTokenContract.balanceOf(this.lender2);
+    const initLenderLendingTokenBalance3 =
+      await this.lendingTokenContract.balanceOf(this.lender3);
+    const initLenderLendingTokenBalance4 =
+      await this.lendingTokenContract.balanceOf(this.lender4);
+    const initEscrowLendingTokenBalance =
+      await this.lendingTokenContract.balanceOf(this.escrowContract.address);
+
+    // When
+    await this.registryContract
+      .connect(this.lender1Signer)
+      .showInterestForInvestment(investmentId, numberOfPartitions);
+
+    await this.registryContract
+      .connect(this.lender2Signer)
+      .showInterestForInvestment(investmentId, numberOfPartitions);
+
+    await this.registryContract
+      .connect(this.lender3Signer)
+      .showInterestForInvestment(investmentId, numberOfPartitions);
+
     await this.registryContract
       .connect(this.lender4Signer)
-      .showInterestForInvestment(this.investmentId, numberOfPartitions);
+      .showInterestForInvestment(investmentId, numberOfPartitions);
 
     const lenderLendingTokenBalanceAfter1 =
       await this.lendingTokenContract.balanceOf(this.lender1);
@@ -351,6 +370,7 @@ export default async function suite() {
     const escrowLendingTokenBalanceAfter =
       await this.lendingTokenContract.balanceOf(this.escrowContract.address);
 
+    // Then
     expect(lenderLendingTokenBalanceAfter1).to.be.equal(
       initLenderLendingTokenBalance1.sub(amountOfLendingTokens)
     );
@@ -376,91 +396,97 @@ export default async function suite() {
     );
 
     //5) The lottery is run when all the partitions have been covered
-
+    // Given
+    await this.governanceContract
+      .connect(this.superDelegatorSigner)
+      .checkCronjobs();
     await this.governanceContract
       .connect(this.superDelegatorSigner)
       .checkCronjobs();
 
     const investmentStatusAfter = await this.registryContract.investmentStatus(
-      this.investmentId
+      investmentId
     );
 
     expect(investmentStatusAfter).to.be.equal(2);
 
+    // When
     await expect(
       this.registryContract
         .connect(this.lender2Signer)
-        .executeLotteryRun(this.investmentId)
+        .executeLotteryRun(investmentId)
     )
       .to.emit(this.registryContract, 'LotteryExecuted')
-      .withArgs(this.investmentId);
+      .withArgs(investmentId);
 
     const ticketsRemainingAfter = await this.registryContract.ticketsRemaining(
-      this.investmentId
+      investmentId
     );
+
+    // Then
     expect(ticketsRemainingAfter.toNumber()).to.be.equal(0);
 
     //6) FundingNFTs are minted and each Funder either receives their NFT or their funds back in case they did not win the lottery
-
+    // Given
     const ticketsWonBefore1 = await this.registryContract.ticketsWonPerAddress(
-      this.investmentId,
+      investmentId,
       this.lender1
     );
     const ticketsRemainBefore1 =
       await this.registryContract.remainingTicketsPerAddress(
-        this.investmentId,
+        investmentId,
         this.lender1
       );
 
     const ticketsWonBefore2 = await this.registryContract.ticketsWonPerAddress(
-      this.investmentId,
+      investmentId,
       this.lender2
     );
     const ticketsRemainBefore2 =
       await this.registryContract.remainingTicketsPerAddress(
-        this.investmentId,
+        investmentId,
         this.lender2
       );
 
     const ticketsWonBefore3 = await this.registryContract.ticketsWonPerAddress(
-      this.investmentId,
+      investmentId,
       this.lender3
     );
     const ticketsRemainBefore3 =
       await this.registryContract.remainingTicketsPerAddress(
-        this.investmentId,
+        investmentId,
         this.lender3
       );
 
     const ticketsWonBefore4 = await this.registryContract.ticketsWonPerAddress(
-      this.investmentId,
+      investmentId,
       this.lender4
     );
     const ticketsRemainBefore4 =
       await this.registryContract.remainingTicketsPerAddress(
-        this.investmentId,
+        investmentId,
         this.lender4
       );
 
     const balanceFundingNFTTokenBefore1 =
       await this.fundingNFTContract.balanceOf(
         this.lender1,
-        this.investmentId.toNumber()
+        investmentId.toNumber()
       );
     const balanceFundingNFTTokenBefore2 =
       await this.fundingNFTContract.balanceOf(
         this.lender2,
-        this.investmentId.toNumber()
+        investmentId.toNumber()
       );
     const balanceFundingNFTTokenBefore3 =
       await this.fundingNFTContract.balanceOf(
         this.lender3,
-        this.investmentId.toNumber()
+        investmentId.toNumber()
       );
     const balanceFundingNFTTokenBefore4 =
       await this.fundingNFTContract.balanceOf(
         this.lender4,
-        this.investmentId.toNumber()
+        investmentId.toNumber()
       );
 
     const lenderLendingTokenBalanceBeforeWithdraw1 =
@@ -472,23 +498,24 @@ export default async function suite() {
     const lenderLendingTokenBalanceBeforeWithdraw4 =
       await this.lendingTokenContract.balanceOf(this.lender4);
 
+    // When
     if (Number(ticketsWonBefore1) > 0) {
       await expect(
         this.registryContract
           .connect(this.lender1Signer)
           .withdrawInvestmentTickets(
-            this.investmentId,
+            investmentId,
             1,
             Number(ticketsWonBefore1) - 1
           )
       )
         .to.emit(this.registryContract, 'WithdrawInvestment')
-        .withArgs(this.investmentId, 1, Number(ticketsWonBefore1) - 1);
+        .withArgs(investmentId, 1, Number(ticketsWonBefore1) - 1);
 
       await expectRevert(
         this.registryContract
           .connect(this.lender1Signer)
-          .withdrawAmountProvidedForNonWonTickets(this.investmentId),
+          .withdrawAmountProvidedForNonWonTickets(investmentId),
         'No non-won tickets to withdraw'
       );
     }
@@ -498,18 +525,18 @@ export default async function suite() {
         this.registryContract
           .connect(this.lender2Signer)
           .withdrawInvestmentTickets(
-            this.investmentId,
+            investmentId,
             1,
             Number(ticketsWonBefore2) - 1
           )
       )
         .to.emit(this.registryContract, 'WithdrawInvestment')
-        .withArgs(this.investmentId, 1, Number(ticketsWonBefore2) - 1);
+        .withArgs(investmentId, 1, Number(ticketsWonBefore2) - 1);
 
       await expectRevert(
         this.registryContract
           .connect(this.lender2Signer)
-          .withdrawAmountProvidedForNonWonTickets(this.investmentId),
+          .withdrawAmountProvidedForNonWonTickets(investmentId),
         'No non-won tickets to withdraw'
       );
     }
@@ -519,18 +546,18 @@ export default async function suite() {
         this.registryContract
           .connect(this.lender3Signer)
           .withdrawInvestmentTickets(
-            this.investmentId,
+            investmentId,
             1,
             Number(ticketsWonBefore3) - 1
           )
       )
         .to.emit(this.registryContract, 'WithdrawInvestment')
-        .withArgs(this.investmentId, 1, Number(ticketsWonBefore3) - 1);
+        .withArgs(investmentId, 1, Number(ticketsWonBefore3) - 1);
 
       await expectRevert(
         this.registryContract
           .connect(this.lender3Signer)
-          .withdrawAmountProvidedForNonWonTickets(this.investmentId),
+          .withdrawAmountProvidedForNonWonTickets(investmentId),
         'No non-won tickets to withdraw'
       );
     }
@@ -540,64 +567,74 @@ export default async function suite() {
         this.registryContract
           .connect(this.lender4Signer)
           .withdrawInvestmentTickets(
-            this.investmentId,
+            investmentId,
             1,
             Number(ticketsWonBefore4) - 1
           )
       )
         .to.emit(this.registryContract, 'WithdrawInvestment')
-        .withArgs(this.investmentId, 1, Number(ticketsWonBefore4) - 1);
+        .withArgs(investmentId, 1, Number(ticketsWonBefore4) - 1);
 
       await expectRevert(
         this.registryContract
           .connect(this.lender4Signer)
-          .withdrawAmountProvidedForNonWonTickets(this.investmentId),
+          .withdrawAmountProvidedForNonWonTickets(investmentId),
         'No non-won tickets to withdraw'
       );
     }
 
     const ticketsAfter1 = await this.registryContract.ticketsWonPerAddress(
-      this.investmentId,
+      investmentId,
       this.lender1
     );
     const ticketsAfter2 = await this.registryContract.ticketsWonPerAddress(
-      this.investmentId,
+      investmentId,
       this.lender2
     );
     const ticketsAfter3 = await this.registryContract.ticketsWonPerAddress(
-      this.investmentId,
+      investmentId,
       this.lender3
     );
     const ticketsAfter4 = await this.registryContract.ticketsWonPerAddress(
-      this.investmentId,
+      investmentId,
       this.lender4
     );
-
-    expect(ticketsAfter1.toNumber()).to.be.equal(0);
-    expect(ticketsAfter2.toNumber()).to.be.equal(0);
-    expect(ticketsAfter3.toNumber()).to.be.equal(0);
-    expect(ticketsAfter4.toNumber()).to.be.equal(0);
 
     const balanceFundingNFTTokenAfter1 =
       await this.fundingNFTContract.balanceOf(
         this.lender1,
-        this.investmentId.toNumber()
+        investmentId.toNumber()
       );
     const balanceFundingNFTTokenAfter2 =
       await this.fundingNFTContract.balanceOf(
         this.lender2,
-        this.investmentId.toNumber()
+        investmentId.toNumber()
       );
     const balanceFundingNFTTokenAfter3 =
       await this.fundingNFTContract.balanceOf(
         this.lender3,
-        this.investmentId.toNumber()
+        investmentId.toNumber()
       );
     const balanceFundingNFTTokenAfter4 =
       await this.fundingNFTContract.balanceOf(
         this.lender4,
-        this.investmentId.toNumber()
+        investmentId.toNumber()
       );
+
+    const lenderLendingTokenBalanceAfterWithdraw1 =
+      await this.lendingTokenContract.balanceOf(this.lender1);
+    const lenderLendingTokenBalanceAfterWithdraw2 =
+      await this.lendingTokenContract.balanceOf(this.lender2);
+    const lenderLendingTokenBalanceAfterWithdraw3 =
+      await this.lendingTokenContract.balanceOf(this.lender3);
+    const lenderLendingTokenBalanceAfterWithdraw4 =
+      await this.lendingTokenContract.balanceOf(this.lender4);
+
+    // Then
+    expect(ticketsAfter1.toNumber()).to.be.equal(0);
+    expect(ticketsAfter2.toNumber()).to.be.equal(0);
+    expect(ticketsAfter3.toNumber()).to.be.equal(0);
+    expect(ticketsAfter4.toNumber()).to.be.equal(0);
 
     if (Number(ticketsWonBefore1) > 0) {
       expect(balanceFundingNFTTokenAfter1).to.be.gt(
@@ -623,15 +660,6 @@ export default async function suite() {
       );
     }
 
-    const lenderLendingTokenBalanceAfterWithdraw1 =
-      await this.lendingTokenContract.balanceOf(this.lender1);
-    const lenderLendingTokenBalanceAfterWithdraw2 =
-      await this.lendingTokenContract.balanceOf(this.lender2);
-    const lenderLendingTokenBalanceAfterWithdraw3 =
-      await this.lendingTokenContract.balanceOf(this.lender3);
-    const lenderLendingTokenBalanceAfterWithdraw4 =
-      await this.lendingTokenContract.balanceOf(this.lender4);
-
     expect(lenderLendingTokenBalanceAfterWithdraw1).to.be.equal(
       lenderLendingTokenBalanceBeforeWithdraw1.add(
         ethers.utils.parseEther(BASE_AMOUNT + '').mul(ticketsRemainBefore1)
@@ -656,8 +684,9 @@ export default async function suite() {
     //validar rALBT balance e los usuarios cambie (no necesariamente)
 
     //7) Funders with a FundingNFT exchange it for their Investment tokens.
+    // Given
     const investmentTokensPerTicket =
-      await this.registryContract.investmentTokensPerTicket(this.investmentId);
+      await this.registryContract.investmentTokensPerTicket(investmentId);
 
     const balanceOfInvestmentTokenBefore1 =
       await this.investmentTokenContract.balanceOf(this.lender1);
@@ -668,18 +697,19 @@ export default async function suite() {
     const balanceOfInvestmentTokenBefore4 =
       await this.investmentTokenContract.balanceOf(this.lender4);
 
+    // When
     if (balanceFundingNFTTokenAfter1.toNumber() > 0) {
       await expect(
         this.registryContract
           .connect(this.lender1Signer)
           .convertNFTToInvestmentTokens(
-            this.investmentId,
+            investmentId,
             balanceFundingNFTTokenAfter1
           )
       )
         .to.emit(this.registryContract, 'ConvertNFTToInvestmentTokens')
         .withArgs(
-          this.investmentId,
+          investmentId,
           balanceFundingNFTTokenAfter1,
           investmentTokensPerTicket.mul(balanceFundingNFTTokenAfter1)
         );
@@ -689,13 +719,13 @@ export default async function suite() {
         this.registryContract
           .connect(this.lender2Signer)
           .convertNFTToInvestmentTokens(
-            this.investmentId,
+            investmentId,
             balanceFundingNFTTokenAfter2
           )
       )
         .to.emit(this.registryContract, 'ConvertNFTToInvestmentTokens')
         .withArgs(
-          this.investmentId,
+          investmentId,
           balanceFundingNFTTokenAfter2,
           investmentTokensPerTicket.mul(balanceFundingNFTTokenAfter2)
         );
@@ -705,13 +735,13 @@ export default async function suite() {
         this.registryContract
           .connect(this.lender3Signer)
           .convertNFTToInvestmentTokens(
-            this.investmentId,
+            investmentId,
             balanceFundingNFTTokenAfter3
           )
       )
         .to.emit(this.registryContract, 'ConvertNFTToInvestmentTokens')
         .withArgs(
-          this.investmentId,
+          investmentId,
           balanceFundingNFTTokenAfter3,
           investmentTokensPerTicket.mul(balanceFundingNFTTokenAfter3)
         );
@@ -721,45 +751,17 @@ export default async function suite() {
         this.registryContract
           .connect(this.lender4Signer)
           .convertNFTToInvestmentTokens(
-            this.investmentId,
+            investmentId,
             balanceFundingNFTTokenAfter4
           )
       )
         .to.emit(this.registryContract, 'ConvertNFTToInvestmentTokens')
         .withArgs(
-          this.investmentId,
+          investmentId,
           balanceFundingNFTTokenAfter4,
           investmentTokensPerTicket.mul(balanceFundingNFTTokenAfter4)
         );
     }
-
-    expect(
-      await this.fundingNFTContract.balanceOf(
-        this.lender1,
-        this.investmentId.toNumber()
-      )
-    ).to.be.equal(0);
-    expect(
-      await this.fundingNFTContract.balanceOf(
-        this.lender2,
-        this.investmentId.toNumber()
-      )
-    ).to.be.equal(0);
-    expect(
-      await this.fundingNFTContract.balanceOf(
-        this.lender3,
-        this.investmentId.toNumber()
-      )
-    ).to.be.equal(0);
-    expect(
-      await this.fundingNFTContract.balanceOf(
-        this.lender4,
-        this.investmentId.toNumber()
-      )
-    ).to.be.equal(0);
-
-    const baseAmountForEachPartition =
-      await this.registryContract.baseAmountForEachPartition();
 
     const balanceOfInvestmentTokenAfter1 =
       await this.investmentTokenContract.balanceOf(this.lender1);
@@ -769,6 +771,32 @@ export default async function suite() {
       await this.investmentTokenContract.balanceOf(this.lender3);
     const balanceOfInvestmentTokenAfter4 =
       await this.investmentTokenContract.balanceOf(this.lender4);
+
+    // Then
+    expect(
+      await this.fundingNFTContract.balanceOf(
+        this.lender1,
+        investmentId.toNumber()
+      )
+    ).to.be.equal(0);
+    expect(
+      await this.fundingNFTContract.balanceOf(
+        this.lender2,
+        investmentId.toNumber()
+      )
+    ).to.be.equal(0);
+    expect(
+      await this.fundingNFTContract.balanceOf(
+        this.lender3,
+        investmentId.toNumber()
+      )
+    ).to.be.equal(0);
+    expect(
+      await this.fundingNFTContract.balanceOf(
+        this.lender4,
+        investmentId.toNumber()
+      )
+    ).to.be.equal(0);
 
     expect(balanceOfInvestmentTokenAfter1.toString()).to.be.equal(
       balanceOfInvestmentTokenBefore1.add(
