@@ -2,6 +2,17 @@ import {getContracts, getSignature} from './utils';
 import {StakingType, InvestmentStatus} from './registryEnums';
 import {BASE_AMOUNT} from './constants';
 
+import {
+  Investment,
+  InvestmentRequest,
+  Stake,
+  GetRALBTData,
+  ShowInterestData,
+  RunLotteryData,
+  FunderClaimRewardData,
+  ExchangeNFTForInvestmentTokenData,
+} from './interfaces';
+
 import {deployments, ethers, getNamedAccounts, web3} from 'hardhat';
 import chai, {expect} from 'chai';
 import {BigNumber} from 'ethers';
@@ -10,13 +21,22 @@ const {expectRevert} = require('@openzeppelin/test-helpers');
 
 // Allows Seeker publishes Investment
 export const requestInvestment = async (
-  investmentTokenContract: any,
-  amountOfTokensToBePurchased: BigNumber,
-  lendingTokenContract: any,
-  totalAmountRequested: BigNumber,
-  ipfsHash: any,
-  seekerSigner: any
-) => {
+  investment: Investment
+  // investmentTokenContract: any,
+  // amountOfTokensToBePurchased: BigNumber,
+  // lendingTokenContract: any,
+  // totalAmountRequested: BigNumber,
+  // ipfsHash: any,
+  // seekerSigner: any
+): Promise<BigNumber> => {
+  const {
+    investmentTokenContract,
+    amountOfTokensToBePurchased,
+    lendingTokenContract,
+    totalAmountRequested,
+    ipfsHash,
+    seekerSigner,
+  } = investment;
   const {registryContract} = await getContracts();
 
   const numberInvestmentBefore = await registryContract.totalInvestments();
@@ -39,28 +59,21 @@ export const requestInvestment = async (
 
   return numberInvestmentBefore;
 };
-export const batchRequestInvestment = async (investments: any[]) => {
-  const investmetsId: any[] = [];
-
-  // investments = {
-  //   investmentTokenContract: any,
-  //   amountOfTokensToBePurchased: BigNumber,
-  //   lendingTokenContract: any,
-  //   totalAmountRequested: BigNumber,
-  //   ipfsHash: any,
-  //   seekerSigner: any
-  // };
+export const batchRequestInvestment = async (
+  investments: Investment[]
+): Promise<BigNumber[]> => {
+  const investmetsId: BigNumber[] = [];
 
   for (let index = 0; index < investments.length; index++) {
     const investment = investments[index];
-    const investmentId = await requestInvestment(
-      investment.investmentTokenContract,
-      investment.amountOfTokensToBePurchased,
-      investment.lendingTokenContract,
-      investment.totalAmountRequested,
-      investment.ipfsHash,
-      investment.seekerSigner
-    );
+    const investmentId = await requestInvestment({
+      investmentTokenContract: investment.investmentTokenContract,
+      amountOfTokensToBePurchased: investment.amountOfTokensToBePurchased,
+      lendingTokenContract: investment.lendingTokenContract,
+      totalAmountRequested: investment.totalAmountRequested,
+      ipfsHash: investment.ipfsHash,
+      seekerSigner: investment.seekerSigner,
+    });
     investmetsId.push(investmentId);
   }
   expect(investmetsId.length).to.be.equal(investments.length);

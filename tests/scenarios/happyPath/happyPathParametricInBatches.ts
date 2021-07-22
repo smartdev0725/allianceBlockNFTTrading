@@ -46,7 +46,7 @@ export default async function suite() {
         seekerSigner: this.seekerSigner,
       });
     }
-    const investmentsId = await batchRequestInvestment(batchInvestmentData);
+    const investmentsId: BigNumber[] = await batchRequestInvestment(batchInvestmentData);
 
     const batchApproveInvestmentData: any[] = [];
     investmentsId.forEach((investment) => {
