@@ -56,6 +56,7 @@ library OrderedDoubleLinkedList {
         uint256 value,
         uint256 id
     ) internal {
+        require(id != 0, "Id should be different from zero");
         Node memory node = self.nodes[self.head];
 
         //If empty
