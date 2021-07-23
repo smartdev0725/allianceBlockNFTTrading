@@ -300,6 +300,21 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
     }
 
     /**
+     * @dev This function is called by the seeker to withdraw the lending tokens provided by investors after lottery ends.
+     * @param investmentId The id of the investment.
+     */
+    function withdrawInvestment(uint256 investmentId) external nonReentrant() {
+        require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
+        require(investmentSeeker[investmentId] == msg.sender, "Only seeker can withdraw");
+        require(!investmentWithdrawn[investmentId], "Already withdrawn");
+        
+        uint256 amountToWithdraw = investmentDetails[investmentId].totalAmountToBeRaised;
+        investmentWithdrawn[investmentId] = true;
+
+        escrow.transferLendingToken(investmentDetails[investmentId].lendingToken, msg.sender, amountToWithdraw);
+    }
+
+    /**
      * @notice Gets Requesting status
      * @dev Returns true if investors have shown interest for equal or more than the total tickets.
      * @param investmentId The id of the investment type to be checked.
