@@ -20,7 +20,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
     // EVENTS
     event InvestmentRequested(uint256 indexed investmentId, address indexed user, uint256 amount);
-    event InvestmentInterest(uint256 indexed investmentId, uint amount);
+    event InvestmentInterest(uint256 indexed investmentId, address indexed user, uint amount);
     event LotteryExecuted(uint256 indexed investmentId);
     event WithdrawInvestment(uint256 indexed investmentId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
     event WithdrawAmountForNonTickets(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets);
@@ -112,7 +112,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         }
 
         // Add event for investment interest
-        emit InvestmentInterest(investmentId, amountOfPartitions);
+        emit InvestmentInterest(investmentId, msg.sender, amountOfPartitions);
 
     }
 
