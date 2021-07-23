@@ -5,7 +5,8 @@ import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
 import {StakingType, InvestmentStatus} from '../../helpers/registryEnums';
 import {getSignature} from '../../helpers/utils';
-import {increaseTime} from '../../helpers/time';
+import {getTransactionTimestamp, increaseTime} from '../../helpers/time';
+import {CronjobType} from '../../helpers/governanceEnums';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 chai.use(solidity);
@@ -14,38 +15,206 @@ export default async function suite() {
   it('should do a full flow', async function () {
     //1) Seeker publishes Investment
     // Given
-    const investmentId = await this.registryContract.totalInvestments();
-    const amountOfTokensToBePurchased = ethers.utils.parseEther('1000');
+    const amountOfInvestmentTokens = ethers.utils.parseEther('1000');
     const totalAmountRequested = ethers.utils.parseEther('200');
     const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
-    await this.registryContract
+
+    const investmentId = await this.registryContract.totalInvestments();
+    const totalInvestmentsBefore =
+      await this.registryContract.totalInvestments();
+    const balanceInvestmentTokenSeekerBefore =
+      await this.investmentTokenContract.balanceOf(this.seeker);
+    const balanceInvestmentTokenEscrowBefore =
+      await this.investmentTokenContract.balanceOf(this.escrowContract.address);
+    const balanceFundingNftEscrowBefore =
+      await this.fundingNFTContract.balanceOf(
+        this.escrowContract.address,
+        investmentId
+      );
+    const totalApprovalRequestsBefore =
+      await this.governanceContract.totalApprovalRequests();
+
+    const amountOfPartitions = totalAmountRequested.div(
+      ethers.utils.parseEther(BASE_AMOUNT.toString())
+    );
+    // When
+    const requestInvestment = await this.registryContract
       .connect(this.seekerSigner)
       .requestInvestment(
         this.investmentTokenContract.address,
-        amountOfTokensToBePurchased,
+        amountOfInvestmentTokens,
         this.lendingTokenContract.address,
         totalAmountRequested,
         ipfsHash
       );
 
-    // When
-    const investmentId2 = await this.registryContract.totalInvestments();
+    const investmentDetails = await this.registryContract.investmentDetails(
+      investmentId
+    );
+    const investmentSeeker = await this.registryContract.investmentSeeker(
+      investmentId
+    );
+    const totalInvestmentsAfter =
+      await this.registryContract.totalInvestments();
+    const balanceInvestmentTokenSeekerAfter =
+      await this.investmentTokenContract.balanceOf(this.seeker);
+    const balanceInvestmentTokenEscrowAfter =
+      await this.investmentTokenContract.balanceOf(this.escrowContract.address);
+    const balanceFundingNftEscrowAfter =
+      await this.fundingNFTContract.balanceOf(
+        this.escrowContract.address,
+        investmentId
+      );
+    const investmentTokensPerTicket =
+      await this.registryContract.investmentTokensPerTicket(investmentId);
+    const isPauseFundingNFTTransfer =
+      await this.fundingNFTContract.transfersPaused(investmentId);
+    const totalApprovalRequestsAfter =
+      await this.governanceContract.totalApprovalRequests();
+    const approvalRequest = await this.governanceContract.approvalRequests(
+      totalApprovalRequestsBefore
+    );
+    const investmentStatus = await this.registryContract.investmentStatus(
+      investmentId
+    );
+
     // Then
-    expect(Number(investmentId2)).to.be.equal(Number(investmentId) + 1);
+    // Events
+    expect(requestInvestment)
+      .to.emit(this.fundingNFTContract, 'TransfersPaused')
+      .withArgs(investmentId);
+    expect(requestInvestment)
+      .to.emit(this.governanceContract, 'ApprovalRequested')
+      .withArgs(investmentId, this.registryContract.address);
+    expect(requestInvestment)
+      .to.emit(this.registryContract, 'InvestmentRequested')
+      .withArgs(investmentId, this.seeker, totalAmountRequested);
+
+    // Correct investment details
+    expect(investmentDetails.investmentId).to.be.equal(investmentId);
+    expect(investmentDetails.investmentToken).to.be.equal(
+      this.investmentTokenContract.address
+    );
+    expect(investmentDetails.investmentTokensAmount).to.be.equal(
+      amountOfInvestmentTokens
+    );
+    expect(investmentDetails.totalAmountToBeRaised).to.be.equal(
+      totalAmountRequested
+    );
+    expect(investmentDetails.extraInfo).to.be.equal(ipfsHash);
+    expect(investmentDetails.totalPartitionsToBePurchased).to.be.equal(
+      amountOfPartitions
+    );
+    expect(investmentDetails.lendingToken).to.be.equal(
+      this.lendingTokenContract.address
+    );
+    // Correct investment seeker
+    expect(investmentSeeker).to.be.equal(this.seeker);
+    // Correct total of investments
+    expect(totalInvestmentsAfter.toNumber()).to.be.equal(
+      totalInvestmentsBefore.toNumber() + 1
+    );
+    // Correct balances
+    expect(balanceInvestmentTokenSeekerAfter).to.be.equal(
+      balanceInvestmentTokenSeekerBefore.sub(amountOfInvestmentTokens)
+    );
+    expect(balanceInvestmentTokenEscrowAfter).to.be.equal(
+      balanceInvestmentTokenEscrowBefore.add(amountOfInvestmentTokens)
+    );
+    expect(balanceFundingNftEscrowAfter).to.be.equal(amountOfPartitions);
+    expect(investmentTokensPerTicket).to.be.equal(
+      amountOfInvestmentTokens.div(amountOfPartitions)
+    );
+    // Nft is pause
+    expect(isPauseFundingNFTTransfer).to.be.true;
+    // Correct approval request
+    expect(approvalRequest.investmentId).to.be.equal(investmentId);
+    expect(approvalRequest.approvalsProvided.toString()).to.be.equal('0');
+    expect(approvalRequest.isApproved).to.be.false;
+    expect(approvalRequest.isProcessed).to.be.false;
+    expect(totalApprovalRequestsAfter.toNumber()).to.be.equal(
+      totalApprovalRequestsBefore.toNumber() + 1
+    );
+    // Correct Status
+    expect(String(investmentStatus)).to.be.equal(
+      String(InvestmentStatus.REQUESTED)
+    );
 
     //2) SuperGovernance approves Investment
     // Given
-    const status = await this.registryContract.investmentStatus(investmentId);
-    expect(String(status)).to.be.equal(String(InvestmentStatus.REQUESTED));
+    const totalCronjobsBeforeApprove =
+      await this.governanceContract.totalCronjobs();
+    const cronjobsListBeforeApprove =
+      await this.governanceContract.cronjobList();
 
     // When
-    await this.governanceContract
+    const approveInvestment = await this.governanceContract
       .connect(this.superDelegatorSigner)
       .superVoteForRequest(investmentId, true);
 
-    const status2 = await this.registryContract.investmentStatus(investmentId);
+    const investmentStatusAfterApprove =
+      await this.registryContract.investmentStatus(investmentId);
+    const investmentDetailsAfterApprove =
+      await this.registryContract.investmentDetails(investmentId);
+    const ticketsRemainingAfterApprove =
+      await this.registryContract.ticketsRemaining(investmentId);
+    const totalCronjobsAfterApprove =
+      await this.governanceContract.totalCronjobs();
+    const cronjobsAfterApprove = await this.governanceContract.cronjobs(
+      totalCronjobsAfterApprove
+    );
+    const cronjobsListAfterApprove =
+      await this.governanceContract.cronjobList();
+    const approvalRequestAfterApprove =
+      await this.governanceContract.approvalRequests(
+        totalApprovalRequestsBefore
+      );
+
     // Then
-    expect(String(status2)).to.be.equal(String(InvestmentStatus.APPROVED));
+    // Events
+    expect(approveInvestment)
+      .to.emit(this.registryContract, 'InvestmentApproved')
+      .withArgs(investmentId);
+    expect(approveInvestment)
+      .to.emit(this.governanceContract, 'VotedForRequest')
+      .withArgs(investmentId, investmentId, true, this.superDelegator);
+
+    // Correct investment status
+    expect(String(investmentStatusAfterApprove)).to.be.equal(
+      String(InvestmentStatus.APPROVED)
+    );
+    // Correct investment details
+    expect(investmentDetailsAfterApprove.approvalDate).to.be.equal(
+      await getTransactionTimestamp(approveInvestment.hash)
+    );
+    // Correct ticketsRemaining
+    expect(ticketsRemainingAfterApprove).to.be.equal(amountOfPartitions);
+    // Correct total of cronJobs
+    expect(totalCronjobsAfterApprove.toNumber()).to.be.equal(
+      totalCronjobsBeforeApprove.toNumber() + 1
+    );
+    // Correct cronJob
+    expect(cronjobsAfterApprove.cronjobType.toString()).to.be.equal(
+      CronjobType.INVESTMENT
+    );
+    expect(cronjobsAfterApprove.externalId).to.be.equal(investmentId);
+    // Correct list of cronJob
+    expect(cronjobsListAfterApprove.head).to.be.equal(
+      cronjobsListBeforeApprove.head
+    );
+    expect(cronjobsListAfterApprove.tail.toNumber()).to.be.equal(
+      cronjobsListBeforeApprove.tail.toNumber() + 1
+    );
+    expect(cronjobsListAfterApprove.size.toNumber()).to.be.equal(
+      cronjobsListBeforeApprove.size.toNumber() + 1
+    );
+    // Verify the node
+    // Correct approval request
+    expect(
+      approvalRequestAfterApprove.approvalsProvided.toString()
+    ).to.be.equal('1');
+    expect(approvalRequestAfterApprove.isApproved).to.be.true;
+    expect(approvalRequestAfterApprove.isProcessed).to.be.true;
 
     //3) 4 Funders stake, one for each tier
     // Given
@@ -685,9 +854,6 @@ export default async function suite() {
 
     //7) Funders with a FundingNFT exchange it for their Investment tokens.
     // Given
-    const investmentTokensPerTicket =
-      await this.registryContract.investmentTokensPerTicket(investmentId);
-
     const balanceOfInvestmentTokenBefore1 =
       await this.investmentTokenContract.balanceOf(this.lender1);
     const balanceOfInvestmentTokenBefore2 =
