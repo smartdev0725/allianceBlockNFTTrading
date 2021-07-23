@@ -3,7 +3,7 @@ import {expect} from 'chai';
 import {BigNumber} from 'ethers';
 import {getSigners, initializeTransfers} from '../helpers/utils';
 
-describe('Registry upgrade test', () => {
+describe('Investment upgrade test', () => {
   let approvalRequest: BigNumber;
   let investmentIdBefore: BigNumber;
   let investmentIdAfter: BigNumber;
@@ -23,7 +23,7 @@ describe('Registry upgrade test', () => {
     const {deployer, seeker, lender1, lender2, lender3, superDelegator} =
       await getNamedAccounts();
 
-    const registryContract = await ethers.getContract('Registry');
+    const investmentContract = await ethers.getContract('Investment');
     const governanceContract = await ethers.getContract('Governance');
     const investmentTokenContract = await ethers.getContract('InvestmentToken');
     const lendingTokenContract = await ethers.getContract('LendingToken');
@@ -32,7 +32,7 @@ describe('Registry upgrade test', () => {
     // Initialize Transfers
     await initializeTransfers(
       {
-        registryContract,
+        investmentContract,
         lendingTokenContract,
         investmentTokenContract,
         collateralTokenContract,
@@ -47,7 +47,7 @@ describe('Registry upgrade test', () => {
       }
     );
 
-    investmentIdBefore = await registryContract.totalInvestments();
+    investmentIdBefore = await investmentContract.totalInvestments();
 
     approvalRequest = await governanceContract.totalApprovalRequests();
 
@@ -55,7 +55,7 @@ describe('Registry upgrade test', () => {
     const amountRequested = ethers.utils.parseEther('10000');
     const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-    await registryContract
+    await investmentContract
       .connect(seekerSigner)
       .requestInvestment(
         investmentTokenContract.address,
@@ -69,15 +69,15 @@ describe('Registry upgrade test', () => {
       .connect(superDelegatorSigner)
       .superVoteForRequest(approvalRequest, true);
 
-    investmentIdAfter = await registryContract.totalInvestments();
+    investmentIdAfter = await investmentContract.totalInvestments();
   });
 
   it('Investment should be ok', async function () {
     // Given
-    const registryContract = await ethers.getContract('Registry');
+    const investmentContract = await ethers.getContract('Investment');
 
     // When
-    const investmentDetails = await registryContract.investmentDetails(investmentIdBefore);
+    const investmentDetails = await investmentContract.investmentDetails(investmentIdBefore);
 
     // Then
     expect(investmentDetails.investmentId.toNumber()).to.equal(investmentIdBefore.toNumber());
@@ -85,14 +85,14 @@ describe('Registry upgrade test', () => {
       investmentDetails.investmentTokensAmount.toString()
     );
     // Check new method don't exist
-    expect(() => registryContract.getSomething2()).to.throw(
-      'registryContract.getSomething2 is not a function'
+    expect(() => investmentContract.getSomething2()).to.throw(
+      'investmentContract.getSomething2 is not a function'
     );
-    expect(() => registryContract.foo()).to.throw(
-      'registryContract.foo is not a function'
+    expect(() => investmentContract.foo()).to.throw(
+      'investmentContract.foo is not a function'
     );
-    expect(() => registryContract.bar()).to.throw(
-      'registryContract.bar is not a function'
+    expect(() => investmentContract.bar()).to.throw(
+      'investmentContract.bar is not a function'
     );
 
     // Given
@@ -100,8 +100,8 @@ describe('Registry upgrade test', () => {
     const {deploy} = deployments;
 
     // When
-    await deploy('Registry', {
-      contract: 'RegistryV2Test',
+    await deploy('Investment', {
+      contract: 'InvestmentV2Test',
       from: proxyOwner,
       proxy: {
         owner: proxyOwner,
@@ -110,17 +110,17 @@ describe('Registry upgrade test', () => {
       log: true,
     });
 
-    const registryContractUpgraded = await ethers.getContract('Registry');
-    const something1 = await registryContractUpgraded.getSomething1();
-    const something2 = await registryContractUpgraded.getSomething2();
+    const investmentContractUpgraded = await ethers.getContract('Investment');
+    const something1 = await investmentContractUpgraded.getSomething1();
+    const something2 = await investmentContractUpgraded.getSomething2();
 
     // Then
-    expect(() => registryContractUpgraded.foo()).to.not.throw();
-    expect(() => registryContractUpgraded.bar()).to.not.throw();
+    expect(() => investmentContractUpgraded.foo()).to.not.throw();
+    expect(() => investmentContractUpgraded.bar()).to.not.throw();
     expect(something1.toNumber()).to.equal(1);
     expect(something2.toNumber()).to.equal(2);
 
-    const investmentDetailsAfterUpdate = await registryContract.investmentDetails(
+    const investmentDetailsAfterUpdate = await investmentContract.investmentDetails(
       investmentIdBefore
     );
     expect(investmentDetailsAfterUpdate.investmentId.toNumber()).to.equal(

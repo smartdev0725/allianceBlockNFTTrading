@@ -3,7 +3,7 @@ import {expect} from "chai";
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
-  describe('Registry initialization', async () => {
+  describe('Investment initialization', async () => {
     it('When initialize again should revert', async function () {
       const reputationalAlbt = "0x664f6b4987d9db811867f431911124109ed5a475";
       const totalTicketsPerRun = 10;
@@ -12,7 +12,7 @@ export default async function suite() {
       const lotteryNumbersForImmediateTicket = 10;
 
       await expectRevert(
-        this.registryContract.initializeInvestment(reputationalAlbt, totalTicketsPerRun, rAlbtPerLotteryNumber, blocksLockedForReputation, lotteryNumbersForImmediateTicket),
+        this.investmentContract.initializeInvestment(reputationalAlbt, totalTicketsPerRun, rAlbtPerLotteryNumber, blocksLockedForReputation, lotteryNumbersForImmediateTicket),
         'Cannot initialize second time'
       );
     });
@@ -23,7 +23,7 @@ export default async function suite() {
       const blocksLockedForReputation = 10;
       const lotteryNumbersForImmediateTicket = 10;
       await expectRevert(
-        this.registryContract.initializeInvestment( ethers.constants.AddressZero, totalTicketsPerRun, rAlbtPerLotteryNumber, blocksLockedForReputation, lotteryNumbersForImmediateTicket),
+        this.investmentContract.initializeInvestment( ethers.constants.AddressZero, totalTicketsPerRun, rAlbtPerLotteryNumber, blocksLockedForReputation, lotteryNumbersForImmediateTicket),
         'Cannot initialize with 0 addresses'
       );
     });
@@ -35,7 +35,7 @@ export default async function suite() {
       const blocksLockedForReputation = 0;
       const lotteryNumbersForImmediateTicket = 0;
       await expectRevert(
-        this.registryContract.initializeInvestment(reputationalAlbt, totalTicketsPerRun, rAlbtPerLotteryNumber, blocksLockedForReputation, lotteryNumbersForImmediateTicket),
+        this.investmentContract.initializeInvestment(reputationalAlbt, totalTicketsPerRun, rAlbtPerLotteryNumber, blocksLockedForReputation, lotteryNumbersForImmediateTicket),
         'Cannot initialize with 0 values'
       );
     });
@@ -46,30 +46,30 @@ export default async function suite() {
       const blocksLockedForReputation = 0;
       const lotteryNumbersForImmediateTicket = 0;
       await expectRevert(
-        this.registryContract.initializeInvestment( ethers.constants.AddressZero, totalTicketsPerRun, rAlbtPerLotteryNumber, blocksLockedForReputation, lotteryNumbersForImmediateTicket),
+        this.investmentContract.initializeInvestment( ethers.constants.AddressZero, totalTicketsPerRun, rAlbtPerLotteryNumber, blocksLockedForReputation, lotteryNumbersForImmediateTicket),
         'Cannot initialize with 0 addresses'
       );
     });
 
     it('When adding as lending token the zero address should revert', async function () {
       await expectRevert(
-        this.registryContract.addLendingToken(ethers.constants.AddressZero),
+        this.investmentContract.addLendingToken(ethers.constants.AddressZero),
         'Cannot provide lendingToken_ with 0 address'
       );
     });
 
     it('When adding second time same lending token should revert', async function () {
-      await this.registryContract.addLendingToken(this.collateralTokenContract.address);
+      await this.investmentContract.addLendingToken(this.collateralTokenContract.address);
 
       await expectRevert(
-        this.registryContract.addLendingToken(this.collateralTokenContract.address),
+        this.investmentContract.addLendingToken(this.collateralTokenContract.address),
         'Cannot add existing lending token'
       );
     });
 
     it('When adding escrow address with zero address should revert', async function () {
       await expectRevert(
-        this.registryContract.setEscrowAddress(ethers.constants.AddressZero),
+        this.investmentContract.setEscrowAddress(ethers.constants.AddressZero),
         'Cannot provide escrowAddress_ with 0 address'
       );
     });
@@ -93,8 +93,8 @@ export default async function suite() {
       this.escrowContract = await ethers.getContract('Escrow2');
 
       // When
-      await this.registryContract.connect(this.deployerSigner).setEscrowAddress(this.escrowContract.address);
-      const escrowAddress = await this.registryContract.escrow();
+      await this.investmentContract.connect(this.deployerSigner).setEscrowAddress(this.escrowContract.address);
+      const escrowAddress = await this.investmentContract.escrow();
 
       // Then
       expect(true).to.be.equal(true);

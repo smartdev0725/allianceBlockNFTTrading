@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.6;
 
-import "../interfaces/IRegistry.sol";
+import "../interfaces/IInvestment.sol";
 import "../libs/OrderedDoubleLinkedList.sol";
 
 /**
@@ -26,7 +26,7 @@ contract GovernanceTypesAndStorage {
         uint256 indexed investmentId,
         address indexed user
     );
-    event InitGovernance(address indexed registryAddress_, address indexed user);
+    event InitGovernance(address indexed investmentAddress_, address indexed user);
 
     uint256 public totalApprovalRequests; // The total amount of approvals requested.
 
@@ -34,7 +34,7 @@ contract GovernanceTypesAndStorage {
 
     mapping(uint256 => ApprovalRequest) public approvalRequests;
 
-    IRegistry public registry;
+    IInvestment public investment;
 
     mapping(bytes32 => uint256) public updatableVariables;
 
@@ -56,8 +56,8 @@ contract GovernanceTypesAndStorage {
 
     // MODIFIERS
 
-    modifier onlyRegistry() {
-        require(msg.sender == address(registry), "Only Registry contract");
+    modifier onlyInvestment() {
+        require(msg.sender == address(investment), "Only Investment contract");
         _;
     }
 }

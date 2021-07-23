@@ -8,7 +8,7 @@ import {
 } from '../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
-describe('Registry Investments', function () {
+describe('Investments', function () {
   beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();
@@ -46,7 +46,7 @@ describe('Registry Investments', function () {
 
     // Get contracts
     const {
-      registryContract,
+      investmentContract,
       governanceContract,
       fundingNFTContract,
       escrowContract,
@@ -56,7 +56,7 @@ describe('Registry Investments', function () {
       stakingContract,
       ALBTContract,
     } = await getContracts();
-    this.registryContract = registryContract;
+    this.investmentContract = investmentContract;
     this.governanceContract = governanceContract;
     this.fundingNFTContract = fundingNFTContract;
     this.escrowContract = escrowContract;
@@ -72,7 +72,7 @@ describe('Registry Investments', function () {
     // Initialize Transfers
     await initializeTransfers(
       {
-        registryContract,
+        investmentContract,
         lendingTokenContract,
         investmentTokenContract,
         collateralTokenContract,
@@ -89,7 +89,7 @@ describe('Registry Investments', function () {
 
     this.approvalRequest = await governanceContract.totalApprovalRequests();
 
-    this.investmentId = await this.registryContract.totalInvestments();
+    this.investmentId = await this.investmentContract.totalInvestments();
     this.startingEscrowInvestmentTokenBalance =
       await investmentTokenContract.balanceOf(escrowContract.address);
 
@@ -97,7 +97,7 @@ describe('Registry Investments', function () {
     this.totalAmountRequested = ethers.utils.parseEther('200');
     this.ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-    await this.registryContract
+    await this.investmentContract
       .connect(this.seekerSigner)
       .requestInvestment(
         this.investmentTokenContract.address,

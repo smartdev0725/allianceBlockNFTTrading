@@ -2,9 +2,9 @@
 pragma solidity >=0.6.0 <0.8.0;
 
 /**
- * @title Interface of the Registry contract.
+ * @title Interface of the Investment contract.
  */
-interface IRegistry {
+interface IInvestment {
     function decideForInvestment(uint256 investmentId, bool decision) external;
 
     function getRequestingInterestStatus(uint256 investmentId) external view returns (bool);

@@ -6,7 +6,7 @@ import {ethers} from 'hardhat';
 import {BASE_AMOUNT} from '../../utils/constants';
 
 const version = 'v0.1.0';
-const contractName = 'Registry';
+const contractName = 'Investment';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts, getChainId} = hre;

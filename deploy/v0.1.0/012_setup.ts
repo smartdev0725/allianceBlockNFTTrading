@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const deployerSigner = signers[0];
 
   const stakingContract = await ethers.getContract('Staking');
-  const registryContract = await ethers.getContract('Registry');
+  const investmentContract = await ethers.getContract('Investment');
   const fundingNFTContract = await ethers.getContract('FundingNFT');
   const stakerMedalNFTContract = await ethers.getContract('StakerMedalNFT');
   const governanceContract = await ethers.getContract('Governance');
@@ -18,38 +18,38 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const rALBTAddress = await escrowContract.reputationalALBT();
 
   // Setup escrow
-  const escrowRegistryAddress = await escrowContract.registry();
+  const escrowInvestmentAddress = await escrowContract.investment();
   const escrowActionVerifierAddress = await escrowContract.actionVerifier();
   const escrowStakingAddress = await escrowContract.staking();
   if (
-    escrowRegistryAddress === ethers.constants.AddressZero &&
+    escrowInvestmentAddress === ethers.constants.AddressZero &&
     escrowActionVerifierAddress === ethers.constants.AddressZero &&
     escrowStakingAddress === ethers.constants.AddressZero
   ) {
     await escrowContract.afterInitialize(
-      registryContract.address,
+      investmentContract.address,
       actionVerifierContract.address,
       stakingContract.address
     );
   }
 
   // Setup governance
-  const governanceAddress = await governanceContract.registry();
+  const governanceAddress = await governanceContract.investment();
   if (governanceAddress === ethers.constants.AddressZero) {
-    await governanceContract.setRegistry(registryContract.address);
+    await governanceContract.setInvestment(investmentContract.address);
   }
 
   // Setup FundingNFT
   const hasRoleMinter = await fundingNFTContract.hasRole(
     ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
-    registryContract.address
+    investmentContract.address
   );
   if (!hasRoleMinter) {
     await fundingNFTContract
       .connect(deployerSigner)
       .grantRole(
         ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
-        registryContract.address
+        investmentContract.address
       );
     await fundingNFTContract
       .connect(deployerSigner)
@@ -60,14 +60,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
   const hasRolePauser = await fundingNFTContract.hasRole(
     ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
-    registryContract.address
+    investmentContract.address
   );
   if (!hasRolePauser) {
     await fundingNFTContract
       .connect(deployerSigner)
       .grantRole(
         ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
-        registryContract.address
+        investmentContract.address
       );
   }
 
@@ -85,12 +85,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       );
   }
 
-  // Setup registry
+  // Setup investment
   const totalTicketsPerRun = 20;
   const rAlbtPerLotteryNumber = ethers.utils.parseEther('1000');
   const blocksLockedForReputation = 20;
   const lotteryNumbersForImmediateTicket = 6;
-  await registryContract
+  await investmentContract
     .connect(deployerSigner)
     .initializeInvestment(
       rALBTAddress,

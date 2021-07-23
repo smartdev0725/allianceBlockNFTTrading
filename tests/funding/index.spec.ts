@@ -49,9 +49,9 @@ describe('Funding', function () {
     this.staker2Signer = staker2Signer;
 
     // Get contracts
-    const {fundingNFTContract, registryContract} = await getContracts();
+    const {fundingNFTContract, investmentContract} = await getContracts();
     this.fundingNFTContract = fundingNFTContract;
-    this.registryContract = registryContract;
+    this.investmentContract = investmentContract;
 
     await this.fundingNFTContract.grantRole(
       ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),

@@ -3,19 +3,19 @@ import {expect} from 'chai';
 import {BASE_AMOUNT} from "../helpers/constants";
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
-describe('Contract Registry', () => {
+describe('Contract Investment', () => {
   beforeEach(async () => {
     await deployments.fixture();
   });
 
   it('should be deployed', async function () {
     // Given
-    const registryContract = await ethers.getContract('Registry');
+    const investmentContract = await ethers.getContract('Investment');
 
     const fundingNFTProxyContract = await deployments.get('FundingNFT_Proxy');
 
     // When
-    const fundingNFT = await registryContract.fundingNFT();
+    const fundingNFT = await investmentContract.fundingNFT();
 
     // Then
     expect(fundingNFT).to.equal(fundingNFTProxyContract.address);
@@ -33,8 +33,8 @@ describe('Contract Registry', () => {
     const amount = ethers.utils.parseEther(BASE_AMOUNT + '').toString()
 
     await expectRevert.unspecified(
-      deploy('RegistryTest', {
-        contract: 'Registry',
+      deploy('InvestmentTest', {
+        contract: 'Investment',
         from: deployer,
         proxy: {
           owner: proxyOwner,
@@ -53,8 +53,8 @@ describe('Contract Registry', () => {
     );
 
     await expectRevert.unspecified(
-      deploy('RegistryTest', {
-        contract: 'Registry',
+      deploy('InvestmentTest', {
+        contract: 'Investment',
         from: deployer,
         proxy: {
           owner: proxyOwner,
@@ -73,8 +73,8 @@ describe('Contract Registry', () => {
     );
 
     await expectRevert.unspecified(
-      deploy('RegistryTest', {
-        contract: 'Registry',
+      deploy('InvestmentTest', {
+        contract: 'Investment',
         from: deployer,
         proxy: {
           owner: proxyOwner,
@@ -93,8 +93,8 @@ describe('Contract Registry', () => {
     );
 
     await expectRevert.unspecified(
-      deploy('RegistryTest', {
-        contract: 'Registry',
+      deploy('InvestmentTest', {
+        contract: 'Investment',
         from: deployer,
         proxy: {
           owner: proxyOwner,
@@ -113,8 +113,8 @@ describe('Contract Registry', () => {
     );
 
     await expectRevert.unspecified(
-      deploy('RegistryTest', {
-        contract: 'Registry',
+      deploy('InvestmentTest', {
+        contract: 'Investment',
         from: deployer,
         proxy: {
           owner: proxyOwner,

@@ -6,12 +6,12 @@ const {expectRevert} = require('@openzeppelin/test-helpers');
 export default async function suite() {
   describe('FundingNFT', async () => {
     it('When initialize again should revert', async function () {
-      const registryAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
+      const investmentAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
       const actionVerifierAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
       const stakingAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
 
       await expectRevert(
-        this.escrowContract.afterInitialize(registryAddress, actionVerifierAddress, stakingAddress),
+        this.escrowContract.afterInitialize(investmentAddress, actionVerifierAddress, stakingAddress),
         'Cannot initialize second time'
       );
     });
@@ -105,13 +105,13 @@ export default async function suite() {
         this.escrowContract
           .connect(seekerSigner)
           .transferFundingNFT(investmentId, partitionsToPurchase, seeker),
-        'Only Registry'
+        'Only Investment'
       );
     });
   });
 
-  describe('Registry', async () => {
-    it('when change registry from another account not allowed should revert', async function () {
+  describe('Investment', async () => {
+    it('when change investment from another account not allowed should revert', async function () {
       // Given
       const {seekerSigner} = await getSigners();
 
@@ -119,21 +119,21 @@ export default async function suite() {
       await expectRevert(
         this.escrowContract
           .connect(seekerSigner)
-          .changeRegistry(ethers.constants.AddressZero),
+          .changeInvestment(ethers.constants.AddressZero),
         'Ownable: caller is not the owner'
       );
     });
 
-    it('when change registry with zero address should not revert', async function () {
+    it('when change investment with zero address should not revert', async function () {
       // Given
       const { deployerSigner } = await getSigners();
       // When and Then
       await expectRevert(this.escrowContract
         .connect(deployerSigner)
-        .changeRegistry(ethers.constants.AddressZero), 'Registry should not be zero address');
+        .changeInvestment(ethers.constants.AddressZero), 'Investment should not be zero address');
     });
 
-    it('when change registry from owner account should not revert', async function () {
+    it('when change investment from owner account should not revert', async function () {
       // Given
       const {deployerSigner} = await getSigners();
       const dummyAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
@@ -141,11 +141,11 @@ export default async function suite() {
       // When
       await this.escrowContract
         .connect(deployerSigner)
-        .changeRegistry(dummyAddress);
+        .changeInvestment(dummyAddress);
 
       // Then
-      const registryAddress = await this.escrowContract.registry();
-      expect(registryAddress.toLowerCase()).to.be.equal(dummyAddress.toLowerCase());
+      const investmentAddress = await this.escrowContract.investment();
+      expect(investmentAddress.toLowerCase()).to.be.equal(dummyAddress.toLowerCase());
     });
   });
 
@@ -217,7 +217,7 @@ export default async function suite() {
             seeker,
             amount
           ),
-        'Only Registry'
+        'Only Investment'
       );
     });
   });
@@ -270,7 +270,7 @@ export default async function suite() {
         this.escrowContract
           .connect(seekerSigner)
           .transferLendingToken(this.lendingTokenContract.address, seeker, amount),
-        'Only Registry'
+        'Only Investment'
       );
     });
   });
@@ -349,7 +349,7 @@ export default async function suite() {
         this.escrowContract
           .connect(seekerSigner)
           .mintReputationalToken(lender1, amount),
-        'Only Registry or Staking'
+        'Only Investment or Staking'
       );
     });
 
@@ -423,7 +423,7 @@ export default async function suite() {
         this.escrowContract
           .connect(seekerSigner)
           .burnFundingNFT(lender1, 1, amount),
-        'Only Registry'
+        'Only Investment'
       );
     });
 

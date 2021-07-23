@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {ethers, getNamedAccounts, web3} from 'hardhat';
-import {StakingType} from '../helpers/registryEnums';
+import {StakingType} from '../helpers/InvestmentEnums';
 import {getSignature} from '../helpers/utils';
 import {increaseTime} from '../helpers/time';
 const {expectRevert} = require('@openzeppelin/test-helpers');
@@ -161,7 +161,7 @@ export default async function suite() {
             reputationalAlbtRewardsPerLevel,
             reputationalAlbtRewardsPerLevel,
             1,
-            this.registryContract.address,
+            this.investmentContract.address,
           ),
         'Ownable: caller is not the owner'
       );
@@ -709,7 +709,7 @@ export default async function suite() {
           reputationalAlbtRewardsPerLevel,
           reputationalAlbtRewardsPerLevelAfterFirstTime,
           2,
-          this.registryContract.address,
+          this.investmentContract.address,
         );
 
       let signature = await getSignature(
@@ -732,9 +732,9 @@ export default async function suite() {
         .mint(this.seeker, amountOfTokensToBePurchased);
       await this.investmentTokenContract
         .connect(this.seekerSigner)
-        .approve(this.registryContract.address, amountOfTokensToBePurchased);
+        .approve(this.investmentContract.address, amountOfTokensToBePurchased);
 
-      await this.registryContract
+      await this.investmentContract
         .connect(this.seekerSigner)
         .requestInvestment(
           this.investmentTokenContract.address,

@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { InvestmentStatus} from '../../helpers/registryEnums';
+import { InvestmentStatus} from '../../helpers/InvestmentEnums';
 import {BASE_AMOUNT} from '../../helpers/constants';
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
@@ -12,7 +12,7 @@ chai.use(solidity);
 export default async function suite() {
   describe('Investment request', async () => {
     it('when all details are stored correctly', async function () {
-      const investmentId = await this.registryContract.totalInvestments();
+      const investmentId = await this.investmentContract.totalInvestments();
       const approvalRequest =
         await this.governanceContract.totalApprovalRequests();
       const initSeekerInvestmentTokenBalance =
@@ -31,7 +31,7 @@ export default async function suite() {
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
       await expect(
-        this.registryContract
+        this.investmentContract
           .connect(this.seekerSigner)
           .requestInvestment(
             this.investmentTokenContract.address,
@@ -41,7 +41,7 @@ export default async function suite() {
             ipfsHash
           )
       )
-        .to.emit(this.registryContract, 'InvestmentRequested')
+        .to.emit(this.investmentContract, 'InvestmentRequested')
         .withArgs(investmentId, this.seeker, totalAmountRequested);
 
       const newSeekerInvestmentTokenBalance =
@@ -59,11 +59,11 @@ export default async function suite() {
 
       const isPaused = await this.fundingNFTContract.transfersPaused(investmentId);
 
-      const investmentStatus = await this.registryContract.investmentStatus(investmentId);
-      const investmentDetails = await this.registryContract.investmentDetails(investmentId);
-      const investmentSeeker = await this.registryContract.investmentSeeker(investmentId);
+      const investmentStatus = await this.investmentContract.investmentStatus(investmentId);
+      const investmentDetails = await this.investmentContract.investmentDetails(investmentId);
+      const investmentSeeker = await this.investmentContract.investmentSeeker(investmentId);
       const investmentTokensPerTicket =
-        await this.registryContract.investmentTokensPerTicket(investmentId);
+        await this.investmentContract.investmentTokensPerTicket(investmentId);
       const daoApprovalRequest = await this.governanceContract.approvalRequests(
         approvalRequest
       );
@@ -92,7 +92,7 @@ export default async function suite() {
         amountOfTokensToBePurchased.div(totalPartitions)
       );
       // Investment id is incremented correctly
-      expect(await this.registryContract.totalInvestments()).to.be.equal(
+      expect(await this.investmentContract.totalInvestments()).to.be.equal(
         investmentId.add(1)
       );
 
@@ -128,7 +128,7 @@ export default async function suite() {
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
       await expectRevert(
-        this.registryContract
+        this.investmentContract
           .connect(this.seekerSigner)
           .requestInvestment(
             this.investmentTokenContract.address,
@@ -147,7 +147,7 @@ export default async function suite() {
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
       await expectRevert(
-        this.registryContract
+        this.investmentContract
           .connect(this.seekerSigner)
           .requestInvestment(
             this.investmentTokenContract.address,
@@ -166,7 +166,7 @@ export default async function suite() {
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
       await expectRevert(
-        this.registryContract
+        this.investmentContract
           .connect(this.seekerSigner)
           .requestInvestment(
             this.investmentTokenContract.address,
@@ -180,10 +180,10 @@ export default async function suite() {
     });
 
     it('when investment request is rejected', async function () {
-      const investmentId = await this.registryContract.totalInvestments();
+      const investmentId = await this.investmentContract.totalInvestments();
 
       await expect(
-        this.registryContract
+        this.investmentContract
           .connect(this.seekerSigner)
           .requestInvestment(
             this.investmentTokenContract.address,
@@ -193,7 +193,7 @@ export default async function suite() {
             this.ipfsHash
           )
       )
-        .to.emit(this.registryContract, 'InvestmentRequested')
+        .to.emit(this.investmentContract, 'InvestmentRequested')
         .withArgs(investmentId, this.seeker, this.totalAmountRequested);
 
       await this.governanceContract
@@ -201,7 +201,7 @@ export default async function suite() {
         .superVoteForRequest(this.approvalRequest.add(1), false);
 
 
-      const investmentStatus = (await this.registryContract.getInvestmentMetadata(investmentId))[1];
+      const investmentStatus = (await this.investmentContract.getInvestmentMetadata(investmentId))[1];
       // Correct Status.
       expect(investmentStatus.toString()).to.be.equal(InvestmentStatus.REJECTED);
     });

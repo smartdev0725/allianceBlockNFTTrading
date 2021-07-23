@@ -45,7 +45,7 @@ describe('Governance', function () {
 
     // Get contracts
     const {
-      registryContract,
+      investmentContract,
       governanceContract,
       lendingTokenContract,
       investmentTokenContract,
@@ -53,13 +53,13 @@ describe('Governance', function () {
     } = await getContracts();
     this.governanceContract = governanceContract;
     this.investmentTokenContract = investmentTokenContract;
-    this.registryContract = registryContract;
+    this.investmentContract = investmentContract;
     this.lendingTokenContract = lendingTokenContract;
 
     // Initialize Transfers
     await initializeTransfers(
       {
-        registryContract,
+        investmentContract,
         lendingTokenContract,
         investmentTokenContract,
         collateralTokenContract,

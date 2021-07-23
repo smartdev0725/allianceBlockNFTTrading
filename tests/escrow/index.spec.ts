@@ -36,7 +36,7 @@ describe('Escrow', function () {
 
     // Setup escrow
     await this.escrowContract.afterInitialize(
-      deployer, // Act as registry contract
+      deployer, // Act as investment contract
       staker1, // Act as actionVerifier contract
       staker2 // Act as staking contract
     );

@@ -4,7 +4,7 @@ pragma solidity 0.7.6;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./GovernanceTypesAndStorage.sol";
-import "../interfaces/IRegistry.sol";
+import "../interfaces/IInvestment.sol";
 import "../libs/OrderedDoubleLinkedList.sol";
 import "../libs/DoubleLinkedList.sol";
 
@@ -72,8 +72,8 @@ contract DaoCronjob is GovernanceTypesAndStorage {
      * @param timestamp the current block height
      */
     function updateInvestment(uint256 investmentId, uint256 timestamp) internal {
-        if (registry.getRequestingInterestStatus(investmentId)) {
-            registry.startLotteryPhase(investmentId);
+        if (investment.getRequestingInterestStatus(investmentId)) {
+            investment.startLotteryPhase(investmentId);
         } else {
             uint256 nextCronjobTimestamp =
                 timestamp.add(updatableVariables[LATE_APPLICATIONS_FOR_INVESTMENT_DURATION]);

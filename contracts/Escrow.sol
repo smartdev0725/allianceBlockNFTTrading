@@ -17,8 +17,8 @@ import "./rALBT.sol";
 contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable {
     using SafeERC20 for IERC20;
 
-    modifier onlyRegistryOrOwner() {
-        require(msg.sender == address(registry) || owner() == msg.sender, "Only Registry or Owner");
+    modifier onlyInvestmentOrOwner() {
+        require(msg.sender == address(investment) || owner() == msg.sender, "Only Investment or Owner");
         _;
     }
 
@@ -44,19 +44,19 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @notice After Initialize
      * @dev To be executed after Initialize
      * @dev requires not already initialized
-     * @param registryAddress_ The registry address.
+     * @param investmentAddress_ The investment address.
      * @param actionVerifierAddress_ The actionVerifier address.
      * @param stakingAddress_ The staking address
      */
     function afterInitialize(
-        address registryAddress_,
+        address investmentAddress_,
         address actionVerifierAddress_,
         address stakingAddress_
     ) external onlyOwner() {
-        require(registryAddress_ != address(0) && actionVerifierAddress_ != address(0) && stakingAddress_ != address(0)
+        require(investmentAddress_ != address(0) && actionVerifierAddress_ != address(0) && stakingAddress_ != address(0)
             , "Cannot initialize with 0 addresses");
-        require(address(registry) == address(0), "Cannot initialize second time");
-        registry = IRegistry(registryAddress_);
+        require(address(investment) == address(0), "Cannot initialize second time");
+        investment = IInvestment(investmentAddress_);
         actionVerifier = actionVerifierAddress_;
         staking = stakingAddress_;
     }
@@ -72,7 +72,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         uint256 investmentId,
         uint256 partitionsPurchased,
         address receiver
-    ) external onlyRegistryOrOwner() {
+    ) external onlyInvestmentOrOwner() {
         fundingNFT.safeTransferFrom(address(this), receiver, investmentId, partitionsPurchased, "");
     }
 
@@ -83,7 +83,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param investmentId The investment id
      * @param amount The amount of funding nft to be burn
      */
-    function burnFundingNFT(address account, uint256 investmentId, uint256 amount) external onlyRegistry() {
+    function burnFundingNFT(address account, uint256 investmentId, uint256 amount) external onlyInvestment() {
         fundingNFT.burn(account, investmentId, amount);
     }
 
@@ -98,7 +98,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         address lendingToken,
         address seeker,
         uint256 amount
-    ) external onlyRegistry() {
+    ) external onlyInvestment() {
         IERC20(lendingToken).safeTransfer(seeker, amount);
     }
 
@@ -113,7 +113,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         address investmentToken,
         address recipient,
         uint256 amount
-    ) external onlyRegistry() {
+    ) external onlyInvestment() {
         IERC20(investmentToken).safeTransfer(recipient, amount);
     }
 
@@ -136,7 +136,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param recipient The address to mint the reputational tokens to.
      * @param amount The amount of reputational tokens to be minted.
      */
-    function mintReputationalToken(address recipient, uint256 amount) external onlyRegistryOrStaking() {
+    function mintReputationalToken(address recipient, uint256 amount) external onlyInvestmentOrStaking() {
         reputationalALBT.mintTo(recipient, amount);
     }
 
@@ -151,12 +151,12 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
-     * @notice Change Registry
-     * @dev This function is used to change the registry address in case of an upgrade.
-     * @param registryAddress The address of the upgraded Registry contract.
+     * @notice Change investment
+     * @dev This function is used to change the investment address in case of an upgrade.
+     * @param investmentAddress The address of the upgraded investment contract.
      */
-    function changeRegistry(address registryAddress) external onlyOwner() {
-        require(registryAddress != address(0), "Registry should not be zero address");
-        registry = IRegistry(registryAddress);
+    function changeInvestment(address investmentAddress) external onlyOwner() {
+        require(investmentAddress != address(0), "Investment should not be zero address");
+        investment = IInvestment(investmentAddress);
     }
 }

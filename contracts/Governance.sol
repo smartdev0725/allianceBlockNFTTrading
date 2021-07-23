@@ -4,7 +4,7 @@ pragma solidity 0.7.6;
 import "./governance/SuperGovernance.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./interfaces/IRegistry.sol";
+import "./interfaces/IInvestment.sol";
 import "./interfaces/IStaking.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
@@ -58,7 +58,7 @@ contract Governance is Initializable, SuperGovernance {
      */
     function requestApproval(
         uint256 investmentId
-    ) external onlyRegistry() checkCronjob() nonReentrant() {
+    ) external onlyInvestment() checkCronjob() nonReentrant() {
         approvalRequests[totalApprovalRequests].investmentId = investmentId;
 
         emit ApprovalRequested(
@@ -74,7 +74,7 @@ contract Governance is Initializable, SuperGovernance {
      * @dev Adds cronJob
      * @param investmentId The id of the investment to store
      */
-    function storeInvestmentTriggering(uint256 investmentId) external onlyRegistry() {
+    function storeInvestmentTriggering(uint256 investmentId) external onlyInvestment() {
         uint256 nextCronjobTimestamp =
             block.timestamp.add(updatableVariables[APPLICATIONS_FOR_INVESTMENT_DURATION]);
         addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, investmentId);

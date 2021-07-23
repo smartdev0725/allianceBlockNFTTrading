@@ -20,17 +20,17 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
     }
 
     /**
-     * @notice Sets Registry contract
+     * @notice Sets investment contract
      * @dev used to initialize SuperGovernance
      * @dev requires not already initialized
-     * @param registryAddress_ the Registry address
+     * @param investmentAddress_ the investment address
      */
-    function setRegistry(address registryAddress_) external onlyOwner() {
-        require(registryAddress_ != address(0), "Cannot initialize with 0 addresses");
-        require(address(registry) == address(0), "Cannot initialize second time");
-        registry = IRegistry(registryAddress_);
+    function setInvestment(address investmentAddress_) external onlyOwner() {
+        require(investmentAddress_ != address(0), "Cannot initialize with 0 addresses");
+        require(address(investment) == address(0), "Cannot initialize second time");
+        investment = IInvestment(investmentAddress_);
 
-        emit InitGovernance(registryAddress_, msg.sender);
+        emit InitGovernance(investmentAddress_, msg.sender);
     }
 
     /**
@@ -45,7 +45,7 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
         require(msg.sender == superDelegator, "Only super delegator can call this function");
         require(!approvalRequests[requestId].isProcessed, "Cannot process again same investment");
 
-        registry.decideForInvestment(approvalRequests[requestId].investmentId, decision);
+        investment.decideForInvestment(approvalRequests[requestId].investmentId, decision);
 
         if (decision) {
             approvalRequests[requestId].approvalsProvided = 1;

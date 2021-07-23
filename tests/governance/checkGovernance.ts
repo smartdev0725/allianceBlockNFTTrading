@@ -12,7 +12,7 @@ export default async function suite() {
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
       // When
-      await this.registryContract
+      await this.investmentContract
         .connect(this.seekerSigner)
         .requestInvestment(
           this.investmentTokenContract.address,
@@ -37,7 +37,7 @@ export default async function suite() {
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
       // When
-      await this.registryContract
+      await this.investmentContract
         .connect(this.seekerSigner)
         .requestInvestment(
           this.investmentTokenContract.address,
@@ -64,7 +64,7 @@ export default async function suite() {
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
       // When
-      await this.registryContract
+      await this.investmentContract
         .connect(this.seekerSigner)
         .requestInvestment(
           this.investmentTokenContract.address,
@@ -89,10 +89,10 @@ export default async function suite() {
       const amountOfTokensToBePurchased = ethers.utils.parseEther('1000');
       const totalAmountRequested = ethers.utils.parseEther('200');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
-      const investmentId = await this.registryContract.totalInvestments();
+      const investmentId = await this.investmentContract.totalInvestments();
 
       // When
-      await this.registryContract
+      await this.investmentContract
         .connect(this.seekerSigner)
         .requestInvestment(
           this.investmentTokenContract.address,
@@ -112,17 +112,17 @@ export default async function suite() {
 
   describe('Governance initialization', async () => {
     it('When initialize again should revert', async function () {
-      const registryAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
+      const investmentAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
 
       await expectRevert(
-        this.governanceContract.setRegistry(registryAddress),
+        this.governanceContract.setInvestment(investmentAddress),
         'Cannot initialize second time'
       );
     });
 
     it('When initialize with zero address should revert', async function () {
       await expectRevert(
-        this.governanceContract.setRegistry( ethers.constants.AddressZero),
+        this.governanceContract.setInvestment( ethers.constants.AddressZero),
         'Cannot initialize with 0 addresses'
       );
     });
@@ -156,10 +156,10 @@ export default async function suite() {
 
     });
 
-    it('When requestApproval not from registry should revert', async function () {
+    it('When requestApproval not from investment should revert', async function () {
       await expectRevert(
         this.governanceContract.requestApproval(1),
-        'Only Registry contract'
+        'Only Investment contract'
       );
     });
 

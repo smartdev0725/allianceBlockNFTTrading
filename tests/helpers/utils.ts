@@ -21,7 +21,7 @@ export const getSigners = async () => {
 };
 
 export const getContracts = async () => {
-  const registryContract = await ethers.getContract('Registry');
+  const investmentContract = await ethers.getContract('Investment');
 
   const governanceContract = await ethers.getContract('Governance');
 
@@ -48,7 +48,7 @@ export const getContracts = async () => {
   const rALBTContract = await rALBTFactory.attach(rALBTAddress);
 
   return {
-    registryContract,
+    investmentContract,
     governanceContract,
     fundingNFTContract,
     escrowContract,
@@ -69,7 +69,7 @@ export const initializeTransfers = async (
   signers: any
 ) => {
   const {
-    registryContract,
+    investmentContract,
     lendingTokenContract,
     investmentTokenContract,
     collateralTokenContract,
@@ -93,7 +93,7 @@ export const initializeTransfers = async (
     .mint(lender1, amountToTransfer);
   await lendingTokenContract
     .connect(lender1Signer)
-    .approve(registryContract.address, amountToTransfer);
+    .approve(investmentContract.address, amountToTransfer);
 
   // Lender 2 minting
   await lendingTokenContract
@@ -101,7 +101,7 @@ export const initializeTransfers = async (
     .mint(lender2, amountToTransfer);
   await lendingTokenContract
     .connect(lender2Signer)
-    .approve(registryContract.address, amountToTransfer);
+    .approve(investmentContract.address, amountToTransfer);
 
   // Lender 3 minting
   await lendingTokenContract
@@ -109,7 +109,7 @@ export const initializeTransfers = async (
     .mint(lender3, amountToTransfer);
   await lendingTokenContract
     .connect(lender3Signer)
-    .approve(registryContract.address, amountToTransfer);
+    .approve(investmentContract.address, amountToTransfer);
 
   // Seeker minting
   await lendingTokenContract
@@ -117,19 +117,19 @@ export const initializeTransfers = async (
     .mint(seeker, amountToTransfer);
   await lendingTokenContract
     .connect(seekerSigner)
-    .approve(registryContract.address, amountToTransfer);
+    .approve(investmentContract.address, amountToTransfer);
   await collateralTokenContract
     .connect(deployerSigner)
     .mint(seeker, amountToTransfer);
   await collateralTokenContract
     .connect(seekerSigner)
-    .approve(registryContract.address, amountToTransfer);
+    .approve(investmentContract.address, amountToTransfer);
   await investmentTokenContract
     .connect(deployerSigner)
     .mint(seeker, amountToTransfer);
   await investmentTokenContract
     .connect(seekerSigner)
-    .approve(registryContract.address, amountToTransfer);
+    .approve(investmentContract.address, amountToTransfer);
 };
 
 export const waitFor = (
