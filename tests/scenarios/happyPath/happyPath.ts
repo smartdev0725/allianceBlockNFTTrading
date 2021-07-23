@@ -53,15 +53,22 @@ export default async function suite() {
       this.lender3
     );
 
-    const amountToStake1 = (
-      await this.stakingContract.stakingTypeAmounts(StakingType.STAKER_LVL_1)
-    ).sub(staker1StakingAmountBefore);
-    const amountToStake2 = (
-      await this.stakingContract.stakingTypeAmounts(StakingType.STAKER_LVL_2)
-    ).sub(staker2StakingAmountBefore);
-    const amountToStake3 = (
-      await this.stakingContract.stakingTypeAmounts(StakingType.STAKER_LVL_3)
-    ).sub(staker3StakingAmountBefore);
+    const stakingTypeAmount1 = await this.stakingContract.stakingTypeAmounts(
+      StakingType.STAKER_LVL_1
+    );
+    const stakingTypeAmount2 = await this.stakingContract.stakingTypeAmounts(
+      StakingType.STAKER_LVL_2
+    );
+    const stakingTypeAmount3 = await this.stakingContract.stakingTypeAmounts(
+      StakingType.STAKER_LVL_3
+    );
+
+    expect(stakingTypeAmount2).to.be.greaterThan(stakingTypeAmount1);
+    expect(stakingTypeAmount3).to.be.greaterThan(stakingTypeAmount2);
+
+    const amountToStake1 = stakingTypeAmount1.sub(staker1StakingAmountBefore);
+    const amountToStake2 = stakingTypeAmount2.sub(staker2StakingAmountBefore);
+    const amountToStake3 = stakingTypeAmount3.sub(staker3StakingAmountBefore);
 
     const staker1ALBTBalanceBefore = await this.ALBTContract.balanceOf(
       this.lender1
@@ -184,68 +191,58 @@ export default async function suite() {
     );
 
     // Then
-    expect(balanceStaker1Medal1.toString()).to.be.equal('1');
-    expect(balanceStaker1Medal2.toString()).to.be.equal('0');
-    expect(balanceStaker1Medal3.toString()).to.be.equal('0');
+    expect(balanceStaker1Medal1).to.be.equal(1);
+    expect(balanceStaker1Medal2).to.be.equal(0);
+    expect(balanceStaker1Medal3).to.be.equal(0);
 
-    expect(balanceStaker2Medal1.toString()).to.be.equal('0');
-    expect(balanceStaker2Medal2.toString()).to.be.equal('1');
-    expect(balanceStaker2Medal3.toString()).to.be.equal('0');
+    expect(balanceStaker2Medal1).to.be.equal(0);
+    expect(balanceStaker2Medal2).to.be.equal(1);
+    expect(balanceStaker2Medal3).to.be.equal(0);
 
-    expect(balanceStaker3Medal1.toString()).to.be.equal('0');
-    expect(balanceStaker3Medal2.toString()).to.be.equal('0');
-    expect(balanceStaker3Medal3.toString()).to.be.equal('1');
+    expect(balanceStaker3Medal1).to.be.equal(0);
+    expect(balanceStaker3Medal2).to.be.equal(0);
+    expect(balanceStaker3Medal3).to.be.equal(1);
 
-    expect(levelOfStakerAfter1.toString()).to.be.equal('1');
-    expect(levelOfStakerAfter2.toString()).to.be.equal('2');
-    expect(levelOfStakerAfter3.toString()).to.be.equal('3');
+    expect(levelOfStakerAfter1).to.be.equal(1);
+    expect(levelOfStakerAfter2).to.be.equal(2);
+    expect(levelOfStakerAfter3).to.be.equal(3);
 
-    expect(Number(staker1StakingAmounAfter)).to.be.greaterThan(
-      Number(staker1StakingAmountBefore)
+    expect(staker1StakingAmounAfter).to.be.greaterThan(
+      staker1StakingAmountBefore
     );
-    expect(Number(staker2StakingAmounAfter)).to.be.greaterThan(
-      Number(staker2StakingAmountBefore)
+    expect(staker2StakingAmounAfter).to.be.greaterThan(
+      staker2StakingAmountBefore
     );
-    expect(Number(staker3StakingAmounAfter)).to.be.greaterThan(
-      Number(staker3StakingAmountBefore)
-    );
-
-    expect(Number(staker1ALBTBalanceAfter)).to.be.equal(
-      Number(staker1ALBTBalanceBefore.sub(amountToStake1))
-    );
-    expect(Number(staker2ALBTBalanceAfter)).to.be.equal(
-      Number(staker2ALBTBalanceBefore.sub(amountToStake2))
-    );
-    expect(Number(staker3ALBTBalanceAfter)).to.be.equal(
-      Number(staker3ALBTBalanceBefore.sub(amountToStake3))
+    expect(staker3StakingAmounAfter).to.be.greaterThan(
+      staker3StakingAmountBefore
     );
 
-    expect(Number(stakingContractALBTBalanceAfter)).to.be.equal(
-      Number(
-        stakingContractALBTBalanceBefore
-          .add(amountToStake1)
-          .add(amountToStake2)
-          .add(amountToStake3)
-      )
+    expect(staker1ALBTBalanceAfter).to.be.equal(
+      staker1ALBTBalanceBefore.sub(amountToStake1)
+    );
+    expect(staker2ALBTBalanceAfter).to.be.equal(
+      staker2ALBTBalanceBefore.sub(amountToStake2)
+    );
+    expect(staker3ALBTBalanceAfter).to.be.equal(
+      staker3ALBTBalanceBefore.sub(amountToStake3)
     );
 
-    expect(Number(stakedSupplyAfter)).to.be.equal(
-      Number(
-        stakedSupplyBefore
-          .add(amountToStake1)
-          .add(amountToStake2)
-          .add(amountToStake3)
-      )
+    expect(stakingContractALBTBalanceAfter).to.be.equal(
+      stakingContractALBTBalanceBefore
+        .add(amountToStake1)
+        .add(amountToStake2)
+        .add(amountToStake3)
     );
-    expect(Number(rALBTBalanceAfter1)).to.be.greaterThan(
-      Number(rALBTBalanceBefore1)
+
+    expect(stakedSupplyAfter).to.be.equal(
+      stakedSupplyBefore
+        .add(amountToStake1)
+        .add(amountToStake2)
+        .add(amountToStake3)
     );
-    expect(Number(rALBTBalanceAfter2)).to.be.greaterThan(
-      Number(rALBTBalanceBefore2)
-    );
-    expect(Number(rALBTBalanceAfter3)).to.be.greaterThan(
-      Number(rALBTBalanceBefore3)
-    );
+    expect(rALBTBalanceAfter1).to.be.greaterThan(rALBTBalanceBefore1);
+    expect(rALBTBalanceAfter2).to.be.greaterThan(rALBTBalanceBefore2);
+    expect(rALBTBalanceAfter3).to.be.greaterThan(rALBTBalanceBefore3);
 
     //4) Funders declare their intention to buy a partition (effectively depositing their funds)
     // Given
@@ -313,7 +310,7 @@ export default async function suite() {
         addressZero
       );
 
-    let signature = await getSignature(
+    const signature = await getSignature(
       'Wallet Connect',
       'Yes',
       this.lender4,
