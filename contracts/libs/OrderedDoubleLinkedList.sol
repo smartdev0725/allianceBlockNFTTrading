@@ -171,6 +171,7 @@ library OrderedDoubleLinkedList {
             self.nodes[self.nodes[id].previous].next = self.nodes[id].next;
         }
 
+        delete self.nodes[id];
         self.size -= 1;
     }
 
