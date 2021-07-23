@@ -21,22 +21,14 @@ const {expectRevert} = require('@openzeppelin/test-helpers');
 
 //1) Allows Seeker publishes Investment
 export const requestInvestment = async (
-  investment: Investment
-  // investmentTokenContract: any,
-  // amountOfTokensToBePurchased: BigNumber,
-  // lendingTokenContract: any,
-  // totalAmountRequested: BigNumber,
-  // ipfsHash: any,
-  // seekerSigner: any
+  investmentTokenContract: any,
+  amountOfTokensToBePurchased: BigNumber,
+  lendingTokenContract: any,
+  totalAmountRequested: BigNumber,
+  ipfsHash: any,
+  seekerSigner: any
 ): Promise<BigNumber> => {
-  const {
-    investmentTokenContract,
-    amountOfTokensToBePurchased,
-    lendingTokenContract,
-    totalAmountRequested,
-    ipfsHash,
-    seekerSigner,
-  } = investment;
+  // Given
   const {registryContract} = await getContracts();
 
   const numberInvestmentBefore = await registryContract.totalInvestments();
@@ -68,14 +60,14 @@ export const batchRequestInvestment = async (
 
   for (let index = 0; index < investments.length; index++) {
     const investment = investments[index];
-    const investmentId = await requestInvestment({
-      investmentTokenContract: investment.investmentTokenContract,
-      amountOfTokensToBePurchased: investment.amountOfTokensToBePurchased,
-      lendingTokenContract: investment.lendingTokenContract,
-      totalAmountRequested: investment.totalAmountRequested,
-      ipfsHash: investment.ipfsHash,
-      seekerSigner: investment.seekerSigner,
-    });
+    const investmentId = await requestInvestment(
+      investment.investmentTokenContract,
+      investment.amountOfTokensToBePurchased,
+      investment.lendingTokenContract,
+      investment.totalAmountRequested,
+      investment.ipfsHash,
+      investment.seekerSigner
+    );
     investmetsId.push(investmentId);
   }
   expect(investmetsId.length).to.be.equal(investments.length);
@@ -395,12 +387,6 @@ export const declareIntentionForBuy = async (
   }
 };
 export const batchDeclareIntentionForBuy = async (data: ShowInterestData[]) => {
-  // data = {
-  //   investmentId: BigNumber,
-  //   lenderSigner: any,
-  //   numberOfPartitions: BigNumber,
-  //   lendingTokenContract: any,
-  // };
   for (let i = 0; i < data.length; i++) {
     await declareIntentionForBuy(
       data[i].investmentId,
@@ -461,10 +447,6 @@ export const batchRunLottery = async (
   data: RunLotteryData[],
   superDelegatorSigner: Signer
 ) => {
-  // data = {
-  //   investmentId: BigNumber,
-  //   lotteryRunnerSigner: any,
-  // };
   for (let i = 0; i < data.length; i++) {
     await runLottery(
       data[i].investmentId,
@@ -478,7 +460,8 @@ export const batchRunLottery = async (
 export const funderClaimLotteryReward = async (
   investmentId: BigNumber,
   lenderSigner: any,
-  lendingTokenContract: any
+  amountTicketsToBlock: BigNumber,
+  lendingTokenContract: Contract
 ) => {
   const {registryContract, fundingNFTContract} = await getContracts();
 
@@ -506,17 +489,24 @@ export const funderClaimLotteryReward = async (
       await lendingTokenContract.balanceOf(lenderSigner.address);
 
     if (Number(ticketsWonBefore) > 0) {
+      if (ticketsWonBefore.lt(amountTicketsToBlock)) {
+        amountTicketsToBlock = ticketsWonBefore;
+      }
       await expect(
         registryContract
           .connect(lenderSigner)
           .withdrawInvestmentTickets(
             investmentId,
-            1,
-            Number(ticketsWonBefore) - 1
+            amountTicketsToBlock,
+            ticketsWonBefore.sub(amountTicketsToBlock)
           )
       )
         .to.emit(registryContract, 'WithdrawInvestment')
-        .withArgs(investmentId, 1, Number(ticketsWonBefore) - 1);
+        .withArgs(
+          investmentId,
+          amountTicketsToBlock,
+          ticketsWonBefore.sub(amountTicketsToBlock)
+        );
 
       await expectRevert(
         registryContract
@@ -531,21 +521,25 @@ export const funderClaimLotteryReward = async (
       lenderSigner.address
     );
 
-    expect(ticketsAfter.toNumber()).to.be.equal(0);
-
     const balanceFundingNFTTokenAfter = await fundingNFTContract.balanceOf(
       lenderSigner.address,
       investmentId.toNumber()
     );
 
-    if (Number(ticketsWonBefore) > 0) {
-      expect(balanceFundingNFTTokenAfter).to.be.gt(
-        balanceFundingNFTTokenBefore
-      );
-    }
-
     const lenderLendingTokenBalanceAfterWithdraw =
       await lendingTokenContract.balanceOf(lenderSigner.address);
+
+    expect(ticketsAfter.toNumber()).to.be.equal(0);
+
+    if (ticketsWonBefore.toNumber() > 0) {
+      if (ticketsWonBefore.eq(amountTicketsToBlock)) {
+        expect(balanceFundingNFTTokenAfter.toNumber()).to.be.equal(0);
+      } else {
+        expect(balanceFundingNFTTokenAfter).to.be.gt(
+          balanceFundingNFTTokenBefore
+        );
+      }
+    }
 
     expect(lenderLendingTokenBalanceAfterWithdraw).to.be.equal(
       lenderLendingTokenBalanceBeforeWithdraw.add(
@@ -560,15 +554,11 @@ export const funderClaimLotteryReward = async (
 export const batchFunderClaimLotteryReward = async (
   data: FunderClaimRewardData[]
 ) => {
-  // data = {
-  //   investmentId: BigNumber,
-  //   lenderSigner: any,
-  //   lendingTokenContract:any
-  // };
   for (let i = 0; i < data.length; i++) {
     await funderClaimLotteryReward(
       data[i].investmentId,
       data[i].lenderSigner,
+      data[i].amountTicketsToBlock,
       data[i].lendingTokenContract
     );
   }
@@ -584,7 +574,7 @@ export const exchangeNFTForInvestmentToken = async (
   const {registryContract, fundingNFTContract} = await getContracts();
 
   const balanceFundingNFTTokenAfter = await fundingNFTContract.balanceOf(
-    lenderSigner.address,
+    await lenderSigner.getAddress(),
     investmentId.toNumber()
   );
 
@@ -592,7 +582,7 @@ export const exchangeNFTForInvestmentToken = async (
     await registryContract.investmentTokensPerTicket(investmentId);
 
   const balanceOfInvestmentTokenBefore =
-    await investmentTokenContract.balanceOf(lenderSigner.address);
+    await investmentTokenContract.balanceOf(await lenderSigner.getAddress());
 
   if (balanceFundingNFTTokenAfter.toNumber() > 0) {
     // When
@@ -610,13 +600,13 @@ export const exchangeNFTForInvestmentToken = async (
   }
 
   const balanceOfInvestmentTokenAfter = await investmentTokenContract.balanceOf(
-    lenderSigner.address
+    await lenderSigner.getAddress()
   );
 
   // Then
   expect(
     await fundingNFTContract.balanceOf(
-      lenderSigner.address,
+      await lenderSigner.getAddress(),
       investmentId.toNumber()
     )
   ).to.be.equal(0);
@@ -630,11 +620,6 @@ export const exchangeNFTForInvestmentToken = async (
 export const batchExchangeNFTForInvestmentToken = async (
   data: ExchangeNFTForInvestmentTokenData[]
 ) => {
-  // data = {
-  //   investmentId: BigNumber,
-  //   lenderSigner: any,
-  //   investmentTokenContract:any
-  // };
   for (let i = 0; i < data.length; i++) {
     await exchangeNFTForInvestmentToken(
       data[i].investmentId,

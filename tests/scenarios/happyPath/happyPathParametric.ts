@@ -102,24 +102,28 @@ export default async function suite() {
     await funderClaimLotteryReward(
       investmentId,
       this.lender1Signer,
+      BigNumber.from(2),
       this.lendingTokenContract
     );
 
     await funderClaimLotteryReward(
       investmentId,
       this.lender2Signer,
+      BigNumber.from(2),
       this.lendingTokenContract
     );
 
     await funderClaimLotteryReward(
       investmentId,
       this.lender3Signer,
+      BigNumber.from(10),
       this.lendingTokenContract
     );
 
     await funderClaimLotteryReward(
       investmentId,
       this.lender4Signer,
+      BigNumber.from(2),
       this.lendingTokenContract
     );
     //7) Funders with a FundingNFT exchange it for their Investment tokens.

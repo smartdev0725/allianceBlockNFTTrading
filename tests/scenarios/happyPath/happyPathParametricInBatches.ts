@@ -36,7 +36,9 @@ export default async function suite() {
         seekerSigner: this.seekerSigner,
       });
     }
-    const investmentsId: BigNumber[] = await batchRequestInvestment(batchInvestmentData);
+    const investmentsId: BigNumber[] = await batchRequestInvestment(
+      batchInvestmentData
+    );
 
     const batchApproveInvestmentData: any[] = [];
     for (let index = 0; index < investmentsId.length; index++) {
@@ -133,21 +135,25 @@ export default async function suite() {
       claimRewardData.push({
         investmentId: investmentsId[index],
         lenderSigner: this.lender1Signer,
+        amountTicketsToBlock: BigNumber.from(1),
         lendingTokenContract: this.lendingTokenContract,
       });
       claimRewardData.push({
         investmentId: investmentsId[index],
         lenderSigner: this.lender2Signer,
+        amountTicketsToBlock: BigNumber.from(1),
         lendingTokenContract: this.lendingTokenContract,
       });
       claimRewardData.push({
         investmentId: investmentsId[index],
         lenderSigner: this.lender3Signer,
+        amountTicketsToBlock: BigNumber.from(1),
         lendingTokenContract: this.lendingTokenContract,
       });
       claimRewardData.push({
         investmentId: investmentsId[index],
         lenderSigner: this.lender4Signer,
+        amountTicketsToBlock: BigNumber.from(1),
         lendingTokenContract: this.lendingTokenContract,
       });
     }
