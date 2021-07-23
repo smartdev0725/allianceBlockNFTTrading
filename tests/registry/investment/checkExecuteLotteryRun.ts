@@ -52,7 +52,7 @@ export default async function suite() {
           .showInterestForInvestment(this.investmentId, numberOfPartitions)
       )
         .to.emit(this.registryContract, 'InvestmentInterest')
-        .withArgs(this.investmentId, numberOfPartitions);
+        .withArgs(this.investmentId, this.lender1Signer.address, numberOfPartitions);
 
       // Then
       await expectRevert(
@@ -74,7 +74,7 @@ export default async function suite() {
           .showInterestForInvestment(this.investmentId, numberOfPartitions)
       )
         .to.emit(this.registryContract, 'InvestmentInterest')
-        .withArgs(this.investmentId, numberOfPartitions);
+        .withArgs(this.investmentId, this.lender1Signer.address, numberOfPartitions);
 
       // Then
       await expectRevert(
@@ -96,7 +96,7 @@ export default async function suite() {
           .showInterestForInvestment(this.investmentId, numberOfPartitions)
       )
         .to.emit(this.registryContract, 'InvestmentInterest')
-        .withArgs(this.investmentId, numberOfPartitions);
+        .withArgs(this.investmentId, this.lender1Signer.address, numberOfPartitions);
 
       // When
       // Move time to 2 days
