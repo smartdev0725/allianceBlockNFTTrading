@@ -238,8 +238,8 @@ export default async function suite() {
       StakingType.STAKER_LVL_3
     );
 
-    expect(stakingTypeAmount2).to.be.greaterThan(stakingTypeAmount1);
-    expect(stakingTypeAmount3).to.be.greaterThan(stakingTypeAmount2);
+    expect(stakingTypeAmount2.gt(stakingTypeAmount1)).to.be.equal(true);
+    expect(stakingTypeAmount3.gt(stakingTypeAmount2)).to.be.equal(true);
 
     const amountToStake1 = stakingTypeAmount1.sub(staker1StakingAmountBefore);
     const amountToStake2 = stakingTypeAmount2.sub(staker2StakingAmountBefore);
