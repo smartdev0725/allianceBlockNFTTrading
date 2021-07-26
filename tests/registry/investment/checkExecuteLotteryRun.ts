@@ -321,7 +321,7 @@ export default async function suite() {
           .connect(this.lender1Signer)
           .withdrawInvestmentTickets(this.investmentId, 3, 7)
       )
-        .to.emit(this.registryContract, 'WithdrawInvestment')
+        .to.emit(this.registryContract, 'WithdrawInvestmentTickets')
         .withArgs(this.investmentId, 3, 7);
 
       await expectRevert(
@@ -810,10 +810,18 @@ export default async function suite() {
         const investmentId = this.investmentId.add(1);
         const seekerInitialLendingBalance =
           await this.lendingTokenContract.balanceOf(this.seekerSigner.address);
+        const expectedAmount = (
+          await this.registryContract.investmentDetails(investmentId)
+        ).totalAmountToBeRaised;
+
         // when
-        await this.registryContract
-          .connect(this.seekerSigner)
-          .withdrawInvestment(investmentId);
+        await expect(
+          this.registryContract
+            .connect(this.seekerSigner)
+            .withdrawInvestment(investmentId)
+        )
+          .to.emit(this.registryContract, 'seekerWithdrawInvestment')
+          .withArgs(investmentId, expectedAmount);
 
         await expectRevert(
           this.registryContract
@@ -821,17 +829,17 @@ export default async function suite() {
             .withdrawInvestment(investmentId),
           'Already withdrawn'
         );
-
-        //then
+        100000000000000000000;
         const seekerFinalLendingBalance =
           await this.lendingTokenContract.balanceOf(this.seekerSigner.address);
-
-        expect(
-          await this.registryContract.investmentWithdrawn(investmentId)
-        ).to.be.equal(true);
-        expect(
-          seekerFinalLendingBalance.gt(seekerInitialLendingBalance)
-        ).to.be.equal(true);
+        const investmentWithdrawn =
+          await this.registryContract.investmentWithdrawn(investmentId);
+        const seekerGotLendingTokens = seekerFinalLendingBalance.eq(
+          seekerInitialLendingBalance.add(expectedAmount)
+        );
+        //then
+        expect(investmentWithdrawn).to.be.equal(true);
+        expect(seekerGotLendingTokens).to.be.equal(true);
       });
     });
 
