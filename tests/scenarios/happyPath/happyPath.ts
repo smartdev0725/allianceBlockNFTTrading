@@ -383,14 +383,14 @@ export default async function suite() {
     expect(levelOfStakerAfter2).to.be.equal(2);
     expect(levelOfStakerAfter3).to.be.equal(3);
 
-    expect(staker1StakingAmounAfter).to.be.greaterThan(
-      staker1StakingAmountBefore
+    expect(staker1StakingAmounAfter.gt(staker1StakingAmountBefore)).to.be.equal(
+      true
     );
-    expect(staker2StakingAmounAfter).to.be.greaterThan(
-      staker2StakingAmountBefore
+    expect(staker2StakingAmounAfter.gt(staker2StakingAmountBefore)).to.be.equal(
+      true
     );
-    expect(staker3StakingAmounAfter).to.be.greaterThan(
-      staker3StakingAmountBefore
+    expect(staker3StakingAmounAfter.gt(staker3StakingAmountBefore)).to.be.equal(
+      true
     );
 
     expect(staker1ALBTBalanceAfter).to.be.equal(
@@ -416,9 +416,9 @@ export default async function suite() {
         .add(amountToStake2)
         .add(amountToStake3)
     );
-    expect(rALBTBalanceAfter1).to.be.greaterThan(rALBTBalanceBefore1);
-    expect(rALBTBalanceAfter2).to.be.greaterThan(rALBTBalanceBefore2);
-    expect(rALBTBalanceAfter3).to.be.greaterThan(rALBTBalanceBefore3);
+    expect(rALBTBalanceAfter1.gt(rALBTBalanceBefore1)).to.be.equal(true);
+    expect(rALBTBalanceAfter2.gt(rALBTBalanceBefore2)).to.be.equal(true);
+    expect(rALBTBalanceAfter3.gt(rALBTBalanceBefore3)).to.be.equal(true);
 
     //Simulates lender4 has rALBT from other methods besides staking
     //GET rALBT HERE!!
