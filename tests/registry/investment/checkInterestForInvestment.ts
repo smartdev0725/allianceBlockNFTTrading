@@ -3,7 +3,7 @@ import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {StakingType, InvestmentStatus} from '../../helpers/InvestmentEnums';
+import {StakingType, ProjectStatusTypes} from '../../helpers/ProjectEnums';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 chai.use(solidity);
@@ -11,7 +11,7 @@ chai.use(solidity);
 export default async function suite() {
   describe('Show investment interest', async () => {
     it('reverts when investment is not approved yet', async function () {
-      const investmentId = await this.investmentContract.totalInvestments();
+      const investmentId = await this.investmentContract.totalProjects();
       const amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
       const totalAmountRequested = ethers.utils.parseEther('10000');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
@@ -322,7 +322,7 @@ export default async function suite() {
       const ticketsRemainingAfter = await this.investmentContract.ticketsRemaining(this.investmentId.add(1));
       const ticketsWonForLender1 = await this.investmentContract.ticketsWonPerAddress(this.investmentId.add(1), this.lender1);
       const ticketsWonForLender2 = await this.investmentContract.ticketsWonPerAddress(this.investmentId.add(1), this.lender2);
-      const status = await this.investmentContract.investmentStatus(this.investmentId.add(1));
+      const status = await this.investmentContract.projectStatus(this.investmentId.add(1));
       expect(ticketsWonForLender1.toString()).to.be.equal(
         '2'
       );
@@ -336,7 +336,7 @@ export default async function suite() {
         '0'
       );
       expect(status.toString()).to.be.equal(
-        InvestmentStatus.SETTLED
+        ProjectStatusTypes.SETTLED
       );
     });
   });

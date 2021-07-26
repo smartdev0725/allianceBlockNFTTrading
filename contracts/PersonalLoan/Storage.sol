@@ -12,7 +12,6 @@ import "../interfaces/IEscrow.sol";
  * @notice Responsible for investment storage
  */
 contract Storage {
-
     // The amount of investment tokens each ticket contains.
     mapping(uint256 => uint256) public investmentTokensPerTicket;
     // The amount of tickets remaining to be allocated to investors.

@@ -11,7 +11,7 @@ import "../TemplateProject/TemplateProject.sol";
  * @notice Functionality for storing investment details and modifiers.
  * @dev Extends Storage
  */
-contract InvestmentDetails is Storage, TemplateProject {
+contract PersonalLoanDetails is Storage, TemplateProject {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 

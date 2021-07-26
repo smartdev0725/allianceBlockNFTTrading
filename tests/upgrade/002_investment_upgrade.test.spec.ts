@@ -47,7 +47,7 @@ describe('Investment upgrade test', () => {
       }
     );
 
-    investmentIdBefore = await investmentContract.totalInvestments();
+    investmentIdBefore = await investmentContract.totalProjects();
 
     approvalRequest = await governanceContract.totalApprovalRequests();
 
@@ -69,7 +69,7 @@ describe('Investment upgrade test', () => {
       .connect(superDelegatorSigner)
       .superVoteForRequest(approvalRequest, true);
 
-    investmentIdAfter = await investmentContract.totalInvestments();
+    investmentIdAfter = await investmentContract.totalProjects();
   });
 
   it('Investment should be ok', async function () {

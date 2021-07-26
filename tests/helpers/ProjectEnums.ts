@@ -1,4 +1,4 @@
-export enum InvestmentStatus {
+export enum ProjectStatusTypes {
   REQUESTED = '0',
   APPROVED = '1',
   STARTED = '2',

@@ -1,7 +1,7 @@
 import {ethers, getNamedAccounts} from 'hardhat';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {StakingType, InvestmentStatus} from '../../helpers/InvestmentEnums';
+import {StakingType, ProjectStatusTypes} from '../../helpers/ProjectEnums';
 import {BigNumber} from 'ethers';
 import {increaseTime} from '../../helpers/time';
 import {getContracts} from "../../helpers/utils";
@@ -473,13 +473,13 @@ export default async function suite() {
         .connect(this.lender1Signer)
         .executeLotteryRun(this.investmentId.add(1));
 
-      const statusBeforeSecondRun = await this.investmentContract.investmentStatus(this.investmentId.add(1));
+      const statusBeforeSecondRun = await this.investmentContract.projectStatus(this.investmentId.add(1));
 
       await this.investmentContract
         .connect(this.lender2Signer)
         .executeLotteryRun(this.investmentId.add(1));
 
-      const statusAfterSecondRun = await this.investmentContract.investmentStatus(this.investmentId.add(1));
+      const statusAfterSecondRun = await this.investmentContract.projectStatus(this.investmentId.add(1));
 
       // Then
       expect(previousCronjobList.head.toString()).to.be.equal('1');
@@ -494,8 +494,8 @@ export default async function suite() {
       expect(afterSecondCronjobList.tail.toString()).to.be.equal('3');
       expect(afterSecondCronjobList.size.toString()).to.be.equal('1');
 
-      expect(statusBeforeSecondRun.toString()).to.be.equal(InvestmentStatus.STARTED);
-      expect(statusAfterSecondRun.toString()).to.be.equal(InvestmentStatus.SETTLED);
+      expect(statusBeforeSecondRun.toString()).to.be.equal(ProjectStatusTypes.STARTED);
+      expect(statusAfterSecondRun.toString()).to.be.equal(ProjectStatusTypes.SETTLED);
     });
 
     context('When doing various withdrawals scenarios', async function () {

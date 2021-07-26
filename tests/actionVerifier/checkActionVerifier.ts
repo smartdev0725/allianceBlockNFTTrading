@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {ethers, getNamedAccounts, web3} from 'hardhat';
-import {StakingType} from '../helpers/InvestmentEnums';
+import {StakingType} from '../helpers/ProjectEnums';
 import {getSignature} from '../helpers/utils';
 import {increaseTime} from '../helpers/time';
 const {expectRevert} = require('@openzeppelin/test-helpers');

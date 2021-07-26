@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {StakingType} from '../helpers/InvestmentEnums';
+import {StakingType} from '../helpers/ProjectEnums';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {

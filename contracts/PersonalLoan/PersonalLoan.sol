@@ -5,16 +5,16 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "./InvestmentDetails.sol";
+import "./PersonalLoanDetails.sol";
 import "../libs/SafeERC20.sol";
 import "../libs/TokenFormat.sol";
 
 /**
  * @title AllianceBlock Investment contract.
  * @notice Functionality for Investment.
- * @dev Extends InvestmentDetails.
+ * @dev Extends PersonalLoanDetails.
  */
-contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradeable {
+contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
     using SafeERC20 for IERC20;
@@ -106,15 +106,6 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
     }
 
     /**
-     * @notice Start Lottery Phase
-     * @dev This function is called by governance to start the lottery phase for an investment.
-     * @param investmentId The id of the investment.
-     */
-    function startLotteryPhase(uint256 investmentId) external onlyGovernance() {
-        _startInvestment(investmentId);
-    }
-
-    /**
      * @notice Approve Investment
      * @param investmentId_ The id of the investment.
      */
@@ -138,6 +129,15 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
             investmentDetails[investmentId_].investmentTokensAmount
         );
         emit InvestmentRejected(investmentId_);
+    }
+
+    /**
+     * @notice Start Lottery Phase
+     * @dev This function is called by governance to start the lottery phase for an investment.
+     * @param investmentId The id of the investment.
+     */
+    function startLotteryPhase(uint256 investmentId) external onlyGovernance() {
+        _startInvestment(investmentId);
     }
 
     /**

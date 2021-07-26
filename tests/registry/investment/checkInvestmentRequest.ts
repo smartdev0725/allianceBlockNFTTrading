@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { InvestmentStatus} from '../../helpers/InvestmentEnums';
+import {ProjectStatusTypes} from '../../helpers/ProjectEnums';
 import {BASE_AMOUNT} from '../../helpers/constants';
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
@@ -12,7 +12,7 @@ chai.use(solidity);
 export default async function suite() {
   describe('Investment request', async () => {
     it('when all details are stored correctly', async function () {
-      const investmentId = await this.investmentContract.totalInvestments();
+      const investmentId = await this.investmentContract.totalProjects();
       const approvalRequest =
         await this.governanceContract.totalApprovalRequests();
       const initSeekerInvestmentTokenBalance =
@@ -59,9 +59,9 @@ export default async function suite() {
 
       const isPaused = await this.fundingNFTContract.transfersPaused(investmentId);
 
-      const investmentStatus = await this.investmentContract.investmentStatus(investmentId);
+      const projectStatus = await this.investmentContract.projectStatus(investmentId);
       const investmentDetails = await this.investmentContract.investmentDetails(investmentId);
-      const investmentSeeker = await this.investmentContract.investmentSeeker(investmentId);
+      const investmentSeeker = await this.investmentContract.projectSeeker(investmentId);
       const investmentTokensPerTicket =
         await this.investmentContract.investmentTokensPerTicket(investmentId);
       const daoApprovalRequest = await this.governanceContract.approvalRequests(
@@ -83,8 +83,9 @@ export default async function suite() {
       expect(investmentDetails.totalPartitionsToBePurchased.toString()).to.be.equal(
         totalPartitions.toString()
       );
+
       // Correct Status.
-      expect(investmentStatus.toString()).to.be.equal(InvestmentStatus.REQUESTED);
+      expect(projectStatus.toString()).to.be.equal(ProjectStatusTypes.REQUESTED);
       // Correct Seeker.
       expect(investmentSeeker.toString()).to.be.equal(this.seeker);
       // Correct investmentTokensPerTicket.
@@ -92,7 +93,7 @@ export default async function suite() {
         amountOfTokensToBePurchased.div(totalPartitions)
       );
       // Investment id is incremented correctly
-      expect(await this.investmentContract.totalInvestments()).to.be.equal(
+      expect(await this.investmentContract.totalProjects()).to.be.equal(
         investmentId.add(1)
       );
 
@@ -180,7 +181,7 @@ export default async function suite() {
     });
 
     it('when investment request is rejected', async function () {
-      const investmentId = await this.investmentContract.totalInvestments();
+      const investmentId = await this.investmentContract.totalProjects();
 
       await expect(
         this.investmentContract
@@ -201,9 +202,9 @@ export default async function suite() {
         .superVoteForRequest(this.approvalRequest.add(1), false);
 
 
-      const investmentStatus = (await this.investmentContract.getInvestmentMetadata(investmentId))[1];
+      const projectStatus = (await this.investmentContract.getInvestmentMetadata(investmentId))[1];
       // Correct Status.
-      expect(investmentStatus.toString()).to.be.equal(InvestmentStatus.REJECTED);
+      expect(projectStatus.toString()).to.be.equal(ProjectStatusTypes.REJECTED);
     });
   });
 }
