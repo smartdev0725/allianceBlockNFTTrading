@@ -1,5 +1,6 @@
 // Investment
-import happyPath from './happyPath';
+import happyPathParametric from './happyPathParametric';
+import happyPathParametricInBatches from './happyPathParametricInBatches';
 
 import {
   getContracts,
@@ -14,8 +15,16 @@ describe('Happy Path', function () {
     await deployments.fixture();
 
     // Get accounts
-    const {deployer, proxyOwner, seeker, lender1, lender2, lender3, lender4, superDelegator} =
-      await getNamedAccounts();
+    const {
+      deployer,
+      proxyOwner,
+      seeker,
+      lender1,
+      lender2,
+      lender3,
+      lender4,
+      superDelegator,
+    } = await getNamedAccounts();
     this.deployer = deployer;
     this.proxyOwner = proxyOwner;
     this.seeker = seeker;
@@ -95,9 +104,9 @@ describe('Happy Path', function () {
       }
     );
 
-    this.approvalRequest = await governanceContract.totalApprovalRequests();
+    // this.approvalRequest = await governanceContract.totalApprovalRequests();
 
-    this.investmentId = await this.registryContract.totalInvestments();
+    // this.investmentId = await this.registryContract.totalInvestments();
     this.startingEscrowInvestmentTokenBalance =
       await investmentTokenContract.balanceOf(escrowContract.address);
 
@@ -105,19 +114,19 @@ describe('Happy Path', function () {
     this.totalAmountRequested = ethers.utils.parseEther('200');
     this.ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-    await this.registryContract
-      .connect(this.seekerSigner)
-      .requestInvestment(
-        this.investmentTokenContract.address,
-        this.amountOfTokensToBePurchased,
-        this.lendingTokenContract.address,
-        this.totalAmountRequested,
-        this.ipfsHash
-      );
+    // await this.registryContract
+    //   .connect(this.seekerSigner)
+    //   .requestInvestment(
+    //     this.investmentTokenContract.address,
+    //     this.amountOfTokensToBePurchased,
+    //     this.lendingTokenContract.address,
+    //     this.totalAmountRequested,
+    //     this.ipfsHash
+    //   );
 
-    await this.governanceContract
-      .connect(this.superDelegatorSigner)
-      .superVoteForRequest(this.approvalRequest, true);
+    // await this.governanceContract
+    //   .connect(this.superDelegatorSigner)
+    //   .superVoteForRequest(this.approvalRequest, true);
 
     // Transfer albt tokens to stakers.
     const amountToTransfer = ethers.utils.parseEther('1000000');
@@ -157,11 +166,7 @@ describe('Happy Path', function () {
       this.stakingContract.address,
       amountToTransfer
     );
-
   });
 
-  describe(
-    'Happy Path process',
-    happyPath.bind(this)
-  );
+  describe('Happy Path process', happyPathParametricInBatches.bind(this));
 });
