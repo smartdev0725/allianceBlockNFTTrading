@@ -10,8 +10,8 @@ import "../libs/SafeERC20.sol";
 import "../libs/TokenFormat.sol";
 
 /**
- * @title AllianceBlock Investment contract.
- * @notice Functionality for Investment.
+ * @title AllianceBlock PersonalLoan contract.
+ * @notice Functionality for PersonalLoan.
  * @dev Extends PersonalLoanDetails.
  */
 contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgradeable {
@@ -20,17 +20,17 @@ contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgr
     using SafeERC20 for IERC20;
 
     // EVENTS
-    event InvestmentStarted(uint256 indexed investmentId);
-    event InvestmentApproved(uint256 indexed investmentId);
-    event InvestmentRejected(uint256 indexed investmentId);
-    event InvestmentRequested(uint256 indexed investmentId, address indexed user, uint256 amount);
-    event InvestmentInterest(uint256 indexed investmentId, uint amount);
-    event LotteryExecuted(uint256 indexed investmentId);
-    event WithdrawInvestment(uint256 indexed investmentId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
-    event WithdrawAmountForNonTickets(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets);
-    event WithdrawLockedInvestmentTickets(uint256 indexedinvestmentId, uint256 ticketsToWithdraw);
-    event ConvertNFTToInvestmentTokens(uint256 indexedinvestmentId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
-    event InvestmentSettled(uint256 investmentId);
+    event ProjectStarted(uint256 indexed projectId);
+    event ProjectApproved(uint256 indexed projectId);
+    event ProjectRejected(uint256 indexed projectId);
+    event ProjectRequested(uint256 indexed projectId, address indexed user, uint256 amount);
+    event ProjectInterest(uint256 indexed projectId, uint amount);
+    event LotteryExecuted(uint256 indexed projectId);
+    event WithdrawProject(uint256 indexed projectId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
+    event WithdrawAmountForNonTickets(uint256 indexed projectId, uint256 amountToReturnForNonWonTickets);
+    event WithdrawLockedProjectTickets(uint256 indexed projectId, uint256 ticketsToWithdraw);
+    event ConvertNFTToProjectTokens(uint256 indexed projectId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
+    event ProjectSettled(uint256 projectId);
 
     /**
      * @notice Initialize
@@ -46,11 +46,13 @@ contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgr
         address governanceAddress_,
         address[] memory lendingTokens_,
         address fundingNFT_,
+        address projectManager_,
         uint256 baseAmountForEachPartition_
     ) public initializer {
         require(escrowAddress != address(0), "Cannot initialize escrowAddress with 0 address");
         require(governanceAddress_ != address(0), "Cannot initialize governanceAddress_ with 0 address");
         require(fundingNFT_ != address(0), "Cannot initialize fundingNFT_ with 0 address");
+        require(projectManager_ != address(0), "Cannot initialize projectManager with 0 address");
         require(baseAmountForEachPartition_ != 0, "Cannot initialize baseAmountForEachPartition_ with 0");
 
         __ReentrancyGuard_init();
@@ -60,6 +62,7 @@ contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgr
         baseAmountForEachPartition = baseAmountForEachPartition_;
         governance = IGovernance(governanceAddress_);
         fundingNFT = IERC1155Mint(fundingNFT_);
+        projectManager = IProjectManager(projectManager_);
 
         for (uint256 i = 0; i < lendingTokens_.length; i++) {
             require(lendingTokens_[i] != address(0), "Cannot initialize lendingToken_ with 0 address");
@@ -97,67 +100,67 @@ contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgr
     /**
      * @notice Decide For Investment
      * @dev This function is called by governance to approve or reject a investment request.
-     * @param investmentId The id of the investment.
+     * @param projectId The id of the investment.
      * @param decision The decision of the governance. [true -> approved] [false -> rejected]
      */
-    function decideForInvestment(uint256 investmentId, bool decision) external onlyGovernance() {
-        if (decision) _approveInvestment(investmentId);
-        else _rejectInvestment(investmentId);
-    }
-
-    /**
-     * @notice Approve Investment
-     * @param investmentId_ The id of the investment.
-     */
-    function _approveInvestment(uint256 investmentId_) internal {
-        projectStatus[investmentId_] = ProjectLibrary.ProjectStatus.APPROVED;
-        investmentDetails[investmentId_].approvalDate = block.timestamp;
-        ticketsRemaining[investmentId_] = investmentDetails[investmentId_].totalPartitionsToBePurchased;
-        governance.storeInvestmentTriggering(investmentId_);
-        emit InvestmentApproved(investmentId_);
-    }
-
-    /**
-     * @notice Reject Investment
-     * @param investmentId_ The id of the investment.
-     */
-    function _rejectInvestment(uint256 investmentId_) internal {
-        projectStatus[investmentId_] = ProjectLibrary.ProjectStatus.REJECTED;
-        escrow.transferInvestmentToken(
-            investmentDetails[investmentId_].investmentToken,
-            projectSeeker[investmentId_],
-            investmentDetails[investmentId_].investmentTokensAmount
-        );
-        emit InvestmentRejected(investmentId_);
+    function decideForProject(uint256 projectId, bool decision) external onlyGovernance() {
+        if (decision) _approveInvestment(projectId);
+        else _rejectInvestment(projectId);
     }
 
     /**
      * @notice Start Lottery Phase
      * @dev This function is called by governance to start the lottery phase for an investment.
-     * @param investmentId The id of the investment.
+     * @param projectId The id of the investment.
      */
-    function startLotteryPhase(uint256 investmentId) external onlyGovernance() {
-        _startInvestment(investmentId);
+    function startLotteryPhase(uint256 projectId) external onlyGovernance() {
+        _startInvestment(projectId);
+    }
+
+    /**
+     * @notice Approve Investment
+     * @param projectId_ The id of the investment.
+     */
+    function _approveInvestment(uint256 projectId_) internal {
+        projectStatus[projectId_] = ProjectLibrary.ProjectStatus.APPROVED;
+        investmentDetails[projectId_].approvalDate = block.timestamp;
+        ticketsRemaining[projectId_] = investmentDetails[projectId_].totalPartitionsToBePurchased;
+        governance.storeInvestmentTriggering(projectId_);
+        emit ProjectApproved(projectId_);
+    }
+
+    /**
+     * @notice Reject Investment
+     * @param projectId_ The id of the investment.
+     */
+    function _rejectInvestment(uint256 projectId_) internal {
+        projectStatus[projectId_] = ProjectLibrary.ProjectStatus.REJECTED;
+        escrow.transferInvestmentToken(
+            investmentDetails[projectId_].investmentToken,
+            projectSeeker[projectId_],
+            investmentDetails[projectId_].investmentTokensAmount
+        );
+        emit ProjectRejected(projectId_);
     }
 
     /**
      * @notice Start Investment
-     * @param investmentId_ The id of the investment.
+     * @param projectId_ The id of the investment.
      */
-    function _startInvestment(uint256 investmentId_) internal {
-        projectStatus[investmentId_] = ProjectLibrary.ProjectStatus.STARTED;
-        investmentDetails[investmentId_].startingDate = block.timestamp;
+    function _startInvestment(uint256 projectId_) internal {
+        projectStatus[projectId_] = ProjectLibrary.ProjectStatus.STARTED;
+        investmentDetails[projectId_].startingDate = block.timestamp;
 
-        emit InvestmentStarted(investmentId_);
+        emit ProjectStarted(projectId_);
     }
 
     /**
      * @notice Get Investment Metadata
      * @dev This helper function provides a single point for querying the Investment metadata
-     * @param investmentId The id of the investment.
+     * @param projectId The id of the investment.
      * @dev returns Investment Details, Investment Status, Investment Seeker Address and Repayment Batch Type
      */
-    function getInvestmentMetadata(uint256 investmentId)
+    function getInvestmentMetadata(uint256 projectId)
         public
         view
         returns (
@@ -167,19 +170,19 @@ contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgr
         )
     {
         return (
-            investmentDetails[investmentId],
-            projectStatus[investmentId],
-            projectSeeker[investmentId]
+            investmentDetails[projectId],
+            projectStatus[projectId],
+            projectSeeker[projectId]
         );
     }
 
     /**
      * @notice IsValidReferralId
-     * @param investmentId The id of the investment.
+     * @param projectId The id of the investment.
      * @dev returns true if investment id exists (so also seeker exists), otherwise returns false
      */
-    function isValidReferralId(uint256 investmentId) external view returns (bool) {
-        return projectSeeker[investmentId] != address(0);
+    function isValidReferralId(uint256 projectId) external view returns (bool) {
+        return projectSeeker[projectId] != address(0);
     }
 
     /**
@@ -207,7 +210,7 @@ contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgr
             "Token amount and price should result in integer amount of tickets"
         );
 
-        uint256 investmentId = _storeInvestmentDetails(
+        uint256 projectId = _storeInvestmentDetails(
             lendingToken,
             totalAmountRequested_,
             investmentToken,
@@ -217,16 +220,16 @@ contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgr
 
         IERC20(investmentToken).safeTransferFrom(msg.sender, address(escrow), amountOfInvestmentTokens);
 
-        fundingNFT.mintGen0(address(escrow), investmentDetails[investmentId].totalPartitionsToBePurchased, investmentId);
+        fundingNFT.mintGen0(address(escrow), investmentDetails[projectId].totalPartitionsToBePurchased, projectId);
 
-        investmentTokensPerTicket[investmentId] = amountOfInvestmentTokens.div(investmentDetails[investmentId].totalPartitionsToBePurchased);
+        investmentTokensPerTicket[projectId] = amountOfInvestmentTokens.div(investmentDetails[projectId].totalPartitionsToBePurchased);
 
-        fundingNFT.pauseTokenTransfer(investmentId); //Pause trades for ERC1155s with the specific investment ID.
+        fundingNFT.pauseTokenTransfer(projectId); //Pause trades for ERC1155s with the specific investment ID.
 
-        governance.requestApproval(investmentId);
+        governance.requestApproval(projectId);
 
         // Add event for investment request
-        emit InvestmentRequested(investmentId, msg.sender, totalAmountRequested_);
+        emit ProjectRequested(projectId, msg.sender, totalAmountRequested_);
 
     }
 
@@ -234,39 +237,39 @@ contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgr
      * @notice user show interest for investment
      * @dev This function is called by the investors who are interested to invest in a specific investment token.
      * @dev require Approval state and valid partition
-     * @param investmentId The id of the investment.
+     * @param projectId The id of the investment.
      * @param amountOfPartitions The amount of partitions this specific investor wanna invest in.
      */
-    function showInterestForInvestment(uint256 investmentId, uint256 amountOfPartitions) external  nonReentrant() {
+    function showInterestForInvestment(uint256 projectId, uint256 amountOfPartitions) external  nonReentrant() {
         require(
-            projectStatus[investmentId] == ProjectLibrary.ProjectStatus.APPROVED,
+            projectStatus[projectId] == ProjectLibrary.ProjectStatus.APPROVED,
             "Can show interest only in Approved state"
         );
         require(amountOfPartitions > 0, "Cannot show interest for 0 partitions");
 
-        IERC20(investmentDetails[investmentId].lendingToken).safeTransferFrom(
+        IERC20(investmentDetails[projectId].lendingToken).safeTransferFrom(
             msg.sender, address(escrow), amountOfPartitions.mul(baseAmountForEachPartition)
         );
 
-        investmentDetails[investmentId].partitionsRequested = investmentDetails[investmentId].partitionsRequested.add(
+        investmentDetails[projectId].partitionsRequested = investmentDetails[projectId].partitionsRequested.add(
             amountOfPartitions
         );
 
         // if it's not the first time calling the function lucky numbers are not provided again.
-        if (remainingTicketsPerAddress[investmentId][msg.sender] > 0 || ticketsWonPerAddress[investmentId][msg.sender] > 0) {
-            remainingTicketsPerAddress[investmentId][msg.sender] =
-                remainingTicketsPerAddress[investmentId][msg.sender].add(amountOfPartitions);
+        if (remainingTicketsPerAddress[projectId][msg.sender] > 0 || ticketsWonPerAddress[projectId][msg.sender] > 0) {
+            remainingTicketsPerAddress[projectId][msg.sender] =
+                remainingTicketsPerAddress[projectId][msg.sender].add(amountOfPartitions);
         }
         else {
-            _applyImmediateTicketsAndProvideLuckyNumbers(investmentId, amountOfPartitions);
+            _applyImmediateTicketsAndProvideLuckyNumbers(projectId, amountOfPartitions);
         }
 
         // Add event for investment interest
-        emit InvestmentInterest(investmentId, amountOfPartitions);
+        emit ProjectInterest(projectId, amountOfPartitions);
 
     }
 
-    function _applyImmediateTicketsAndProvideLuckyNumbers(uint256 investmentId_, uint256 amountOfPartitions_) internal {
+    function _applyImmediateTicketsAndProvideLuckyNumbers(uint256 projectId_, uint256 amountOfPartitions_) internal {
         uint256 reputationalBalance = _updateReputationalBalanceForPreviouslyLockedTokens();
         uint256 totalLotteryNumbers = reputationalBalance.div(rAlbtPerLotteryNumber);
 
@@ -286,73 +289,73 @@ contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgr
 
         if (immediateTickets > 0) {
             // Just in case we provided immediate tickets and tickets finished, so there is no lottery in this case.
-            if (immediateTickets >= ticketsRemaining[investmentId_]) {
-                immediateTickets = ticketsRemaining[investmentId_];
-                projectStatus[investmentId_] = ProjectLibrary.ProjectStatus.SETTLED;
-                fundingNFT.unpauseTokenTransfer(investmentId_); // UnPause trades for ERC1155s with the specific investment ID.
-                emit InvestmentSettled(investmentId_);
+            if (immediateTickets >= ticketsRemaining[projectId_]) {
+                immediateTickets = ticketsRemaining[projectId_];
+                projectStatus[projectId_] = ProjectLibrary.ProjectStatus.SETTLED;
+                fundingNFT.unpauseTokenTransfer(projectId_); // UnPause trades for ERC1155s with the specific investment ID.
+                emit ProjectSettled(projectId_);
             }
 
-            ticketsWonPerAddress[investmentId_][msg.sender] = immediateTickets;
-            ticketsRemaining[investmentId_] = ticketsRemaining[investmentId_].sub(immediateTickets);
+            ticketsWonPerAddress[projectId_][msg.sender] = immediateTickets;
+            ticketsRemaining[projectId_] = ticketsRemaining[projectId_].sub(immediateTickets);
         }
 
-        remainingTicketsPerAddress[investmentId_][msg.sender] = amountOfPartitions_.sub(immediateTickets);
+        remainingTicketsPerAddress[projectId_][msg.sender] = amountOfPartitions_.sub(immediateTickets);
 
-        uint256 maxLotteryNumber = totalLotteryNumbersPerInvestment[investmentId_].add(totalLotteryNumbers);
+        uint256 maxLotteryNumber = totalLotteryNumbersPerInvestment[projectId_].add(totalLotteryNumbers);
 
-        for (uint256 i = totalLotteryNumbersPerInvestment[investmentId_].add(1); i <= maxLotteryNumber; i++) {
-            addressOfLotteryNumber[investmentId_][i] = msg.sender;
+        for (uint256 i = totalLotteryNumbersPerInvestment[projectId_].add(1); i <= maxLotteryNumber; i++) {
+            addressOfLotteryNumber[projectId_][i] = msg.sender;
         }
 
-        totalLotteryNumbersPerInvestment[investmentId_] = maxLotteryNumber;
+        totalLotteryNumbersPerInvestment[projectId_] = maxLotteryNumber;
     }
 
     /**
      * @notice Executes lottery run
      * @dev This function is called by any investor interested in an Investment Token to run part of the lottery.
      * @dev requires Started state and available tickets
-     * @param investmentId The id of the investment.
+     * @param projectId The id of the investment.
      */
-    function executeLotteryRun(uint256 investmentId) external {
-        require(projectStatus[investmentId] == ProjectLibrary.ProjectStatus.STARTED, "Can run lottery only in Started state");
+    function executeLotteryRun(uint256 projectId) external {
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.STARTED, "Can run lottery only in Started state");
         require(
-            remainingTicketsPerAddress[investmentId][msg.sender] > 0,
+            remainingTicketsPerAddress[projectId][msg.sender] > 0,
             "Can run lottery only if has remaining ticket"
         );
 
-        ticketsWonPerAddress[investmentId][msg.sender] = ticketsWonPerAddress[investmentId][msg.sender].add(1);
-        remainingTicketsPerAddress[investmentId][msg.sender] = remainingTicketsPerAddress[investmentId][msg.sender].sub(
+        ticketsWonPerAddress[projectId][msg.sender] = ticketsWonPerAddress[projectId][msg.sender].add(1);
+        remainingTicketsPerAddress[projectId][msg.sender] = remainingTicketsPerAddress[projectId][msg.sender].sub(
             1
         );
-        ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(1);
+        ticketsRemaining[projectId] = ticketsRemaining[projectId].sub(1);
 
         uint256 counter = totalTicketsPerRun;
-        uint256 maxNumber = totalLotteryNumbersPerInvestment[investmentId];
+        uint256 maxNumber = totalLotteryNumbersPerInvestment[projectId];
 
-        if (ticketsRemaining[investmentId] <= counter) {
-            projectStatus[investmentId] = ProjectLibrary.ProjectStatus.SETTLED;
-            counter = ticketsRemaining[investmentId];
-            ticketsRemaining[investmentId] = 0;
-            fundingNFT.unpauseTokenTransfer(investmentId); // UnPause trades for ERC1155s with the specific investment ID.
-            emit InvestmentSettled(investmentId);
+        if (ticketsRemaining[projectId] <= counter) {
+            projectStatus[projectId] = ProjectLibrary.ProjectStatus.SETTLED;
+            counter = ticketsRemaining[projectId];
+            ticketsRemaining[projectId] = 0;
+            fundingNFT.unpauseTokenTransfer(projectId); // UnPause trades for ERC1155s with the specific investment ID.
+            emit ProjectSettled(projectId);
         } else {
-            ticketsRemaining[investmentId] = ticketsRemaining[investmentId].sub(counter);
+            ticketsRemaining[projectId] = ticketsRemaining[projectId].sub(counter);
         }
 
         while (counter > 0) {
             uint256 randomNumber = _getRandomNumber(maxNumber);
             lotteryNonce = lotteryNonce.add(1);
 
-            address randomAddress = addressOfLotteryNumber[investmentId][randomNumber.add(1)];
+            address randomAddress = addressOfLotteryNumber[projectId][randomNumber.add(1)];
 
-            if (remainingTicketsPerAddress[investmentId][randomAddress] > 0) {
-                remainingTicketsPerAddress[investmentId][randomAddress] = remainingTicketsPerAddress[investmentId][
+            if (remainingTicketsPerAddress[projectId][randomAddress] > 0) {
+                remainingTicketsPerAddress[projectId][randomAddress] = remainingTicketsPerAddress[projectId][
                     randomAddress
                 ]
                     .sub(1);
 
-                ticketsWonPerAddress[investmentId][randomAddress] = ticketsWonPerAddress[investmentId][randomAddress]
+                ticketsWonPerAddress[projectId][randomAddress] = ticketsWonPerAddress[projectId][randomAddress]
                     .add(1);
 
                 counter--;
@@ -360,102 +363,102 @@ contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgr
         }
 
         // Add event for lottery executed
-        emit LotteryExecuted(investmentId);
+        emit LotteryExecuted(projectId);
     }
 
     /**
      * @notice Withdraw Investment Tickets
      * @dev This function is called by an investor to withdraw his tickets.
      * @dev require Settled state and enough tickets won
-     * @param investmentId The id of the investment.
+     * @param projectId The id of the investment.
      * @param ticketsToLock The amount of won tickets to be locked, so as to get more rALBT.
      * @param ticketsToWithdraw The amount of won tickets to be withdrawn instantly.
      */
     function withdrawInvestmentTickets(
-        uint256 investmentId,
+        uint256 projectId,
         uint256 ticketsToLock,
         uint256 ticketsToWithdraw
     ) external  nonReentrant() {
-        require(projectStatus[investmentId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
         require(
-            ticketsWonPerAddress[investmentId][msg.sender] > 0 &&
-                ticketsWonPerAddress[investmentId][msg.sender] >= ticketsToLock.add(ticketsToWithdraw),
+            ticketsWonPerAddress[projectId][msg.sender] > 0 &&
+                ticketsWonPerAddress[projectId][msg.sender] >= ticketsToLock.add(ticketsToWithdraw),
             "Not enough tickets won"
         );
 
-        ticketsWonPerAddress[investmentId][msg.sender] = ticketsWonPerAddress[investmentId][msg.sender]
+        ticketsWonPerAddress[projectId][msg.sender] = ticketsWonPerAddress[projectId][msg.sender]
             .sub(ticketsToLock)
             .sub(ticketsToWithdraw);
 
         _updateReputationalBalanceForPreviouslyLockedTokens();
 
         if (ticketsToLock > 0) {
-            lockedTicketsForSpecificInvestmentPerAddress[investmentId][
+            lockedTicketsForSpecificInvestmentPerAddress[projectId][
                 msg.sender
-            ] = lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender].add(ticketsToLock);
+            ] = lockedTicketsForSpecificInvestmentPerAddress[projectId][msg.sender].add(ticketsToLock);
 
             lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].add(ticketsToLock);
         }
 
         if (ticketsToWithdraw > 0) {
-            escrow.transferFundingNFT(investmentId, ticketsToWithdraw, msg.sender);
+            escrow.transferFundingNFT(projectId, ticketsToWithdraw, msg.sender);
         }
 
-        if (remainingTicketsPerAddress[investmentId][msg.sender] > 0) {
-            _withdrawAmountProvidedForNonWonTickets(investmentId);
+        if (remainingTicketsPerAddress[projectId][msg.sender] > 0) {
+            _withdrawAmountProvidedForNonWonTickets(projectId);
         }
 
         // Add event for withdraw investment
-        emit WithdrawInvestment(investmentId, ticketsToLock, ticketsToWithdraw);
+        emit WithdrawProject(projectId, ticketsToLock, ticketsToWithdraw);
     }
 
     /**
      * @dev This function is called by an investor to withdraw lending tokens provided for non-won tickets.
-     * @param investmentId The id of the investment.
+     * @param projectId The id of the investment.
      */
-    function withdrawAmountProvidedForNonWonTickets(uint256 investmentId) external nonReentrant() {
-        require(projectStatus[investmentId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
-        require(remainingTicketsPerAddress[investmentId][msg.sender] > 0, "No non-won tickets to withdraw");
+    function withdrawAmountProvidedForNonWonTickets(uint256 projectId) external nonReentrant() {
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
+        require(remainingTicketsPerAddress[projectId][msg.sender] > 0, "No non-won tickets to withdraw");
 
-        _withdrawAmountProvidedForNonWonTickets(investmentId);
+        _withdrawAmountProvidedForNonWonTickets(projectId);
     }
 
     /**
      * @notice Withdraw locked investment ticket.
      * @dev This function is called by an investor to withdraw his locked tickets.
      * @dev requires Settled state and available tickets.
-     * @param investmentId The id of the investment.
+     * @param projectId The id of the investment.
      * @param ticketsToWithdraw The amount of locked tickets to be withdrawn.
      */
-    function withdrawLockedInvestmentTickets(uint256 investmentId, uint256 ticketsToWithdraw) external nonReentrant() {
-        require(projectStatus[investmentId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
+    function withdrawLockedInvestmentTickets(uint256 projectId, uint256 ticketsToWithdraw) external nonReentrant() {
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
         require(
             ticketsToWithdraw > 0 &&
-                lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender] >= ticketsToWithdraw,
+                lockedTicketsForSpecificInvestmentPerAddress[projectId][msg.sender] >= ticketsToWithdraw,
             "Not enough tickets to withdraw"
         );
 
         _updateReputationalBalanceForPreviouslyLockedTokens();
 
-        lockedTicketsForSpecificInvestmentPerAddress[investmentId][
+        lockedTicketsForSpecificInvestmentPerAddress[projectId][
             msg.sender
-        ] = lockedTicketsForSpecificInvestmentPerAddress[investmentId][msg.sender].sub(ticketsToWithdraw);
+        ] = lockedTicketsForSpecificInvestmentPerAddress[projectId][msg.sender].sub(ticketsToWithdraw);
 
         lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].sub(ticketsToWithdraw);
 
-        escrow.transferFundingNFT(investmentId, ticketsToWithdraw, msg.sender);
+        escrow.transferFundingNFT(projectId, ticketsToWithdraw, msg.sender);
 
         // Add event for withdraw locked investment tickets
-        emit WithdrawLockedInvestmentTickets(investmentId, ticketsToWithdraw);
+        emit WithdrawLockedProjectTickets(projectId, ticketsToWithdraw);
     }
 
     /**
      * @notice Gets Requesting status
      * @dev Returns true if investors have shown interest for equal or more than the total tickets.
-     * @param investmentId The id of the investment type to be checked.
+     * @param projectId The id of the investment type to be checked.
      */
-    function getRequestingInterestStatus(uint256 investmentId) external view returns (bool) {
-        return investmentDetails[investmentId].totalPartitionsToBePurchased <= investmentDetails[investmentId].partitionsRequested;
+    function getRequestingInterestStatus(uint256 projectId) external view returns (bool) {
+        return investmentDetails[projectId].totalPartitionsToBePurchased <= investmentDetails[projectId].partitionsRequested;
     }
 
     /**
@@ -497,33 +500,33 @@ contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgr
         return rALBT.balanceOf(msg.sender);
     }
 
-    function _withdrawAmountProvidedForNonWonTickets(uint256 investmentId_) internal {
+    function _withdrawAmountProvidedForNonWonTickets(uint256 projectId_) internal {
         uint256 amountToReturnForNonWonTickets =
-            remainingTicketsPerAddress[investmentId_][msg.sender].mul(baseAmountForEachPartition);
-        remainingTicketsPerAddress[investmentId_][msg.sender] = 0;
+            remainingTicketsPerAddress[projectId_][msg.sender].mul(baseAmountForEachPartition);
+        remainingTicketsPerAddress[projectId_][msg.sender] = 0;
 
-        escrow.transferLendingToken(investmentDetails[investmentId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
+        escrow.transferLendingToken(investmentDetails[projectId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
 
         // Add event for withdraw amount provided for non tickets
-        emit WithdrawAmountForNonTickets(investmentId_, amountToReturnForNonWonTickets);
+        emit WithdrawAmountForNonTickets(projectId_, amountToReturnForNonWonTickets);
     }
 
     /**
      * @notice Convert NFT to investment tokens
-     * @param investmentId the investmentId
+     * @param projectId the projectId
      * @param amountOfNFTToConvert the amount of nft to convert
      */
-    function convertNFTToInvestmentTokens (uint256 investmentId, uint256 amountOfNFTToConvert) external {
-        require(projectStatus[investmentId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
+    function convertNFTToInvestmentTokens (uint256 projectId, uint256 amountOfNFTToConvert) external {
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
         require(amountOfNFTToConvert != 0, "Amount of nft to convert cannot be 0");
-        require(amountOfNFTToConvert <= fundingNFT.balanceOf(msg.sender, investmentId), "Not enough NFT to convert");
+        require(amountOfNFTToConvert <= fundingNFT.balanceOf(msg.sender, projectId), "Not enough NFT to convert");
 
-        uint256 amountOfInvestmentTokenToTransfer = investmentTokensPerTicket[investmentId].mul(amountOfNFTToConvert);
+        uint256 amountOfInvestmentTokenToTransfer = investmentTokensPerTicket[projectId].mul(amountOfNFTToConvert);
 
-        escrow.burnFundingNFT(msg.sender, investmentId, amountOfNFTToConvert);
-        escrow.transferInvestmentToken(investmentDetails[investmentId].investmentToken, msg.sender, amountOfInvestmentTokenToTransfer);
+        escrow.burnFundingNFT(msg.sender, projectId, amountOfNFTToConvert);
+        escrow.transferInvestmentToken(investmentDetails[projectId].investmentToken, msg.sender, amountOfInvestmentTokenToTransfer);
 
         // Add event for convert nft to investment tokens
-        emit ConvertNFTToInvestmentTokens(investmentId, amountOfNFTToConvert, amountOfInvestmentTokenToTransfer);
+        emit ConvertNFTToProjectTokens(projectId, amountOfNFTToConvert, amountOfInvestmentTokenToTransfer);
     }
 }

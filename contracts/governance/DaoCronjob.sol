@@ -45,7 +45,7 @@ contract DaoCronjob is GovernanceTypesAndStorage {
      * @param timestamp The current block height
      */
     function executeCronjob(uint256 cronjobId, uint256 timestamp) internal {
-        updateInvestment(cronjobs[cronjobId].projectType, cronjobs[cronjobId].projectId, timestamp);
+        updateProject(cronjobs[cronjobId].projectId, timestamp);
     }
 
     /**
@@ -53,32 +53,31 @@ contract DaoCronjob is GovernanceTypesAndStorage {
      * @dev Adds a node to the cronjobList (OrderedDoubleLinkedList)
      * @param cronjobType The type of cronJob
      * @param timestamp The current block height
-     * @param externalId Id of the request in case of dao approval, change voting request or investment
+     * @param projectId Id of the request in case of dao approval, change voting request or investment
      */
     function addCronjob(
         CronjobType cronjobType,
         uint256 timestamp,
-        uint256 projectType,
         uint256 projectId
     ) internal {
         totalCronjobs = totalCronjobs.add(1);
-        cronjobs[totalCronjobs] = Cronjob(cronjobType, projectType, projectId);
+        cronjobs[totalCronjobs] = Cronjob(cronjobType, projectId);
         cronjobList.addNodeIncrement(timestamp, totalCronjobs);
     }
 
     /**
      * @notice Updates an investment
      * @dev checks if lottery should start or adds cronJob for late application
-     * @param investmentId The id of the investment to update
+     * @param projectId The id of the project to update
      * @param timestamp the current block height
      */
-    function updateInvestment(uint256 projectType, uint256 projectId, uint256 timestamp) internal {
-        if (IProject(projects[projectType]).getRequestingInterestStatus(projectId)) {
-            IProject(projects[projectType]).startLotteryPhase(projectId);
+    function updateProject(uint256 projectId, uint256 timestamp) internal {
+        if (IProject(projectManager.getProjectAddressFromProjectId(projectId)).getRequestingInterestStatus(projectId)) {
+            IProject(projectManager.getProjectAddressFromProjectId(projectId)).startLotteryPhase(projectId);
         } else {
             uint256 nextCronjobTimestamp =
                 timestamp.add(updatableVariables[LATE_APPLICATIONS_FOR_INVESTMENT_DURATION]);
-            addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, projectType, projectId);
+            addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, projectId);
         }
     }
 }

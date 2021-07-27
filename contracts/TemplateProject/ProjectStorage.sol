@@ -6,6 +6,7 @@ import "../interfaces/IERC20.sol";
 import "../interfaces/IERC1155Mint.sol";
 import "../interfaces/IGovernance.sol";
 import "../interfaces/IEscrow.sol";
+import "../interfaces/IProjectManager.sol";
 
 /**
  * @title AllianceBlock Storage contract
@@ -17,6 +18,7 @@ contract ProjectStorage {
     IERC1155Mint public fundingNFT; // Funding nft's contract address.
     IEscrow public escrow; // Escrow's contract address.
     IERC20 public rALBT; // rALBT's contract address.
+    IProjectManager public projectManager; // rALBT's contract address.
 
     uint256 public totalProjects; // The total amount of investment requests.
 

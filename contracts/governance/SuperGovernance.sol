@@ -17,23 +17,6 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
     function __SuperGovernance_init() public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
-        projectCont = 1;
-    }
-
-    /**
-     * @notice Sets investment contract
-     * @dev used to initialize SuperGovernance
-     * @dev requires not already initialized
-     * @param projectAddress_ the investment address
-     */
-    function setProject(address projectAddress_) external onlyOwner() {
-        require(projectAddress_ != address(0), "Cannot initialize with 0 addresses");
-        require(projectTypesIndex[projectAddress_] == 0, "Cannot initialize second time");
-        projectTypesIndex[projectAddress_] = projectCont;
-        projects[projectCont] = projectAddress_;
-        projectCont += 1;
-
-        emit InitGovernance(projectAddress_, msg.sender);
     }
 
     /**
@@ -48,7 +31,7 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
         require(msg.sender == superDelegator, "Only super delegator can call this function");
         require(!approvalRequests[requestId].isProcessed, "Cannot process again same investment");
 
-        IProject(projects[approvalRequests[requestId].projectType]).decideForProject(projectId, decision);
+        IProject(projectManager.getProjectAddressFromProjectId(approvalRequests[requestId].projectId)).decideForProject(approvalRequests[requestId].projectId, decision);
 
         if (decision) {
             approvalRequests[requestId].approvalsProvided = 1;
@@ -57,6 +40,6 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
 
         approvalRequests[requestId].isProcessed = true;
 
-        emit VotedForRequest(approvalRequests[requestId].projectType, projectId, decision, msg.sender);
+        emit VotedForRequest(approvalRequests[requestId].projectId, decision, msg.sender);
     }
 }

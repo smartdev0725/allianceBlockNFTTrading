@@ -4,7 +4,6 @@ pragma solidity 0.7.6;
 import "./governance/SuperGovernance.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./interfaces/IInvestment.sol";
 import "./interfaces/IStaking.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
@@ -27,14 +26,16 @@ contract Governance is Initializable, SuperGovernance {
     function initialize(
         address superDelegator_,
         uint256 applicationsForInvestmentDuration_,
-        uint256 lateApplicationsForInvestmentDuration_
+        uint256 lateApplicationsForInvestmentDuration_,
+        address projectManager_
     ) external initializer {
         require(superDelegator_ != address(0), "Cannot initialize with 0 addresses");
         require(applicationsForInvestmentDuration_ != 0, "Cannot initialize applicationsForInvestmentDuration_ with 0");
         require(lateApplicationsForInvestmentDuration_ != 0, "Cannot initialize lateApplicationsForInvestmentDuration_ with 0");
 
         __SuperGovernance_init();
-
+        
+        projectManager = IProjectManager(projectManager_);
         superDelegator = superDelegator_;
 
         updatableVariables[APPLICATIONS_FOR_INVESTMENT_DURATION] = applicationsForInvestmentDuration_;
@@ -59,7 +60,6 @@ contract Governance is Initializable, SuperGovernance {
     function requestApproval(
         uint256 projectId
     ) external onlyProject() checkCronjob() nonReentrant() {
-        approvalRequests[totalApprovalRequests].projectType = projectTypesIndex[msg.sender];
         approvalRequests[totalApprovalRequests].projectId = projectId;
 
         emit ApprovalRequested(
@@ -73,11 +73,11 @@ contract Governance is Initializable, SuperGovernance {
     /**
      * @notice Stores Investment Duration
      * @dev Adds cronJob
-     * @param investmentId The id of the investment to store
+     * @param projectId The id of the investment to store
      */
-    function storeInvestmentTriggering(uint256 investmentId) external onlyProject() {
+    function storeInvestmentTriggering(uint256 projectId) external onlyProject() {
         uint256 nextCronjobTimestamp =
             block.timestamp.add(updatableVariables[APPLICATIONS_FOR_INVESTMENT_DURATION]);
-        addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, investmentId);
+        addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, projectId);
     }
 }

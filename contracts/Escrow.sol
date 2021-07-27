@@ -18,7 +18,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     using SafeERC20 for IERC20;
 
     modifier onlyProjectOrOwner() {
-        require(projectTypesIndex[msg.sender] != 0 || owner() == msg.sender, "Only Project or Owner");
+        require(projectManager.isProject(msg.sender) || owner() == msg.sender, "Only Project or Owner");
         _;
     }
 
@@ -27,17 +27,19 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @dev Initializes the contract.
      * @param lendingToken_ The token that lenders will be able to lend.
      * @param fundingNFT_ The ERC1155 token contract which will represent the lending amounts.
+     * @param projectManager_ The project manager contract.
      */
-    function initialize(address lendingToken_, address fundingNFT_) external initializer {
+    function initialize(address lendingToken_, address fundingNFT_, address projectManager_) external initializer {
         require(lendingToken_ != address(0), "Cannot initialize lendingToken_ with 0 address");
         require(fundingNFT_ != address(0), "Cannot initialize fundingNFT_ with 0 address");
+        require(projectManager_ != address(0), "Cannot initialize projectManager_ with 0 address");
 
         __Ownable_init();
         __ERC1155Holder_init(); // This internally calls __ERC1155Receiver_init_unchained
 
-        projectCont = 1;
         lendingToken = IERC20(lendingToken_);
         fundingNFT = IERC1155Mint(fundingNFT_);
+        projectManager = IProjectManager(projectManager_);
         reputationalALBT = new rALBT();
     }
 
@@ -54,14 +56,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         address actionVerifierAddress_,
         address stakingAddress_
     ) external onlyOwner() {
-        require(projectAddress != address(0) && actionVerifierAddress_ != address(0) && stakingAddress_ != address(0)
-            , "Cannot initialize with 0 addresses");
-        require(projectTypesIndex[projectAddress_] == 0, "Cannot initialize second time");
-
-        projectTypesIndex[projectAddress_] = projectCont;
-        projects[projectCont] = projectAddress_;
-        projectCont += 1;
-
+        require(actionVerifierAddress_ != address(0) && stakingAddress_ != address(0), "Cannot initialize with 0 addresses");
         actionVerifier = actionVerifierAddress_;
         staking = stakingAddress_;
     }
@@ -88,7 +83,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param projectId The project id
      * @param amount The amount of funding nft to be burn
      */
-    function burnFundingNFT(address account, uint256 projectId, uint256 amount) external onlyInvestment() {
+    function burnFundingNFT(address account, uint256 projectId, uint256 amount) external onlyProject() {
         fundingNFT.burn(account, projectId, amount);
     }
 
@@ -103,7 +98,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         address lendingToken,
         address seeker,
         uint256 amount
-    ) external onlyInvestment() {
+    ) external onlyProject() {
         IERC20(lendingToken).safeTransfer(seeker, amount);
     }
 
@@ -118,7 +113,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         address investmentToken,
         address recipient,
         uint256 amount
-    ) external onlyInvestment() {
+    ) external onlyProject() {
         IERC20(investmentToken).safeTransfer(recipient, amount);
     }
 
@@ -141,7 +136,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param recipient The address to mint the reputational tokens to.
      * @param amount The amount of reputational tokens to be minted.
      */
-    function mintReputationalToken(address recipient, uint256 amount) external onlyInvestmentOrStaking() {
+    function mintReputationalToken(address recipient, uint256 amount) external onlyProjectOrStaking() {
         reputationalALBT.mintTo(recipient, amount);
     }
 
@@ -153,17 +148,5 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      */
     function burnReputationalToken(address from, uint256 amount) external onlyStaking() {
         reputationalALBT.burnFrom(from, amount);
-    }
-
-    /**
-     * @notice Change investment
-     * @dev This function is used to change the investment address in case of an upgrade.
-     * @param projectAddress The address of the upgraded investment contract.
-     */
-    function changeInvestment(uint256 projectType, address projectAddress) external onlyOwner() {
-        require(projectAddress != address(0), "Investment should not be zero address");
-
-        projectTypesIndex[projectAddress] = projectTypesIndex[projects[projectType]];
-        projects[projectType] = projectAddress;
     }
 }

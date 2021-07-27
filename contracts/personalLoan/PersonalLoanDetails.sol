@@ -30,8 +30,10 @@ contract PersonalLoanDetails is Storage, TemplateProject {
         uint256 investmentTokensAmount_,
         string memory extraInfo_
     ) internal returns (uint256) {
+        uint256 projectId = projectManager.createProject();
+        
         ProjectLibrary.InvestmentDetails memory investment;
-        investment.investmentId = totalProjects;
+        investment.investmentId = projectId;
         investment.investmentToken = investmentToken_;
         investment.investmentTokensAmount = investmentTokensAmount_;
         investment.totalAmountToBeRaised = amountRequestedToBeRaised_;
@@ -39,11 +41,9 @@ contract PersonalLoanDetails is Storage, TemplateProject {
         investment.totalPartitionsToBePurchased = amountRequestedToBeRaised_.div(baseAmountForEachPartition);
         investment.lendingToken = lendingToken_;
 
-        investmentDetails[totalProjects] = investment;
+        investmentDetails[projectId] = investment;
 
-        projectSeeker[totalProjects] = msg.sender;
-
-        totalProjects = totalProjects.add(1);
+        projectSeeker[projectId] = msg.sender;
 
         return investment.investmentId;
 

@@ -2,6 +2,7 @@
 pragma solidity 0.7.6;
 
 import "../interfaces/IProject.sol";
+import "../interfaces/IProjectManager.sol";
 import "../libs/OrderedDoubleLinkedList.sol";
 
 /**
@@ -14,7 +15,6 @@ contract GovernanceTypesAndStorage {
     bytes32 public constant LATE_APPLICATIONS_FOR_INVESTMENT_DURATION = keccak256("lateApplicationsForInvestmentDuration");
 
     struct ApprovalRequest {
-        uint256 projectType; // The investment id for which approcal is requested.
         uint256 projectId; // The investment id for which approcal is requested.
         uint256 approvalsProvided; // The number of approvals that this request has gathered.
         bool isApproved; // True if request was approved, false if not.
@@ -22,7 +22,7 @@ contract GovernanceTypesAndStorage {
     }
 
     // EVENTS
-    event VotedForRequest(uint256 indexed projectType, uint256 indexed projectId, bool decision, address indexed user);
+    event VotedForRequest(uint256 indexed projectId, bool decision, address indexed user);
     event ApprovalRequested(
         uint256 indexed projectId,
         address indexed user
@@ -33,15 +33,9 @@ contract GovernanceTypesAndStorage {
 
     address public superDelegator;
 
-    // projectType => projectId => ApprovalRequest
     mapping(uint256 => ApprovalRequest) public approvalRequests;
 
-    // cont of the amount of project types
-    uint256 projectCont;
-    // mapping to save the address to a project
-    mapping(uint256 => address) public projects;
-    // mapping to save the index of the type of project
-    mapping(address => uint256) public projectTypesIndex;
+    IProjectManager projectManager;
 
     mapping(bytes32 => uint256) public updatableVariables;
 
@@ -52,7 +46,6 @@ contract GovernanceTypesAndStorage {
 
     struct Cronjob {
         CronjobType cronjobType; // This is the cronjob type.
-        uint256 projectType; // This is the id of the request in case of dao approval, change voting request or investment.
         uint256 projectId; // This is the id of the request in case of dao approval, change voting request or investment.
     }
 
@@ -65,7 +58,7 @@ contract GovernanceTypesAndStorage {
     // MODIFIERS
 
     modifier onlyProject() {
-        require(projectTypesIndex[msg.sender] != 0, "Only Project contract");
+        require(projectManager.isProject(msg.sender), "Only Project contract");
         _;
     }
 }
