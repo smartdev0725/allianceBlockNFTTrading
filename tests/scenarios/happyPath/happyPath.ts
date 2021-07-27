@@ -865,7 +865,7 @@ export default async function suite() {
             Number(ticketsWonBefore1) - 1
           )
       )
-        .to.emit(this.registryContract, 'WithdrawInvestment')
+        .to.emit(this.registryContract, 'WithdrawInvestmentTickets')
         .withArgs(investmentId, 1, Number(ticketsWonBefore1) - 1);
 
       await expectRevert(
@@ -886,7 +886,7 @@ export default async function suite() {
             Number(ticketsWonBefore2) - 1
           )
       )
-        .to.emit(this.registryContract, 'WithdrawInvestment')
+        .to.emit(this.registryContract, 'WithdrawInvestmentTickets')
         .withArgs(investmentId, 1, Number(ticketsWonBefore2) - 1);
 
       await expectRevert(
@@ -907,7 +907,7 @@ export default async function suite() {
             Number(ticketsWonBefore3) - 1
           )
       )
-        .to.emit(this.registryContract, 'WithdrawInvestment')
+        .to.emit(this.registryContract, 'WithdrawInvestmentTickets')
         .withArgs(investmentId, 1, Number(ticketsWonBefore3) - 1);
 
       await expectRevert(
@@ -928,7 +928,7 @@ export default async function suite() {
             Number(ticketsWonBefore4) - 1
           )
       )
-        .to.emit(this.registryContract, 'WithdrawInvestment')
+        .to.emit(this.registryContract, 'WithdrawInvestmentTickets')
         .withArgs(investmentId, 1, Number(ticketsWonBefore4) - 1);
 
       await expectRevert(
@@ -1185,5 +1185,31 @@ export default async function suite() {
     );
 
     //8) Seeker claims the funding, when all investment tokens have been exchanged.
+    // given
+    const seekerInitialLendingBalance =
+      await this.lendingTokenContract.balanceOf(this.seekerSigner.address);
+    const expectedAmount = (
+      await this.registryContract.investmentDetails(investmentId)
+    ).totalAmountToBeRaised;
+
+    // when
+    await expect(
+      this.registryContract
+        .connect(this.seekerSigner)
+        .withdrawInvestment(investmentId)
+    )
+      .to.emit(this.registryContract, 'seekerWithdrawInvestment')
+      .withArgs(investmentId, expectedAmount);
+    
+    const seekerFinalLendingBalance =
+      await this.lendingTokenContract.balanceOf(this.seekerSigner.address);
+    const investmentWithdrawn =
+      await this.registryContract.investmentWithdrawn(investmentId);
+    const seekerGotLendingTokens = seekerFinalLendingBalance.eq(
+      seekerInitialLendingBalance.add(expectedAmount)
+    );
+    //then
+    expect(investmentWithdrawn).to.be.equal(true);
+    expect(seekerGotLendingTokens).to.be.equal(true);
   });
 }

@@ -829,7 +829,7 @@ export default async function suite() {
             .withdrawInvestment(investmentId),
           'Already withdrawn'
         );
-        100000000000000000000;
+        
         const seekerFinalLendingBalance =
           await this.lendingTokenContract.balanceOf(this.seekerSigner.address);
         const investmentWithdrawn =
