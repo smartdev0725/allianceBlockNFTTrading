@@ -30,9 +30,7 @@ contract ProjectStorage {
 
     // All supported lending tokens are giving true, while unsupported are giving false.
     mapping(address => bool) public isValidLendingToken;
-
-    // Mapping from investment id -> details for each and every investment.
-    mapping(uint256 => ProjectLibrary.InvestmentDetails) public investmentDetails;
+    
     // Mapping from investment id -> investment status.
     mapping(uint256 => ProjectLibrary.ProjectStatus) public projectStatus;
 

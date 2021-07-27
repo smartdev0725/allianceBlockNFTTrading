@@ -17,20 +17,23 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
     function __SuperGovernance_init() public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
+        projectCont = 1;
     }
 
     /**
      * @notice Sets investment contract
      * @dev used to initialize SuperGovernance
      * @dev requires not already initialized
-     * @param investmentAddress_ the investment address
+     * @param projectAddress_ the investment address
      */
-    function setInvestment(address investmentAddress_) external onlyOwner() {
-        require(investmentAddress_ != address(0), "Cannot initialize with 0 addresses");
-        require(address(investment) == address(0), "Cannot initialize second time");
-        investment = IInvestment(investmentAddress_);
+    function setProject(address projectAddress_) external onlyOwner() {
+        require(projectAddress_ != address(0), "Cannot initialize with 0 addresses");
+        require(projectTypesIndex[projectAddress_] == 0, "Cannot initialize second time");
+        projectTypesIndex[projectAddress_] = projectCont;
+        projects[projectCont] = projectAddress_;
+        projectCont += 1;
 
-        emit InitGovernance(investmentAddress_, msg.sender);
+        emit InitGovernance(projectAddress_, msg.sender);
     }
 
     /**
@@ -45,7 +48,7 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
         require(msg.sender == superDelegator, "Only super delegator can call this function");
         require(!approvalRequests[requestId].isProcessed, "Cannot process again same investment");
 
-        investment.decideForInvestment(approvalRequests[requestId].investmentId, decision);
+        IProject(projects[approvalRequests[requestId].projectType]).decideForProject(projectId, decision);
 
         if (decision) {
             approvalRequests[requestId].approvalsProvided = 1;
@@ -54,6 +57,6 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
 
         approvalRequests[requestId].isProcessed = true;
 
-        emit VotedForRequest(approvalRequests[requestId].investmentId, requestId, decision, msg.sender);
+        emit VotedForRequest(approvalRequests[requestId].projectType, projectId, decision, msg.sender);
     }
 }

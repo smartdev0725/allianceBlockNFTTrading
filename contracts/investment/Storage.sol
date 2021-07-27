@@ -31,6 +31,9 @@ contract Storage {
     mapping(address => uint256) public lockedTicketsPerAddress;
     // The last block checked for rewards for the tickets locked per address.
     mapping(address => uint256) public lastBlockCheckedForLockedTicketsPerAddress;
+    
+    // Mapping from investment id -> details for each and every investment.
+    mapping(uint256 => ProjectLibrary.InvestmentDetails) public investmentDetails;
 
     // This variable represents the base amount in which every investment amount is divided to. (also the starting value for each ERC1155)
     uint256 public baseAmountForEachPartition;

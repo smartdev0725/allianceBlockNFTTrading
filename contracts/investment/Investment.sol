@@ -100,9 +100,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
      * @param investmentId The id of the investment.
      * @param decision The decision of the governance. [true -> approved] [false -> rejected]
      */
-    function decideForInvestment(uint256 investmentId, bool decision) external onlyGovernance() {
-        if (decision) _approveInvestment(investmentId);
-        else _rejectInvestment(investmentId);
+    function decideForProject(uint256 projectId, bool decision) external onlyGovernance() {
+        if (decision) _approveInvestment(projectId);
+        else _rejectInvestment(projectId);
     }
 
     /**

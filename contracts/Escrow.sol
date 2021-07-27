@@ -17,8 +17,8 @@ import "./rALBT.sol";
 contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable {
     using SafeERC20 for IERC20;
 
-    modifier onlyInvestmentOrOwner() {
-        require(msg.sender == address(investment) || owner() == msg.sender, "Only Investment or Owner");
+    modifier onlyProjectOrOwner() {
+        require(projectTypesIndex[msg.sender] != 0 || owner() == msg.sender, "Only Project or Owner");
         _;
     }
 
@@ -35,6 +35,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         __Ownable_init();
         __ERC1155Holder_init(); // This internally calls __ERC1155Receiver_init_unchained
 
+        projectCont = 1;
         lendingToken = IERC20(lendingToken_);
         fundingNFT = IERC1155Mint(fundingNFT_);
         reputationalALBT = new rALBT();
@@ -44,19 +45,23 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @notice After Initialize
      * @dev To be executed after Initialize
      * @dev requires not already initialized
-     * @param investmentAddress_ The investment address.
+     * @param projectAddress The investment address.
      * @param actionVerifierAddress_ The actionVerifier address.
      * @param stakingAddress_ The staking address
      */
     function afterInitialize(
-        address investmentAddress_,
+        address projectAddress,
         address actionVerifierAddress_,
         address stakingAddress_
     ) external onlyOwner() {
-        require(investmentAddress_ != address(0) && actionVerifierAddress_ != address(0) && stakingAddress_ != address(0)
+        require(projectAddress != address(0) && actionVerifierAddress_ != address(0) && stakingAddress_ != address(0)
             , "Cannot initialize with 0 addresses");
-        require(address(investment) == address(0), "Cannot initialize second time");
-        investment = IInvestment(investmentAddress_);
+        require(projectTypesIndex[projectAddress_] == 0, "Cannot initialize second time");
+
+        projectTypesIndex[projectAddress_] = projectCont;
+        projects[projectCont] = projectAddress_;
+        projectCont += 1;
+
         actionVerifier = actionVerifierAddress_;
         staking = stakingAddress_;
     }
@@ -64,27 +69,27 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     /**
      * @notice Transfer Funding NFT
      * @dev This function is used to send the ERC1155 tokens from escrow to the lenders.
-     * @param investmentId The id of the investment.
+     * @param projectId The id of the project.
      * @param partitionsPurchased The amount of ERC1155 tokens that should be sent back to the lender.
      * @param receiver Lender's address.
      */
     function transferFundingNFT(
-        uint256 investmentId,
+        uint256 projectId,
         uint256 partitionsPurchased,
         address receiver
-    ) external onlyInvestmentOrOwner() {
-        fundingNFT.safeTransferFrom(address(this), receiver, investmentId, partitionsPurchased, "");
+    ) external onlyProjectOrOwner() {
+        fundingNFT.safeTransferFrom(address(this), receiver, projectId, partitionsPurchased, "");
     }
 
     /**
      * @notice Burn Funding NFT
      * @dev This function is used to burn NFT
      * @param account The address to burn the funding nft from
-     * @param investmentId The investment id
+     * @param projectId The project id
      * @param amount The amount of funding nft to be burn
      */
-    function burnFundingNFT(address account, uint256 investmentId, uint256 amount) external onlyInvestment() {
-        fundingNFT.burn(account, investmentId, amount);
+    function burnFundingNFT(address account, uint256 projectId, uint256 amount) external onlyInvestment() {
+        fundingNFT.burn(account, projectId, amount);
     }
 
     /**
@@ -153,10 +158,12 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     /**
      * @notice Change investment
      * @dev This function is used to change the investment address in case of an upgrade.
-     * @param investmentAddress The address of the upgraded investment contract.
+     * @param projectAddress The address of the upgraded investment contract.
      */
-    function changeInvestment(address investmentAddress) external onlyOwner() {
-        require(investmentAddress != address(0), "Investment should not be zero address");
-        investment = IInvestment(investmentAddress);
+    function changeInvestment(uint256 projectType, address projectAddress) external onlyOwner() {
+        require(projectAddress != address(0), "Investment should not be zero address");
+
+        projectTypesIndex[projectAddress] = projectTypesIndex[projects[projectType]];
+        projects[projectType] = projectAddress;
     }
 }

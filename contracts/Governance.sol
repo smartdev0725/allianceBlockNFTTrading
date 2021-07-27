@@ -54,15 +54,16 @@ contract Governance is Initializable, SuperGovernance {
     /**
      * @notice Request a investment or investment approval
      * @dev Executes cronJob()
-     * @param investmentId The id of the investment or investment to approve
+     * @param projectId The id of the investment or investment to approve
      */
     function requestApproval(
-        uint256 investmentId
-    ) external onlyInvestment() checkCronjob() nonReentrant() {
-        approvalRequests[totalApprovalRequests].investmentId = investmentId;
+        uint256 projectId
+    ) external onlyProject() checkCronjob() nonReentrant() {
+        approvalRequests[totalApprovalRequests].projectType = projectTypesIndex[msg.sender];
+        approvalRequests[totalApprovalRequests].projectId = projectId;
 
         emit ApprovalRequested(
-            approvalRequests[totalApprovalRequests].investmentId,
+            approvalRequests[totalApprovalRequests].projectId,
             msg.sender
         );
 
@@ -74,7 +75,7 @@ contract Governance is Initializable, SuperGovernance {
      * @dev Adds cronJob
      * @param investmentId The id of the investment to store
      */
-    function storeInvestmentTriggering(uint256 investmentId) external onlyInvestment() {
+    function storeInvestmentTriggering(uint256 investmentId) external onlyProject() {
         uint256 nextCronjobTimestamp =
             block.timestamp.add(updatableVariables[APPLICATIONS_FOR_INVESTMENT_DURATION]);
         addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, investmentId);

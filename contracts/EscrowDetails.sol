@@ -12,6 +12,13 @@ import "./rALBT.sol";
  * @notice Functionality, storage and modifiers for Escrow
  */
 contract EscrowDetails {
+
+    uint256 projectCont;
+    // mapping to save the address to a project
+    mapping(uint256 => address) public projects;
+    // mapping to save the index of the type of project
+    mapping(address => uint256) public projectTypesIndex;
+
     IInvestment public investment;
 
     IERC20 public lendingToken;
@@ -22,8 +29,8 @@ contract EscrowDetails {
     mapping(uint256 => address) public investmentSeeker;
     rALBT public reputationalALBT;
 
-    modifier onlyInvestment() {
-        require(msg.sender == address(investment), "Only Investment");
+    modifier onlyProject() {
+        require(projectTypesIndex[msg.sender] != 0, "Only Project");
         _;
     }
 
@@ -37,8 +44,8 @@ contract EscrowDetails {
         _;
     }
 
-    modifier onlyInvestmentOrStaking() {
-        require(msg.sender == staking || msg.sender == address(investment), "Only Investment or Staking");
+    modifier onlyProjectOrStaking() {
+        require(msg.sender == staking || projectTypesIndex[msg.sender] != 0, "Only Project or Staking");
         _;
     }
 }
