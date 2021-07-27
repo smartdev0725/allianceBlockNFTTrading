@@ -512,18 +512,36 @@ export default async function suite() {
     await this.registryContract
       .connect(this.lender1Signer)
       .showInterestForInvestment(investmentId, numberOfPartitions);
+    //check number of partitions requested for this investment
+    //after each call to showInterestForInvestment
+    expect(
+      (await this.registryContract.investmentDetails(investmentId))
+        .partitionsRequested
+    ).to.be.equal(numberOfPartitions);
 
     await this.registryContract
       .connect(this.lender2Signer)
       .showInterestForInvestment(investmentId, numberOfPartitions);
+    expect(
+      (await this.registryContract.investmentDetails(investmentId))
+        .partitionsRequested
+    ).to.be.equal(numberOfPartitions.mul(2));
 
     await this.registryContract
       .connect(this.lender3Signer)
       .showInterestForInvestment(investmentId, numberOfPartitions);
+    expect(
+      (await this.registryContract.investmentDetails(investmentId))
+        .partitionsRequested
+    ).to.be.equal(numberOfPartitions.mul(3));
 
     await this.registryContract
       .connect(this.lender4Signer)
       .showInterestForInvestment(investmentId, numberOfPartitions);
+    expect(
+      (await this.registryContract.investmentDetails(investmentId))
+        .partitionsRequested
+    ).to.be.equal(numberOfPartitions.mul(4));
 
     const lenderLendingTokenBalanceAfter1 =
       await this.lendingTokenContract.balanceOf(this.lender1);
