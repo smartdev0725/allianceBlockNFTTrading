@@ -1,6 +1,6 @@
 import {BASE_AMOUNT} from '../../helpers/constants';
 import {ethers, web3} from 'hardhat';
-import {BigNumber} from 'ethers';
+import {BigNumber, Contract} from 'ethers';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
 import {StakingType, InvestmentStatus} from '../../helpers/registryEnums';
@@ -26,11 +26,6 @@ export default async function suite() {
       await this.investmentTokenContract.balanceOf(this.seeker);
     const balanceInvestmentTokenEscrowBefore =
       await this.investmentTokenContract.balanceOf(this.escrowContract.address);
-    const balanceFundingNftEscrowBefore =
-      await this.fundingNFTContract.balanceOf(
-        this.escrowContract.address,
-        investmentId
-      );
     const totalApprovalRequestsBefore =
       await this.governanceContract.totalApprovalRequests();
 
@@ -218,15 +213,12 @@ export default async function suite() {
 
     //3) 4 Funders stake, one for each tier
     // Given
-    const staker1StakingAmountBefore = await this.stakingContract.getBalance(
-      this.lender1
-    );
-    const staker2StakingAmountBefore = await this.stakingContract.getBalance(
-      this.lender2
-    );
-    const staker3StakingAmountBefore = await this.stakingContract.getBalance(
-      this.lender3
-    );
+    const reputationalStakingTypeAmount1 =
+      await this.stakingContract.reputationalStakingTypeAmounts(1);
+    const reputationalStakingTypeAmount2 =
+      await this.stakingContract.reputationalStakingTypeAmounts(2);
+    const reputationalStakingTypeAmount3 =
+      await this.stakingContract.reputationalStakingTypeAmounts(3);
 
     const stakingTypeAmount1 = await this.stakingContract.stakingTypeAmounts(
       StakingType.STAKER_LVL_1
@@ -238,35 +230,35 @@ export default async function suite() {
       StakingType.STAKER_LVL_3
     );
 
-    expect(stakingTypeAmount2.gt(stakingTypeAmount1)).to.be.equal(true);
-    expect(stakingTypeAmount3.gt(stakingTypeAmount2)).to.be.equal(true);
-
-    const amountToStake1 = stakingTypeAmount1.sub(staker1StakingAmountBefore);
-    const amountToStake2 = stakingTypeAmount2.sub(staker2StakingAmountBefore);
-    const amountToStake3 = stakingTypeAmount3.sub(staker3StakingAmountBefore);
-
-    const staker1ALBTBalanceBefore = await this.ALBTContract.balanceOf(
+    const balanceALBTStaker1BeforeStake = await this.ALBTContract.balanceOf(
       this.lender1
     );
-    const staker2ALBTBalanceBefore = await this.ALBTContract.balanceOf(
+    const balanceALBTStaker2BeforeStake = await this.ALBTContract.balanceOf(
       this.lender2
     );
-    const staker3ALBTBalanceBefore = await this.ALBTContract.balanceOf(
+    const balanceALBTStaker3BeforeStake = await this.ALBTContract.balanceOf(
       this.lender3
     );
+    const balanceALBTStakingContractBeforeStake =
+      await this.ALBTContract.balanceOf(this.stakingContract.address);
 
-    const stakingContractALBTBalanceBefore = await this.ALBTContract.balanceOf(
-      this.stakingContract.address
+    const totalSupplyBeforeStake = await this.stakingContract.totalSupply();
+
+    const balanceStakingStaker1BeforeStake =
+      await this.stakingContract.getBalance(this.lender1);
+    const balanceStakingStaker2BeforeStake =
+      await this.stakingContract.getBalance(this.lender2);
+    const balanceStakingStaker3BeforeStake =
+      await this.stakingContract.getBalance(this.lender3);
+
+    const amountToStake1 = stakingTypeAmount1.sub(
+      balanceStakingStaker1BeforeStake
     );
-    const stakedSupplyBefore = await this.stakingContract.totalSupply();
-    const rALBTBalanceBefore1 = await this.rALBTContract.balanceOf(
-      this.lender1
+    const amountToStake2 = stakingTypeAmount2.sub(
+      balanceStakingStaker2BeforeStake
     );
-    const rALBTBalanceBefore2 = await this.rALBTContract.balanceOf(
-      this.lender2
-    );
-    const rALBTBalanceBefore3 = await this.rALBTContract.balanceOf(
-      this.lender3
+    const amountToStake3 = stakingTypeAmount3.sub(
+      balanceStakingStaker3BeforeStake
     );
 
     // When
@@ -294,38 +286,15 @@ export default async function suite() {
       .to.emit(this.stakingContract, 'Staked')
       .withArgs(this.lender3, amountToStake3);
 
-    const staker1StakingAmounAfter = await this.stakingContract.getBalance(
+    const balanceRALBTAfterStake1 = await this.rALBTContract.balanceOf(
       this.lender1
     );
-    const staker2StakingAmounAfter = await this.stakingContract.getBalance(
+    const balanceRALBTAfterStake2 = await this.rALBTContract.balanceOf(
       this.lender2
     );
-    const staker3StakingAmounAfter = await this.stakingContract.getBalance(
+    const balanceRALBTAfterStake3 = await this.rALBTContract.balanceOf(
       this.lender3
     );
-    const stakedSupplyAfter = await this.stakingContract.totalSupply();
-    const staker1ALBTBalanceAfter = await this.ALBTContract.balanceOf(
-      this.lender1
-    );
-    const staker2ALBTBalanceAfter = await this.ALBTContract.balanceOf(
-      this.lender2
-    );
-    const staker3ALBTBalanceAfter = await this.ALBTContract.balanceOf(
-      this.lender3
-    );
-    const stakingContractALBTBalanceAfter = await this.ALBTContract.balanceOf(
-      this.stakingContract.address
-    );
-    const rALBTBalanceAfter1 = await this.rALBTContract.balanceOf(this.lender1);
-    const rALBTBalanceAfter2 = await this.rALBTContract.balanceOf(this.lender2);
-    const rALBTBalanceAfter3 = await this.rALBTContract.balanceOf(this.lender3);
-
-    const levelOfStakerAfter1 =
-      await this.stakerMedalNFTContract.getLevelOfStaker(this.lender1);
-    const levelOfStakerAfter2 =
-      await this.stakerMedalNFTContract.getLevelOfStaker(this.lender2);
-    const levelOfStakerAfter3 =
-      await this.stakerMedalNFTContract.getLevelOfStaker(this.lender3);
 
     const balanceStaker1Medal1 = await this.stakerMedalNFTContract.balanceOf(
       this.lender1,
@@ -366,7 +335,41 @@ export default async function suite() {
       3
     );
 
+    const balanceALBTStaker1AfterStake = await this.ALBTContract.balanceOf(
+      this.lender1
+    );
+    const balanceALBTStaker2AfterStake = await this.ALBTContract.balanceOf(
+      this.lender2
+    );
+    const balanceALBTStaker3AfterStake = await this.ALBTContract.balanceOf(
+      this.lender3
+    );
+    const balanceALBTStakingContractAfterStake =
+      await this.ALBTContract.balanceOf(this.stakingContract.address);
+
+    const totalSupplyAfterStake = await this.stakingContract.totalSupply();
+
+    const balanceStakingStaker1AfterStake =
+      await this.stakingContract.getBalance(this.lender1);
+    const balanceStakingStaker2AfterStake =
+      await this.stakingContract.getBalance(this.lender2);
+    const balanceStakingStaker3AfterStake =
+      await this.stakingContract.getBalance(this.lender3);
+
+    const levelOfStakerAfter1 =
+      await this.stakerMedalNFTContract.getLevelOfStaker(this.lender1);
+    const levelOfStakerAfter2 =
+      await this.stakerMedalNFTContract.getLevelOfStaker(this.lender2);
+    const levelOfStakerAfter3 =
+      await this.stakerMedalNFTContract.getLevelOfStaker(this.lender3);
+
     // Then
+    // Correct rALBT balance
+    expect(balanceRALBTAfterStake1).to.be.equal(reputationalStakingTypeAmount1);
+    expect(balanceRALBTAfterStake2).to.be.equal(reputationalStakingTypeAmount2);
+    expect(balanceRALBTAfterStake3).to.be.equal(reputationalStakingTypeAmount3);
+
+    // Correct staker medal
     expect(balanceStaker1Medal1).to.be.equal(1);
     expect(balanceStaker1Medal2).to.be.equal(0);
     expect(balanceStaker1Medal3).to.be.equal(0);
@@ -383,57 +386,51 @@ export default async function suite() {
     expect(levelOfStakerAfter2).to.be.equal(2);
     expect(levelOfStakerAfter3).to.be.equal(3);
 
-    expect(staker1StakingAmounAfter.gt(staker1StakingAmountBefore)).to.be.equal(
-      true
+    // Correct ALBT balance
+    expect(balanceALBTStaker1AfterStake).to.be.equal(
+      balanceALBTStaker1BeforeStake.sub(amountToStake1)
     );
-    expect(staker2StakingAmounAfter.gt(staker2StakingAmountBefore)).to.be.equal(
-      true
+    expect(balanceALBTStaker2AfterStake).to.be.equal(
+      balanceALBTStaker2BeforeStake.sub(amountToStake2)
     );
-    expect(staker3StakingAmounAfter.gt(staker3StakingAmountBefore)).to.be.equal(
-      true
+    expect(balanceALBTStaker3AfterStake).to.be.equal(
+      balanceALBTStaker3BeforeStake.sub(amountToStake3)
     );
-
-    expect(staker1ALBTBalanceAfter).to.be.equal(
-      staker1ALBTBalanceBefore.sub(amountToStake1)
-    );
-    expect(staker2ALBTBalanceAfter).to.be.equal(
-      staker2ALBTBalanceBefore.sub(amountToStake2)
-    );
-    expect(staker3ALBTBalanceAfter).to.be.equal(
-      staker3ALBTBalanceBefore.sub(amountToStake3)
+    expect(balanceALBTStakingContractAfterStake).to.be.equal(
+      balanceALBTStakingContractBeforeStake.add(
+        amountToStake1.add(amountToStake2).add(amountToStake3)
+      )
     );
 
-    expect(stakingContractALBTBalanceAfter).to.be.equal(
-      stakingContractALBTBalanceBefore
-        .add(amountToStake1)
-        .add(amountToStake2)
-        .add(amountToStake3)
+    // Correct total supply
+    expect(totalSupplyAfterStake).to.be.equal(
+      totalSupplyBeforeStake.add(
+        amountToStake1.add(amountToStake2).add(amountToStake3)
+      )
     );
 
-    expect(stakedSupplyAfter).to.be.equal(
-      stakedSupplyBefore
-        .add(amountToStake1)
-        .add(amountToStake2)
-        .add(amountToStake3)
+    // Correct staking balance
+    expect(balanceStakingStaker1AfterStake).to.be.equal(
+      balanceStakingStaker1BeforeStake.add(amountToStake1)
     );
-    expect(rALBTBalanceAfter1.gt(rALBTBalanceBefore1)).to.be.equal(true);
-    expect(rALBTBalanceAfter2.gt(rALBTBalanceBefore2)).to.be.equal(true);
-    expect(rALBTBalanceAfter3.gt(rALBTBalanceBefore3)).to.be.equal(true);
+    expect(balanceStakingStaker2AfterStake).to.be.equal(
+      balanceStakingStaker2BeforeStake.add(amountToStake2)
+    );
+    expect(balanceStakingStaker3AfterStake).to.be.equal(
+      balanceStakingStaker3BeforeStake.add(amountToStake3)
+    );
 
     //Simulates lender4 has rALBT from other methods besides staking
-    //GET rALBT HERE!!
-    // Given
-    const rALBTBalanceBefore4 = await this.rALBTContract.balanceOf(
-      this.lender4
-    );
 
+    // Add new action
+    // Given
     const addressZero = '0x0000000000000000000000000000000000000000';
     const actions = [
       {
         account: this.lender4,
         actionName: 'Wallet Connect',
         answer: 'Yes',
-        referralId: '0',
+        referralId: 0,
       },
     ];
     const reputationalAlbtRewardsPerLevel = [
@@ -442,7 +439,6 @@ export default async function suite() {
       ethers.utils.parseEther('500').toString(),
       ethers.utils.parseEther('500').toString(),
     ];
-
     const reputationalAlbtRewardsPerLevelAfterFirstTime = [
       ethers.utils.parseEther('10').toString(),
       ethers.utils.parseEther('10').toString(),
@@ -450,21 +446,117 @@ export default async function suite() {
       ethers.utils.parseEther('10').toString(),
     ];
 
-    await this.actionVerifierContract
-      .connect(this.deployerSigner)
-      .importAction(
-        'Wallet Connect',
-        reputationalAlbtRewardsPerLevel,
-        reputationalAlbtRewardsPerLevelAfterFirstTime,
-        2,
-        addressZero
+    // Then
+    await expect(
+      this.actionVerifierContract
+        .connect(this.deployerSigner)
+        .importAction(
+          actions[0].actionName,
+          reputationalAlbtRewardsPerLevel,
+          reputationalAlbtRewardsPerLevelAfterFirstTime,
+          2,
+          addressZero
+        )
+    )
+      .to.emit(this.actionVerifierContract, 'ActionImported')
+      .withArgs(actions[0].actionName);
+
+    // Reward per action
+    const rewardPerActionLevel0 =
+      await this.actionVerifierContract.rewardPerActionPerLevel(
+        web3.utils.keccak256(actions[0].actionName),
+        0
+      );
+    const rewardPerActionLevel1 =
+      await this.actionVerifierContract.rewardPerActionPerLevel(
+        web3.utils.keccak256(actions[0].actionName),
+        1
+      );
+    const rewardPerActionLevel2 =
+      await this.actionVerifierContract.rewardPerActionPerLevel(
+        web3.utils.keccak256(actions[0].actionName),
+        2
+      );
+    const rewardPerActionLevel3 =
+      await this.actionVerifierContract.rewardPerActionPerLevel(
+        web3.utils.keccak256(actions[0].actionName),
+        3
       );
 
-    const signature = await getSignature(
-      'Wallet Connect',
-      'Yes',
-      this.lender4,
-      0,
+    // Reward per action after first time
+    const rewardPerActionPerLevelAfterFirstTime0 =
+      await this.actionVerifierContract.rewardPerActionPerLevelAfterFirstTime(
+        web3.utils.keccak256(actions[0].actionName),
+        0
+      );
+    const rewardPerActionPerLevelAfterFirstTime1 =
+      await this.actionVerifierContract.rewardPerActionPerLevelAfterFirstTime(
+        web3.utils.keccak256(actions[0].actionName),
+        1
+      );
+    const rewardPerActionPerLevelAfterFirstTime2 =
+      await this.actionVerifierContract.rewardPerActionPerLevelAfterFirstTime(
+        web3.utils.keccak256(actions[0].actionName),
+        2
+      );
+    const rewardPerActionPerLevelAfterFirstTime3 =
+      await this.actionVerifierContract.rewardPerActionPerLevelAfterFirstTime(
+        web3.utils.keccak256(actions[0].actionName),
+        3
+      );
+
+    const minimumLevelForActionProvision =
+      await this.actionVerifierContract.minimumLevelForActionProvision(
+        web3.utils.keccak256(actions[0].actionName)
+      );
+
+    // Then
+    // Correct reward per action
+    expect(rewardPerActionLevel0.toString()).to.be.equal(
+      reputationalAlbtRewardsPerLevel[0]
+    );
+    expect(rewardPerActionLevel1.toString()).to.be.equal(
+      reputationalAlbtRewardsPerLevel[1]
+    );
+    expect(rewardPerActionLevel2.toString()).to.be.equal(
+      reputationalAlbtRewardsPerLevel[2]
+    );
+    expect(rewardPerActionLevel3.toString()).to.be.equal(
+      reputationalAlbtRewardsPerLevel[3]
+    );
+    // Correct reward per action after first time
+    expect(rewardPerActionPerLevelAfterFirstTime0.toString()).to.be.equal(
+      reputationalAlbtRewardsPerLevelAfterFirstTime[0]
+    );
+    expect(rewardPerActionPerLevelAfterFirstTime1.toString()).to.be.equal(
+      reputationalAlbtRewardsPerLevelAfterFirstTime[1]
+    );
+    expect(rewardPerActionPerLevelAfterFirstTime2.toString()).to.be.equal(
+      reputationalAlbtRewardsPerLevelAfterFirstTime[2]
+    );
+    expect(rewardPerActionPerLevelAfterFirstTime3.toString()).to.be.equal(
+      reputationalAlbtRewardsPerLevelAfterFirstTime[3]
+    );
+    // Correct minimumLevelForActionProvision
+    expect(minimumLevelForActionProvision.toString()).to.be.equal('2');
+
+    // Get rAlbt
+    // Given
+    const balanceRALBTBeforeActions3 = await this.rALBTContract.balanceOf(
+      this.lender3
+    );
+    const balanceRALBTBeforeActions4 = await this.rALBTContract.balanceOf(
+      this.lender4
+    );
+    const rewardPerActionProvisionPerLevel3 = await this.actionVerifierContract
+      .connect(this.lender3Signer)
+      .rewardPerActionProvisionPerLevel(StakingType.STAKER_LVL_3);
+
+    let signature = await getSignature(
+      actions[0].actionName,
+      actions[0].answer,
+      actions[0].account,
+      actions[0].referralId,
       this.actionVerifierContract.address,
       web3
     );
@@ -472,23 +564,37 @@ export default async function suite() {
     const signatures = [signature];
 
     // Then
-    await this.actionVerifierContract
-      .connect(this.lender3Signer)
-      .provideRewardsForActions(actions, signatures);
-
-    for (let i = 0; i < 50; i++) {
+    const amountOfActions = 55;
+    for (let i = 0; i < amountOfActions; i++) {
       await increaseTime(this.deployerSigner.provider, 1 * 24 * 60 * 60); // 1 day
 
-      await this.actionVerifierContract
+      const provideRewardsForActions = await this.actionVerifierContract
         .connect(this.lender3Signer)
         .provideRewardsForActions(actions, signatures);
+
+      // Add events
+      // emit ActionsProvided(actions, signatures, msg.sender);
+      // emit EpochChanged(currentEpoch, endingTimestampForCurrentEpoch);
     }
 
-    const rALBTBalanceAfter4 = await this.rALBTContract.balanceOf(this.lender4);
+    const balanceRALBTAfterActions3 = await this.rALBTContract.balanceOf(
+      this.lender3
+    );
+    const balanceRALBTAfterActions4 = await this.rALBTContract.balanceOf(
+      this.lender4
+    );
 
     // Then
-    expect(Number(rALBTBalanceAfter4)).to.be.greaterThan(
-      Number(rALBTBalanceBefore4)
+    // Correct balance of rALBT
+    expect(balanceRALBTAfterActions3).to.be.equal(
+      balanceRALBTBeforeActions3.add(
+        rewardPerActionProvisionPerLevel3.mul(amountOfActions)
+      )
+    );
+    expect(balanceRALBTAfterActions4).to.be.equal(
+      balanceRALBTBeforeActions4
+        .add(rewardPerActionLevel0)
+        .add(rewardPerActionPerLevelAfterFirstTime0.mul(amountOfActions - 1))
     );
 
     //4) Funders declare their intention to buy a partition (effectively depositing their funds)
@@ -580,35 +686,101 @@ export default async function suite() {
     );
 
     //5) The lottery is run when all the partitions have been covered
+    // Change lottery status to started
     // Given
-    await this.governanceContract
-      .connect(this.superDelegatorSigner)
-      .checkCronjobs();
-    await this.governanceContract
-      .connect(this.superDelegatorSigner)
-      .checkCronjobs();
+    const totalCronjobsBeforeLotteryStarted =
+      await this.governanceContract.totalCronjobs();
+    const cronjobsListBeforeLotteryStarted =
+      await this.governanceContract.cronjobList();
 
+    // When
+    let lotteryStarted;
+    for (let i = 0; i < 2; i++) {
+      lotteryStarted = await this.governanceContract
+        .connect(this.superDelegatorSigner)
+        .checkCronjobs();
+    }
     const investmentStatusAfter = await this.registryContract.investmentStatus(
       investmentId
     );
-
-    expect(investmentStatusAfter).to.be.equal(2);
-
-    // When
-    await expect(
-      this.registryContract
-        .connect(this.lender2Signer)
-        .executeLotteryRun(investmentId)
-    )
-      .to.emit(this.registryContract, 'LotteryExecuted')
-      .withArgs(investmentId);
-
-    const ticketsRemainingAfter = await this.registryContract.ticketsRemaining(
-      investmentId
+    const totalCronjobsAfterLotteryStarted =
+      await this.governanceContract.totalCronjobs();
+    const cronjobsAfterLotteryStarted = await this.governanceContract.cronjobs(
+      totalCronjobsAfterLotteryStarted
     );
+    const cronjobsListAfterLotteryStarted =
+      await this.governanceContract.cronjobList();
+    const investmentDetailsLotteryStarted =
+      await this.registryContract.investmentDetails(investmentId);
 
     // Then
-    expect(ticketsRemainingAfter.toNumber()).to.be.equal(0);
+    // Events
+    expect(lotteryStarted)
+      .to.emit(this.registryContract, 'InvestmentStarted')
+      .withArgs(investmentId);
+    // Correct total of cronJobs
+    expect(totalCronjobsAfterLotteryStarted).to.be.equal(
+      totalCronjobsBeforeLotteryStarted.add(1)
+    );
+    // Correct cronJob added
+    expect(cronjobsAfterLotteryStarted.cronjobType.toString()).to.be.equal(
+      CronjobType.INVESTMENT
+    );
+    expect(cronjobsAfterLotteryStarted.externalId).to.be.equal(
+      investmentId.sub(1)
+    );
+    // Correct list of cronJob
+    expect(cronjobsListAfterLotteryStarted.head).to.be.equal(
+      cronjobsListBeforeLotteryStarted.head.add(2)
+    );
+    expect(cronjobsListAfterLotteryStarted.tail).to.be.equal(
+      cronjobsListBeforeLotteryStarted.head.add(2)
+    );
+    expect(cronjobsListAfterLotteryStarted.size.toNumber()).to.be.equal(1);
+    // Verify the node
+    // Correct lottery status
+    expect(investmentStatusAfter.toString()).to.be.equal(
+      InvestmentStatus.STARTED
+    );
+    // Correct investment details
+    expect(investmentDetailsLotteryStarted.startingDate).to.be.equal(
+      await getTransactionTimestamp(lotteryStarted.hash)
+    );
+
+    // Run Lottery
+    // When
+    const runLottery = await this.registryContract
+      .connect(this.lender2Signer)
+      .executeLotteryRun(investmentId);
+
+    const ticketsRemainingAfterRunLottery =
+      await this.registryContract.ticketsRemaining(investmentId);
+
+    const investmentStatusAfterRunLottery =
+      await this.registryContract.investmentStatus(investmentId);
+
+    const isPauseFundingNFTTransferAfterRunLottey =
+      await this.fundingNFTContract.transfersPaused(investmentId);
+
+    // Then
+    // Events
+    expect(runLottery)
+      .to.emit(this.registryContract, 'LotteryExecuted')
+      .withArgs(investmentId);
+    expect(runLottery)
+      .to.emit(this.registryContract, 'InvestmentSettled')
+      .withArgs(investmentId);
+    expect(runLottery)
+      .to.emit(this.fundingNFTContract, 'TransfersResumed')
+      .withArgs(investmentId);
+    // Correct tickets remaining
+    expect(ticketsRemainingAfterRunLottery).to.be.equal(0);
+    // Correct status
+    expect(investmentStatusAfterRunLottery.toString()).to.be.equal(
+      InvestmentStatus.SETTLED
+    );
+    // Unpause token
+    expect(isPauseFundingNFTTransferAfterRunLottey).to.be.false;
 
     //6) FundingNFTs are minted and each Funder either receives their NFT or their funds back in case they did not win the lottery
     // Given
