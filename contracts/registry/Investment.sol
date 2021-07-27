@@ -20,9 +20,10 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
     // EVENTS
     event InvestmentRequested(uint256 indexed investmentId, address indexed user, uint256 amount);
-    event InvestmentInterest(uint256 indexed investmentId, uint amount);
+    event InvestmentInterest(uint256 indexed investmentId, address indexed user, uint amount);
     event LotteryExecuted(uint256 indexed investmentId);
-    event WithdrawInvestment(uint256 indexed investmentId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
+    event WithdrawInvestmentTickets(uint256 indexed investmentId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
+    event seekerWithdrawInvestment(uint256 indexed investmentId, uint256 amountWithdrawn);
     event WithdrawAmountForNonTickets(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets);
     event WithdrawLockedInvestmentTickets(uint256 indexedinvestmentId, uint256 ticketsToWithdraw);
     event ConvertNFTToInvestmentTokens(uint256 indexedinvestmentId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
@@ -112,7 +113,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         }
 
         // Add event for investment interest
-        emit InvestmentInterest(investmentId, amountOfPartitions);
+        emit InvestmentInterest(investmentId, msg.sender, amountOfPartitions);
 
     }
 
@@ -256,7 +257,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         }
 
         // Add event for withdraw investment
-        emit WithdrawInvestment(investmentId, ticketsToLock, ticketsToWithdraw);
+        emit WithdrawInvestmentTickets(investmentId, ticketsToLock, ticketsToWithdraw);
     }
 
     /**
@@ -297,6 +298,22 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         // Add event for withdraw locked investment tickets
         emit WithdrawLockedInvestmentTickets(investmentId, ticketsToWithdraw);
+    }
+
+    /**
+     * @dev This function is called by the seeker to withdraw the lending tokens provided by investors after lottery ends.
+     * @param investmentId The id of the investment.
+     */
+    function withdrawInvestment(uint256 investmentId) external nonReentrant() {
+        require(investmentStatus[investmentId] == InvestmentLibrary.InvestmentStatus.SETTLED, "Can withdraw only in Settled state");
+        require(investmentSeeker[investmentId] == msg.sender, "Only seeker can withdraw");
+        require(!investmentWithdrawn[investmentId], "Already withdrawn");
+        
+        uint256 amountToWithdraw = investmentDetails[investmentId].totalAmountToBeRaised;
+        investmentWithdrawn[investmentId] = true;
+
+        escrow.transferLendingToken(investmentDetails[investmentId].lendingToken, msg.sender, amountToWithdraw);
+        emit seekerWithdrawInvestment(investmentId, amountToWithdraw);
     }
 
     /**
