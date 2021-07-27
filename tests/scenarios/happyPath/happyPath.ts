@@ -552,7 +552,7 @@ export default async function suite() {
       .connect(this.lender3Signer)
       .rewardPerActionProvisionPerLevel(StakingType.STAKER_LVL_3);
 
-    let signature = await getSignature(
+    const signature = await getSignature(
       actions[0].actionName,
       actions[0].answer,
       actions[0].account,
@@ -614,6 +614,36 @@ export default async function suite() {
     const initEscrowLendingTokenBalance =
       await this.lendingTokenContract.balanceOf(this.escrowContract.address);
 
+    const rALBTPerLotteryNumber =
+      await this.registryContract.rAlbtPerLotteryNumber();
+    const lotteryNumbersForImmediateTicket =
+      await this.registryContract.lotteryNumbersForImmediateTicket();
+    let totalLotteryNumbersForLender1 = (
+      await this.rALBTContract.balanceOf(this.lender1Signer.address)
+    ).div(rALBTPerLotteryNumber);
+    let totalLotteryNumbersForLender2 = (
+      await this.rALBTContract.balanceOf(this.lender2Signer.address)
+    ).div(rALBTPerLotteryNumber);
+    let totalLotteryNumbersForLender3 = (
+      await this.rALBTContract.balanceOf(this.lender3Signer.address)
+    ).div(rALBTPerLotteryNumber);
+    let totalLotteryNumbersForLender4 = (
+      await this.rALBTContract.balanceOf(this.lender4Signer.address)
+    ).div(rALBTPerLotteryNumber);
+
+    let immediateTicketsLender1 = BigNumber.from(0);
+    let immediateTicketsLender2 = BigNumber.from(0);
+    let immediateTicketsLender3 = BigNumber.from(0);
+    let immediateTicketsLender4 = BigNumber.from(0);
+
+    let ticketsRemaining = await this.registryContract.ticketsRemaining(
+      investmentId
+    );
+    let totalLotteryNumbersPerInvestment =
+      await this.registryContract.totalLotteryNumbersPerInvestment(
+        investmentId
+      );
+
     // When
     await this.registryContract
       .connect(this.lender1Signer)
@@ -624,6 +654,54 @@ export default async function suite() {
       (await this.registryContract.investmentDetails(investmentId))
         .partitionsRequested
     ).to.be.equal(numberOfPartitions);
+    //then check for immediate tickets
+    if (totalLotteryNumbersForLender1.gt(lotteryNumbersForImmediateTicket)) {
+      // these cases do NOT take into account previously locked tokens, that case has to be tested in a different way
+      // this is only valid for Happy path
+      const rest = totalLotteryNumbersForLender1
+        .sub(1)
+        .mod(lotteryNumbersForImmediateTicket)
+        .add(1);
+      immediateTicketsLender1 = totalLotteryNumbersForLender1
+        .sub(rest)
+        .div(lotteryNumbersForImmediateTicket);
+
+      totalLotteryNumbersForLender1 = rest;
+      if (immediateTicketsLender1.gt(0)) {
+        expect(
+          (
+            await this.registryContract.ticketsWonPerAddress(
+              investmentId,
+              this.lender1Signer.address
+            )
+          ).eq(immediateTicketsLender1)
+        ).to.be.true;
+        const remaining = await this.registryContract.ticketsRemaining(
+          investmentId
+        );
+        expect(remaining.eq(ticketsRemaining.sub(immediateTicketsLender1))).to
+          .be.true;
+        ticketsRemaining = remaining.sub(immediateTicketsLender1);
+      }
+    }
+    expect(
+      (
+        await this.registryContract.remainingTicketsPerAddress(
+          investmentId,
+          this.lender1Signer.address
+        )
+      ).eq(numberOfPartitions.sub(immediateTicketsLender1))
+    ).to.be.true;
+    expect(
+      (
+        await this.registryContract.totalLotteryNumbersPerInvestment(
+          investmentId
+        )
+      ).eq(totalLotteryNumbersPerInvestment.add(totalLotteryNumbersForLender1))
+    ).to.be.true;
+    totalLotteryNumbersPerInvestment = totalLotteryNumbersPerInvestment.add(
+      totalLotteryNumbersForLender1
+    );
 
     await this.registryContract
       .connect(this.lender2Signer)
@@ -632,6 +710,54 @@ export default async function suite() {
       (await this.registryContract.investmentDetails(investmentId))
         .partitionsRequested
     ).to.be.equal(numberOfPartitions.mul(2));
+    if (totalLotteryNumbersForLender2.gt(lotteryNumbersForImmediateTicket)) {
+      // these cases do NOT take into account previously locked tokens, that case has to be tested in a different way
+      // this is only valid for Happy path
+      const rest = totalLotteryNumbersForLender2
+        .sub(1)
+        .mod(lotteryNumbersForImmediateTicket)
+        .add(1);
+      immediateTicketsLender2 = totalLotteryNumbersForLender2
+        .sub(rest)
+        .div(lotteryNumbersForImmediateTicket);
+
+      totalLotteryNumbersForLender2 = rest;
+      if (immediateTicketsLender2.gt(0)) {
+        expect(
+          (
+            await this.registryContract.ticketsWonPerAddress(
+              investmentId,
+              this.lender2Signer.address
+            )
+          ).eq(immediateTicketsLender2)
+        ).to.be.true;
+        const remaining = await this.registryContract.ticketsRemaining(
+          investmentId
+        );
+        expect(
+          remaining.eq(ticketsRemaining.sub(immediateTicketsLender2))
+        ).to.be.true;
+        ticketsRemaining = remaining.sub(immediateTicketsLender2);
+      }
+    }
+    expect(
+      (
+        await this.registryContract.remainingTicketsPerAddress(
+          investmentId,
+          this.lender2Signer.address
+        )
+      ).eq(numberOfPartitions.sub(immediateTicketsLender2))
+    ).to.be.true;
+    expect(
+      (
+        await this.registryContract.totalLotteryNumbersPerInvestment(
+          investmentId
+        )
+      ).eq(totalLotteryNumbersPerInvestment.add(totalLotteryNumbersForLender2))
+    ).to.be.true;
+    totalLotteryNumbersPerInvestment = totalLotteryNumbersPerInvestment.add(
+      totalLotteryNumbersForLender2
+    );
 
     await this.registryContract
       .connect(this.lender3Signer)
@@ -640,6 +766,54 @@ export default async function suite() {
       (await this.registryContract.investmentDetails(investmentId))
         .partitionsRequested
     ).to.be.equal(numberOfPartitions.mul(3));
+    if (totalLotteryNumbersForLender3.gt(lotteryNumbersForImmediateTicket)) {
+      // these cases do NOT take into account previously locked tokens, that case has to be tested in a different way
+      // this is only valid for Happy path
+      const rest = totalLotteryNumbersForLender3
+        .sub(1)
+        .mod(lotteryNumbersForImmediateTicket)
+        .add(1);
+      immediateTicketsLender3 = totalLotteryNumbersForLender3
+        .sub(rest)
+        .div(lotteryNumbersForImmediateTicket);
+
+      totalLotteryNumbersForLender3 = rest;
+      if (immediateTicketsLender3.gt(0)) {
+        expect(
+          (
+            await this.registryContract.ticketsWonPerAddress(
+              investmentId,
+              this.lender3Signer.address
+            )
+          ).eq(immediateTicketsLender3)
+        ).to.be.true;
+        const remaining = await this.registryContract.ticketsRemaining(
+          investmentId
+        );
+        expect(
+          remaining.eq(ticketsRemaining.sub(immediateTicketsLender3))
+        ).to.be.true;
+        ticketsRemaining = remaining.sub(immediateTicketsLender3);
+      }
+    }
+    expect(
+      (
+        await this.registryContract.remainingTicketsPerAddress(
+          investmentId,
+          this.lender3Signer.address
+        )
+      ).eq(numberOfPartitions.sub(immediateTicketsLender3))
+    ).to.be.true;
+    expect(
+      (
+        await this.registryContract.totalLotteryNumbersPerInvestment(
+          investmentId
+        )
+      ).eq(totalLotteryNumbersPerInvestment.add(totalLotteryNumbersForLender3))
+    ).to.be.true;
+    totalLotteryNumbersPerInvestment = totalLotteryNumbersPerInvestment.add(
+      totalLotteryNumbersForLender3
+    );
 
     await this.registryContract
       .connect(this.lender4Signer)
@@ -648,6 +822,54 @@ export default async function suite() {
       (await this.registryContract.investmentDetails(investmentId))
         .partitionsRequested
     ).to.be.equal(numberOfPartitions.mul(4));
+    if (totalLotteryNumbersForLender4.gt(lotteryNumbersForImmediateTicket)) {
+      // these cases do NOT take into account previously locked tokens, that case has to be tested in a different way
+      // this is only valid for Happy path
+      const rest = totalLotteryNumbersForLender4
+        .sub(1)
+        .mod(lotteryNumbersForImmediateTicket)
+        .add(1);
+      immediateTicketsLender4 = totalLotteryNumbersForLender4
+        .sub(rest)
+        .div(lotteryNumbersForImmediateTicket);
+
+      totalLotteryNumbersForLender4 = rest;
+      if (immediateTicketsLender4.gt(0)) {
+        expect(
+          (
+            await this.registryContract.ticketsWonPerAddress(
+              investmentId,
+              this.lender4Signer.address
+            )
+          ).eq(immediateTicketsLender4)
+        ).to.be.true;
+        const remaining = await this.registryContract.ticketsRemaining(
+          investmentId
+        );
+        expect(
+          remaining.eq(ticketsRemaining.sub(immediateTicketsLender4))
+        ).to.be.true;
+        ticketsRemaining = remaining.sub(immediateTicketsLender4);
+      }
+    }
+    expect(
+      (
+        await this.registryContract.remainingTicketsPerAddress(
+          investmentId,
+          this.lender4Signer.address
+        )
+      ).eq(numberOfPartitions.sub(immediateTicketsLender4))
+    ).to.be.true;
+    expect(
+      (
+        await this.registryContract.totalLotteryNumbersPerInvestment(
+          investmentId
+        )
+      ).eq(totalLotteryNumbersPerInvestment.add(totalLotteryNumbersForLender4))
+    ).to.be.true;
+    totalLotteryNumbersPerInvestment = totalLotteryNumbersPerInvestment.add(
+      totalLotteryNumbersForLender4
+    );
 
     const lenderLendingTokenBalanceAfter1 =
       await this.lendingTokenContract.balanceOf(this.lender1);
@@ -1200,11 +1422,13 @@ export default async function suite() {
     )
       .to.emit(this.registryContract, 'seekerWithdrawInvestment')
       .withArgs(investmentId, expectedAmount);
-    
-    const seekerFinalLendingBalance =
-      await this.lendingTokenContract.balanceOf(this.seekerSigner.address);
-    const investmentWithdrawn =
-      await this.registryContract.investmentWithdrawn(investmentId);
+
+    const seekerFinalLendingBalance = await this.lendingTokenContract.balanceOf(
+      this.seekerSigner.address
+    );
+    const investmentWithdrawn = await this.registryContract.investmentWithdrawn(
+      investmentId
+    );
     const seekerGotLendingTokens = seekerFinalLendingBalance.eq(
       seekerInitialLendingBalance.add(expectedAmount)
     );
