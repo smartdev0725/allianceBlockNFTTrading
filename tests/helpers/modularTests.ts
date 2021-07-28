@@ -334,13 +334,15 @@ export const declareIntentionForBuy = async (
   investmentId: BigNumber,
   lenderSigner: any,
   numberOfPartitions: BigNumber,
-  lendingTokenContract: any
+  lendingTokenContract: any,
 ) => {
   // When
   const {escrowContract, registryContract, rALBTContract} =
     await getContracts();
 
   const rAlbtPerLotteryNumber = await registryContract.rAlbtPerLotteryNumber();
+  const lotteryNumbersForImmediateTicket =
+    await registryContract.lotteryNumbersForImmediateTicket();
   const rALBTBalanceBefore = await rALBTContract.balanceOf(
     lenderSigner.address
   );
@@ -355,11 +357,71 @@ export const declareIntentionForBuy = async (
     const initEscrowLendingTokenBalance = await lendingTokenContract.balanceOf(
       escrowContract.address
     );
+    let totalLotteryNumbersForLender = (
+      await rALBTContract.balanceOf(lenderSigner.address)
+    ).div(rAlbtPerLotteryNumber);
+    let immediateTicketsLender = BigNumber.from(0);
+    let ticketsRemaining = await registryContract.ticketsRemaining(
+      investmentId
+    );
+    const totalLotteryNumbersPerInvestment =
+      await registryContract.totalLotteryNumbersPerInvestment(investmentId);
 
+      
     // When
     await registryContract
-      .connect(lenderSigner)
-      .showInterestForInvestment(investmentId, numberOfPartitions);
+    .connect(lenderSigner)
+    .showInterestForInvestment(investmentId, numberOfPartitions);
+    
+    //removed this test until i find a way to make it work for variable input
+    // expect(
+    //   (await registryContract.investmentDetails(investmentId))
+    //     .partitionsRequested
+    // ).to.be.equal(numberOfPartitions.mul(iteration));
+    //then check for immediate tickets
+    if (totalLotteryNumbersForLender.gt(lotteryNumbersForImmediateTicket)) {
+      // these cases do NOT take into account previously locked tokens, that case has to be tested in a different way
+      // this is only valid for Happy path
+      const rest = totalLotteryNumbersForLender
+        .sub(1)
+        .mod(lotteryNumbersForImmediateTicket)
+        .add(1);
+      immediateTicketsLender = totalLotteryNumbersForLender
+        .sub(rest)
+        .div(lotteryNumbersForImmediateTicket);
+
+      totalLotteryNumbersForLender = rest;
+      if (immediateTicketsLender.gt(0)) {
+        expect(
+          (
+            await registryContract.ticketsWonPerAddress(
+              investmentId,
+              lenderSigner.address
+            )
+          ).eq(immediateTicketsLender)
+        ).to.be.true;
+        const remaining = await registryContract.ticketsRemaining(investmentId);
+        expect(remaining.eq(ticketsRemaining.sub(immediateTicketsLender))).to.be
+          .true;
+        ticketsRemaining = remaining.sub(immediateTicketsLender);
+      }
+    }
+    expect(
+      (
+        await registryContract.remainingTicketsPerAddress(
+          investmentId,
+          lenderSigner.address
+        )
+      ).eq(numberOfPartitions.sub(immediateTicketsLender))
+    ).to.be.true;
+    expect(
+      (
+        await registryContract.totalLotteryNumbersPerInvestment(investmentId)
+      ).eq(totalLotteryNumbersPerInvestment.add(totalLotteryNumbersForLender))
+    ).to.be.true;
+    // totalLotteryNumbersPerInvestment = totalLotteryNumbersPerInvestment.add(
+    //   totalLotteryNumbersForLender
+    // );
 
     const lenderLendingTokenBalanceAfter = await lendingTokenContract.balanceOf(
       lenderSigner.address
@@ -646,9 +708,7 @@ export const seekerClaimsFunding = async (
 
   // when
   await expect(
-    registryContract
-      .connect(seekerSigner)
-      .withdrawInvestment(investmentId)
+    registryContract.connect(seekerSigner).withdrawInvestment(investmentId)
   )
     .to.emit(registryContract, 'seekerWithdrawInvestment')
     .withArgs(investmentId, expectedAmount);

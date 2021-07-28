@@ -61,25 +61,25 @@ export default async function suite() {
       investmentId,
       this.lender1Signer,
       BigNumber.from(6),
-      this.lendingTokenContract
+      this.lendingTokenContract,
     );
     await declareIntentionForBuy(
       investmentId,
       this.lender2Signer,
       BigNumber.from(6),
-      this.lendingTokenContract
+      this.lendingTokenContract,
     );
     await declareIntentionForBuy(
       investmentId,
       this.lender3Signer,
       BigNumber.from(6),
-      this.lendingTokenContract
+      this.lendingTokenContract,
     );
     await declareIntentionForBuy(
       investmentId,
       this.lender4Signer,
       BigNumber.from(6),
-      this.lendingTokenContract
+      this.lendingTokenContract,
     );
 
     //5) The lottery is run when all the partitions have been covered
