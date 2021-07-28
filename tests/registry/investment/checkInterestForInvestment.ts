@@ -47,7 +47,7 @@ export default async function suite() {
       await expectRevert(
         this.investmentContract
           .connect(this.lender1Signer)
-          .decideForInvestment(this.projectId, true),
+          .decideForProject(this.projectId, true),
         'Only Governance'
       );
     });

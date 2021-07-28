@@ -683,7 +683,7 @@ export default async function suite() {
           account: this.lender1,
           actionName: 'Investment Vote',
           answer: 'Yes',
-          referralId: '0',
+          referralId: '1',
         },
       ];
 
@@ -716,7 +716,7 @@ export default async function suite() {
         'Investment Vote',
         'Yes',
         this.lender1,
-        0,
+        1,
         this.actionVerifierContract.address,
         web3
       );

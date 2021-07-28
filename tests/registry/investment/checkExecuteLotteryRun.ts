@@ -27,14 +27,14 @@ export default async function suite() {
 
     it('when execute show interest for investment with wrong partitions ', async function () {
       await expectRevert(
-        this.investmentContract.showInterestForInvestment(this.investmentId, 0),
+        this.investmentContract.showInterestForInvestment(this.projectId, 0),
         'Cannot show interest for 0 partitions'
       );
     });
 
     it('when execute show interest for investment without lending tokens should revert', async function () {
       await expectRevert(
-        this.investmentContract.showInterestForInvestment(this.investmentId, 10),
+        this.investmentContract.showInterestForInvestment(this.projectId, 10),
         'ERC20: transfer amount exceeds balance'
       );
     });
@@ -49,14 +49,14 @@ export default async function suite() {
       await expect(
         this.investmentContract
           .connect(this.lender1Signer)
-          .showInterestForInvestment(this.investmentId, numberOfPartitions)
+          .showInterestForInvestment(this.projectId, numberOfPartitions)
       )
-        .to.emit(this.investmentContract, 'InvestmentInterest')
-        .withArgs(this.investmentId, numberOfPartitions);
+        .to.emit(this.investmentContract, 'ProjectInterest')
+        .withArgs(this.projectId, numberOfPartitions);
 
       // Then
       await expectRevert(
-        this.investmentContract.executeLotteryRun(this.investmentId),
+        this.investmentContract.executeLotteryRun(this.projectId),
         'Can run lottery only in Started state'
       );
     });
@@ -71,14 +71,14 @@ export default async function suite() {
       await expect(
         this.investmentContract
           .connect(this.lender1Signer)
-          .showInterestForInvestment(this.investmentId, numberOfPartitions)
+          .showInterestForInvestment(this.projectId, numberOfPartitions)
       )
-        .to.emit(this.investmentContract, 'InvestmentInterest')
-        .withArgs(this.investmentId, numberOfPartitions);
+        .to.emit(this.investmentContract, 'ProjectInterest')
+        .withArgs(this.projectId, numberOfPartitions);
 
       // Then
       await expectRevert(
-        this.investmentContract.convertNFTToInvestmentTokens(this.investmentId, 10),
+        this.investmentContract.convertNFTToInvestmentTokens(this.projectId, 10),
         'Can withdraw only in Settled state'
       );
     });
@@ -93,10 +93,10 @@ export default async function suite() {
       await expect(
         this.investmentContract
           .connect(this.lender1Signer)
-          .showInterestForInvestment(this.investmentId, numberOfPartitions)
+          .showInterestForInvestment(this.projectId, numberOfPartitions)
       )
-        .to.emit(this.investmentContract, 'InvestmentInterest')
-        .withArgs(this.investmentId, numberOfPartitions);
+        .to.emit(this.investmentContract, 'ProjectInterest')
+        .withArgs(this.projectId, numberOfPartitions);
 
       // When
       // Move time to 2 days
@@ -109,29 +109,29 @@ export default async function suite() {
       await expectRevert(
         this.investmentContract
         .connect(this.lender2Signer)
-        .executeLotteryRun(this.investmentId),
+        .executeLotteryRun(this.projectId),
         'Can run lottery only if has remaining ticket'
       );
 
       await expect(
         this.investmentContract
           .connect(this.lender1Signer)
-          .executeLotteryRun(this.investmentId)
+          .executeLotteryRun(this.projectId)
       )
         .to.emit(this.investmentContract, 'LotteryExecuted')
-        .withArgs(this.investmentId);
+        .withArgs(this.projectId);
 
       // Then
       const ticketsRemainingAfter =
-        await this.investmentContract.ticketsRemaining(this.investmentId);
+        await this.investmentContract.ticketsRemaining(this.projectId);
       const remainingTicketsPerAddressAfter =
         await this.investmentContract.remainingTicketsPerAddress(
-          this.investmentId,
+          this.projectId,
           this.lender1
         );
       const ticketsWonPerAddressAfter =
         await this.investmentContract.ticketsWonPerAddress(
-          this.investmentId,
+          this.projectId,
           this.lender1
         );
 
@@ -145,7 +145,7 @@ export default async function suite() {
     it('Cannot withdraw tickets in a non settled state', async function () {
       await expectRevert(
         this.investmentContract.withdrawInvestmentTickets(
-          this.investmentId,
+          this.projectId,
           BigNumber.from(10),
           BigNumber.from(10)
         ),
@@ -168,13 +168,13 @@ export default async function suite() {
       // When
       await this.investmentContract
         .connect(this.lender1Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(10));
+        .showInterestForInvestment(this.projectId, BigNumber.from(10));
       await this.investmentContract
         .connect(this.lender2Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(9));
+        .showInterestForInvestment(this.projectId, BigNumber.from(9));
       await this.investmentContract
         .connect(this.lender3Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(1));
+        .showInterestForInvestment(this.projectId, BigNumber.from(1));
 
       // Move time to 2 days
       await increaseTime(this.deployerSigner.provider, 2 * 24 * 60 * 60); // 2 days
@@ -185,39 +185,39 @@ export default async function suite() {
 
       await this.investmentContract
         .connect(this.lender3Signer)
-        .executeLotteryRun(this.investmentId);
+        .executeLotteryRun(this.projectId);
 
       // Then
       const ticketsRemainingAfter =
-        await this.investmentContract.ticketsRemaining(this.investmentId);
+        await this.investmentContract.ticketsRemaining(this.projectId);
       const lender1remainingTicketsPerAddressAfter =
         await this.investmentContract.remainingTicketsPerAddress(
-          this.investmentId,
+          this.projectId,
           this.lender1
         );
       const lender1ticketsWonPerAddressAfter =
         await this.investmentContract.ticketsWonPerAddress(
-          this.investmentId,
+          this.projectId,
           this.lender1
         );
       const lender2remainingTicketsPerAddressAfter =
         await this.investmentContract.remainingTicketsPerAddress(
-          this.investmentId,
+          this.projectId,
           this.lender2
         );
       const lender2ticketsWonPerAddressAfter =
         await this.investmentContract.ticketsWonPerAddress(
-          this.investmentId,
+          this.projectId,
           this.lender2
         );
       const lender3remainingTicketsPerAddressAfter =
         await this.investmentContract.remainingTicketsPerAddress(
-          this.investmentId,
+          this.projectId,
           this.lender3
         );
       const lender3ticketsWonPerAddressAfter =
         await this.investmentContract.ticketsWonPerAddress(
-          this.investmentId,
+          this.projectId,
           this.lender3
         );
 
@@ -245,13 +245,13 @@ export default async function suite() {
       // When
       await this.investmentContract
         .connect(this.lender1Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(900));
+        .showInterestForInvestment(this.projectId, BigNumber.from(900));
       await this.investmentContract
         .connect(this.lender2Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(900));
+        .showInterestForInvestment(this.projectId, BigNumber.from(900));
       await this.investmentContract
         .connect(this.lender3Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(1200));
+        .showInterestForInvestment(this.projectId, BigNumber.from(1200));
 
       // Move time to 2 days
       await increaseTime(this.deployerSigner.provider, 2 * 24 * 60 * 60); // 2 days
@@ -262,13 +262,13 @@ export default async function suite() {
 
       await this.investmentContract
         .connect(this.lender3Signer)
-        .executeLotteryRun(this.investmentId);
+        .executeLotteryRun(this.projectId);
 
       // Then
       await expectRevert(
         this.investmentContract
           .connect(this.lender1Signer)
-          .withdrawInvestmentTickets(this.investmentId, 1000, 700),
+          .withdrawInvestmentTickets(this.projectId, 1000, 700),
         'Not enough tickets won'
       );
     });
@@ -288,13 +288,13 @@ export default async function suite() {
       // When
       await this.investmentContract
         .connect(this.lender1Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(10));
+        .showInterestForInvestment(this.projectId, BigNumber.from(10));
       await this.investmentContract
         .connect(this.lender2Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(9));
+        .showInterestForInvestment(this.projectId, BigNumber.from(9));
       await this.investmentContract
         .connect(this.lender3Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(1));
+        .showInterestForInvestment(this.projectId, BigNumber.from(1));
 
       // Move time to 2 days
       await increaseTime(this.deployerSigner.provider, 2 * 24 * 60 * 60); // 2 days
@@ -305,34 +305,34 @@ export default async function suite() {
 
       await this.investmentContract
         .connect(this.lender3Signer)
-        .executeLotteryRun(this.investmentId);
+        .executeLotteryRun(this.projectId);
 
       const balanceFundingNFTTokenBefore =
-        await this.fundingNFTContract.balanceOf(this.lender1, this.investmentId.toNumber());
+        await this.fundingNFTContract.balanceOf(this.lender1, this.projectId.toNumber());
 
       await expect(
         this.investmentContract
           .connect(this.lender1Signer)
-          .withdrawInvestmentTickets(this.investmentId, 3, 7)
+          .withdrawInvestmentTickets(this.projectId, 3, 7)
       )
-        .to.emit(this.investmentContract, 'WithdrawInvestment')
-        .withArgs(this.investmentId, 3, 7);
+        .to.emit(this.investmentContract, 'WithdrawProject')
+        .withArgs(this.projectId, 3, 7);
 
       await expectRevert(
         this.investmentContract
           .connect(this.lender1Signer)
-          .withdrawAmountProvidedForNonWonTickets(this.investmentId),
+          .withdrawAmountProvidedForNonWonTickets(this.projectId),
         'No non-won tickets to withdraw'
       );
 
       const balanceFundingNFTTokenAfter =
-        await this.fundingNFTContract.balanceOf(this.lender1, this.investmentId.toNumber());
+        await this.fundingNFTContract.balanceOf(this.lender1, this.projectId.toNumber());
       expect(+balanceFundingNFTTokenAfter.toString()).to.be.greaterThan(
         +balanceFundingNFTTokenBefore.toString()
       );
       const lender1ticketsWonPerAddressAfter =
         await this.investmentContract.ticketsWonPerAddress(
-          this.investmentId,
+          this.projectId,
           this.lender1
         );
       expect(lender1ticketsWonPerAddressAfter.toNumber()).to.be.equal(0);
@@ -353,13 +353,13 @@ export default async function suite() {
       // When
       await this.investmentContract
         .connect(this.lender1Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(10));
+        .showInterestForInvestment(this.projectId, BigNumber.from(10));
       await this.investmentContract
         .connect(this.lender2Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(9));
+        .showInterestForInvestment(this.projectId, BigNumber.from(9));
       await this.investmentContract
         .connect(this.lender3Signer)
-        .showInterestForInvestment(this.investmentId, BigNumber.from(21));
+        .showInterestForInvestment(this.projectId, BigNumber.from(21));
 
       // Move time to 2 days
       await increaseTime(this.deployerSigner.provider, 2 * 24 * 60 * 60); // 2 days
@@ -370,11 +370,11 @@ export default async function suite() {
 
       await this.investmentContract
         .connect(this.lender3Signer)
-        .executeLotteryRun(this.investmentId);
+        .executeLotteryRun(this.projectId);
 
       const lender3remainingTicketsPerAddressBefore =
         await this.investmentContract.remainingTicketsPerAddress(
-          this.investmentId,
+          this.projectId,
           this.lender3
         );
       const lendingTokenBalanceBefore =
@@ -387,10 +387,10 @@ export default async function suite() {
       await expect(
         this.investmentContract
           .connect(this.lender3Signer)
-          .withdrawAmountProvidedForNonWonTickets(this.investmentId)
+          .withdrawAmountProvidedForNonWonTickets(this.projectId)
       )
         .to.emit(this.investmentContract, 'WithdrawAmountForNonTickets')
-        .withArgs(this.investmentId, amountToReturnForNonWonTickets);
+        .withArgs(this.projectId, amountToReturnForNonWonTickets);
 
       const lendingTokenBalanceAfter =
         await this.lendingTokenContract.balanceOf(this.lender3);
@@ -398,7 +398,7 @@ export default async function suite() {
       // Then
       const lender3remainingTicketsPerAddressAfter =
         await this.investmentContract.remainingTicketsPerAddress(
-          this.investmentId,
+          this.projectId,
           this.lender3
         );
       expect(
@@ -442,11 +442,11 @@ export default async function suite() {
 
       await this.investmentContract
         .connect(this.lender1Signer)
-        .showInterestForInvestment(this.investmentId.add(1), numberOfPartitions);
+        .showInterestForInvestment(this.projectId.add(1), numberOfPartitions);
 
       await this.investmentContract
         .connect(this.lender2Signer)
-        .showInterestForInvestment(this.investmentId.add(1), numberOfPartitions);
+        .showInterestForInvestment(this.projectId.add(1), numberOfPartitions);
 
       // When
       // Move time to 2 days
@@ -471,15 +471,15 @@ export default async function suite() {
 
       await this.investmentContract
         .connect(this.lender1Signer)
-        .executeLotteryRun(this.investmentId.add(1));
+        .executeLotteryRun(this.projectId.add(1));
 
-      const statusBeforeSecondRun = await this.investmentContract.projectStatus(this.investmentId.add(1));
+      const statusBeforeSecondRun = await this.investmentContract.projectStatus(this.projectId.add(1));
 
       await this.investmentContract
         .connect(this.lender2Signer)
-        .executeLotteryRun(this.investmentId.add(1));
+        .executeLotteryRun(this.projectId.add(1));
 
-      const statusAfterSecondRun = await this.investmentContract.projectStatus(this.investmentId.add(1));
+      const statusAfterSecondRun = await this.investmentContract.projectStatus(this.projectId.add(1));
 
       // Then
       expect(previousCronjobList.head.toString()).to.be.equal('1');
@@ -527,7 +527,7 @@ export default async function suite() {
 
         await this.investmentContract
           .connect(this.lender1Signer)
-          .showInterestForInvestment(this.investmentId.add(1), numberOfPartitions);
+          .showInterestForInvestment(this.projectId.add(1), numberOfPartitions);
 
         // Move time to 2 days
         await increaseTime(this.deployerSigner.provider, 2 * 24 * 60 * 60); // 2 days
@@ -544,13 +544,13 @@ export default async function suite() {
 
         await this.investmentContract
           .connect(this.lender1Signer)
-          .executeLotteryRun(this.investmentId.add(1));
+          .executeLotteryRun(this.projectId.add(1));
       });
 
       it('When withdrawing with 0 ticketsToLock', async function () {
         const ticketsToLock = 0;
         const ticketsToWithdraw = 10;
-        const investmentId = this.investmentId.add(1);
+        const investmentId = this.projectId.add(1);
 
         const balanceOfNFTTokensBefore = await this.fundingNFTContract.balanceOf(this.lender1, investmentId.toNumber());
 
@@ -569,7 +569,7 @@ export default async function suite() {
       it('When withdrawing with 0 ticketsToWithdraw', async function () {
         const ticketsToLock = 10;
         const ticketsToWithdraw = 0;
-        const investmentId = this.investmentId.add(1);
+        const investmentId = this.projectId.add(1);
 
         const balanceOfNFTTokensBefore = await this.fundingNFTContract.balanceOf(this.lender1, investmentId);
         const lockedTicketsBefore = await this.investmentContract.lockedTicketsPerAddress(this.lender1);
@@ -601,7 +601,7 @@ export default async function suite() {
 
         await this.investmentContract
           .connect(this.lender1Signer)
-          .withdrawAmountProvidedForNonWonTickets(this.investmentId.add(1));
+          .withdrawAmountProvidedForNonWonTickets(this.projectId.add(1));
 
         const balanceOfLendingTokensAfter = await this.lendingTokenContract.balanceOf(this.lender1);
         const lockedTicketsAfter = await this.investmentContract.lockedTicketsPerAddress(this.lender1);
@@ -616,7 +616,7 @@ export default async function suite() {
       it('When trying to withdraw non won tickets in non-settled state', async function () {
         await expectRevert(this.investmentContract
           .connect(this.lender1Signer)
-          .withdrawAmountProvidedForNonWonTickets(this.investmentId),
+          .withdrawAmountProvidedForNonWonTickets(this.projectId),
           'Can withdraw only in Settled state');
       });
 
@@ -625,7 +625,7 @@ export default async function suite() {
 
         const ticketsToLock = 0;
         const ticketsToWithdraw = 10;
-        const investmentId = this.investmentId.add(1);
+        const investmentId = this.projectId.add(1);
 
         const balanceOfNFTTokensBefore = await this.fundingNFTContract.balanceOf(this.lender1, investmentId.toNumber());
 
@@ -648,7 +648,7 @@ export default async function suite() {
             .connect(this.lender1Signer)
             .convertNFTToInvestmentTokens(investmentId, ticketsToWithdraw)
         )
-          .to.emit(this.investmentContract, 'ConvertNFTToInvestmentTokens')
+          .to.emit(this.investmentContract, 'ConvertNFTToProjectTokens')
           .withArgs(investmentId, ticketsToWithdraw, amountOfInvestmentTokenToTransfer);
 
         const balanceOfInvestmentToken = await investmentTokenContract.balanceOf(this.lender1);
@@ -663,7 +663,7 @@ export default async function suite() {
 
         const ticketsToLock = 0;
         const ticketsToWithdraw = 10;
-        const investmentId = this.investmentId.add(1);
+        const investmentId = this.projectId.add(1);
 
         const balanceOfNFTTokensBefore = await this.fundingNFTContract.balanceOf(this.lender1, investmentId.toNumber());
 
@@ -715,7 +715,7 @@ export default async function suite() {
 
         await this.investmentContract
           .connect(this.lender1Signer)
-          .showInterestForInvestment(this.investmentId.add(1), numberOfPartitions);
+          .showInterestForInvestment(this.projectId.add(1), numberOfPartitions);
 
         // Move time to 2 days
         await increaseTime(this.deployerSigner.provider, 2 * 24 * 60 * 60); // 2 days
@@ -732,14 +732,14 @@ export default async function suite() {
 
         await this.investmentContract
           .connect(this.lender1Signer)
-          .executeLotteryRun(this.investmentId.add(1));
+          .executeLotteryRun(this.projectId.add(1));
 
         const ticketsToLock = 10;
         const ticketsToWithdraw = 0;
 
         await this.investmentContract
           .connect(this.lender1Signer)
-          .withdrawInvestmentTickets(this.investmentId.add(1), ticketsToLock, ticketsToWithdraw);
+          .withdrawInvestmentTickets(this.projectId.add(1), ticketsToLock, ticketsToWithdraw);
 
         await this.investmentContract
           .connect(this.seekerSigner)
@@ -763,7 +763,7 @@ export default async function suite() {
 
         await this.investmentContract
           .connect(this.lender1Signer)
-          .showInterestForInvestment(this.investmentId.add(2), numberOfPartitions);
+          .showInterestForInvestment(this.projectId.add(2), numberOfPartitions);
 
         const balanceOfReputationalTokensAfter = await this.rALBTContract.balanceOf(this.lender1);
 
@@ -775,7 +775,7 @@ export default async function suite() {
 
       it('When withdrawing locked tokens should have more rALBT and investmentTokens', async function () {
         const balanceOfReputationalTokensBefore = await this.rALBTContract.balanceOf(this.lender1);
-        const investmentId = this.investmentId.add(1);
+        const investmentId = this.projectId.add(1);
         const numberOfPartitions = BigNumber.from(10);
 
         const balanceFundingNFTTokenBefore =
@@ -802,7 +802,7 @@ export default async function suite() {
         const numberOfPartitions = BigNumber.from(12);
         await expectRevert(this.investmentContract
           .connect(this.lender1Signer)
-          .withdrawLockedInvestmentTickets(this.investmentId.add(1), numberOfPartitions),
+          .withdrawLockedInvestmentTickets(this.projectId.add(1), numberOfPartitions),
           'Not enough tickets to withdraw');
       });
 
@@ -810,7 +810,7 @@ export default async function suite() {
         const numberOfPartitions = BigNumber.from(5);
         await expectRevert(this.investmentContract
           .connect(this.lender1Signer)
-          .withdrawLockedInvestmentTickets(this.investmentId, numberOfPartitions),
+          .withdrawLockedInvestmentTickets(this.projectId, numberOfPartitions),
           'Can withdraw only in Settled state');
       });
     });

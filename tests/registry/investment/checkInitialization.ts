@@ -86,7 +86,7 @@ export default async function suite() {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [this.lendingTokenContract.address, this.fundingNFTContract.address],
+        args: [this.lendingTokenContract.address, this.fundingNFTContract.address, this.projectManagerContract.address],
         log: true,
       });
 

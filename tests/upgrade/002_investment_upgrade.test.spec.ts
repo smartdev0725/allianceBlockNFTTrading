@@ -5,8 +5,8 @@ import {getSigners, initializeTransfers} from '../helpers/utils';
 
 describe('Investment upgrade test', () => {
   let approvalRequest: BigNumber;
-  let investmentIdBefore: BigNumber;
-  let investmentIdAfter: BigNumber;
+  let projectIdBefore: BigNumber;
+  let projectIdAfter: BigNumber;
   let amountOfInvestmentTokens: BigNumber;
 
   beforeEach(async () => {
@@ -24,6 +24,7 @@ describe('Investment upgrade test', () => {
       await getNamedAccounts();
 
     const investmentContract = await ethers.getContract('Investment');
+    const projectManagerContract = await ethers.getContract('ProjectManager');
     const governanceContract = await ethers.getContract('Governance');
     const investmentTokenContract = await ethers.getContract('InvestmentToken');
     const lendingTokenContract = await ethers.getContract('LendingToken');
@@ -47,7 +48,7 @@ describe('Investment upgrade test', () => {
       }
     );
 
-    investmentIdBefore = await investmentContract.totalProjects();
+    projectIdBefore = await projectManagerContract.getTotalProjects();
 
     approvalRequest = await governanceContract.totalApprovalRequests();
 
@@ -69,7 +70,7 @@ describe('Investment upgrade test', () => {
       .connect(superDelegatorSigner)
       .superVoteForRequest(approvalRequest, true);
 
-    investmentIdAfter = await investmentContract.totalProjects();
+    projectIdAfter = await investmentContract.totalProjects();
   });
 
   it('Investment should be ok', async function () {
@@ -77,10 +78,10 @@ describe('Investment upgrade test', () => {
     const investmentContract = await ethers.getContract('Investment');
 
     // When
-    const investmentDetails = await investmentContract.investmentDetails(investmentIdBefore);
+    const investmentDetails = await investmentContract.investmentDetails(projectIdBefore);
 
     // Then
-    expect(investmentDetails.investmentId.toNumber()).to.equal(investmentIdBefore.toNumber());
+    expect(investmentDetails.investmentId.toNumber()).to.equal(projectIdBefore.toNumber());
     expect(amountOfInvestmentTokens.toString()).to.equal(
       investmentDetails.investmentTokensAmount.toString()
     );
@@ -121,10 +122,10 @@ describe('Investment upgrade test', () => {
     expect(something2.toNumber()).to.equal(2);
 
     const investmentDetailsAfterUpdate = await investmentContract.investmentDetails(
-      investmentIdBefore
+      projectIdBefore
     );
     expect(investmentDetailsAfterUpdate.investmentId.toNumber()).to.equal(
-      investmentIdBefore.toNumber()
+      projectIdBefore.toNumber()
     );
     expect(amountOfInvestmentTokens.toString()).to.equal(
       investmentDetailsAfterUpdate.investmentTokensAmount.toString()
