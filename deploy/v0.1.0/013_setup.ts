@@ -14,6 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const stakerMedalNFTContract = await ethers.getContract('StakerMedalNFT');
   const escrowContract = await ethers.getContract('Escrow');
   const actionVerifierContract = await ethers.getContract('ActionVerifier');
+  const projectManagerContract = await ethers.getContract('ProjectManager');
   const rALBTAddress = await escrowContract.reputationalALBT();
 
   // Setup escrow
@@ -89,6 +90,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       blocksLockedForReputation,
       lotteryNumbersForImmediateTicket
     );
+
+  // Setupp ProjectManager
+  await projectManagerContract
+    .connect(deployerSigner)
+    .createProjectType(investmentContract.address);
+
   return true;
 };
 

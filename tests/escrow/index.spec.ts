@@ -13,6 +13,7 @@ describe('Escrow', function () {
 
     const fundingNFTContract = await get('FundingNFT');
     const lendingTokenContract = await get('LendingToken');
+    const projectManagerContract = await get('ProjectManager');
 
     await deploy('Escrow2', {
       contract: 'Escrow',
@@ -22,7 +23,11 @@ describe('Escrow', function () {
         methodName: 'initialize',
         proxyContract: 'OpenZeppelinTransparentProxy',
       },
-      args: [lendingTokenContract.address, fundingNFTContract.address],
+      args: [
+        lendingTokenContract.address,
+        fundingNFTContract.address,
+        projectManagerContract.address,
+      ],
       log: true,
     });
 
@@ -36,7 +41,6 @@ describe('Escrow', function () {
 
     // Setup escrow
     await this.escrowContract.afterInitialize(
-      deployer, // Act as investment contract
       staker1, // Act as actionVerifier contract
       staker2 // Act as staking contract
     );

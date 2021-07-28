@@ -8,7 +8,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts, getChainId} = hre;
   const {deploy} = deployments;
 
-  const {deployer} = await getNamedAccounts();
+  const {deployer, proxyOwner} = await getNamedAccounts();
   const chainId = await getChainId();
 
   // Only for development stage
@@ -17,6 +17,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       contract: contractName,
       from: deployer,
       log: true,
+      proxy: {
+        owner: proxyOwner,
+        methodName: 'initialize',
+        proxyContract: 'OpenZeppelinTransparentProxy',
+      },
     });
   }
   return true;

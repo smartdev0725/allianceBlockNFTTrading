@@ -29,7 +29,6 @@ describe('Contract Escrow', () => {
     ).to.not.equal('0x');
   });
 
-
   it('should revert if parameters are wrongs', async function () {
     const {deploy} = deployments;
     const {deployer, proxyOwner} = await getNamedAccounts();
@@ -48,7 +47,11 @@ describe('Contract Escrow', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [ethers.constants.AddressZero, fundingNFTAddress],
+        args: [
+          ethers.constants.AddressZero,
+          fundingNFTAddress,
+          ethers.constants.AddressZero,
+        ],
         log: true,
       })
     );
@@ -62,7 +65,11 @@ describe('Contract Escrow', () => {
           methodName: 'initialize',
           proxyContract: 'OpenZeppelinTransparentProxy',
         },
-        args: [lendingTokenAddress, ethers.constants.AddressZero],
+        args: [
+          lendingTokenAddress,
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
+        ],
         log: true,
       })
     );

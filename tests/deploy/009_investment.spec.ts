@@ -1,6 +1,6 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {expect} from 'chai';
-import {BASE_AMOUNT} from "../helpers/constants";
+import {BASE_AMOUNT} from '../helpers/constants';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 describe('Contract Investment', () => {
@@ -30,7 +30,8 @@ describe('Contract Investment', () => {
     const governanceAddress = (await get('Governance')).address;
     const lendingTokenAddress = (await get('LendingToken')).address;
     const fundingNFTAddress = (await get('FundingNFT')).address;
-    const amount = ethers.utils.parseEther(BASE_AMOUNT + '').toString()
+    const PMAddress = (await get('ProjectManager')).address;
+    const amount = ethers.utils.parseEther(BASE_AMOUNT + '').toString();
 
     await expectRevert.unspecified(
       deploy('InvestmentTest', {
@@ -46,6 +47,7 @@ describe('Contract Investment', () => {
           governanceAddress,
           [lendingTokenAddress],
           fundingNFTAddress,
+          PMAddress,
           amount,
         ],
         log: true,
@@ -66,6 +68,7 @@ describe('Contract Investment', () => {
           ethers.constants.AddressZero,
           [lendingTokenAddress],
           fundingNFTAddress,
+          PMAddress,
           amount,
         ],
         log: true,
@@ -86,6 +89,7 @@ describe('Contract Investment', () => {
           governanceAddress,
           [ethers.constants.AddressZero],
           fundingNFTAddress,
+          PMAddress,
           amount,
         ],
         log: true,
@@ -106,6 +110,7 @@ describe('Contract Investment', () => {
           governanceAddress,
           [lendingTokenAddress],
           ethers.constants.AddressZero,
+          PMAddress,
           amount,
         ],
         log: true,
@@ -126,12 +131,31 @@ describe('Contract Investment', () => {
           governanceAddress,
           [lendingTokenAddress],
           fundingNFTAddress,
+          ethers.constants.AddressZero,
+          amount,
+        ],
+        log: true,
+      })
+    );
+    await expectRevert.unspecified(
+      deploy('InvestmentTest', {
+        contract: 'Investment',
+        from: deployer,
+        proxy: {
+          owner: proxyOwner,
+          methodName: 'initialize',
+          proxyContract: 'OpenZeppelinTransparentProxy',
+        },
+        args: [
+          escrowAddress,
+          governanceAddress,
+          [lendingTokenAddress],
+          fundingNFTAddress,
+          PMAddress,
           0,
         ],
         log: true,
       })
     );
-
   });
-
 });

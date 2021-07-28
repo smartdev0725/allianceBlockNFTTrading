@@ -6,19 +6,25 @@ const {expectRevert} = require('@openzeppelin/test-helpers');
 export default async function suite() {
   describe('FundingNFT', async () => {
     it('When initialize again should revert', async function () {
-      const investmentAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
-      const actionVerifierAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
-      const stakingAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
+      const actionVerifierAddress =
+        '0x664f6b4987d9db811867f431911124109ed5a475';
+      const stakingAddress = '0x664f6b4987d9db811867f431911124109ed5a475';
 
       await expectRevert(
-        this.escrowContract.afterInitialize(investmentAddress, actionVerifierAddress, stakingAddress),
+        this.escrowContract.afterInitialize(
+          actionVerifierAddress,
+          stakingAddress
+        ),
         'Cannot initialize second time'
       );
     });
 
     it('When initialize with zero address should revert', async function () {
       await expectRevert(
-        this.escrowContract.afterInitialize( ethers.constants.AddressZero,  ethers.constants.AddressZero,  ethers.constants.AddressZero),
+        this.escrowContract.afterInitialize(
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero
+        ),
         'Cannot initialize with 0 addresses'
       );
     });
@@ -126,17 +132,20 @@ export default async function suite() {
 
     it('when change investment with zero address should not revert', async function () {
       // Given
-      const { deployerSigner } = await getSigners();
+      const {deployerSigner} = await getSigners();
       // When and Then
-      await expectRevert(this.escrowContract
-        .connect(deployerSigner)
-        .changeInvestment(ethers.constants.AddressZero), 'Investment should not be zero address');
+      await expectRevert(
+        this.escrowContract
+          .connect(deployerSigner)
+          .changeInvestment(ethers.constants.AddressZero),
+        'Investment should not be zero address'
+      );
     });
 
     it('when change investment from owner account should not revert', async function () {
       // Given
       const {deployerSigner} = await getSigners();
-      const dummyAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
+      const dummyAddress = '0x664f6b4987d9db811867f431911124109ed5a475';
 
       // When
       await this.escrowContract
@@ -145,7 +154,9 @@ export default async function suite() {
 
       // Then
       const investmentAddress = await this.escrowContract.investment();
-      expect(investmentAddress.toLowerCase()).to.be.equal(dummyAddress.toLowerCase());
+      expect(investmentAddress.toLowerCase()).to.be.equal(
+        dummyAddress.toLowerCase()
+      );
     });
   });
 
@@ -233,7 +244,11 @@ export default async function suite() {
       await this.lendingTokenContract.mint(this.escrowContract.address, amount);
       await this.escrowContract
         .connect(deployerSigner)
-        .transferLendingToken(this.lendingTokenContract.address, seeker, amount);
+        .transferLendingToken(
+          this.lendingTokenContract.address,
+          seeker,
+          amount
+        );
 
       // Then
       const escrowBalance = await this.lendingTokenContract.balanceOf(
@@ -251,7 +266,11 @@ export default async function suite() {
 
       // When and Then
       await expectRevert(
-        this.escrowContract.transferLendingToken(this.lendingTokenContract.address, seeker, amount),
+        this.escrowContract.transferLendingToken(
+          this.lendingTokenContract.address,
+          seeker,
+          amount
+        ),
         'ERC20: transfer amount exceeds balance'
       );
     });
@@ -269,7 +288,11 @@ export default async function suite() {
       await expectRevert(
         this.escrowContract
           .connect(seekerSigner)
-          .transferLendingToken(this.lendingTokenContract.address, seeker, amount),
+          .transferLendingToken(
+            this.lendingTokenContract.address,
+            seeker,
+            amount
+          ),
         'Only Investment'
       );
     });
@@ -448,10 +471,7 @@ export default async function suite() {
       await this.fundingNFTContract
         .connect(lender1Signer)
         .mintGen0(staker1, 20, 1);
-      const balance = await this.fundingNFTContract.balanceOf(
-        staker1,
-        1
-      );
+      const balance = await this.fundingNFTContract.balanceOf(staker1, 1);
 
       expect(balance.toString()).to.be.equal('20');
 
@@ -459,7 +479,10 @@ export default async function suite() {
       await this.escrowContract
         .connect(deployerSigner)
         .burnFundingNFT(staker1, 1, 20);
-      const balanceAfterBurn = await this.fundingNFTContract.balanceOf(staker1, 1);
+      const balanceAfterBurn = await this.fundingNFTContract.balanceOf(
+        staker1,
+        1
+      );
       expect(balanceAfterBurn.toNumber()).to.be.equal(0);
     });
   });
