@@ -11,6 +11,10 @@ interface IProjectManager {
 
     function isProject(address projectAddress) external returns (bool);
 
+    function getTotalProjects() view external returns (uint256);
+    
+    function getTotalProjectTypes() view external returns (uint256);
+
     function getProjectTypeFromProjectId(uint256 id) external returns (uint256);
 
     function getProjectTypeIndexFromAddress(address project) external returns (uint256);

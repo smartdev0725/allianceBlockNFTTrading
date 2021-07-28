@@ -12,7 +12,7 @@ chai.use(solidity);
 export default async function suite() {
   describe('Investment request', async () => {
     it('when all details are stored correctly', async function () {
-      const investmentId = await this.investmentContract.totalProjects();
+      const projectId = await this.projectManagerContract.getTotalProjects();
       const approvalRequest =
         await this.governanceContract.totalApprovalRequests();
       const initSeekerInvestmentTokenBalance =
@@ -23,7 +23,7 @@ export default async function suite() {
       const initEscrowFundingNftBalance =
         await this.fundingNFTContract.balanceOf(
           this.escrowContract.address,
-          investmentId
+          projectId
         );
 
       const amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
@@ -41,15 +41,15 @@ export default async function suite() {
             ipfsHash
           )
       )
-        .to.emit(this.investmentContract, 'InvestmentRequested')
-        .withArgs(investmentId, this.seeker, totalAmountRequested);
+        .to.emit(this.investmentContract, 'ProjectRequested')
+        .withArgs(projectId, this.seeker, totalAmountRequested);
 
       const newSeekerInvestmentTokenBalance =
         await this.investmentTokenContract.balanceOf(this.seeker);
       const newEscrowInvestmentTokenBalance =
         await this.investmentTokenContract.balanceOf(this.escrowContract.address);
       const tokenId = BigNumber.from(
-        new BN(0).ishln(128).or(new BN(investmentId.toNumber())).toString()
+        new BN(0).ishln(128).or(new BN(projectId.toNumber())).toString()
       );
       const newEscrowFundingNftBalance =
         await this.fundingNFTContract.balanceOf(
@@ -57,13 +57,13 @@ export default async function suite() {
           tokenId
         );
 
-      const isPaused = await this.fundingNFTContract.transfersPaused(investmentId);
+      const isPaused = await this.fundingNFTContract.transfersPaused(projectId);
 
-      const projectStatus = await this.investmentContract.projectStatus(investmentId);
-      const investmentDetails = await this.investmentContract.investmentDetails(investmentId);
-      const investmentSeeker = await this.investmentContract.projectSeeker(investmentId);
+      const projectStatus = await this.investmentContract.projectStatus(projectId);
+      const investmentDetails = await this.investmentContract.investmentDetails(projectId);
+      const investmentSeeker = await this.investmentContract.projectSeeker(projectId);
       const investmentTokensPerTicket =
-        await this.investmentContract.investmentTokensPerTicket(investmentId);
+        await this.investmentContract.investmentTokensPerTicket(projectId);
       const daoApprovalRequest = await this.governanceContract.approvalRequests(
         approvalRequest
       );
@@ -72,7 +72,7 @@ export default async function suite() {
       );
 
       // Correct Details.
-      expect(investmentDetails.investmentId.toString()).to.be.equal(investmentId.toString());
+      expect(investmentDetails.investmentId.toString()).to.be.equal(projectId.toString());
       expect(investmentDetails.investmentToken).to.be.equal(
         this.investmentTokenContract.address
       );
@@ -93,8 +93,8 @@ export default async function suite() {
         amountOfTokensToBePurchased.div(totalPartitions)
       );
       // Investment id is incremented correctly
-      expect(await this.investmentContract.totalProjects()).to.be.equal(
-        investmentId.add(1)
+      expect(await this.projectManagerContract.getTotalProjects()).to.be.equal(
+        projectId.add(1)
       );
 
       // Correct Balances.
@@ -116,8 +116,8 @@ export default async function suite() {
       expect(isPaused).to.be.equal(true);
 
       // Correct Dao Request.
-      expect(daoApprovalRequest.investmentId.toString()).to.be.equal(
-        investmentId.toString()
+      expect(daoApprovalRequest.projectId.toString()).to.be.equal(
+        projectId.toString()
       );
       expect(daoApprovalRequest.approvalsProvided.toNumber()).equal(0);
       expect(daoApprovalRequest.isApproved).to.be.equal(false);
@@ -181,7 +181,7 @@ export default async function suite() {
     });
 
     it('when investment request is rejected', async function () {
-      const investmentId = await this.investmentContract.totalProjects();
+      const projectId = await this.projectManagerContract.getTotalProjects();
 
       await expect(
         this.investmentContract
@@ -194,15 +194,15 @@ export default async function suite() {
             this.ipfsHash
           )
       )
-        .to.emit(this.investmentContract, 'InvestmentRequested')
-        .withArgs(investmentId, this.seeker, this.totalAmountRequested);
+        .to.emit(this.investmentContract, 'ProjectRequested')
+        .withArgs(projectId, this.seeker, this.totalAmountRequested);
 
       await this.governanceContract
         .connect(this.superDelegatorSigner)
         .superVoteForRequest(this.approvalRequest.add(1), false);
 
 
-      const projectStatus = (await this.investmentContract.getInvestmentMetadata(investmentId))[1];
+      const projectStatus = (await this.investmentContract.getInvestmentMetadata(projectId))[1];
       // Correct Status.
       expect(projectStatus.toString()).to.be.equal(ProjectStatusTypes.REJECTED);
     });

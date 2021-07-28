@@ -49,6 +49,7 @@ describe('Investments', function () {
 
     // Get contracts
     const {
+      projectManagerContract,
       investmentContract,
       governanceContract,
       fundingNFTContract,
@@ -59,6 +60,7 @@ describe('Investments', function () {
       stakingContract,
       ALBTContract,
     } = await getContracts();
+    this.projectManagerContract = projectManagerContract;
     this.investmentContract = investmentContract;
     this.governanceContract = governanceContract;
     this.fundingNFTContract = fundingNFTContract;
@@ -92,7 +94,8 @@ describe('Investments', function () {
 
     this.approvalRequest = await governanceContract.totalApprovalRequests();
 
-    this.investmentId = await this.investmentContract.totalProjects();
+    this.projectId = await this.projectManagerContract.getTotalProjects();
+    
     this.startingEscrowInvestmentTokenBalance =
       await investmentTokenContract.balanceOf(escrowContract.address);
 

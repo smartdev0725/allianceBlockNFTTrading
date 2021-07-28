@@ -12,8 +12,8 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 contract ProjectManager is Initializable, OwnableUpgradeable {
     using SafeMath for uint256;
 
-    uint256 projectCont;
-    uint256 projectTypeCont;
+    uint256 totalProjects;
+    uint256 totalProjectTypes;
     // mapping of the projectId to a project type
     mapping(uint256 => uint256) projectTypeFromProjectId;
     // mapping of the project type to a project address
@@ -33,8 +33,16 @@ contract ProjectManager is Initializable, OwnableUpgradeable {
      */
     function initialize() external initializer {
         __Ownable_init();
-        projectCont = 1;
-        projectTypeCont = 1;
+        totalProjects = 1;
+        totalProjectTypes = 1;
+    }
+
+    function getTotalProjects() view external returns (uint256){
+        return totalProjects;
+    }
+
+    function getTotalProjectTypes() view external returns (uint256){
+        return totalProjectTypes;
     }
 
     function getProjectTypeFromProjectId(uint256 id) view external returns (uint256){
@@ -58,17 +66,17 @@ contract ProjectManager is Initializable, OwnableUpgradeable {
     }
 
     function createProject() external onlyProject() returns(uint256){
-        projectTypeFromProjectId[projectCont] = projectTypeIndexFromAddress[msg.sender];
-        projectAddressFromProjectId[projectCont] = msg.sender;
-        projectCont += 1;
-        return projectCont-1;
+        projectTypeFromProjectId[totalProjects] = projectTypeIndexFromAddress[msg.sender];
+        projectAddressFromProjectId[totalProjects] = msg.sender;
+        totalProjects += 1;
+        return totalProjects-1;
         //INVERTIR LUEGO
     }
 
     function createProjectType(address projectAddress) external onlyOwner(){
-        projectTypeIndexFromAddress[projectAddress] = projectTypeCont;
-        projectAddressFromType[projectTypeCont] = projectAddress;
-        projectTypeCont += 1;
+        projectTypeIndexFromAddress[projectAddress] = totalProjectTypes;
+        projectAddressFromType[totalProjectTypes] = projectAddress;
+        totalProjectTypes += 1;
     }
 
 }

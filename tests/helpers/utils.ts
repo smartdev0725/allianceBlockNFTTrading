@@ -21,6 +21,8 @@ export const getSigners = async () => {
 };
 
 export const getContracts = async () => {
+  const projectManagerContract = await ethers.getContract('ProjectManager');
+
   const investmentContract = await ethers.getContract('Investment');
 
   const governanceContract = await ethers.getContract('Governance');
@@ -48,6 +50,7 @@ export const getContracts = async () => {
   const rALBTContract = await rALBTFactory.attach(rALBTAddress);
 
   return {
+    projectManagerContract,
     investmentContract,
     governanceContract,
     fundingNFTContract,

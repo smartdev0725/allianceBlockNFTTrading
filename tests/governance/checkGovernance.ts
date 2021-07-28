@@ -89,7 +89,7 @@ export default async function suite() {
       const amountOfTokensToBePurchased = ethers.utils.parseEther('1000');
       const totalAmountRequested = ethers.utils.parseEther('200');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
-      const investmentId = await this.investmentContract.totalProjects();
+      const projectId = await this.projectManagerContract.getTotalProjects();
 
       // When
       await this.investmentContract
@@ -105,29 +105,29 @@ export default async function suite() {
       // Then
       await expect(
         this.governanceContract.connect(this.superDelegatorSigner).superVoteForRequest(approvalRequest, true)
-      ).to.emit(this.governanceContract, 'VotedForRequest').withArgs(investmentId, approvalRequest, true, this.superDelegator);
+      ).to.emit(this.governanceContract, 'VotedForRequest').withArgs(projectId, true, this.superDelegator);
     });
 
   });
 
-  describe('Governance initialization', async () => {
-    it('When initialize again should revert', async function () {
-      const investmentAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
+  // describe('Governance initialization', async () => {
+  //   it('When initialize again should revert', async function () {
+  //     const investmentAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
 
-      await expectRevert(
-        this.governanceContract.setInvestment(investmentAddress),
-        'Cannot initialize second time'
-      );
-    });
+  //     await expectRevert(
+  //       this.governanceContract.setInvestment(investmentAddress),
+  //       'Cannot initialize second time'
+  //     );
+  //   });
 
-    it('When initialize with zero address should revert', async function () {
-      await expectRevert(
-        this.governanceContract.setInvestment( ethers.constants.AddressZero),
-        'Cannot initialize with 0 addresses'
-      );
-    });
+  //   it('When initialize with zero address should revert', async function () {
+  //     await expectRevert(
+  //       this.governanceContract.setInvestment( ethers.constants.AddressZero),
+  //       'Cannot initialize with 0 addresses'
+  //     );
+  //   });
 
-  });
+  // });
 
   describe('Governance update', async () => {
     it('When update superdelegator with another user should revert', async function () {
@@ -159,7 +159,7 @@ export default async function suite() {
     it('When requestApproval not from investment should revert', async function () {
       await expectRevert(
         this.governanceContract.requestApproval(1),
-        'Only Investment contract'
+        'Only Project contract'
       );
     });
 

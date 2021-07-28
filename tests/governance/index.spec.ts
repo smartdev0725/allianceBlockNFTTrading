@@ -45,12 +45,14 @@ describe('Governance', function () {
 
     // Get contracts
     const {
+      projectManagerContract,
       investmentContract,
       governanceContract,
       lendingTokenContract,
       investmentTokenContract,
       collateralTokenContract,
     } = await getContracts();
+    this.projectManagerContract = projectManagerContract;
     this.governanceContract = governanceContract;
     this.investmentTokenContract = investmentTokenContract;
     this.investmentContract = investmentContract;

@@ -35,6 +35,7 @@ describe('Escrow', function () {
     this.fundingNFTContract = await ethers.getContract('FundingNFT');
     this.collateralTokenContract = await ethers.getContract('CollateralToken');
     this.lendingTokenContract = await ethers.getContract('LendingToken');
+    this.projectManagerContract = await ethers.getContract('ProjectManager');
 
     const rALBTAddress = await this.escrowContract.reputationalALBT();
     this.rALBTContract = await ethers.getContractAt('rALBT', rALBTAddress);
@@ -44,6 +45,9 @@ describe('Escrow', function () {
       staker1, // Act as actionVerifier contract
       staker2 // Act as staking contract
     );
+
+    //SIMULATES DEPLOYER AS A PROJECT TYPE
+    await this.projectManagerContract.createProjectType(deployer);
   });
 
   describe('When checking escrow functionalities', checkEscrow.bind(this));
