@@ -15,6 +15,7 @@ import {
   runLottery,
   funderClaimLotteryReward,
   exchangeNFTForInvestmentToken,
+  seekerClaimsFunding,
 } from '../../helpers/modularTests';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
@@ -147,5 +148,7 @@ export default async function suite() {
       this.lender4Signer,
       this.investmentTokenContract
     );
+    //8) Seeker claims the funding, when all investment tokens have been exchanged.
+    await seekerClaimsFunding(investmentId, this.seekerSigner);
   });
 }

@@ -168,5 +168,5 @@ describe('Happy Path', function () {
     );
   });
 
-  describe('Happy Path process', happyPathParametricInBatches.bind(this));
+  describe('Happy Path process', happyPathParametric.bind(this));
 });

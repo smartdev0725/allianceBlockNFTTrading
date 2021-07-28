@@ -628,3 +628,41 @@ export const batchExchangeNFTForInvestmentToken = async (
     );
   }
 };
+
+//8) Seeker claims the funding, when all investment tokens have been exchanged.
+
+export const seekerClaimsFunding = async (
+  investmentId: BigNumber,
+  seekerSigner: Signer
+): Promise<void> => {
+  const {registryContract, lendingTokenContract} = await getContracts();
+  // given
+  const seekerInitialLendingBalance = await lendingTokenContract.balanceOf(
+    await seekerSigner.getAddress()
+  );
+  const expectedAmount = (
+    await registryContract.investmentDetails(investmentId)
+  ).totalAmountToBeRaised;
+
+  // when
+  await expect(
+    registryContract
+      .connect(seekerSigner)
+      .withdrawInvestment(investmentId)
+  )
+    .to.emit(registryContract, 'seekerWithdrawInvestment')
+    .withArgs(investmentId, expectedAmount);
+
+  const seekerFinalLendingBalance = await lendingTokenContract.balanceOf(
+    await seekerSigner.getAddress()
+  );
+  const investmentWithdrawn = await registryContract.investmentWithdrawn(
+    investmentId
+  );
+  const seekerGotLendingTokens = seekerFinalLendingBalance.eq(
+    seekerInitialLendingBalance.add(expectedAmount)
+  );
+  //then
+  expect(investmentWithdrawn).to.be.equal(true);
+  expect(seekerGotLendingTokens).to.be.equal(true);
+};
