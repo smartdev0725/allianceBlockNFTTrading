@@ -106,9 +106,7 @@ export default async function suite() {
     // Correct investment seeker
     expect(investmentSeeker).to.be.equal(this.seeker);
     // Correct total of investments
-    expect(totalInvestmentsAfter.toNumber()).to.be.equal(
-      totalInvestmentsBefore.toNumber() + 1
-    );
+    expect(totalInvestmentsAfter).to.be.equal(totalInvestmentsBefore.add(1));
     // Correct balances
     expect(balanceInvestmentTokenSeekerAfter).to.be.equal(
       balanceInvestmentTokenSeekerBefore.sub(amountOfInvestmentTokens)
@@ -185,8 +183,8 @@ export default async function suite() {
     // Correct ticketsRemaining
     expect(ticketsRemainingAfterApprove).to.be.equal(amountOfPartitions);
     // Correct total of cronJobs
-    expect(totalCronjobsAfterApprove.toNumber()).to.be.equal(
-      totalCronjobsBeforeApprove.toNumber() + 1
+    expect(totalCronjobsAfterApprove).to.be.equal(
+      totalCronjobsBeforeApprove.add(1)
     );
     // Correct cronJob
     expect(cronjobsAfterApprove.cronjobType.toString()).to.be.equal(
@@ -197,13 +195,12 @@ export default async function suite() {
     expect(cronjobsListAfterApprove.head).to.be.equal(
       cronjobsListBeforeApprove.head
     );
-    expect(cronjobsListAfterApprove.tail.toNumber()).to.be.equal(
-      cronjobsListBeforeApprove.tail.toNumber() + 1
+    expect(cronjobsListAfterApprove.tail).to.be.equal(
+      cronjobsListBeforeApprove.tail.add(1)
     );
-    expect(cronjobsListAfterApprove.size.toNumber()).to.be.equal(
-      cronjobsListBeforeApprove.size.toNumber() + 1
+    expect(cronjobsListAfterApprove.size).to.be.equal(
+      cronjobsListBeforeApprove.size.add(1)
     );
-    // Verify the node
     // Correct approval request
     expect(
       approvalRequestAfterApprove.approvalsProvided.toString()
@@ -572,9 +569,8 @@ export default async function suite() {
         .connect(this.lender3Signer)
         .provideRewardsForActions(actions, signatures);
 
-      // Add events
-      // emit ActionsProvided(actions, signatures, msg.sender);
-      // emit EpochChanged(currentEpoch, endingTimestampForCurrentEpoch);
+      expect(provideRewardsForActions).to.emit(this.actionVerifierContract,'ActionsProvided');
+      expect(provideRewardsForActions).to.emit(this.actionVerifierContract,'EpochChanged');
     }
 
     const balanceRALBTAfterActions3 = await this.rALBTContract.balanceOf(
@@ -1368,7 +1364,7 @@ export default async function suite() {
     expect(ticketsRemainAfterWithdraw2).to.be.equal(0);
     expect(ticketsRemainAfterWithdraw3).to.be.equal(0);
     expect(ticketsRemainAfterWithdraw4).to.be.equal(0);
-    // Correct balance of investment token
+    // Correct balance of lending token
     expect(balanceLendingTokenAfterWithdraw1).to.be.equal(
       balanceLendingTokenBeforeWithdraw1.add(
         ethers.utils
@@ -1609,7 +1605,7 @@ export default async function suite() {
       seekerInitialLendingBalance.add(expectedAmount)
     );
     //then
-    expect(investmentWithdrawn).to.be.equal(true);
-    expect(seekerGotLendingTokens).to.be.equal(true);
+    expect(investmentWithdrawn).to.be.true;
+    expect(seekerGotLendingTokens).to.be.true;
   });
 }
