@@ -501,7 +501,7 @@ export const funderClaimLotteryReward = async (
             ticketsWonBefore.sub(amountTicketsToBlock)
           )
       )
-        .to.emit(registryContract, 'WithdrawInvestment')
+        .to.emit(registryContract, 'WithdrawInvestmentTickets')
         .withArgs(
           investmentId,
           amountTicketsToBlock,
