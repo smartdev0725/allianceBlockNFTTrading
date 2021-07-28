@@ -62,6 +62,7 @@ contract ProjectManager is Initializable, OwnableUpgradeable {
         projectAddressFromProjectId[projectCont] = msg.sender;
         projectCont += 1;
         return projectCont-1;
+        //INVERTIR LUEGO
     }
 
     function createProjectType(address projectAddress) external onlyOwner(){
