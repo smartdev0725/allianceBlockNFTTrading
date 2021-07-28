@@ -21,7 +21,7 @@ contract rALBT is Ownable {
 
     string constant NAME = "Reputational AllianceBlock Token"; // The name of the token
     string constant SYMBOL = "rALBT"; // The symbol of the token
-    uint256 public _totalSupply;
+    uint256 public totalSupply;
 
     mapping(address => uint256) private _balances;
 
@@ -94,14 +94,6 @@ contract rALBT is Ownable {
     }
 
     /**
-     * @notice Total Supply
-     * @dev See {IERC20-totalSupply}.
-     */
-    function totalSupply() public view returns (uint256) {
-        return _totalSupply;
-    }
-
-    /**
      * @notice Balance Of
      * @dev See {IERC20-balanceOf}.
      */
@@ -124,7 +116,7 @@ contract rALBT is Ownable {
     function _mint(address account, uint256 amount) internal {
         require(account != address(0), "ERC20: mint to the zero address");
 
-        _totalSupply = _totalSupply.add(amount);
+        totalSupply = totalSupply.add(amount);
         _balances[account] = _balances[account].add(amount);
         emit Transfer(address(0), account, amount);
     }
@@ -146,7 +138,7 @@ contract rALBT is Ownable {
         require(account != address(0), "ERC20: burn from the zero address");
 
         _balances[account] = _balances[account].sub(amount, "ERC20: burn amount exceeds balance");
-        _totalSupply = _totalSupply.sub(amount);
+        totalSupply = totalSupply.sub(amount);
         emit Transfer(account, address(0), amount);
     }
 }
