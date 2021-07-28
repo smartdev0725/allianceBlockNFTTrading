@@ -13,12 +13,15 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const chainId = await getChainId();
   if (+chainId === 1 && !process.env.LENDING_TOKEN_ADDRESS) {
-    throw new Error("LENDING_TOKEN_ADDRESS env var should not be empty");
+    throw new Error('LENDING_TOKEN_ADDRESS env var should not be empty');
   }
 
-  const lendingTokenAddress = (+chainId === 1) ? process.env.LENDING_TOKEN_ADDRESS
-    : (await get('LendingToken')).address;
+  const lendingTokenAddress =
+    +chainId === 1
+      ? process.env.LENDING_TOKEN_ADDRESS
+      : (await get('LendingToken')).address;
   const fundingNFTAddress = (await get('FundingNFT')).address;
+  const projectManagerAddress = (await get('ProjectManager')).address;
 
   await deploy(contractName, {
     contract: contractName,
@@ -28,7 +31,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
-    args: [lendingTokenAddress, fundingNFTAddress],
+    args: [lendingTokenAddress, fundingNFTAddress, projectManagerAddress],
     log: true,
   });
   return true;

@@ -12,31 +12,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const investmentContract = await ethers.getContract('Investment');
   const fundingNFTContract = await ethers.getContract('FundingNFT');
   const stakerMedalNFTContract = await ethers.getContract('StakerMedalNFT');
-  const governanceContract = await ethers.getContract('Governance');
   const escrowContract = await ethers.getContract('Escrow');
   const actionVerifierContract = await ethers.getContract('ActionVerifier');
   const rALBTAddress = await escrowContract.reputationalALBT();
 
   // Setup escrow
-  const escrowInvestmentAddress = await escrowContract.investment();
   const escrowActionVerifierAddress = await escrowContract.actionVerifier();
   const escrowStakingAddress = await escrowContract.staking();
   if (
-    escrowInvestmentAddress === ethers.constants.AddressZero &&
     escrowActionVerifierAddress === ethers.constants.AddressZero &&
     escrowStakingAddress === ethers.constants.AddressZero
   ) {
     await escrowContract.afterInitialize(
-      investmentContract.address,
       actionVerifierContract.address,
       stakingContract.address
     );
-  }
-
-  // Setup governance
-  const governanceAddress = await governanceContract.investment();
-  if (governanceAddress === ethers.constants.AddressZero) {
-    await governanceContract.setInvestment(investmentContract.address);
   }
 
   // Setup FundingNFT

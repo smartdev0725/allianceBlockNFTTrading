@@ -29,7 +29,11 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param fundingNFT_ The ERC1155 token contract which will represent the lending amounts.
      * @param projectManager_ The project manager contract.
      */
-    function initialize(address lendingToken_, address fundingNFT_, address projectManager_) external initializer {
+    function initialize(
+        address lendingToken_,
+        address fundingNFT_,
+        address projectManager_
+    ) external initializer {
         require(lendingToken_ != address(0), "Cannot initialize lendingToken_ with 0 address");
         require(fundingNFT_ != address(0), "Cannot initialize fundingNFT_ with 0 address");
         require(projectManager_ != address(0), "Cannot initialize projectManager_ with 0 address");
@@ -47,16 +51,14 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @notice After Initialize
      * @dev To be executed after Initialize
      * @dev requires not already initialized
-     * @param projectAddress The investment address.
      * @param actionVerifierAddress_ The actionVerifier address.
      * @param stakingAddress_ The staking address
      */
-    function afterInitialize(
-        address projectAddress,
-        address actionVerifierAddress_,
-        address stakingAddress_
-    ) external onlyOwner() {
-        require(actionVerifierAddress_ != address(0) && stakingAddress_ != address(0), "Cannot initialize with 0 addresses");
+    function afterInitialize(address actionVerifierAddress_, address stakingAddress_) external onlyOwner() {
+        require(
+            actionVerifierAddress_ != address(0) && stakingAddress_ != address(0),
+            "Cannot initialize with 0 addresses"
+        );
         actionVerifier = actionVerifierAddress_;
         staking = stakingAddress_;
     }
@@ -83,7 +85,11 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param projectId The project id
      * @param amount The amount of funding nft to be burn
      */
-    function burnFundingNFT(address account, uint256 projectId, uint256 amount) external onlyProject() {
+    function burnFundingNFT(
+        address account,
+        uint256 projectId,
+        uint256 amount
+    ) external onlyProject() {
         fundingNFT.burn(account, projectId, amount);
     }
 

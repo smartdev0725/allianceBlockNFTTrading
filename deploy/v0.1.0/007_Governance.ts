@@ -3,16 +3,21 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import '@nomiclabs/hardhat-ethers';
 import {ethers} from 'hardhat';
 
-import {APPLICATION_FOR_INVESTMENT_DURATION, LATE_APPLICATION_FOR_INVESTMENT_DURATION} from '../../utils/constants';
+import {
+  APPLICATION_FOR_INVESTMENT_DURATION,
+  LATE_APPLICATION_FOR_INVESTMENT_DURATION,
+} from '../../utils/constants';
 
 const version = 'v0.1.0';
 const contractName = 'Governance';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
+  const {deploy, get} = deployments;
 
-  const {deployer, proxyOwner, superDelegator} = await getNamedAccounts();  
+  const {deployer, proxyOwner, superDelegator} = await getNamedAccounts();
+
+  const projectManagerAddress = (await get('ProjectManager')).address;
 
   await deploy(contractName, {
     contract: contractName,
@@ -26,6 +31,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       superDelegator,
       APPLICATION_FOR_INVESTMENT_DURATION,
       LATE_APPLICATION_FOR_INVESTMENT_DURATION,
+      projectManagerAddress,
     ],
     log: true,
   });
