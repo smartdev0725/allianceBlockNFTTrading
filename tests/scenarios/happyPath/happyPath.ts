@@ -1,14 +1,13 @@
 import {BASE_AMOUNT} from '../../helpers/constants';
 import {ethers, web3} from 'hardhat';
-import {BigNumber, Contract, constants} from 'ethers';
+import {BigNumber, constants} from 'ethers';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
 import {StakingType, InvestmentStatus} from '../../helpers/registryEnums';
 import {getSignature} from '../../helpers/utils';
 import {getTransactionTimestamp, increaseTime} from '../../helpers/time';
 import {CronjobType} from '../../helpers/governanceEnums';
-const {expectRevert} = require('@openzeppelin/test-helpers');
-const AddressZero  = constants.AddressZero;
+const AddressZero = constants.AddressZero;
 chai.use(solidity);
 
 export default async function suite() {
@@ -454,7 +453,7 @@ export default async function suite() {
           reputationalAlbtRewardsPerLevel,
           reputationalAlbtRewardsPerLevelAfterFirstTime,
           2,
-          AddressZero 
+          AddressZero
         )
     )
       .to.emit(this.actionVerifierContract, 'ActionImported')
@@ -733,9 +732,8 @@ export default async function suite() {
         const remaining = await this.registryContract.ticketsRemaining(
           investmentId
         );
-        expect(
-          remaining.eq(ticketsRemaining.sub(immediateTicketsLender2))
-        ).to.be.true;
+        expect(remaining.eq(ticketsRemaining.sub(immediateTicketsLender2))).to
+          .be.true;
         ticketsRemaining = remaining.sub(immediateTicketsLender2);
       }
     }
@@ -789,9 +787,8 @@ export default async function suite() {
         const remaining = await this.registryContract.ticketsRemaining(
           investmentId
         );
-        expect(
-          remaining.eq(ticketsRemaining.sub(immediateTicketsLender3))
-        ).to.be.true;
+        expect(remaining.eq(ticketsRemaining.sub(immediateTicketsLender3))).to
+          .be.true;
         ticketsRemaining = remaining.sub(immediateTicketsLender3);
       }
     }
@@ -845,9 +842,8 @@ export default async function suite() {
         const remaining = await this.registryContract.ticketsRemaining(
           investmentId
         );
-        expect(
-          remaining.eq(ticketsRemaining.sub(immediateTicketsLender4))
-        ).to.be.true;
+        expect(remaining.eq(ticketsRemaining.sub(immediateTicketsLender4))).to
+          .be.true;
         ticketsRemaining = remaining.sub(immediateTicketsLender4);
       }
     }
