@@ -1,6 +1,6 @@
 import {BASE_AMOUNT} from '../../helpers/constants';
 import {ethers, web3} from 'hardhat';
-import {BigNumber, Contract} from 'ethers';
+import {BigNumber, Contract, constants} from 'ethers';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
 import {StakingType, InvestmentStatus} from '../../helpers/registryEnums';
@@ -8,7 +8,7 @@ import {getSignature} from '../../helpers/utils';
 import {getTransactionTimestamp, increaseTime} from '../../helpers/time';
 import {CronjobType} from '../../helpers/governanceEnums';
 const {expectRevert} = require('@openzeppelin/test-helpers');
-
+const AddressZero  = constants.AddressZero;
 chai.use(solidity);
 
 export default async function suite() {
@@ -424,7 +424,6 @@ export default async function suite() {
 
     // Add new action
     // Given
-    const addressZero = '0x0000000000000000000000000000000000000000';
     const actions = [
       {
         account: this.lender4,
@@ -455,7 +454,7 @@ export default async function suite() {
           reputationalAlbtRewardsPerLevel,
           reputationalAlbtRewardsPerLevelAfterFirstTime,
           2,
-          addressZero
+          AddressZero 
         )
     )
       .to.emit(this.actionVerifierContract, 'ActionImported')
