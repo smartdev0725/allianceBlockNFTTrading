@@ -16,7 +16,8 @@ import {
 import {ethers, web3} from 'hardhat';
 import {expect} from 'chai';
 import {BigNumber} from 'ethers';
-import {increaseTime} from './time';
+import {getTransactionTimestamp, increaseTime} from './time';
+import {CronjobType} from './governanceEnums';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 //1) Allows Seeker publishes Investment
@@ -334,7 +335,7 @@ export const declareIntentionForBuy = async (
   investmentId: BigNumber,
   lenderSigner: any,
   numberOfPartitions: BigNumber,
-  lendingTokenContract: any,
+  lendingTokenContract: any
 ) => {
   // When
   const {escrowContract, registryContract, rALBTContract} =
@@ -367,12 +368,11 @@ export const declareIntentionForBuy = async (
     const totalLotteryNumbersPerInvestment =
       await registryContract.totalLotteryNumbersPerInvestment(investmentId);
 
-      
     // When
     await registryContract
-    .connect(lenderSigner)
-    .showInterestForInvestment(investmentId, numberOfPartitions);
-    
+      .connect(lenderSigner)
+      .showInterestForInvestment(investmentId, numberOfPartitions);
+
     //removed this test until i find a way to make it work for variable input
     // expect(
     //   (await registryContract.investmentDetails(investmentId))
@@ -462,49 +462,76 @@ export const batchDeclareIntentionForBuy = async (data: ShowInterestData[]) => {
 //5) The lottery is run when all the partitions have been covered
 export const runLottery = async (
   investmentId: BigNumber,
-  lotteryRunnerSigner: any,
-  superDelegatorSigner: any
+  lotteryRunnerSigner: Signer,
+  superDelegatorSigner: Signer
 ) => {
-  // Given
-  const {registryContract, governanceContract} = await getContracts();
-  const ticketsRemainingBefore = await registryContract.ticketsRemaining(
-    investmentId
-  );
-
-  for (let i = 0; i < 50; i++) {
-    const investmentStatus = await registryContract.investmentStatus(
-      investmentId
-    );
-    if (investmentStatus === 2) {
-      break;
-    }
-    await governanceContract.connect(superDelegatorSigner).checkCronjobs();
-  }
-
-  const investmentStatus = await registryContract.investmentStatus(
-    investmentId
-  );
-  expect(investmentStatus).to.be.equal(2);
+  const {registryContract, governanceContract, fundingNFTContract} =
+    await getContracts();
 
   // When
-  await expect(
-    registryContract
-      .connect(lotteryRunnerSigner)
-      .executeLotteryRun(investmentId)
-  )
-    .to.emit(registryContract, 'LotteryExecuted')
-    .withArgs(investmentId);
+  const lotteryStarted = await governanceContract
+    .connect(superDelegatorSigner)
+    .checkCronjobs();
 
-  const ticketsRemainingAfter = await registryContract.ticketsRemaining(
+  const investmentStatusAfter = await registryContract.investmentStatus(
     investmentId
   );
+ 
+  const investmentDetailsLotteryStarted =
+    await registryContract.investmentDetails(investmentId);
 
   // Then
-  expect(ticketsRemainingAfter.toNumber()).to.be.lessThan(
-    ticketsRemainingBefore.toNumber()
+  // Events
+  expect(lotteryStarted)
+    .to.emit(registryContract, 'InvestmentStarted')
+    .withArgs(investmentId);
+
+  // Verify the node
+  // Correct lottery status
+  expect(investmentStatusAfter.toString()).to.be.equal(
+    InvestmentStatus.STARTED
   );
-  return ticketsRemainingAfter;
+  // Correct investment details
+  expect(investmentDetailsLotteryStarted.startingDate).to.be.equal(
+    await getTransactionTimestamp(lotteryStarted.hash)
+  );
+
+  // Run Lottery
+  // When
+  const runLottery = await registryContract
+    .connect(lotteryRunnerSigner)
+    .executeLotteryRun(investmentId);
+
+  const ticketsRemainingAfterRunLottery =
+    await registryContract.ticketsRemaining(investmentId);
+
+  const investmentStatusAfterRunLottery =
+    await registryContract.investmentStatus(investmentId);
+
+  const isPauseFundingNFTTransferAfterRunLottey =
+    await fundingNFTContract.transfersPaused(investmentId);
+
+  // Then
+  // Events
+  expect(runLottery)
+    .to.emit(registryContract, 'LotteryExecuted')
+    .withArgs(investmentId);
+  expect(runLottery)
+    .to.emit(registryContract, 'InvestmentSettled')
+    .withArgs(investmentId);
+  expect(runLottery)
+    .to.emit(fundingNFTContract, 'TransfersResumed')
+    .withArgs(investmentId);
+  // Correct tickets remaining
+  expect(ticketsRemainingAfterRunLottery).to.be.equal(0);
+  // Correct status
+  expect(investmentStatusAfterRunLottery.toString()).to.be.equal(
+    InvestmentStatus.SETTLED
+  );
+  // Unpause token
+  expect(isPauseFundingNFTTransferAfterRunLottey).to.be.false;
 };
+
 export const batchRunLottery = async (
   data: RunLotteryData[],
   superDelegatorSigner: Signer

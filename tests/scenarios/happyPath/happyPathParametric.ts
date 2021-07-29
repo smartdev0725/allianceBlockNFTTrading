@@ -85,19 +85,11 @@ export default async function suite() {
     //5) The lottery is run when all the partitions have been covered
     await increaseTime(this.deployerSigner.provider, 5 * 24 * 60 * 60); // 5 day
 
-    let ticketsRemaining = await runLottery(
+    await runLottery(
       investmentId,
       this.lender1Signer,
       this.superDelegatorSigner
     );
-
-    while (ticketsRemaining.toNumber() !== 0) {
-      ticketsRemaining = await runLottery(
-        investmentId,
-        this.lender1Signer,
-        this.superDelegatorSigner
-      );
-    }
 
     //6) FundingNFTs are minted and each Funder either receives their NFT or their funds back in case they did not win the lottery
     await funderClaimLotteryReward(
