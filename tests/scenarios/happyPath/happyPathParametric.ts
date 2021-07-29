@@ -16,6 +16,7 @@ import {
   funderClaimLotteryReward,
   exchangeNFTForInvestmentToken,
   seekerClaimsFunding,
+  addNewAction,
 } from '../../helpers/modularTests';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
@@ -50,10 +51,20 @@ export default async function suite() {
     await fundersStake(this.lender3Signer, StakingType.STAKER_LVL_3);
 
     // Lender4 get rALDT from actions
+    const actions = [
+      {
+        account: this.lender4,
+        actionName: 'Wallet Connect',
+        answer: 'Yes',
+        referralId: 0,
+      },
+    ];
+    await addNewAction(this.deployerSigner, actions);
     await getRALBTWithActions(
       this.lender4Signer,
       this.lender3Signer,
-      this.deployerSigner
+      55,
+      actions
     );
 
     // Lenders declare their intention to buy a partition (effectively depositing their funds)
@@ -61,25 +72,25 @@ export default async function suite() {
       investmentId,
       this.lender1Signer,
       BigNumber.from(6),
-      this.lendingTokenContract,
+      this.lendingTokenContract
     );
     await declareIntentionForBuy(
       investmentId,
       this.lender2Signer,
       BigNumber.from(6),
-      this.lendingTokenContract,
+      this.lendingTokenContract
     );
     await declareIntentionForBuy(
       investmentId,
       this.lender3Signer,
       BigNumber.from(6),
-      this.lendingTokenContract,
+      this.lendingTokenContract
     );
     await declareIntentionForBuy(
       investmentId,
       this.lender4Signer,
       BigNumber.from(6),
-      this.lendingTokenContract,
+      this.lendingTokenContract
     );
 
     //5) The lottery is run when all the partitions have been covered
