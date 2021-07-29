@@ -59,7 +59,24 @@ export default async function suite() {
         referralId: 0,
       },
     ];
-    await addNewAction(this.deployerSigner, actions);
+    const reputationalAlbtRewardsPerLevel = [
+      ethers.utils.parseEther('500').toString(),
+      ethers.utils.parseEther('500').toString(),
+      ethers.utils.parseEther('500').toString(),
+      ethers.utils.parseEther('500').toString(),
+    ];
+    const reputationalAlbtRewardsPerLevelAfterFirstTime = [
+      ethers.utils.parseEther('10').toString(),
+      ethers.utils.parseEther('10').toString(),
+      ethers.utils.parseEther('10').toString(),
+      ethers.utils.parseEther('10').toString(),
+    ];
+    await addNewAction(
+      this.deployerSigner,
+      actions,
+      reputationalAlbtRewardsPerLevel,
+      reputationalAlbtRewardsPerLevelAfterFirstTime
+    );
     await getRALBTWithActions(
       this.lender4Signer,
       this.lender3Signer,

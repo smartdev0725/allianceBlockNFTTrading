@@ -389,7 +389,6 @@ export const fundersStake = async (
     );
   }
 };
-
 export const batchFundersStake = async (data: Stake[]) => {
   //  data = {lenderSigner: any, stakingLevel: StakingType}
   for (let i = 0; i < data.length; i++) {
@@ -398,26 +397,15 @@ export const batchFundersStake = async (data: Stake[]) => {
 };
 
 // Get RALBT with actions
-export const addNewAction = async (deployerSigner: any, action: any) => {
+export const addNewAction = async (
+  deployerSigner: any,
+  action: any,
+  reputationalAlbtRewardsPerLevel: any,
+  reputationalAlbtRewardsPerLevelAfterFirstTime: any
+) => {
   // Given
   const {actionVerifierContract} = await getContracts();
-
-  // Add new action
-  // Given
   const addressZero = '0x0000000000000000000000000000000000000000';
-  const reputationalAlbtRewardsPerLevel = [
-    ethers.utils.parseEther('500').toString(),
-    ethers.utils.parseEther('500').toString(),
-    ethers.utils.parseEther('500').toString(),
-    ethers.utils.parseEther('500').toString(),
-  ];
-  const reputationalAlbtRewardsPerLevelAfterFirstTime = [
-    ethers.utils.parseEther('10').toString(),
-    ethers.utils.parseEther('10').toString(),
-    ethers.utils.parseEther('10').toString(),
-    ethers.utils.parseEther('10').toString(),
-  ];
-
   // Then
   await expect(
     actionVerifierContract
@@ -519,19 +507,42 @@ export const getRALBTWithActions = async (
   amountOfActions: any,
   actions: any
 ) => {
-  const {actionVerifierContract, rALBTContract} = await getContracts();
-
-  // Get rAlbt
   // Given
-  const balanceRALBTBeforeActionsActionCaller = await rALBTContract.balanceOf(
-    actionCallerSigner.address
+  const {actionVerifierContract, rALBTContract, stakerMedalNFTContract} =
+    await getContracts();
+  const stakingLevelLender = await stakerMedalNFTContract.getLevelOfStaker(
+    lenderSigner.address
   );
+  const stakingLevelActionCaller =
+    await stakerMedalNFTContract.getLevelOfStaker(actionCallerSigner.address);
+
   const balanceRALBTBeforeActions = await rALBTContract.balanceOf(
     lenderSigner.address
   );
-  const rewardPerActionProvisionPerLevel3 = await actionVerifierContract
-    .connect(actionCallerSigner)
-    .rewardPerActionProvisionPerLevel(StakingType.STAKER_LVL_3);
+  const balanceRALBTBeforeActionsActionCaller = await rALBTContract.balanceOf(
+    actionCallerSigner.address
+  );
+
+  const lastEpochActionDonePerAccountBefore =
+    await actionVerifierContract.lastEpochActionDonePerAccount(
+      lenderSigner.address,
+      web3.utils.keccak256(actions[0].actionName)
+    );
+
+  const rewardPerActionProvisionPerLevel =
+    await actionVerifierContract.rewardPerActionProvisionPerLevel(
+      stakingLevelActionCaller
+    );
+  const rewardPerActionLevel =
+    await actionVerifierContract.rewardPerActionPerLevel(
+      web3.utils.keccak256(actions[0].actionName),
+      stakingLevelLender
+    );
+  const rewardPerActionPerLevelAfterFirstTime =
+    await actionVerifierContract.rewardPerActionPerLevelAfterFirstTime(
+      web3.utils.keccak256(actions[0].actionName),
+      stakingLevelLender
+    );
 
   const signature = await getSignature(
     actions[0].actionName,
@@ -544,7 +555,7 @@ export const getRALBTWithActions = async (
 
   const signatures = [signature];
 
-  // Then
+  // When
   for (let i = 0; i < amountOfActions; i++) {
     await increaseTime(lenderSigner.provider, 1 * 24 * 60 * 60); // 1 day
 
@@ -568,19 +579,25 @@ export const getRALBTWithActions = async (
   const balanceRALBTAfterActions = await rALBTContract.balanceOf(
     lenderSigner.address
   );
-
+  const lenderReward = () => {
+    if (lastEpochActionDonePerAccountBefore.eq(0)) {
+      return balanceRALBTBeforeActions
+        .add(rewardPerActionLevel)
+        .add(rewardPerActionPerLevelAfterFirstTime.mul(amountOfActions - 1));
+    } else {
+      return balanceRALBTBeforeActions.add(
+        rewardPerActionPerLevelAfterFirstTime.mul(amountOfActions)
+      );
+    }
+  };
   // Then
   // Correct balance of rALBT
   expect(balanceRALBTAfterActionsActionCaller).to.be.equal(
     balanceRALBTBeforeActionsActionCaller.add(
-      rewardPerActionProvisionPerLevel3.mul(amountOfActions)
+      rewardPerActionProvisionPerLevel.mul(amountOfActions)
     )
   );
-  // expect(balanceRALBTAfterActions).to.be.equal(
-  //   balanceRALBTBeforeActions
-  //     .add(rewardPerActionLevel0)
-  //     .add(rewardPerActionPerLevelAfterFirstTime0.mul(amountOfActions - 1))
-  // );
+  expect(balanceRALBTAfterActions).to.be.equal(lenderReward());
 };
 // export const batchGetRALBTWithActions = async (
 //   data: GetRALBTData[],
@@ -826,87 +843,136 @@ export const funderClaimLotteryReward = async (
   amountTicketsToBlock: BigNumber,
   lendingTokenContract: Contract
 ) => {
-  const {registryContract, fundingNFTContract} = await getContracts();
+  const {registryContract, fundingNFTContract, escrowContract} =
+    await getContracts();
 
   const ticketsRemaining = await registryContract.ticketsRemaining(
     investmentId
   );
 
-  if (ticketsRemaining.toNumber() === 0) {
-    const ticketsWonBefore = await registryContract.ticketsWonPerAddress(
-      investmentId,
-      lenderSigner.address
-    );
-    const ticketsRemainBefore =
+  if (ticketsRemaining.eq(0)) {
+    // Given
+    const ticketsWonBeforeWithdraw =
+      await registryContract.ticketsWonPerAddress(
+        investmentId,
+        lenderSigner.address
+      );
+    const lockedTicketsForSpecificInvestmentBeforeWithdraw =
+      await registryContract.lockedTicketsForSpecificInvestmentPerAddress(
+        investmentId,
+        lenderSigner.address
+      );
+    const lockedTicketsBeforeWithdraw =
+      await registryContract.lockedTicketsPerAddress(lenderSigner.address);
+    const balanceFundingNFTTokenBeforeWithdraw =
+      await fundingNFTContract.balanceOf(
+        lenderSigner.address,
+        investmentId.toNumber()
+      );
+    const ticketsRemainBeforeWithdraw =
       await registryContract.remainingTicketsPerAddress(
         investmentId,
         lenderSigner.address
       );
-
-    const balanceFundingNFTTokenBefore = await fundingNFTContract.balanceOf(
-      lenderSigner.address,
-      investmentId.toNumber()
-    );
-
-    const lenderLendingTokenBalanceBeforeWithdraw =
+    const balanceLendingTokenBeforeWithdraw =
       await lendingTokenContract.balanceOf(lenderSigner.address);
+    const balanceLendingTokenBeforeWithdrawEscrow =
+      await lendingTokenContract.balanceOf(escrowContract.address);
+    let withdrawInvestmentTickets;
 
-    if (Number(ticketsWonBefore) > 0) {
-      if (ticketsWonBefore.lt(amountTicketsToBlock)) {
-        amountTicketsToBlock = ticketsWonBefore;
-      }
-      await expect(
-        registryContract
-          .connect(lenderSigner)
-          .withdrawInvestmentTickets(
-            investmentId,
-            amountTicketsToBlock,
-            ticketsWonBefore.sub(amountTicketsToBlock)
-          )
-      )
-        .to.emit(registryContract, 'WithdrawInvestmentTickets')
-        .withArgs(
+    // When
+    if (ticketsWonBeforeWithdraw.gt(0)) {
+      amountTicketsToBlock = amountTicketsToBlock.gt(ticketsWonBeforeWithdraw)
+        ? ticketsWonBeforeWithdraw
+        : amountTicketsToBlock;
+      withdrawInvestmentTickets = await registryContract
+        .connect(lenderSigner)
+        .withdrawInvestmentTickets(
           investmentId,
           amountTicketsToBlock,
-          ticketsWonBefore.sub(amountTicketsToBlock)
+          ticketsWonBeforeWithdraw.sub(amountTicketsToBlock)
         );
-
-      await expectRevert(
-        registryContract
-          .connect(lenderSigner)
-          .withdrawAmountProvidedForNonWonTickets(investmentId),
-        'No non-won tickets to withdraw'
-      );
     }
-
-    const ticketsAfter = await registryContract.ticketsWonPerAddress(
+    const ticketsWonAfterWithdraw = await registryContract.ticketsWonPerAddress(
       investmentId,
       lenderSigner.address
     );
+    const lockedTicketsForSpecificInvestmentAfterWithdraw =
+      await registryContract.lockedTicketsForSpecificInvestmentPerAddress(
+        investmentId,
+        lenderSigner.address
+      );
+    const lockedTicketsAfterWithdraw =
+      await registryContract.lockedTicketsPerAddress(lenderSigner.address);
+    const balanceFundingNFTTokenAfterWithdraw =
+      await fundingNFTContract.balanceOf(lenderSigner.address, investmentId);
+    const ticketsRemainAfterWithdraw =
+      await registryContract.remainingTicketsPerAddress(
+        investmentId,
+        lenderSigner.address
+      );
+    const balanceLendingTokenAfterWithdraw =
+      await lendingTokenContract.balanceOf(lenderSigner.address);
+    const balanceLendingTokenAfterWithdrawEscrow =
+      await lendingTokenContract.balanceOf(escrowContract.address);
 
-    const balanceFundingNFTTokenAfter = await fundingNFTContract.balanceOf(
-      lenderSigner.address,
-      investmentId.toNumber()
+    // Then
+    // Events
+    // Withdraw Investment
+    expect(withdrawInvestmentTickets)
+      .to.emit(registryContract, 'WithdrawInvestmentTickets')
+      .withArgs(
+        investmentId,
+        amountTicketsToBlock,
+        ticketsWonBeforeWithdraw.sub(amountTicketsToBlock)
+      );
+    // WithdrawAmountForNonTickets
+    if (ticketsRemainBeforeWithdraw.gt(0)) {
+      expect(withdrawInvestmentTickets)
+        .to.emit(registryContract, 'WithdrawAmountForNonTickets')
+        .withArgs(
+          investmentId,
+          ethers.utils
+            .parseEther(BASE_AMOUNT + '')
+            .mul(ticketsRemainBeforeWithdraw)
+        );
+    }
+    // Correct amount of won tickets
+    expect(ticketsWonAfterWithdraw).to.be.equal(0);
+    // Correct amount of tickets locked for specific investment
+    expect(lockedTicketsForSpecificInvestmentAfterWithdraw).to.be.equal(
+      lockedTicketsForSpecificInvestmentBeforeWithdraw.add(amountTicketsToBlock)
+    );
+    // Correct amount of tickets locked
+    expect(lockedTicketsAfterWithdraw).to.be.equal(
+      lockedTicketsBeforeWithdraw.add(amountTicketsToBlock)
     );
 
-    const lenderLendingTokenBalanceAfterWithdraw =
-      await lendingTokenContract.balanceOf(lenderSigner.address);
-
-    expect(ticketsAfter.toNumber()).to.be.equal(0);
-
-    if (ticketsWonBefore.toNumber() > 0) {
-      if (ticketsWonBefore.eq(amountTicketsToBlock)) {
-        expect(balanceFundingNFTTokenAfter.toNumber()).to.be.equal(0);
-      } else {
-        expect(balanceFundingNFTTokenAfter).to.be.gt(
-          balanceFundingNFTTokenBefore
-        );
-      }
+    // Correct balance of funding nft
+    if (ticketsWonBeforeWithdraw.gt(0)) {
+      expect(balanceFundingNFTTokenAfterWithdraw).to.be.equal(
+        balanceFundingNFTTokenBeforeWithdraw.add(
+          ticketsWonBeforeWithdraw.sub(amountTicketsToBlock)
+        )
+      );
     }
+    // Correct amount of tickets remaining
+    expect(ticketsRemainAfterWithdraw).to.be.equal(0);
 
-    expect(lenderLendingTokenBalanceAfterWithdraw).to.be.equal(
-      lenderLendingTokenBalanceBeforeWithdraw.add(
-        ethers.utils.parseEther(BASE_AMOUNT + '').mul(ticketsRemainBefore)
+    // Correct balance of lending token
+    expect(balanceLendingTokenAfterWithdraw).to.be.equal(
+      balanceLendingTokenBeforeWithdraw.add(
+        ethers.utils
+          .parseEther(BASE_AMOUNT + '')
+          .mul(ticketsRemainBeforeWithdraw)
+      )
+    );
+
+    expect(balanceLendingTokenAfterWithdrawEscrow).to.be.equal(
+      balanceLendingTokenBeforeWithdrawEscrow.sub(
+        ethers.utils
+          .parseEther(BASE_AMOUNT + '')
+          .mul(ticketsRemainBeforeWithdraw)
       )
     );
   } else {
@@ -930,53 +996,68 @@ export const batchFunderClaimLotteryReward = async (
 //7) Funders with a FundingNFT exchange it for their Investment tokens.
 export const exchangeNFTForInvestmentToken = async (
   investmentId: BigNumber,
-  lenderSigner: Signer,
+  lenderSigner: any,
   investmentTokenContract: Contract
 ) => {
   // Given
-  const {registryContract, fundingNFTContract} = await getContracts();
-
-  const balanceFundingNFTTokenAfter = await fundingNFTContract.balanceOf(
-    await lenderSigner.getAddress(),
-    investmentId.toNumber()
-  );
-
+  const {registryContract, fundingNFTContract, escrowContract} =
+    await getContracts();
   const investmentTokensPerTicket =
     await registryContract.investmentTokensPerTicket(investmentId);
+  const balanceFundingNFTTokenBeforeExchange =
+    await fundingNFTContract.balanceOf(
+      lenderSigner.address,
+      investmentId.toNumber()
+    );
+  const balanceOfInvestmentTokenBeforeExchange =
+    await investmentTokenContract.balanceOf(lenderSigner.address);
 
-  const balanceOfInvestmentTokenBefore =
-    await investmentTokenContract.balanceOf(await lenderSigner.getAddress());
+  const balanceOfInvestmentTokenBeforeExhangeEscrow =
+    await investmentTokenContract.balanceOf(escrowContract.address);
 
-  if (balanceFundingNFTTokenAfter.toNumber() > 0) {
-    // When
+  // When
+  if (balanceFundingNFTTokenBeforeExchange.toNumber() > 0) {
     await expect(
       registryContract
         .connect(lenderSigner)
-        .convertNFTToInvestmentTokens(investmentId, balanceFundingNFTTokenAfter)
+        .convertNFTToInvestmentTokens(
+          investmentId,
+          balanceFundingNFTTokenBeforeExchange
+        )
     )
       .to.emit(registryContract, 'ConvertNFTToInvestmentTokens')
       .withArgs(
         investmentId,
-        balanceFundingNFTTokenAfter,
-        investmentTokensPerTicket.mul(balanceFundingNFTTokenAfter)
+        balanceFundingNFTTokenBeforeExchange,
+        investmentTokensPerTicket.mul(balanceFundingNFTTokenBeforeExchange)
       );
   }
 
-  const balanceOfInvestmentTokenAfter = await investmentTokenContract.balanceOf(
-    await lenderSigner.getAddress()
-  );
+  const balanceFundingNFTTokenAfterExchange =
+    await fundingNFTContract.balanceOf(
+      lenderSigner.address,
+      investmentId.toNumber()
+    );
+
+  const balanceOfInvestmentTokenAfterExhange =
+    await investmentTokenContract.balanceOf(lenderSigner.address);
+
+  const balanceOfInvestmentTokenAfterExhangeEscrow =
+    await investmentTokenContract.balanceOf(escrowContract.address);
 
   // Then
-  expect(
-    await fundingNFTContract.balanceOf(
-      await lenderSigner.getAddress(),
-      investmentId.toNumber()
-    )
-  ).to.be.equal(0);
+  // Correct balance of funding nft
+  expect(balanceFundingNFTTokenAfterExchange).to.be.equal(0);
 
-  expect(balanceOfInvestmentTokenAfter.toString()).to.be.equal(
-    balanceOfInvestmentTokenBefore.add(
-      ethers.utils.parseEther('50').mul(balanceFundingNFTTokenAfter).toString()
+  // Correct balance of investment token
+  expect(balanceOfInvestmentTokenAfterExhange).to.be.equal(
+    balanceOfInvestmentTokenBeforeExchange.add(
+      investmentTokensPerTicket.mul(balanceFundingNFTTokenBeforeExchange)
+    )
+  );
+  expect(balanceOfInvestmentTokenAfterExhangeEscrow).to.be.equal(
+    balanceOfInvestmentTokenBeforeExhangeEscrow.sub(
+      investmentTokensPerTicket.mul(balanceFundingNFTTokenBeforeExchange)
     )
   );
 };
@@ -993,7 +1074,6 @@ export const batchExchangeNFTForInvestmentToken = async (
 };
 
 //8) Seeker claims the funding, when all investment tokens have been exchanged.
-
 export const seekerClaimsFunding = async (
   investmentId: BigNumber,
   seekerSigner: Signer
