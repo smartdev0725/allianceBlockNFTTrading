@@ -10,6 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const stakingContract = await ethers.getContract('Staking');
   const investmentContract = await ethers.getContract('Investment');
+  const personalLoanContract = await ethers.getContract('PersonalLoan');
   const fundingNFTContract = await ethers.getContract('FundingNFT');
   const stakerMedalNFTContract = await ethers.getContract('StakerMedalNFT');
   const escrowContract = await ethers.getContract('Escrow');
@@ -46,6 +47,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       .connect(deployerSigner)
       .grantRole(
         ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
+        personalLoanContract.address
+      );
+    await fundingNFTContract
+      .connect(deployerSigner)
+      .grantRole(
+        ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
         escrowContract.address
       );
   }
@@ -59,6 +66,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       .grantRole(
         ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
         investmentContract.address
+      );
+    await fundingNFTContract
+      .connect(deployerSigner)
+      .grantRole(
+        ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
+        personalLoanContract.address
       );
   }
 
@@ -91,10 +104,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       lotteryNumbersForImmediateTicket
     );
 
+  // Setup personal loan
+  await personalLoanContract
+    .connect(deployerSigner)
+    .initializeInvestment(
+      rALBTAddress,
+      totalTicketsPerRun,
+      rAlbtPerLotteryNumber,
+      blocksLockedForReputation,
+      lotteryNumbersForImmediateTicket
+    );
   // Setupp ProjectManager
   await projectManagerContract
     .connect(deployerSigner)
     .createProjectType(investmentContract.address);
+  await projectManagerContract
+    .connect(deployerSigner)
+    .createProjectType(personalLoanContract.address);
 
   return true;
 };

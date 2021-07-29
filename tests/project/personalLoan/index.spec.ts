@@ -1,6 +1,6 @@
-// Investment
-import checkInvestmentRequest from './checkInvestmentRequest';
-import checkInterestForInvestment from './checkInterestForInvestment';
+// Project Loan
+import checkPersonalLoanRequest from './checkPersonalLoanRequest';
+import checkInterestForPersonalLoan from './checkInterestForPersonalLoan';
 import checkExecuteLotteryRun from './checkExecuteLotteryRun';
 import checkInitialization from './checkInitialization';
 
@@ -11,14 +11,21 @@ import {
 } from '../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
-describe('Investments', function () {
+describe('Personal Loans', function () {
   beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();
 
     // Get accounts
-    const {deployer, proxyOwner, seeker, lender1, lender2, lender3, superDelegator} =
-      await getNamedAccounts();
+    const {
+      deployer,
+      proxyOwner,
+      seeker,
+      lender1,
+      lender2,
+      lender3,
+      superDelegator,
+    } = await getNamedAccounts();
     this.deployer = deployer;
     this.proxyOwner = proxyOwner;
     this.seeker = seeker;
@@ -50,6 +57,7 @@ describe('Investments', function () {
     // Get contracts
     const {
       projectManagerContract,
+      personalLoanContract,
       investmentContract,
       governanceContract,
       fundingNFTContract,
@@ -61,6 +69,7 @@ describe('Investments', function () {
       ALBTContract,
     } = await getContracts();
     this.projectManagerContract = projectManagerContract;
+    this.personalLoanContract = personalLoanContract;
     this.investmentContract = investmentContract;
     this.governanceContract = governanceContract;
     this.fundingNFTContract = fundingNFTContract;
@@ -77,6 +86,7 @@ describe('Investments', function () {
     // Initialize Transfers
     await initializeTransfers(
       {
+        personalLoanContract,
         investmentContract,
         lendingTokenContract,
         investmentTokenContract,
@@ -92,10 +102,14 @@ describe('Investments', function () {
       }
     );
 
+    await this.projectManagerContract.createProjectType(
+      personalLoanContract.address
+    );
+
     this.approvalRequest = await governanceContract.totalApprovalRequests();
 
     this.projectId = await this.projectManagerContract.getTotalProjects();
-    
+
     this.startingEscrowInvestmentTokenBalance =
       await investmentTokenContract.balanceOf(escrowContract.address);
 
@@ -103,7 +117,7 @@ describe('Investments', function () {
     this.totalAmountRequested = ethers.utils.parseEther('200');
     this.ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-    await this.investmentContract
+    await this.personalLoanContract
       .connect(this.seekerSigner)
       .requestInvestment(
         this.investmentTokenContract.address,
@@ -148,19 +162,16 @@ describe('Investments', function () {
   });
 
   describe(
-    'When checking investment requests',
-    checkInvestmentRequest.bind(this)
+    'When checking personal loan requests',
+    checkPersonalLoanRequest.bind(this)
   );
   describe(
-    'When checking interest for investment',
-    checkInterestForInvestment.bind(this)
+    'When checking interest for PersonalLoan',
+    checkInterestForPersonalLoan.bind(this)
   );
   describe(
     'When checking execute lottery run',
     checkExecuteLotteryRun.bind(this)
   );
-  describe(
-    'When checking initialization',
-    checkInitialization.bind(this)
-  );
+  describe('When checking initialization', checkInitialization.bind(this));
 });

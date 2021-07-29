@@ -24,6 +24,7 @@ describe('Investment upgrade test', () => {
       await getNamedAccounts();
 
     const investmentContract = await ethers.getContract('Investment');
+    const personalLoanContract = await ethers.getContract('PersonalLoan');
     const projectManagerContract = await ethers.getContract('ProjectManager');
     const governanceContract = await ethers.getContract('Governance');
     const investmentTokenContract = await ethers.getContract('InvestmentToken');
@@ -37,6 +38,7 @@ describe('Investment upgrade test', () => {
         lendingTokenContract,
         investmentTokenContract,
         collateralTokenContract,
+        personalLoanContract,
       },
       {deployer, lender1, lender2, lender3, seeker},
       {
@@ -78,10 +80,14 @@ describe('Investment upgrade test', () => {
     const investmentContract = await ethers.getContract('Investment');
 
     // When
-    const investmentDetails = await investmentContract.investmentDetails(projectIdBefore);
+    const investmentDetails = await investmentContract.investmentDetails(
+      projectIdBefore
+    );
 
     // Then
-    expect(investmentDetails.investmentId.toNumber()).to.equal(projectIdBefore.toNumber());
+    expect(investmentDetails.investmentId.toNumber()).to.equal(
+      projectIdBefore.toNumber()
+    );
     expect(amountOfInvestmentTokens.toString()).to.equal(
       investmentDetails.investmentTokensAmount.toString()
     );
@@ -121,9 +127,8 @@ describe('Investment upgrade test', () => {
     expect(something1.toNumber()).to.equal(1);
     expect(something2.toNumber()).to.equal(2);
 
-    const investmentDetailsAfterUpdate = await investmentContract.investmentDetails(
-      projectIdBefore
-    );
+    const investmentDetailsAfterUpdate =
+      await investmentContract.investmentDetails(projectIdBefore);
     expect(investmentDetailsAfterUpdate.investmentId.toNumber()).to.equal(
       projectIdBefore.toNumber()
     );
