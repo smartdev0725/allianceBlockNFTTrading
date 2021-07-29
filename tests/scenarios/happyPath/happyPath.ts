@@ -10,6 +10,22 @@ import {CronjobType} from '../../helpers/governanceEnums';
 const AddressZero = constants.AddressZero;
 chai.use(solidity);
 
+/** Happy Path
+ * The objective of this test is to simulate a scenario where every action taken
+ * by the users is "positive".
+ * Here's a list of "steps"
+ * 1) Seeker publishes Investment (31 - 151)
+ * 2) SuperGovernance approves Investment (156 - 228)
+ * 3) 4 Funders stake, one for each tier (232 - 613)
+ * 4) Funders declare their intention to buy a partition
+ *    (effectively depositing their funds) (617 - 921)
+ * 5) The lottery is run when all the partitions have been covered (926 - 1018)
+ * 6) FundingNFTs are minted and each Funder either receives their (1022 - 1424)
+ *    NFT or their funds back in case they did not win the lottery
+ * 7) Funders with a FundingNFT exchange it for their Investment tokens (1428 - 1596)
+ * 8) Seeker claims the funding, when all investment tokens have been exchanged. (1600 - 1627)
+ */
+
 export default async function suite() {
   it('should do a full flow', async function () {
     //1) Seeker publishes Investment
