@@ -21,9 +21,24 @@ export interface Stake {
   stakingLevel: StakingType;
 }
 
+export interface Action {
+  account: string;
+  actionName: string;
+  answer: string;
+  referralId: number;
+}
+
+export interface AddNewAction {
+  action: Action[];
+  reputationalAlbtRewardsPerLevel: BigNumber[];
+  reputationalAlbtRewardsPerLevelAfterFirstTime: BigNumber[];
+}
+
 export interface GetRALBTData {
   lenderSigner: Signer;
   actionCallerSigner: Signer;
+  amountOfActions: number;
+  actions: Action[];
 }
 
 export interface ShowInterestData {
@@ -49,4 +64,9 @@ export interface ExchangeNFTForInvestmentTokenData {
   investmentId: BigNumber;
   lenderSigner: Signer;
   investmentTokenContract: Contract;
+}
+
+export interface SeekerClaimsFunding {
+  investmentId: BigNumber;
+  seekerSigner: Signer;
 }

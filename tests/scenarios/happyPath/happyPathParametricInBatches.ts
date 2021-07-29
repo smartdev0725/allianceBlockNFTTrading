@@ -13,6 +13,8 @@ import {
   batchRunLottery,
   batchFunderClaimLotteryReward,
   batchExchangeNFTForInvestmentToken,
+  batchAddNewAction,
+  batchSeekerClaimsFunding,
 } from '../../helpers/modularTests';
 
 chai.use(solidity);
@@ -40,6 +42,7 @@ export default async function suite() {
       batchInvestmentData
     );
 
+    // Allow to approve investment
     const batchApproveInvestmentData: any[] = [];
     for (let index = 0; index < investmentsId.length; index++) {
       batchApproveInvestmentData.push({
@@ -47,12 +50,12 @@ export default async function suite() {
         approve: true,
       });
     }
-
     await batchHandleInvestmentRequest(
       batchApproveInvestmentData,
       this.superDelegatorSigner
     );
 
+    // Stake
     const batchStakeData: any[] = [
       {
         lenderSigner: this.lender1Signer,
@@ -67,30 +70,54 @@ export default async function suite() {
         stakingLevel: StakingType.STAKER_LVL_3,
       },
     ];
-
     await batchFundersStake(batchStakeData);
 
-    const getRALBTFromActionsData = [
-      //  data = {lenderSigner: any, actionCallerSigner: any}
+    // Add new aaction
+    const actionData = [
       {
-        lenderSigner: this.lender4Signer,
-        actionCallerSigner: this.lender3Signer,
-      },
-      {
-        lenderSigner: this.lender4Signer,
-        actionCallerSigner: this.lender3Signer,
-      },
-      {
-        lenderSigner: this.lender4Signer,
-        actionCallerSigner: this.lender3Signer,
+        account: this.lender4,
+        actionName: 'Wallet Connect',
+        answer: 'Yes',
+        referralId: 0,
       },
     ];
+    const addNewActionData = [
+      {
+        action: actionData,
+        reputationalAlbtRewardsPerLevel: [
+          ethers.utils.parseEther('500'),
+          ethers.utils.parseEther('500'),
+          ethers.utils.parseEther('500'),
+          ethers.utils.parseEther('500'),
+        ],
+        reputationalAlbtRewardsPerLevelAfterFirstTime: [
+          ethers.utils.parseEther('10'),
+          ethers.utils.parseEther('10'),
+          ethers.utils.parseEther('10'),
+          ethers.utils.parseEther('10'),
+        ],
+      },
+    ];
+    await batchAddNewAction(this.deployerSigner, addNewActionData);
 
+    // Get rALBT
+    const getRALBTFromActionsData = {
+      lenderSigner: this.lender4Signer,
+      actionCallerSigner: this.lender3Signer,
+      amountOfActions: 15,
+      actions: actionData,
+    };
     await batchGetRALBTWithActions(
-      getRALBTFromActionsData,
+      [
+        getRALBTFromActionsData,
+        getRALBTFromActionsData,
+        getRALBTFromActionsData,
+        getRALBTFromActionsData,
+      ],
       this.deployerSigner
     );
 
+    // Declare Intention For Buy
     const declareIntentionForBuyData = [];
     for (let index = 0; index < investmentsId.length; index++) {
       const investment = investmentsId[index];
@@ -121,6 +148,7 @@ export default async function suite() {
     }
     await batchDeclareIntentionForBuy(declareIntentionForBuyData);
 
+    // Run Lottery
     const runLotteryData = [];
     for (let index = 0; index < investmentsId.length; index++) {
       runLotteryData.push({
@@ -130,7 +158,8 @@ export default async function suite() {
     }
     await batchRunLottery(runLotteryData, this.superDelegatorSigner);
 
-    const claimRewardData = [];
+    // Clain Reward
+    const claimRewardData: any[] = [];
     for (let index = 0; index < investmentsId.length; index++) {
       claimRewardData.push({
         investmentId: investmentsId[index],
@@ -159,6 +188,7 @@ export default async function suite() {
     }
     await batchFunderClaimLotteryReward(claimRewardData);
 
+    // Exchange nft
     const batchExchangeNFTForInvestmentTokenData: any[] = [];
     for (let index = 0; index < investmentsId.length; index++) {
       batchExchangeNFTForInvestmentTokenData.push({
@@ -185,5 +215,15 @@ export default async function suite() {
     await batchExchangeNFTForInvestmentToken(
       batchExchangeNFTForInvestmentTokenData
     );
+
+    // Seeker withdraw funds
+    const batchSeekerClaimsFundingData: any[] = [];
+    for (let index = 0; index < investmentsId.length; index++) {
+      batchSeekerClaimsFundingData.push({
+        investmentId: investmentsId[index],
+        seekerSigner: this.seekerSigner,
+      });
+    }
+    await batchSeekerClaimsFunding(batchSeekerClaimsFundingData);
   });
 }

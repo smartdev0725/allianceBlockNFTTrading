@@ -60,16 +60,16 @@ export default async function suite() {
       },
     ];
     const reputationalAlbtRewardsPerLevel = [
-      ethers.utils.parseEther('500').toString(),
-      ethers.utils.parseEther('500').toString(),
-      ethers.utils.parseEther('500').toString(),
-      ethers.utils.parseEther('500').toString(),
+      ethers.utils.parseEther('500'),
+      ethers.utils.parseEther('500'),
+      ethers.utils.parseEther('500'),
+      ethers.utils.parseEther('500'),
     ];
     const reputationalAlbtRewardsPerLevelAfterFirstTime = [
-      ethers.utils.parseEther('10').toString(),
-      ethers.utils.parseEther('10').toString(),
-      ethers.utils.parseEther('10').toString(),
-      ethers.utils.parseEther('10').toString(),
+      ethers.utils.parseEther('10'),
+      ethers.utils.parseEther('10'),
+      ethers.utils.parseEther('10'),
+      ethers.utils.parseEther('10'),
     ];
     await addNewAction(
       this.deployerSigner,
