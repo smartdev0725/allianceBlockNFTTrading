@@ -1,8 +1,5 @@
 // Investment
-import checkInvestmentRequest from './checkInvestmentRequest';
-import checkInterestForInvestment from './checkInterestForInvestment';
-import checkExecuteLotteryRun from './checkExecuteLotteryRun';
-import checkInitialization from './checkInitialization';
+import happyPath from './happyPath';
 
 import {
   getContracts,
@@ -11,7 +8,7 @@ import {
 } from '../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
-describe('Registry Investments', function () {
+describe('Happy Path', function () {
   beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();
@@ -52,6 +49,7 @@ describe('Registry Investments', function () {
 
     // Get contracts
     const {
+      actionVerifierContract,
       registryContract,
       governanceContract,
       fundingNFTContract,
@@ -61,7 +59,9 @@ describe('Registry Investments', function () {
       collateralTokenContract,
       stakingContract,
       ALBTContract,
+      stakerMedalNFTContract,
     } = await getContracts();
+    this.actionVerifierContract = actionVerifierContract;
     this.registryContract = registryContract;
     this.governanceContract = governanceContract;
     this.fundingNFTContract = fundingNFTContract;
@@ -71,6 +71,7 @@ describe('Registry Investments', function () {
     this.collateralTokenContract = collateralTokenContract;
     this.stakingContract = stakingContract;
     this.ALBTContract = ALBTContract;
+    this.stakerMedalNFTContract = stakerMedalNFTContract;
     const rALBTFactory = await ethers.getContractFactory('rALBT');
     const rALBTAddress = await this.escrowContract.reputationalALBT();
     this.rALBTContract = await rALBTFactory.attach(rALBTAddress);
@@ -146,22 +147,21 @@ describe('Registry Investments', function () {
       this.stakingContract.address,
       amountToTransfer
     );
+
+    await this.ALBTContract.connect(this.deployerSigner).mint(
+      this.lender4,
+      amountToTransfer
+    );
+
+    await this.ALBTContract.connect(this.lender4Signer).approve(
+      this.stakingContract.address,
+      amountToTransfer
+    );
+
   });
 
   describe(
-    'When checking investment requests',
-    checkInvestmentRequest.bind(this)
-  );
-  describe(
-    'When checking interest for investment',
-    checkInterestForInvestment.bind(this)
-  );
-  describe(
-    'When checking execute lottery run',
-    checkExecuteLotteryRun.bind(this)
-  );
-  describe(
-    'When checking initialization',
-    checkInitialization.bind(this)
+    'Happy Path process',
+    happyPath.bind(this)
   );
 });

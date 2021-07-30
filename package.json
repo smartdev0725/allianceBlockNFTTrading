@@ -14,6 +14,7 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "test:gas": "cross-env REPORT_GAS=true hardhat test",
+    "test:scenario": "node ./testScenario.js",
     "coverage": "cross-env HARDHAT_DEPLOY_FIXTURE=true hardhat coverage",
     "deploy": "hardhat deploy",
     "deploy:reset": "hardhat deploy --reset",
