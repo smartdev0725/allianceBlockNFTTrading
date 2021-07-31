@@ -402,7 +402,7 @@ export const batchFundersStake = async (data: Stake[]) => {
 // Add New Actions
 export const addNewAction = async (
   deployerSigner: Signer,
-  action: Action[],
+  action: Action,
   reputationalAlbtRewardsPerLevel: BigNumber[],
   reputationalAlbtRewardsPerLevelAfterFirstTime: BigNumber[]
 ) => {
@@ -414,7 +414,7 @@ export const addNewAction = async (
     actionVerifierContract
       .connect(deployerSigner)
       .importAction(
-        action[0].actionName,
+        action.actionName,
         reputationalAlbtRewardsPerLevel,
         reputationalAlbtRewardsPerLevelAfterFirstTime,
         2,
@@ -422,55 +422,54 @@ export const addNewAction = async (
       )
   )
     .to.emit(actionVerifierContract, 'ActionImported')
-    .withArgs(action[0].actionName);
+    .withArgs(action.actionName);
 
   // Reward per action
   const rewardPerActionLevel0 =
     await actionVerifierContract.rewardPerActionPerLevel(
-      web3.utils.keccak256(action[0].actionName),
+      web3.utils.keccak256(action.actionName),
       0
     );
   const rewardPerActionLevel1 =
     await actionVerifierContract.rewardPerActionPerLevel(
-      web3.utils.keccak256(action[0].actionName),
+      web3.utils.keccak256(action.actionName),
       1
     );
   const rewardPerActionLevel2 =
     await actionVerifierContract.rewardPerActionPerLevel(
-      web3.utils.keccak256(action[0].actionName),
+      web3.utils.keccak256(action.actionName),
       2
     );
   const rewardPerActionLevel3 =
     await actionVerifierContract.rewardPerActionPerLevel(
-      web3.utils.keccak256(action[0].actionName),
+      web3.utils.keccak256(action.actionName),
       3
     );
-
   // Reward per action after first time
   const rewardPerActionPerLevelAfterFirstTime0 =
     await actionVerifierContract.rewardPerActionPerLevelAfterFirstTime(
-      web3.utils.keccak256(action[0].actionName),
+      web3.utils.keccak256(action.actionName),
       0
     );
   const rewardPerActionPerLevelAfterFirstTime1 =
     await actionVerifierContract.rewardPerActionPerLevelAfterFirstTime(
-      web3.utils.keccak256(action[0].actionName),
+      web3.utils.keccak256(action.actionName),
       1
     );
   const rewardPerActionPerLevelAfterFirstTime2 =
     await actionVerifierContract.rewardPerActionPerLevelAfterFirstTime(
-      web3.utils.keccak256(action[0].actionName),
+      web3.utils.keccak256(action.actionName),
       2
     );
   const rewardPerActionPerLevelAfterFirstTime3 =
     await actionVerifierContract.rewardPerActionPerLevelAfterFirstTime(
-      web3.utils.keccak256(action[0].actionName),
+      web3.utils.keccak256(action.actionName),
       3
     );
 
   const minimumLevelForActionProvision =
     await actionVerifierContract.minimumLevelForActionProvision(
-      web3.utils.keccak256(action[0].actionName)
+      web3.utils.keccak256(action.actionName)
     );
 
   // Then
@@ -505,14 +504,14 @@ export const addNewAction = async (
 };
 export const batchAddNewAction = async (
   deployerSigner: Signer,
-  newAction: AddNewAction[]
+  actions: AddNewAction[]
 ) => {
-  for (let i = 0; i < newAction.length; i++) {
+  for (let i = 0; i < actions.length; i++) {
     await addNewAction(
       deployerSigner,
-      newAction[i].action,
-      newAction[i].reputationalAlbtRewardsPerLevel,
-      newAction[i].reputationalAlbtRewardsPerLevelAfterFirstTime
+      actions[i].action,
+      actions[i].reputationalAlbtRewardsPerLevel,
+      actions[i].reputationalAlbtRewardsPerLevelAfterFirstTime
     );
   }
 };
@@ -520,7 +519,6 @@ export const batchAddNewAction = async (
 export const getRALBTWithActions = async (
   lenderSigner: Signer,
   actionCallerSigner: Signer,
-  amountOfActions: number,
   actions: Action[]
 ) => {
   // Given
@@ -574,22 +572,20 @@ export const getRALBTWithActions = async (
   const signatures = [signature];
 
   // When
-  for (let i = 0; i < amountOfActions; i++) {
-    await increaseTime(lenderSigner.provider, 1 * 24 * 60 * 60); // 1 day
+  await increaseTime(lenderSigner.provider, 1 * 24 * 60 * 60); // 1 day
 
-    const provideRewardsForActions = await actionVerifierContract
-      .connect(actionCallerSigner)
-      .provideRewardsForActions(actions, signatures);
+  const provideRewardsForActions = await actionVerifierContract
+    .connect(actionCallerSigner)
+    .provideRewardsForActions(actions, signatures);
 
-    expect(provideRewardsForActions).to.emit(
-      actionVerifierContract,
-      'ActionsProvided'
-    );
-    expect(provideRewardsForActions).to.emit(
-      actionVerifierContract,
-      'EpochChanged'
-    );
-  }
+  expect(provideRewardsForActions).to.emit(
+    actionVerifierContract,
+    'ActionsProvided'
+  );
+  expect(provideRewardsForActions).to.emit(
+    actionVerifierContract,
+    'EpochChanged'
+  );
 
   const balanceRALBTAfterActionsActionCaller = await rALBTContract.balanceOf(
     actionCallerAddress
@@ -597,21 +593,17 @@ export const getRALBTWithActions = async (
   const balanceRALBTAfterActions = await rALBTContract.balanceOf(lenderAddress);
   const lenderReward = () => {
     if (lastEpochActionDonePerAccountBefore.eq(0)) {
-      return balanceRALBTBeforeActions
-        .add(rewardPerActionLevel)
-        .add(rewardPerActionPerLevelAfterFirstTime.mul(amountOfActions - 1));
+      return balanceRALBTBeforeActions.add(rewardPerActionLevel);
     } else {
       return balanceRALBTBeforeActions.add(
-        rewardPerActionPerLevelAfterFirstTime.mul(amountOfActions)
+        rewardPerActionPerLevelAfterFirstTime
       );
     }
   };
   // Then
   // Correct balance of rALBT
   expect(balanceRALBTAfterActionsActionCaller).to.be.equal(
-    balanceRALBTBeforeActionsActionCaller.add(
-      rewardPerActionProvisionPerLevel.mul(amountOfActions)
-    )
+    balanceRALBTBeforeActionsActionCaller.add(rewardPerActionProvisionPerLevel)
   );
   expect(balanceRALBTAfterActions).to.be.equal(lenderReward());
 };
@@ -625,7 +617,6 @@ export const batchGetRALBTWithActions = async (
     await getRALBTWithActions(
       getRALBTData[i].lenderSigner,
       getRALBTData[i].actionCallerSigner,
-      getRALBTData[i].amountOfActions,
       getRALBTData[i].actions
     );
   }

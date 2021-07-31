@@ -29,7 +29,7 @@ export interface Action {
 }
 
 export interface AddNewAction {
-  action: Action[];
+  action: Action;
   reputationalAlbtRewardsPerLevel: BigNumber[];
   reputationalAlbtRewardsPerLevelAfterFirstTime: BigNumber[];
 }
@@ -37,7 +37,6 @@ export interface AddNewAction {
 export interface GetRALBTData {
   lenderSigner: Signer;
   actionCallerSigner: Signer;
-  amountOfActions: number;
   actions: Action[];
 }
 

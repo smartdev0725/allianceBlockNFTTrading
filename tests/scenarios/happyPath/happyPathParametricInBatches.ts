@@ -73,14 +73,12 @@ export default async function suite() {
     await batchFundersStake(batchStakeData);
 
     // Add new aaction
-    const actionData = [
-      {
-        account: this.lender4,
-        actionName: 'Wallet Connect',
-        answer: 'Yes',
-        referralId: 0,
-      },
-    ];
+    const actionData = {
+      account: this.lender4,
+      actionName: 'Wallet Connect',
+      answer: 'Yes',
+      referralId: 0,
+    };
     const addNewActionData = [
       {
         action: actionData,
@@ -104,16 +102,15 @@ export default async function suite() {
     const getRALBTFromActionsData = {
       lenderSigner: this.lender4Signer,
       actionCallerSigner: this.lender3Signer,
-      amountOfActions: 15,
-      actions: actionData,
+      actions: [actionData],
     };
+
+    const getRALBTFromActionsDataArray = [];
+    for (let i = 0; i < 55; i++) {
+      getRALBTFromActionsDataArray.push(getRALBTFromActionsData);
+    }
     await batchGetRALBTWithActions(
-      [
-        getRALBTFromActionsData,
-        getRALBTFromActionsData,
-        getRALBTFromActionsData,
-        getRALBTFromActionsData,
-      ],
+      getRALBTFromActionsDataArray,
       this.deployerSigner
     );
 
