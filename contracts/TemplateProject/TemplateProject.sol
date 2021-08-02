@@ -15,6 +15,14 @@ contract TemplateProject is ProjectStorage, OwnableUpgradeable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 
+    // EVENTS
+    event ProjectStarted(uint256 indexed projectId);
+    event ProjectApproved(uint256 indexed projectId);
+    event ProjectRejected(uint256 indexed projectId);
+    event ProjectRequested(uint256 indexed projectId, address indexed user, uint256 amount);
+    event ProjectInterest(uint256 indexed projectId, uint amount);
+    event ProjectSettled(uint256 projectId);
+
     modifier onlyGovernance() {
         require(msg.sender == address(governance), "Only Governance");
         _;

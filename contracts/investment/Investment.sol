@@ -20,17 +20,12 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
     using SafeERC20 for IERC20;
 
     // EVENTS
-    event ProjectStarted(uint256 indexed projectId);
-    event ProjectApproved(uint256 indexed projectId);
-    event ProjectRejected(uint256 indexed projectId);
-    event ProjectRequested(uint256 indexed projectId, address indexed user, uint256 amount);
-    event ProjectInterest(uint256 indexed projectId, uint amount);
     event LotteryExecuted(uint256 indexed projectId);
-    event WithdrawProject(uint256 indexed projectId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
+    event WithdrawProjectTickets(uint256 indexed projectId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
+    event seekerWithdrawInvestment(uint256 indexed projectId, uint256 amountWithdrawn);
     event WithdrawAmountForNonTickets(uint256 indexed projectId, uint256 amountToReturnForNonWonTickets);
     event WithdrawLockedProjectTickets(uint256 indexed projectId, uint256 ticketsToWithdraw);
     event ConvertNFTToProjectTokens(uint256 indexed projectId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
-    event ProjectSettled(uint256 projectId);
 
     /**
      * @notice Initialize
@@ -409,7 +404,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         }
 
         // Add event for withdraw investment
-        emit WithdrawProject(projectId, ticketsToLock, ticketsToWithdraw);
+        emit WithdrawProjectTickets(projectId, ticketsToLock, ticketsToWithdraw);
     }
 
     /**
@@ -450,6 +445,22 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         // Add event for withdraw locked investment tickets
         emit WithdrawLockedProjectTickets(projectId, ticketsToWithdraw);
+    }
+
+    /**
+     * @dev This function is called by the seeker to withdraw the lending tokens provided by investors after lottery ends.
+     * @param projectId The id of the investment.
+     */
+    function withdrawInvestment(uint256 projectId) external nonReentrant() {
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
+        require(projectSeeker[projectId] == msg.sender, "Only seeker can withdraw");
+        require(!investmentWithdrawn[projectId], "Already withdrawn");
+        
+        uint256 amountToWithdraw = investmentDetails[projectId].totalAmountToBeRaised;
+        investmentWithdrawn[projectId] = true;
+
+        escrow.transferLendingToken(investmentDetails[projectId].lendingToken, msg.sender, amountToWithdraw);
+        emit seekerWithdrawInvestment(projectId, amountToWithdraw);
     }
 
     /**

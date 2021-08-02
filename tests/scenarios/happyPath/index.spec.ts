@@ -1,8 +1,5 @@
-// Project Loan
-import checkPersonalLoanRequest from './checkPersonalLoanRequest';
-import checkInterestForPersonalLoan from './checkInterestForPersonalLoan';
-import checkExecuteLotteryRun from './checkExecuteLotteryRun';
-import checkInitialization from './checkInitialization';
+// Investment
+import happyPath from './happyPath';
 
 import {
   getContracts,
@@ -11,7 +8,7 @@ import {
 } from '../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
-describe('Personal Loans', function () {
+describe('Happy Path', function () {
   beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();
@@ -55,6 +52,7 @@ describe('Personal Loans', function () {
       projectManagerContract,
       personalLoanContract,
       investmentContract,
+      actionVerifierContract,
       governanceContract,
       fundingNFTContract,
       escrowContract,
@@ -68,6 +66,8 @@ describe('Personal Loans', function () {
     this.projectManagerContract = projectManagerContract;
     this.personalLoanContract = personalLoanContract;
     this.investmentContract = investmentContract;
+    this.actionVerifierContract = actionVerifierContract;
+    this.registryContract = {};
     this.governanceContract = governanceContract;
     this.fundingNFTContract = fundingNFTContract;
     this.escrowContract = escrowContract;
@@ -172,16 +172,7 @@ describe('Personal Loans', function () {
   });
 
   describe(
-    'When checking personal loan requests',
-    checkPersonalLoanRequest.bind(this)
+    'Happy Path process',
+    happyPath.bind(this)
   );
-  describe(
-    'When checking interest for PersonalLoan',
-    checkInterestForPersonalLoan.bind(this)
-  );
-  describe(
-    'When checking execute lottery run',
-    checkExecuteLotteryRun.bind(this)
-  );
-  describe('When checking initialization', checkInitialization.bind(this));
 });

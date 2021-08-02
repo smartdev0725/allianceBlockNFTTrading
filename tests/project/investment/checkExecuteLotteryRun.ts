@@ -315,7 +315,7 @@ export default async function suite() {
           .connect(this.lender1Signer)
           .withdrawInvestmentTickets(this.projectId, 3, 7)
       )
-        .to.emit(this.investmentContract, 'WithdrawProject')
+        .to.emit(this.investmentContract, 'WithdrawProjectTickets')
         .withArgs(this.projectId, 3, 7);
 
       await expectRevert(

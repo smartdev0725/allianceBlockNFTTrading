@@ -20,17 +20,11 @@ contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgr
     using SafeERC20 for IERC20;
 
     // EVENTS
-    event ProjectStarted(uint256 indexed projectId);
-    event ProjectApproved(uint256 indexed projectId);
-    event ProjectRejected(uint256 indexed projectId);
-    event ProjectRequested(uint256 indexed projectId, address indexed user, uint256 amount);
-    event ProjectInterest(uint256 indexed projectId, uint amount);
     event LotteryExecuted(uint256 indexed projectId);
     event WithdrawProject(uint256 indexed projectId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
     event WithdrawAmountForNonTickets(uint256 indexed projectId, uint256 amountToReturnForNonWonTickets);
     event WithdrawLockedProjectTickets(uint256 indexed projectId, uint256 ticketsToWithdraw);
     event ConvertNFTToProjectTokens(uint256 indexed projectId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
-    event ProjectSettled(uint256 projectId);
 
     /**
      * @notice Initialize

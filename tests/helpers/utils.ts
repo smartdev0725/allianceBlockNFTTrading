@@ -17,6 +17,7 @@ export const getSigners = async () => {
     lender3Signer: signers[9],
     seekerSigner: signers[10],
     superDelegatorSigner: signers[11],
+    lender4Signer: signers[12],
   };
 };
 
@@ -82,12 +83,13 @@ export const initializeTransfers = async (
     collateralTokenContract,
   } = contracts;
 
-  const {lender1, lender2, lender3, seeker, deployer} = accounts;
+  const {lender1, lender2, lender3, lender4, seeker, deployer} = accounts;
   const {
     deployerSigner,
     lender1Signer,
     lender2Signer,
     lender3Signer,
+    lender4Signer,
     seekerSigner,
   } = signers;
 
@@ -117,6 +119,14 @@ export const initializeTransfers = async (
       .mint(lender3, amountToTransfer);
     await lendingTokenContract
       .connect(lender3Signer)
+      .approve(projectContract.address, amountToTransfer);
+
+    // Lender 4 minting
+    await lendingTokenContract
+      .connect(deployerSigner)
+      .mint(lender4, amountToTransfer);
+    await lendingTokenContract
+      .connect(lender4Signer)
       .approve(projectContract.address, amountToTransfer);
 
     // Seeker minting
