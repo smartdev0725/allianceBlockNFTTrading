@@ -77,6 +77,21 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     }
 
     /**
+     * @notice Transfer Funding NFT
+     * @dev This function is used to send the ERC1155 tokens from escrow to the lenders.
+     * @param investmentId The id of the investment.
+     * @param amountOfNfts The amount of ERC1155 tokens that should be locked.
+     * @param sender The address to lock the Nfts from..
+     */
+    function lockFundingNFT(
+        uint256 investmentId,
+        uint256 amountOfNfts,
+        address sender
+    ) external onlyRegistryOrOwner() {
+        fundingNFT.safeTransferFrom(sender, address(this), investmentId, amountOfNfts, "");
+    }
+
+    /**
      * @notice Burn Funding NFT
      * @dev This function is used to burn NFT
      * @param account The address to burn the funding nft from

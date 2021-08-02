@@ -14,6 +14,12 @@ interface IEscrow {
         address receiver
     ) external;
 
+    function lockFundingNFT(
+        uint256 investmentId,
+        uint256 amountOfNfts,
+        address sender
+    ) external;
+
     function transferLendingToken(
         address lendingToken,
         address seeker,
