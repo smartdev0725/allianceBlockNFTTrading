@@ -12,7 +12,7 @@ chai.use(solidity);
 export default async function suite() {
   describe('ProjectLoan request', async () => {
     it('when all details are stored correctly', async function () {
-      const projectId = await this.projectManagerContract.getTotalProjects();
+      const projectId = await this.projectManagerContract.totalProjects();
       const approvalRequest =
         await this.governanceContract.totalApprovalRequests();
       const initSeekerInvestmentTokenBalance =
@@ -106,7 +106,7 @@ export default async function suite() {
         amountOfTokensToBePurchased.div(totalPartitions)
       );
       // Investment id is incremented correctly
-      expect(await this.projectManagerContract.getTotalProjects()).to.be.equal(
+      expect(await this.projectManagerContract.totalProjects()).to.be.equal(
         projectId.add(1)
       );
 
@@ -194,7 +194,7 @@ export default async function suite() {
     });
 
     it('when personalLoan request is rejected', async function () {
-      const projectId = await this.projectManagerContract.getTotalProjects();
+      const projectId = await this.projectManagerContract.totalProjects();
 
       await expect(
         this.personalLoanContract

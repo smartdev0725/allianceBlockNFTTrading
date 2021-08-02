@@ -37,34 +37,18 @@ contract ProjectManager is Initializable, OwnableUpgradeable {
         totalProjectTypes = 1;
     }
 
-    function getTotalProjects() view external returns (uint256){
-        return totalProjects;
-    }
-
-    function getTotalProjectTypes() view external returns (uint256){
-        return totalProjectTypes;
-    }
-
-    function getProjectTypeFromProjectId(uint256 id) view external returns (uint256){
-        return projectTypeFromProjectId[id];
-    }
-
-    function getProjectTypeIndexFromAddress(address project) view external returns (uint256){
-        return projectTypeIndexFromAddress[project];
-    }
-
-    function getProjectAddressFromType(uint256 id) view external returns (address){
-        return projectAddressFromType[id];
-    }
-
-    function getProjectAddressFromProjectId(uint256 id) view external returns (address){
-        return projectAddressFromProjectId[id];
-    }
-
+    /**
+     * @notice Function to know if an address is a valid project type contract.
+     * @param projectAddress address to verify.
+     */
     function isProject(address projectAddress) view external returns (bool){
         return projectTypeIndexFromAddress[projectAddress] != 0;
     }
 
+    /**
+     * @notice Function to create a new project.
+     * @dev Must be called from a valid project type contract.
+     */
     function createProject() external onlyProject() returns(uint256){
         projectTypeFromProjectId[totalProjects] = projectTypeIndexFromAddress[msg.sender];
         projectAddressFromProjectId[totalProjects] = msg.sender;
@@ -72,6 +56,10 @@ contract ProjectManager is Initializable, OwnableUpgradeable {
         return totalProjects-1;
     }
 
+    /**
+     * @notice Function to create a new project type.
+     * @dev Must be called from the owner.
+     */
     function createProjectType(address projectAddress) external onlyOwner(){
         projectTypeIndexFromAddress[projectAddress] = totalProjectTypes;
         projectAddressFromType[totalProjectTypes] = projectAddress;

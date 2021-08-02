@@ -11,7 +11,7 @@ chai.use(solidity);
 export default async function suite() {
   describe('Show investment interest', async () => {
     it('reverts when investment is not approved yet', async function () {
-      const projectId = await this.projectManagerContract.getTotalProjects();
+      const projectId = await this.projectManagerContract.totalProjects();
       const amountOfTokensToBePurchased = ethers.utils.parseEther('100000');
       const totalAmountRequested = ethers.utils.parseEther('10000');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';

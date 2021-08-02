@@ -31,7 +31,7 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
         require(msg.sender == superDelegator, "Only super delegator can call this function");
         require(!approvalRequests[requestId].isProcessed, "Cannot process again same investment");
 
-        IProject(projectManager.getProjectAddressFromProjectId(approvalRequests[requestId].projectId)).decideForProject(approvalRequests[requestId].projectId, decision);
+        IProject(projectManager.projectAddressFromProjectId(approvalRequests[requestId].projectId)).decideForProject(approvalRequests[requestId].projectId, decision);
 
         if (decision) {
             approvalRequests[requestId].approvalsProvided = 1;

@@ -19,8 +19,9 @@ describe('Investment upgrade test', () => {
       lender1Signer,
       lender2Signer,
       lender3Signer,
+      lender4Signer,
     } = await getSigners();
-    const {deployer, seeker, lender1, lender2, lender3, superDelegator} =
+    const {deployer, seeker, lender1, lender2, lender3, lender4, superDelegator} =
       await getNamedAccounts();
 
     const investmentContract = await ethers.getContract('Investment');
@@ -40,12 +41,13 @@ describe('Investment upgrade test', () => {
         collateralTokenContract,
         personalLoanContract,
       },
-      {deployer, lender1, lender2, lender3, seeker},
+      {deployer, lender1, lender2, lender3, lender4, seeker},
       {
         deployerSigner,
         lender1Signer,
         lender2Signer,
         lender3Signer,
+        lender4Signer,
         seekerSigner,
       }
     );

@@ -108,7 +108,7 @@ describe('Personal Loans', function () {
 
     this.approvalRequest = await governanceContract.totalApprovalRequests();
 
-    this.projectId = await this.projectManagerContract.getTotalProjects();
+    this.projectId = await this.projectManagerContract.totalProjects();
 
     this.startingEscrowInvestmentTokenBalance =
       await investmentTokenContract.balanceOf(escrowContract.address);

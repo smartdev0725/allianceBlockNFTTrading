@@ -89,7 +89,7 @@ export default async function suite() {
       const amountOfTokensToBePurchased = ethers.utils.parseEther('1000');
       const totalAmountRequested = ethers.utils.parseEther('200');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
-      const projectId = await this.projectManagerContract.getTotalProjects();
+      const projectId = await this.projectManagerContract.totalProjects();
 
       // When
       await this.investmentContract

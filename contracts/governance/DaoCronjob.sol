@@ -72,8 +72,8 @@ contract DaoCronjob is GovernanceTypesAndStorage {
      * @param timestamp the current block height
      */
     function updateProject(uint256 projectId, uint256 timestamp) internal {
-        if (IProject(projectManager.getProjectAddressFromProjectId(projectId)).getRequestingInterestStatus(projectId)) {
-            IProject(projectManager.getProjectAddressFromProjectId(projectId)).startLotteryPhase(projectId);
+        if (IProject(projectManager.projectAddressFromProjectId(projectId)).getRequestingInterestStatus(projectId)) {
+            IProject(projectManager.projectAddressFromProjectId(projectId)).startLotteryPhase(projectId);
         } else {
             uint256 nextCronjobTimestamp =
                 timestamp.add(updatableVariables[LATE_APPLICATIONS_FOR_INVESTMENT_DURATION]);
