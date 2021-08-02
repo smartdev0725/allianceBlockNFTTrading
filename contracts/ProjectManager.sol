@@ -12,16 +12,16 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 contract ProjectManager is Initializable, OwnableUpgradeable {
     using SafeMath for uint256;
 
-    uint256 totalProjects;
-    uint256 totalProjectTypes;
+    uint256 public totalProjects;
+    uint256 public totalProjectTypes;
     // mapping of the projectId to a project type
-    mapping(uint256 => uint256) projectTypeFromProjectId;
+    mapping(uint256 => uint256) public projectTypeFromProjectId;
     // mapping of the project type to a project address
-    mapping(address => uint256) projectTypeIndexFromAddress;
+    mapping(address => uint256) public projectTypeIndexFromAddress;
     // mapping of the project type to a project address
-    mapping(uint256 => address) projectAddressFromType;
+    mapping(uint256 => address) public projectAddressFromType;
     // mapping of the project type to a project address
-    mapping(uint256 => address) projectAddressFromProjectId;
+    mapping(uint256 => address) public projectAddressFromProjectId;
 
     modifier onlyProject() {
         require(projectTypeIndexFromAddress[msg.sender] != 0, "Only Project contract");
@@ -33,7 +33,7 @@ contract ProjectManager is Initializable, OwnableUpgradeable {
      */
     function initialize() external initializer {
         __Ownable_init();
-        totalProjects = 1;
+        totalProjects = 0;
         totalProjectTypes = 1;
     }
 
@@ -70,7 +70,6 @@ contract ProjectManager is Initializable, OwnableUpgradeable {
         projectAddressFromProjectId[totalProjects] = msg.sender;
         totalProjects += 1;
         return totalProjects-1;
-        //INVERTIR LUEGO
     }
 
     function createProjectType(address projectAddress) external onlyOwner(){
