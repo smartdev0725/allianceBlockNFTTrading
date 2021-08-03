@@ -30,7 +30,7 @@ describe('Contract Investment', () => {
     const governanceAddress = (await get('Governance')).address;
     const lendingTokenAddress = (await get('LendingToken')).address;
     const fundingNFTAddress = (await get('FundingNFT')).address;
-    const PMAddress = (await get('ProjectManager')).address;
+    const projectManagerAddress = (await get('ProjectManager')).address;
     const amount = ethers.utils.parseEther(BASE_AMOUNT + '').toString();
 
     await expectRevert.unspecified(
@@ -47,7 +47,7 @@ describe('Contract Investment', () => {
           governanceAddress,
           [lendingTokenAddress],
           fundingNFTAddress,
-          PMAddress,
+          projectManagerAddress,
           amount,
         ],
         log: true,
@@ -68,7 +68,7 @@ describe('Contract Investment', () => {
           ethers.constants.AddressZero,
           [lendingTokenAddress],
           fundingNFTAddress,
-          PMAddress,
+          projectManagerAddress,
           amount,
         ],
         log: true,
@@ -89,7 +89,7 @@ describe('Contract Investment', () => {
           governanceAddress,
           [ethers.constants.AddressZero],
           fundingNFTAddress,
-          PMAddress,
+          projectManagerAddress,
           amount,
         ],
         log: true,
@@ -110,7 +110,7 @@ describe('Contract Investment', () => {
           governanceAddress,
           [lendingTokenAddress],
           ethers.constants.AddressZero,
-          PMAddress,
+          projectManagerAddress,
           amount,
         ],
         log: true,
@@ -151,7 +151,7 @@ describe('Contract Investment', () => {
           governanceAddress,
           [lendingTokenAddress],
           fundingNFTAddress,
-          PMAddress,
+          projectManagerAddress,
           0,
         ],
         log: true,

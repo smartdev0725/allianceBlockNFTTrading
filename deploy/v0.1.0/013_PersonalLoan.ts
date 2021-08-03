@@ -25,26 +25,27 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       ? process.env.LENDING_TOKEN_ADDRESS
       : (await get('LendingToken')).address;
   const fundingNFTAddress = (await get('FundingNFT')).address;
-  const PMAddress = (await get('ProjectManager')).address;
-
-  await deploy(contractName, {
-    contract: contractName,
-    from: deployer,
-    proxy: {
-      owner: proxyOwner,
-      methodName: 'initialize',
-      proxyContract: 'OpenZeppelinTransparentProxy',
-    },
-    args: [
-      escrowAddress,
-      governanceAddress,
-      [lendingTokenAddress],
-      fundingNFTAddress,
-      PMAddress,
-      ethers.utils.parseEther(BASE_AMOUNT + '').toString(), // Same as toWei in web3
-    ],
-    log: true,
-  });
+  const projectManagerAddress = (await get('ProjectManager')).address;
+  if (+chainId !== 1) {
+    await deploy(contractName, {
+      contract: contractName,
+      from: deployer,
+      proxy: {
+        owner: proxyOwner,
+        methodName: 'initialize',
+        proxyContract: 'OpenZeppelinTransparentProxy',
+      },
+      args: [
+        escrowAddress,
+        governanceAddress,
+        [lendingTokenAddress],
+        fundingNFTAddress,
+        projectManagerAddress,
+        ethers.utils.parseEther(BASE_AMOUNT + '').toString(), // Same as toWei in web3
+      ],
+      log: true,
+    });
+  }
   return true;
 };
 
@@ -57,5 +58,6 @@ func.dependencies = [
   'LendingTokenv0.1.0',
   'Governancev0.1.0',
   'Escrowv0.1.0',
+  'ProjectManagerv0.1.0'
 ];
 func.id = id;

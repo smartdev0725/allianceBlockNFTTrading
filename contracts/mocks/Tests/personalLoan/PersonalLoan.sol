@@ -6,13 +6,12 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "./PersonalLoanDetails.sol";
-import "../../libs/SafeERC20.sol";
-import "../../libs/TokenFormat.sol";
+import "../../../libs/SafeERC20.sol";
+import "../../../libs/TokenFormat.sol";
 
 /**
- * @title AllianceBlock PersonalLoan contract.
- * @notice Functionality for PersonalLoan.
- * @dev Extends PersonalLoanDetails.
+ * @title TEST contract to simulate new type of project.
+ * @notice Same contract as investment
  */
 contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;

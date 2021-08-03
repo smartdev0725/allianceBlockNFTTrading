@@ -42,4 +42,5 @@ const id = contractName + version;
 
 export default func;
 func.tags = [id, version];
+func.dependencies = ['ProjectManagerv0.1.0'];
 func.id = id;

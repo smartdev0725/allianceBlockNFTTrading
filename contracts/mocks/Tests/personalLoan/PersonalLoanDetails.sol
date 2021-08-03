@@ -3,8 +3,8 @@ pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Storage.sol";
-import "../../libs/TokenFormat.sol";
-import "../BaseProject/BaseProject.sol";
+import "../../../libs/TokenFormat.sol";
+import "../../../projects/BaseProject/BaseProject.sol";
 
 /**
  * @title AllianceBlock InvestmentDetails contract

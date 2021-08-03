@@ -59,6 +59,10 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
             actionVerifierAddress_ != address(0) && stakingAddress_ != address(0),
             "Cannot initialize with 0 addresses"
         );
+        require(
+            actionVerifier == address(0) && staking == address(0),
+            "Cannot initialize second time"
+        );
         actionVerifier = actionVerifierAddress_;
         staking = stakingAddress_;
     }

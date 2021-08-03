@@ -110,25 +110,6 @@ export default async function suite() {
 
   });
 
-  // describe('Governance initialization', async () => {
-  //   it('When initialize again should revert', async function () {
-  //     const investmentAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
-
-  //     await expectRevert(
-  //       this.governanceContract.setInvestment(investmentAddress),
-  //       'Cannot initialize second time'
-  //     );
-  //   });
-
-  //   it('When initialize with zero address should revert', async function () {
-  //     await expectRevert(
-  //       this.governanceContract.setInvestment( ethers.constants.AddressZero),
-  //       'Cannot initialize with 0 addresses'
-  //     );
-  //   });
-
-  // });
-
   describe('Governance update', async () => {
     it('When update superdelegator with another user should revert', async function () {
       const otherAddress = "0x664f6b4987d9db811867f431911124109ed5a475";

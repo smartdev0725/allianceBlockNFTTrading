@@ -5,19 +5,19 @@ const {expectRevert} = require('@openzeppelin/test-helpers');
 
 export default async function suite() {
   describe('FundingNFT', async () => {
-    // it('When initialize again should revert', async function () {
-    //   const actionVerifierAddress =
-    //     '0x664f6b4987d9db811867f431911124109ed5a475';
-    //   const stakingAddress = '0x664f6b4987d9db811867f431911124109ed5a475';
+    it('When initialize again should revert', async function () {
+      const actionVerifierAddress =
+        '0x664f6b4987d9db811867f431911124109ed5a475';
+      const stakingAddress = '0x664f6b4987d9db811867f431911124109ed5a475';
 
-    //   await expectRevert(
-    //     this.escrowContract.afterInitialize(
-    //       actionVerifierAddress,
-    //       stakingAddress
-    //     ),
-    //     'Cannot initialize second time'
-    //   );
-    // });
+      await expectRevert(
+        this.escrowContract.afterInitialize(
+          actionVerifierAddress,
+          stakingAddress
+        ),
+        'Cannot initialize second time'
+      );
+    });
 
     it('When initialize with zero address should revert', async function () {
       await expectRevert(
@@ -115,50 +115,6 @@ export default async function suite() {
       );
     });
   });
-
-  // describe('Investment', async () => {
-  //   it('when change investment from another account not allowed should revert', async function () {
-  //     // Given
-  //     const {seekerSigner} = await getSigners();
-
-  //     // When and Then
-  //     await expectRevert(
-  //       this.escrowContract
-  //         .connect(seekerSigner)
-  //         .changeInvestment(ethers.constants.AddressZero),
-  //       'Ownable: caller is not the owner'
-  //     );
-  //   });
-
-  //   it('when change investment with zero address should not revert', async function () {
-  //     // Given
-  //     const {deployerSigner} = await getSigners();
-  //     // When and Then
-  //     await expectRevert(
-  //       this.escrowContract
-  //         .connect(deployerSigner)
-  //         .changeInvestment(ethers.constants.AddressZero),
-  //       'Investment should not be zero address'
-  //     );
-  //   });
-
-  //   it('when change investment from owner account should not revert', async function () {
-  //     // Given
-  //     const {deployerSigner} = await getSigners();
-  //     const dummyAddress = '0x664f6b4987d9db811867f431911124109ed5a475';
-
-  //     // When
-  //     await this.escrowContract
-  //       .connect(deployerSigner)
-  //       .changeInvestment(dummyAddress);
-
-  //     // Then
-  //     const investmentAddress = await this.escrowContract.investment();
-  //     expect(investmentAddress.toLowerCase()).to.be.equal(
-  //       dummyAddress.toLowerCase()
-  //     );
-  //   });
-  // });
 
   describe('Collateral Token', async () => {
     it('when transfer collateral token', async function () {
