@@ -14,13 +14,13 @@ contract ProjectManager is Initializable, OwnableUpgradeable {
 
     uint256 public totalProjects;
     uint256 public totalProjectTypes;
-    // mapping of the projectId to a project type
+    // mapping for project Id => project type
     mapping(uint256 => uint256) public projectTypeFromProjectId;
-    // mapping of the project type to a project address
+    // mapping for project address => project type 
     mapping(address => uint256) public projectTypeIndexFromAddress;
-    // mapping of the project type to a project address
+    // mapping for project type => project address
     mapping(uint256 => address) public projectAddressFromType;
-    // mapping of the project type to a project address
+    // mapping for project Id => project address
     mapping(uint256 => address) public projectAddressFromProjectId;
 
     modifier onlyProject() {
