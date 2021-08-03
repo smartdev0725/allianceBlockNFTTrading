@@ -24,7 +24,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
     event LotteryExecuted(uint256 indexed investmentId);
     event WithdrawInvestmentTickets(uint256 indexed investmentId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
     event seekerWithdrawInvestment(uint256 indexed investmentId, uint256 amountWithdrawn);
-    event WithdrawAmountForNonTickets(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets);
+    event lotteryLoserClaimedFunds(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets);
     event WithdrawLockedInvestmentTickets(uint256 indexedinvestmentId, uint256 ticketsToWithdraw);
     event ConvertNFTToInvestmentTokens(uint256 indexedinvestmentId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
     event InvestmentSettled(uint256 investmentId);
@@ -372,7 +372,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         escrow.transferLendingToken(investmentDetails[investmentId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
 
         // Add event for withdraw amount provided for non tickets
-        emit WithdrawAmountForNonTickets(investmentId_, amountToReturnForNonWonTickets);
+        emit lotteryLoserClaimedFunds(investmentId_, amountToReturnForNonWonTickets);
     }
 
     /**

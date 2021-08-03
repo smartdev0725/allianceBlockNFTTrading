@@ -1267,10 +1267,10 @@ export default async function suite() {
     expect(withdrawInvestmentTickets4)
       .to.emit(this.registryContract, 'WithdrawInvestmentTickets')
       .withArgs(investmentId, 1, ticketsWonBeforeWithdraw4.sub(1));
-    // WithdrawAmountForNonTickets
+    // lotteryLoserClaimedFunds
     if (ticketsRemainBeforeWithdraw1.gt(0)) {
       expect(withdrawInvestmentTickets1)
-        .to.emit(this.registryContract, 'WithdrawAmountForNonTickets')
+        .to.emit(this.registryContract, 'lotteryLoserClaimedFunds')
         .withArgs(
           investmentId,
           ethers.utils
@@ -1280,7 +1280,7 @@ export default async function suite() {
     }
     if (ticketsRemainBeforeWithdraw2.gt(0)) {
       expect(withdrawInvestmentTickets2)
-        .to.emit(this.registryContract, 'WithdrawAmountForNonTickets')
+        .to.emit(this.registryContract, 'lotteryLoserClaimedFunds')
         .withArgs(
           investmentId,
           ethers.utils
@@ -1290,7 +1290,7 @@ export default async function suite() {
     }
     if (ticketsRemainBeforeWithdraw3.gt(0)) {
       expect(withdrawInvestmentTickets3)
-        .to.emit(this.registryContract, 'WithdrawAmountForNonTickets')
+        .to.emit(this.registryContract, 'lotteryLoserClaimedFunds')
         .withArgs(
           investmentId,
           ethers.utils
@@ -1300,7 +1300,7 @@ export default async function suite() {
     }
     if (ticketsRemainBeforeWithdraw4.gt(0)) {
       expect(withdrawInvestmentTickets4)
-        .to.emit(this.registryContract, 'WithdrawAmountForNonTickets')
+        .to.emit(this.registryContract, 'lotteryLoserClaimedFunds')
         .withArgs(
           investmentId,
           ethers.utils

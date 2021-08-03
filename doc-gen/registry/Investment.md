@@ -132,7 +132,7 @@ Convert NFT to investment tokens
 
 
 
-### `WithdrawAmountForNonTickets(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets)`
+### `lotteryLoserClaimedFunds(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets)`
 
 
 
