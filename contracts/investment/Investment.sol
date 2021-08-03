@@ -51,7 +51,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         require(baseAmountForEachPartition_ != 0, "Cannot initialize baseAmountForEachPartition_ with 0");
 
         __ReentrancyGuard_init();
-        __TemplateProject_init();
+        __BaseProject_init();
 
         escrow = IEscrow(escrowAddress);
         baseAmountForEachPartition = baseAmountForEachPartition_;

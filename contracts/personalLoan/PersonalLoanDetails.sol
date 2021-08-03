@@ -4,14 +4,14 @@ pragma solidity 0.7.6;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Storage.sol";
 import "../libs/TokenFormat.sol";
-import "../TemplateProject/TemplateProject.sol";
+import "../BaseProject/BaseProject.sol";
 
 /**
  * @title AllianceBlock InvestmentDetails contract
  * @notice Functionality for storing investment details and modifiers.
  * @dev Extends Storage
  */
-contract PersonalLoanDetails is Storage, TemplateProject {
+contract PersonalLoanDetails is Storage, BaseProject {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 

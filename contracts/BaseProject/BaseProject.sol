@@ -3,15 +3,15 @@ pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "./ProjectStorage.sol";
+import "./BaseProjectStorage.sol";
 import "../libs/TokenFormat.sol";
 
 /**
- * @title AllianceBlock InvestmentDetails contract
- * @notice Functionality for storing investment details and modifiers.
- * @dev Extends Storage
+ * @title AllianceBlock BaseProject contract
+ * @notice Common functionality for all type of projects.
+ * @dev Extends BaseProjectStorage
  */
-contract TemplateProject is ProjectStorage, OwnableUpgradeable {
+contract BaseProject is BaseProjectStorage, OwnableUpgradeable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 
@@ -28,7 +28,7 @@ contract TemplateProject is ProjectStorage, OwnableUpgradeable {
         _;
     }
 
-    function __TemplateProject_init() public{
+    function __BaseProject_init() public{
         __Ownable_init();
     }
 

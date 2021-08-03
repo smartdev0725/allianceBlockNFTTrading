@@ -9,10 +9,10 @@ import "../interfaces/IEscrow.sol";
 import "../interfaces/IProjectManager.sol";
 
 /**
- * @title AllianceBlock Storage contract
- * @notice Responsible for investment storage
+ * @title AllianceBlock BaseProjectStorage contract
+ * @notice Responsible for common project storage
  */
-contract ProjectStorage {
+contract BaseProjectStorage {
 
     IGovernance public governance; // Governance's contract address.
     IERC1155Mint public fundingNFT; // Funding nft's contract address.
@@ -28,7 +28,7 @@ contract ProjectStorage {
     // All supported lending tokens are giving true, while unsupported are giving false.
     mapping(address => bool) public isValidLendingToken;
     
-    // Mapping from investment id -> investment status.
+    // Mapping from projectId -> project status.
     mapping(uint256 => ProjectLibrary.ProjectStatus) public projectStatus;
 
 }
