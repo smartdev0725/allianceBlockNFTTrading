@@ -5,24 +5,23 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "./InvestmentDetails.sol";
-import "../libs/SafeERC20.sol";
-import "../libs/TokenFormat.sol";
+import "./PersonalLoanDetails.sol";
+import "../../libs/SafeERC20.sol";
+import "../../libs/TokenFormat.sol";
 
 /**
- * @title AllianceBlock Investment contract.
- * @notice Functionality for Investment.
- * @dev Extends InvestmentDetails.
+ * @title AllianceBlock PersonalLoan contract.
+ * @notice Functionality for PersonalLoan.
+ * @dev Extends PersonalLoanDetails.
  */
-contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradeable {
+contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
     using SafeERC20 for IERC20;
 
     // EVENTS
     event LotteryExecuted(uint256 indexed projectId);
-    event WithdrawProjectTickets(uint256 indexed projectId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
-    event seekerWithdrawInvestment(uint256 indexed projectId, uint256 amountWithdrawn);
+    event WithdrawProject(uint256 indexed projectId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
     event WithdrawAmountForNonTickets(uint256 indexed projectId, uint256 amountToReturnForNonWonTickets);
     event WithdrawLockedProjectTickets(uint256 indexed projectId, uint256 ticketsToWithdraw);
     event ConvertNFTToProjectTokens(uint256 indexed projectId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
@@ -404,7 +403,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         }
 
         // Add event for withdraw investment
-        emit WithdrawProjectTickets(projectId, ticketsToLock, ticketsToWithdraw);
+        emit WithdrawProject(projectId, ticketsToLock, ticketsToWithdraw);
     }
 
     /**
@@ -445,22 +444,6 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         // Add event for withdraw locked investment tickets
         emit WithdrawLockedProjectTickets(projectId, ticketsToWithdraw);
-    }
-
-    /**
-     * @dev This function is called by the seeker to withdraw the lending tokens provided by investors after lottery ends.
-     * @param projectId The id of the investment.
-     */
-    function withdrawInvestment(uint256 projectId) external nonReentrant() {
-        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
-        require(projectSeeker[projectId] == msg.sender, "Only seeker can withdraw");
-        require(!investmentWithdrawn[projectId], "Already withdrawn");
-        
-        uint256 amountToWithdraw = investmentDetails[projectId].totalAmountToBeRaised;
-        investmentWithdrawn[projectId] = true;
-
-        escrow.transferLendingToken(investmentDetails[projectId].lendingToken, msg.sender, amountToWithdraw);
-        emit seekerWithdrawInvestment(projectId, amountToWithdraw);
     }
 
     /**

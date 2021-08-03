@@ -4,7 +4,7 @@ pragma solidity 0.7.6;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./BaseProjectStorage.sol";
-import "../libs/TokenFormat.sol";
+import "../../libs/TokenFormat.sol";
 
 /**
  * @title AllianceBlock BaseProject contract

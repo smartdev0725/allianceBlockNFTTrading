@@ -2,7 +2,7 @@
 pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
-import "../../investment/Investment.sol";
+import "../../projects/investment/Investment.sol";
 
 /**
  * @title AllianceBlock Investment contract
