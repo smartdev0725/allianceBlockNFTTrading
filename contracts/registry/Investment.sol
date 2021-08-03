@@ -24,9 +24,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
     event LotteryExecuted(uint256 indexed investmentId);
     event WithdrawInvestmentTickets(uint256 indexed investmentId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
     event seekerWithdrawInvestment(uint256 indexed investmentId, uint256 amountWithdrawn);
-    event lotteryLoserClaimedFunds(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets);
-    event WithdrawLockedInvestmentTickets(uint256 indexedinvestmentId, uint256 ticketsToWithdraw);
-    event ConvertNFTToInvestmentTokens(uint256 indexedinvestmentId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
+    event lotteryLoserClaimedFunds(uint256 indexed indexedinvestmentId, uint256 amountToReturnForNonWonTickets);
+    event WithdrawLockedInvestmentTickets(uint256 indexed indexedinvestmentId, uint256 ticketsToWithdraw);
+    event ConvertNFTToInvestmentTokens(uint256 indexed indexedinvestmentId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
     event InvestmentSettled(uint256 investmentId);
 
     function __Investment_init() public initializer {
