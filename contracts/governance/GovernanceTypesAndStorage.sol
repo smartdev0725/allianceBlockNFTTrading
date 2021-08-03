@@ -35,7 +35,7 @@ contract GovernanceTypesAndStorage {
 
     mapping(uint256 => ApprovalRequest) public approvalRequests;
 
-    IProjectManager projectManager;
+    IProjectManager public projectManager;
 
     mapping(bytes32 => uint256) public updatableVariables;
 
