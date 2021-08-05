@@ -217,7 +217,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
     /**
      * @notice Convert Investment Tickets to Nfts.
-     * @dev This function is called by an investor to withdraw his tickets.
+     * @dev This function is called by an investor to convert his tickets won to NFTs.
      * @dev require Settled state and enough tickets won
      * @param investmentId The id of the investment.
      */
@@ -260,7 +260,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
         lockedNftsPerAddress[msg.sender] = lockedNftsPerAddress[msg.sender].add(nftsToLock);
 
-        LockInvestmentNfts(investmentId, msg.sender, nftsToLock);
+        emit LockInvestmentNfts(investmentId, msg.sender, nftsToLock);
     }
 
     /**
