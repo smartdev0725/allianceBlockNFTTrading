@@ -1124,17 +1124,41 @@ export default async function suite() {
 
     // When
     if (ticketsWonBeforeWithdraw1.gt(0)) {
+
       convertInvestmentTicketsToNfts1 = await this.registryContract
+      .connect(this.lender1Signer)
+      .convertInvestmentTicketsToNfts(
+        investmentId
+      );
+
+      await this.fundingNFTContract
         .connect(this.lender1Signer)
-        .convertInvestmentTicketsToNfts(
-          investmentId
+        .setApprovalForAll(this.escrowContract.address, true);
+
+      await this.registryContract
+        .connect(this.lender1Signer)
+        .lockInvestmentNfts(
+          investmentId,
+          1
         );
     }
     if (ticketsWonBeforeWithdraw2.gt(0)) {
+
       convertInvestmentTicketsToNfts2 = await this.registryContract
         .connect(this.lender2Signer)
         .convertInvestmentTicketsToNfts(
           investmentId
+        );
+
+      await this.fundingNFTContract
+        .connect(this.lender2Signer)
+        .setApprovalForAll(this.escrowContract.address, true);
+
+      await this.registryContract
+        .connect(this.lender2Signer)
+        .lockInvestmentNfts(
+          investmentId,
+          1
         );
     }
     if (ticketsWonBeforeWithdraw3.gt(0)) {
@@ -1143,12 +1167,34 @@ export default async function suite() {
         .convertInvestmentTicketsToNfts(
           investmentId
         );
+
+      await this.fundingNFTContract
+        .connect(this.lender3Signer)
+        .setApprovalForAll(this.escrowContract.address, true);
+
+      await this.registryContract
+        .connect(this.lender3Signer)
+        .lockInvestmentNfts(
+          investmentId,
+          1
+        );
     }
     if (ticketsWonBeforeWithdraw4.gt(0)) {
       convertInvestmentTicketsToNfts4 = await this.registryContract
         .connect(this.lender4Signer)
         .convertInvestmentTicketsToNfts(
           investmentId
+        );
+
+      await this.fundingNFTContract
+        .connect(this.lender4Signer)
+        .setApprovalForAll(this.escrowContract.address, true);
+
+      await this.registryContract
+        .connect(this.lender4Signer)
+        .lockInvestmentNfts(
+          investmentId,
+          1
         );
     }
 
