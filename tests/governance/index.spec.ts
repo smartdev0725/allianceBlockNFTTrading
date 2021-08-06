@@ -46,7 +46,7 @@ describe('Governance', function () {
     const {
       projectManagerContract,
       investmentContract,
-      personalLoanContract,
+      mockPersonalLoanContract,
       governanceContract,
       lendingTokenContract,
       investmentTokenContract,
@@ -62,7 +62,7 @@ describe('Governance', function () {
     await initializeTransfers(
       {
         investmentContract,
-        personalLoanContract,
+        mockPersonalLoanContract,
         lendingTokenContract,
         investmentTokenContract,
         collateralTokenContract,

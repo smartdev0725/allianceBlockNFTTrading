@@ -26,7 +26,7 @@ export const getContracts = async () => {
 
   const investmentContract = await ethers.getContract('Investment');
 
-  const personalLoanContract = await ethers.getContract('PersonalLoan');
+  const mockPersonalLoanContract = await ethers.getContract('MockPersonalLoan');
 
   const governanceContract = await ethers.getContract('Governance');
 
@@ -55,7 +55,7 @@ export const getContracts = async () => {
   return {
     projectManagerContract,
     investmentContract,
-    personalLoanContract,
+    mockPersonalLoanContract,
     governanceContract,
     fundingNFTContract,
     escrowContract,
@@ -77,7 +77,7 @@ export const initializeTransfers = async (
 ) => {
   const {
     investmentContract,
-    personalLoanContract,
+    mockPersonalLoanContract,
     lendingTokenContract,
     investmentTokenContract,
     collateralTokenContract,
@@ -93,7 +93,7 @@ export const initializeTransfers = async (
     seekerSigner,
   } = signers;
 
-  for (const projectContract of [investmentContract, personalLoanContract]) {
+  for (const projectContract of [investmentContract, mockPersonalLoanContract]) {
     // Transfer tokens.
     const amountToTransfer = ethers.utils.parseEther('10000000');
 

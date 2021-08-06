@@ -2,7 +2,7 @@
 pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./Storage.sol";
+import "./MockStorage.sol";
 import "../../../libs/TokenFormat.sol";
 import "../../../projects/BaseProject/BaseProject.sol";
 
@@ -11,7 +11,7 @@ import "../../../projects/BaseProject/BaseProject.sol";
  * @notice Functionality for storing investment details and modifiers.
  * @dev Extends Storage
  */
-contract PersonalLoanDetails is Storage, BaseProject {
+contract MockPersonalLoanDetails is MockStorage, BaseProject {
     using SafeMath for uint256;
     using TokenFormat for uint256;
 

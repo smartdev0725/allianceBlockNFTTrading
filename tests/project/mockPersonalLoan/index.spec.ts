@@ -53,7 +53,7 @@ describe('Personal Loans', function () {
     // Get contracts
     const {
       projectManagerContract,
-      personalLoanContract,
+      mockPersonalLoanContract,
       investmentContract,
       governanceContract,
       fundingNFTContract,
@@ -66,7 +66,7 @@ describe('Personal Loans', function () {
       stakerMedalNFTContract,
     } = await getContracts();
     this.projectManagerContract = projectManagerContract;
-    this.personalLoanContract = personalLoanContract;
+    this.mockPersonalLoanContract = mockPersonalLoanContract;
     this.investmentContract = investmentContract;
     this.governanceContract = governanceContract;
     this.fundingNFTContract = fundingNFTContract;
@@ -84,7 +84,7 @@ describe('Personal Loans', function () {
     // Initialize Transfers
     await initializeTransfers(
       {
-        personalLoanContract,
+        mockPersonalLoanContract,
         investmentContract,
         lendingTokenContract,
         investmentTokenContract,
@@ -102,7 +102,7 @@ describe('Personal Loans', function () {
     );
 
     await this.projectManagerContract.createProjectType(
-      personalLoanContract.address
+      mockPersonalLoanContract.address
     );
 
     this.approvalRequest = await governanceContract.totalApprovalRequests();
@@ -116,7 +116,7 @@ describe('Personal Loans', function () {
     this.totalAmountRequested = ethers.utils.parseEther('200');
     this.ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-    await this.personalLoanContract
+    await this.mockPersonalLoanContract
       .connect(this.seekerSigner)
       .requestInvestment(
         this.investmentTokenContract.address,

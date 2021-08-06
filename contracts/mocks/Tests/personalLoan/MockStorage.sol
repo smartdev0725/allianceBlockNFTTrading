@@ -11,7 +11,7 @@ import "../../../interfaces/IEscrow.sol";
  * @title AllianceBlock Storage contract
  * @notice Responsible for investment storage
  */
-contract Storage {
+contract MockStorage {
 
     // The amount of investment tokens each ticket contains.
     mapping(uint256 => uint256) public investmentTokensPerTicket;

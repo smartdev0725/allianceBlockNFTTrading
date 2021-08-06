@@ -33,7 +33,7 @@ export default async function suite() {
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
       await expect(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.seekerSigner)
           .requestInvestment(
             this.investmentTokenContract.address,
@@ -43,7 +43,7 @@ export default async function suite() {
             ipfsHash
           )
       )
-        .to.emit(this.personalLoanContract, 'ProjectRequested')
+        .to.emit(this.mockPersonalLoanContract, 'ProjectRequested')
         .withArgs(projectId, this.seeker, totalAmountRequested);
 
       const newSeekerInvestmentTokenBalance =
@@ -63,16 +63,16 @@ export default async function suite() {
 
       const isPaused = await this.fundingNFTContract.transfersPaused(projectId);
 
-      const projectStatus = await this.personalLoanContract.projectStatus(
+      const projectStatus = await this.mockPersonalLoanContract.projectStatus(
         projectId
       );
       const investmentDetails =
-        await this.personalLoanContract.investmentDetails(projectId);
-      const investmentSeeker = await this.personalLoanContract.projectSeeker(
+        await this.mockPersonalLoanContract.investmentDetails(projectId);
+      const investmentSeeker = await this.mockPersonalLoanContract.projectSeeker(
         projectId
       );
       const investmentTokensPerTicket =
-        await this.personalLoanContract.investmentTokensPerTicket(projectId);
+        await this.mockPersonalLoanContract.investmentTokensPerTicket(projectId);
       const daoApprovalRequest = await this.governanceContract.approvalRequests(
         approvalRequest
       );
@@ -142,7 +142,7 @@ export default async function suite() {
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
       await expectRevert(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.seekerSigner)
           .requestInvestment(
             this.investmentTokenContract.address,
@@ -161,7 +161,7 @@ export default async function suite() {
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
       await expectRevert(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.seekerSigner)
           .requestInvestment(
             this.investmentTokenContract.address,
@@ -180,7 +180,7 @@ export default async function suite() {
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
       await expectRevert(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.seekerSigner)
           .requestInvestment(
             this.investmentTokenContract.address,
@@ -197,7 +197,7 @@ export default async function suite() {
       const projectId = await this.projectManagerContract.totalProjects();
 
       await expect(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.seekerSigner)
           .requestInvestment(
             this.investmentTokenContract.address,
@@ -207,7 +207,7 @@ export default async function suite() {
             this.ipfsHash
           )
       )
-        .to.emit(this.personalLoanContract, 'ProjectRequested')
+        .to.emit(this.mockPersonalLoanContract, 'ProjectRequested')
         .withArgs(projectId, this.seeker, this.totalAmountRequested);
 
       await this.governanceContract
@@ -215,7 +215,7 @@ export default async function suite() {
         .superVoteForRequest(this.approvalRequest.add(1), false);
 
       const projectStatus = (
-        await this.personalLoanContract.getInvestmentMetadata(projectId)
+        await this.mockPersonalLoanContract.getInvestmentMetadata(projectId)
       )[1];
       // Correct Status.
       expect(projectStatus.toString()).to.be.equal(ProjectStatusTypes.REJECTED);

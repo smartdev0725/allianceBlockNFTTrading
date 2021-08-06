@@ -13,28 +13,28 @@ export default async function suite() {
   describe('Check execute lottery', async () => {
     it('when execute lottery with a wrong id ', async function () {
       await expectRevert(
-        this.personalLoanContract.executeLotteryRun(1000),
+        this.mockPersonalLoanContract.executeLotteryRun(1000),
         'Can run lottery only in Started state'
       );
     });
 
     it('when execute show interest for personalLoan with wrong projectId param ', async function () {
       await expectRevert(
-        this.personalLoanContract.showInterestForInvestment(10, 20),
+        this.mockPersonalLoanContract.showInterestForInvestment(10, 20),
         'Can show interest only in Approved state'
       );
     });
 
     it('when execute show interest for personalLoan with wrong partitions ', async function () {
       await expectRevert(
-        this.personalLoanContract.showInterestForInvestment(this.projectId, 0),
+        this.mockPersonalLoanContract.showInterestForInvestment(this.projectId, 0),
         'Cannot show interest for 0 partitions'
       );
     });
 
     it('when execute show interest for personalLoan without lending tokens should revert', async function () {
       await expectRevert(
-        this.personalLoanContract.showInterestForInvestment(this.projectId, 10),
+        this.mockPersonalLoanContract.showInterestForInvestment(this.projectId, 10),
         'ERC20: transfer amount exceeds balance'
       );
     });
@@ -47,16 +47,16 @@ export default async function suite() {
         .stake(StakingType.STAKER_LVL_2);
 
       await expect(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .showInterestForInvestment(this.projectId, numberOfPartitions)
       )
-        .to.emit(this.personalLoanContract, 'ProjectInterest')
+        .to.emit(this.mockPersonalLoanContract, 'ProjectInterest')
         .withArgs(this.projectId, numberOfPartitions);
 
       // Then
       await expectRevert(
-        this.personalLoanContract.executeLotteryRun(this.projectId),
+        this.mockPersonalLoanContract.executeLotteryRun(this.projectId),
         'Can run lottery only in Started state'
       );
     });
@@ -69,16 +69,16 @@ export default async function suite() {
         .stake(StakingType.STAKER_LVL_2);
 
       await expect(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .showInterestForInvestment(this.projectId, numberOfPartitions)
       )
-        .to.emit(this.personalLoanContract, 'ProjectInterest')
+        .to.emit(this.mockPersonalLoanContract, 'ProjectInterest')
         .withArgs(this.projectId, numberOfPartitions);
 
       // Then
       await expectRevert(
-        this.personalLoanContract.convertNFTToInvestmentTokens(
+        this.mockPersonalLoanContract.convertNFTToInvestmentTokens(
           this.projectId,
           10
         ),
@@ -94,11 +94,11 @@ export default async function suite() {
         .stake(StakingType.STAKER_LVL_2);
 
       await expect(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .showInterestForInvestment(this.projectId, numberOfPartitions)
       )
-        .to.emit(this.personalLoanContract, 'ProjectInterest')
+        .to.emit(this.mockPersonalLoanContract, 'ProjectInterest')
         .withArgs(this.projectId, numberOfPartitions);
 
       // When
@@ -110,30 +110,30 @@ export default async function suite() {
         .checkCronjobs();
 
       await expectRevert(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.lender2Signer)
           .executeLotteryRun(this.projectId),
         'Can run lottery only if has remaining ticket'
       );
 
       await expect(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .executeLotteryRun(this.projectId)
       )
-        .to.emit(this.personalLoanContract, 'LotteryExecuted')
+        .to.emit(this.mockPersonalLoanContract, 'LotteryExecuted')
         .withArgs(this.projectId);
 
       // Then
       const ticketsRemainingAfter =
-        await this.personalLoanContract.ticketsRemaining(this.projectId);
+        await this.mockPersonalLoanContract.ticketsRemaining(this.projectId);
       const remainingTicketsPerAddressAfter =
-        await this.personalLoanContract.remainingTicketsPerAddress(
+        await this.mockPersonalLoanContract.remainingTicketsPerAddress(
           this.projectId,
           this.lender1
         );
       const ticketsWonPerAddressAfter =
-        await this.personalLoanContract.ticketsWonPerAddress(
+        await this.mockPersonalLoanContract.ticketsWonPerAddress(
           this.projectId,
           this.lender1
         );
@@ -147,7 +147,7 @@ export default async function suite() {
 
     it('Cannot withdraw tickets in a non settled state', async function () {
       await expectRevert(
-        this.personalLoanContract.withdrawInvestmentTickets(
+        this.mockPersonalLoanContract.withdrawInvestmentTickets(
           this.projectId,
           BigNumber.from(10),
           BigNumber.from(10)
@@ -169,13 +169,13 @@ export default async function suite() {
         .stake(StakingType.STAKER_LVL_2);
 
       // When
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender1Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(10));
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender2Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(9));
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender3Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(1));
 
@@ -186,40 +186,40 @@ export default async function suite() {
         .connect(this.superDelegatorSigner)
         .checkCronjobs();
 
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender3Signer)
         .executeLotteryRun(this.projectId);
 
       // Then
       const ticketsRemainingAfter =
-        await this.personalLoanContract.ticketsRemaining(this.projectId);
+        await this.mockPersonalLoanContract.ticketsRemaining(this.projectId);
       const lender1remainingTicketsPerAddressAfter =
-        await this.personalLoanContract.remainingTicketsPerAddress(
+        await this.mockPersonalLoanContract.remainingTicketsPerAddress(
           this.projectId,
           this.lender1
         );
       const lender1ticketsWonPerAddressAfter =
-        await this.personalLoanContract.ticketsWonPerAddress(
+        await this.mockPersonalLoanContract.ticketsWonPerAddress(
           this.projectId,
           this.lender1
         );
       const lender2remainingTicketsPerAddressAfter =
-        await this.personalLoanContract.remainingTicketsPerAddress(
+        await this.mockPersonalLoanContract.remainingTicketsPerAddress(
           this.projectId,
           this.lender2
         );
       const lender2ticketsWonPerAddressAfter =
-        await this.personalLoanContract.ticketsWonPerAddress(
+        await this.mockPersonalLoanContract.ticketsWonPerAddress(
           this.projectId,
           this.lender2
         );
       const lender3remainingTicketsPerAddressAfter =
-        await this.personalLoanContract.remainingTicketsPerAddress(
+        await this.mockPersonalLoanContract.remainingTicketsPerAddress(
           this.projectId,
           this.lender3
         );
       const lender3ticketsWonPerAddressAfter =
-        await this.personalLoanContract.ticketsWonPerAddress(
+        await this.mockPersonalLoanContract.ticketsWonPerAddress(
           this.projectId,
           this.lender3
         );
@@ -246,13 +246,13 @@ export default async function suite() {
         .stake(StakingType.STAKER_LVL_2);
 
       // When
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender1Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(900));
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender2Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(900));
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender3Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(1200));
 
@@ -263,13 +263,13 @@ export default async function suite() {
         .connect(this.superDelegatorSigner)
         .checkCronjobs();
 
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender3Signer)
         .executeLotteryRun(this.projectId);
 
       // Then
       await expectRevert(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .withdrawInvestmentTickets(this.projectId, 1000, 700),
         'Not enough tickets won'
@@ -289,13 +289,13 @@ export default async function suite() {
         .stake(StakingType.STAKER_LVL_2);
 
       // When
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender1Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(10));
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender2Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(9));
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender3Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(1));
 
@@ -306,7 +306,7 @@ export default async function suite() {
         .connect(this.superDelegatorSigner)
         .checkCronjobs();
 
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender3Signer)
         .executeLotteryRun(this.projectId);
 
@@ -317,15 +317,15 @@ export default async function suite() {
         );
 
       await expect(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .withdrawInvestmentTickets(this.projectId, 3, 7)
       )
-        .to.emit(this.personalLoanContract, 'WithdrawProject')
+        .to.emit(this.mockPersonalLoanContract, 'WithdrawProject')
         .withArgs(this.projectId, 3, 7);
 
       await expectRevert(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .withdrawAmountProvidedForNonWonTickets(this.projectId),
         'No non-won tickets to withdraw'
@@ -340,7 +340,7 @@ export default async function suite() {
         +balanceFundingNFTTokenBefore.toString()
       );
       const lender1ticketsWonPerAddressAfter =
-        await this.personalLoanContract.ticketsWonPerAddress(
+        await this.mockPersonalLoanContract.ticketsWonPerAddress(
           this.projectId,
           this.lender1
         );
@@ -360,13 +360,13 @@ export default async function suite() {
         .stake(StakingType.STAKER_LVL_2);
 
       // When
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender1Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(10));
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender2Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(9));
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender3Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(21));
 
@@ -377,12 +377,12 @@ export default async function suite() {
         .connect(this.superDelegatorSigner)
         .checkCronjobs();
 
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender3Signer)
         .executeLotteryRun(this.projectId);
 
       const lender3remainingTicketsPerAddressBefore =
-        await this.personalLoanContract.remainingTicketsPerAddress(
+        await this.mockPersonalLoanContract.remainingTicketsPerAddress(
           this.projectId,
           this.lender3
         );
@@ -390,16 +390,16 @@ export default async function suite() {
         await this.lendingTokenContract.balanceOf(this.lender3);
 
       const baseAmountForEachPartition =
-        await this.personalLoanContract.baseAmountForEachPartition();
+        await this.mockPersonalLoanContract.baseAmountForEachPartition();
       const amountToReturnForNonWonTickets =
         lender3remainingTicketsPerAddressBefore.mul(baseAmountForEachPartition);
 
       await expect(
-        this.personalLoanContract
+        this.mockPersonalLoanContract
           .connect(this.lender3Signer)
           .withdrawAmountProvidedForNonWonTickets(this.projectId)
       )
-        .to.emit(this.personalLoanContract, 'WithdrawAmountForNonTickets')
+        .to.emit(this.mockPersonalLoanContract, 'WithdrawAmountForNonTickets')
         .withArgs(this.projectId, amountToReturnForNonWonTickets);
 
       const lendingTokenBalanceAfter =
@@ -407,7 +407,7 @@ export default async function suite() {
 
       // Then
       const lender3remainingTicketsPerAddressAfter =
-        await this.personalLoanContract.remainingTicketsPerAddress(
+        await this.mockPersonalLoanContract.remainingTicketsPerAddress(
           this.projectId,
           this.lender3
         );
@@ -426,7 +426,7 @@ export default async function suite() {
       const totalAmountRequested = ethers.utils.parseEther('250'); // 25 > 20 (every run number) tickets
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.seekerSigner)
         .requestInvestment(
           this.investmentTokenContract.address,
@@ -450,11 +450,11 @@ export default async function suite() {
 
       const numberOfPartitions = 26;
 
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender1Signer)
         .showInterestForInvestment(this.projectId.add(1), numberOfPartitions);
 
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender2Signer)
         .showInterestForInvestment(this.projectId.add(1), numberOfPartitions);
 
@@ -480,19 +480,19 @@ export default async function suite() {
       const afterSecondCronjobList =
         await this.governanceContract.cronjobList();
 
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender1Signer)
         .executeLotteryRun(this.projectId.add(1));
 
       const statusBeforeSecondRun =
-        await this.personalLoanContract.projectStatus(this.projectId.add(1));
+        await this.mockPersonalLoanContract.projectStatus(this.projectId.add(1));
 
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.lender2Signer)
         .executeLotteryRun(this.projectId.add(1));
 
       const statusAfterSecondRun =
-        await this.personalLoanContract.projectStatus(this.projectId.add(1));
+        await this.mockPersonalLoanContract.projectStatus(this.projectId.add(1));
 
       // Then
       expect(previousCronjobList.head.toString()).to.be.equal('1');
@@ -522,7 +522,7 @@ export default async function suite() {
         const totalAmountRequested = ethers.utils.parseEther('100'); // 10 tickets
         const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-        await this.personalLoanContract
+        await this.mockPersonalLoanContract
           .connect(this.seekerSigner)
           .requestInvestment(
             this.investmentTokenContract.address,
@@ -542,7 +542,7 @@ export default async function suite() {
 
         const numberOfPartitions = 11;
 
-        await this.personalLoanContract
+        await this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .showInterestForInvestment(this.projectId.add(1), numberOfPartitions);
 
@@ -559,7 +559,7 @@ export default async function suite() {
           .connect(this.superDelegatorSigner)
           .checkCronjobs();
 
-        await this.personalLoanContract
+        await this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .executeLotteryRun(this.projectId.add(1));
       });
@@ -575,7 +575,7 @@ export default async function suite() {
             investmentId.toNumber()
           );
 
-        await this.personalLoanContract
+        await this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .withdrawInvestmentTickets(
             investmentId,
@@ -604,9 +604,9 @@ export default async function suite() {
         const balanceOfNFTTokensBefore =
           await this.fundingNFTContract.balanceOf(this.lender1, investmentId);
         const lockedTicketsBefore =
-          await this.personalLoanContract.lockedTicketsPerAddress(this.lender1);
+          await this.mockPersonalLoanContract.lockedTicketsPerAddress(this.lender1);
 
-        await this.personalLoanContract
+        await this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .withdrawInvestmentTickets(
             investmentId,
@@ -619,7 +619,7 @@ export default async function suite() {
           investmentId
         );
         const lockedTicketsAfter =
-          await this.personalLoanContract.lockedTicketsPerAddress(this.lender1);
+          await this.mockPersonalLoanContract.lockedTicketsPerAddress(this.lender1);
 
         const NFTTokensGot = balanceOfNFTTokensAfter.sub(
           balanceOfNFTTokensBefore
@@ -632,7 +632,7 @@ export default async function suite() {
         ).to.be.equal(ticketsToLock.toString());
 
         await expectRevert(
-          this.personalLoanContract
+          this.mockPersonalLoanContract
             .connect(this.lender1Signer)
             .convertNFTToInvestmentTokens(investmentId, 10),
           'Not enough NFT to convert'
@@ -642,19 +642,19 @@ export default async function suite() {
       it('When withdrawing only non-won tickets', async function () {
         const ticketsNotWon = BigNumber.from(1);
         const baseAmountForEachTicket =
-          await this.personalLoanContract.baseAmountForEachPartition();
+          await this.mockPersonalLoanContract.baseAmountForEachPartition();
 
         const balanceOfLendingTokensBefore =
           await this.lendingTokenContract.balanceOf(this.lender1);
 
-        await this.personalLoanContract
+        await this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .withdrawAmountProvidedForNonWonTickets(this.projectId.add(1));
 
         const balanceOfLendingTokensAfter =
           await this.lendingTokenContract.balanceOf(this.lender1);
         const lockedTicketsAfter =
-          await this.personalLoanContract.lockedTicketsPerAddress(this.lender1);
+          await this.mockPersonalLoanContract.lockedTicketsPerAddress(this.lender1);
 
         const lendingTokensGot = balanceOfLendingTokensAfter.sub(
           balanceOfLendingTokensBefore
@@ -669,7 +669,7 @@ export default async function suite() {
 
       it('When trying to withdraw non won tickets in non-settled state', async function () {
         await expectRevert(
-          this.personalLoanContract
+          this.mockPersonalLoanContract
             .connect(this.lender1Signer)
             .withdrawAmountProvidedForNonWonTickets(this.projectId),
           'Can withdraw only in Settled state'
@@ -689,7 +689,7 @@ export default async function suite() {
             investmentId.toNumber()
           );
 
-        await this.personalLoanContract
+        await this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .withdrawInvestmentTickets(
             investmentId,
@@ -709,18 +709,18 @@ export default async function suite() {
         expect(nftTokensGot.toNumber()).to.be.equal(ticketsToWithdraw);
 
         const investmentTokensPerTicket =
-          await this.personalLoanContract.investmentTokensPerTicket(
+          await this.mockPersonalLoanContract.investmentTokensPerTicket(
             investmentId
           );
         const amountOfInvestmentTokenToTransfer =
           investmentTokensPerTicket.mul(ticketsToWithdraw);
 
         await expect(
-          this.personalLoanContract
+          this.mockPersonalLoanContract
             .connect(this.lender1Signer)
             .convertNFTToInvestmentTokens(investmentId, ticketsToWithdraw)
         )
-          .to.emit(this.personalLoanContract, 'ConvertNFTToProjectTokens')
+          .to.emit(this.mockPersonalLoanContract, 'ConvertNFTToProjectTokens')
           .withArgs(
             investmentId,
             ticketsToWithdraw,
@@ -753,7 +753,7 @@ export default async function suite() {
             investmentId.toNumber()
           );
 
-        await this.personalLoanContract
+        await this.mockPersonalLoanContract
           .connect(this.lender1Signer)
           .withdrawInvestmentTickets(
             investmentId,
@@ -773,7 +773,7 @@ export default async function suite() {
         expect(nftTokensGot.toNumber()).to.be.equal(ticketsToWithdraw);
 
         await expectRevert(
-          this.personalLoanContract
+          this.mockPersonalLoanContract
             .connect(this.lender1Signer)
             .convertNFTToInvestmentTokens(investmentId, 0),
           'Amount of nft to convert cannot be 0'
@@ -790,7 +790,7 @@ export default async function suite() {
           const totalAmountRequested = ethers.utils.parseEther('100'); // 10 tickets
           const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-          await this.personalLoanContract
+          await this.mockPersonalLoanContract
             .connect(this.seekerSigner)
             .requestInvestment(
               this.investmentTokenContract.address,
@@ -810,7 +810,7 @@ export default async function suite() {
 
           const numberOfPartitions = 10;
 
-          await this.personalLoanContract
+          await this.mockPersonalLoanContract
             .connect(this.lender1Signer)
             .showInterestForInvestment(
               this.projectId.add(1),
@@ -830,14 +830,14 @@ export default async function suite() {
             .connect(this.superDelegatorSigner)
             .checkCronjobs();
 
-          await this.personalLoanContract
+          await this.mockPersonalLoanContract
             .connect(this.lender1Signer)
             .executeLotteryRun(this.projectId.add(1));
 
           const ticketsToLock = 10;
           const ticketsToWithdraw = 0;
 
-          await this.personalLoanContract
+          await this.mockPersonalLoanContract
             .connect(this.lender1Signer)
             .withdrawInvestmentTickets(
               this.projectId.add(1),
@@ -845,7 +845,7 @@ export default async function suite() {
               ticketsToWithdraw
             );
 
-          await this.personalLoanContract
+          await this.mockPersonalLoanContract
             .connect(this.seekerSigner)
             .requestInvestment(
               this.investmentTokenContract.address,
@@ -866,7 +866,7 @@ export default async function suite() {
 
           const numberOfPartitions = 10;
 
-          await this.personalLoanContract
+          await this.mockPersonalLoanContract
             .connect(this.lender1Signer)
             .showInterestForInvestment(
               this.projectId.add(2),
@@ -896,7 +896,7 @@ export default async function suite() {
               investmentId.toNumber()
             );
 
-          await this.personalLoanContract
+          await this.mockPersonalLoanContract
             .connect(this.lender1Signer)
             .withdrawLockedInvestmentTickets(investmentId, numberOfPartitions);
 
@@ -924,7 +924,7 @@ export default async function suite() {
         it('Should revert when trying to withdraw more than locked tickets', async function () {
           const numberOfPartitions = BigNumber.from(12);
           await expectRevert(
-            this.personalLoanContract
+            this.mockPersonalLoanContract
               .connect(this.lender1Signer)
               .withdrawLockedInvestmentTickets(
                 this.projectId.add(1),
@@ -937,7 +937,7 @@ export default async function suite() {
         it('Should revert when trying to withdraw locked tickets on non settled state', async function () {
           const numberOfPartitions = BigNumber.from(5);
           await expectRevert(
-            this.personalLoanContract
+            this.mockPersonalLoanContract
               .connect(this.lender1Signer)
               .withdrawLockedInvestmentTickets(
                 this.projectId,

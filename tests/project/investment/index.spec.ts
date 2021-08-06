@@ -54,7 +54,7 @@ describe('Investments', function () {
     const {
       projectManagerContract,
       investmentContract,
-      personalLoanContract,
+      mockPersonalLoanContract,
       governanceContract,
       fundingNFTContract,
       escrowContract,
@@ -66,7 +66,7 @@ describe('Investments', function () {
     } = await getContracts();
     this.projectManagerContract = projectManagerContract;
     this.investmentContract = investmentContract;
-    this.personalLoanContract = personalLoanContract;
+    this.mockPersonalLoanContract = mockPersonalLoanContract;
     this.governanceContract = governanceContract;
     this.fundingNFTContract = fundingNFTContract;
     this.escrowContract = escrowContract;
@@ -83,7 +83,7 @@ describe('Investments', function () {
     await initializeTransfers(
       {
         investmentContract,
-        personalLoanContract,
+        mockPersonalLoanContract,
         lendingTokenContract,
         investmentTokenContract,
         collateralTokenContract,

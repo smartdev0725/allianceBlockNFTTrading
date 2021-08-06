@@ -25,7 +25,7 @@ describe('Investment upgrade test', () => {
       await getNamedAccounts();
 
     const investmentContract = await ethers.getContract('Investment');
-    const personalLoanContract = await ethers.getContract('PersonalLoan');
+    const mockPersonalLoanContract = await ethers.getContract('MockPersonalLoan');
     const projectManagerContract = await ethers.getContract('ProjectManager');
     const governanceContract = await ethers.getContract('Governance');
     const investmentTokenContract = await ethers.getContract('InvestmentToken');
@@ -39,7 +39,7 @@ describe('Investment upgrade test', () => {
         lendingTokenContract,
         investmentTokenContract,
         collateralTokenContract,
-        personalLoanContract,
+        mockPersonalLoanContract,
       },
       {deployer, lender1, lender2, lender3, lender4, seeker},
       {

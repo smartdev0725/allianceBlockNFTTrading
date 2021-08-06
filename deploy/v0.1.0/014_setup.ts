@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const stakingContract = await ethers.getContract('Staking');
   const investmentContract = await ethers.getContract('Investment');
-  const personalLoanContract = await ethers.getContract('PersonalLoan');
+  const mockPersonalLoanContract = await ethers.getContract('MockPersonalLoan');
   const fundingNFTContract = await ethers.getContract('FundingNFT');
   const stakerMedalNFTContract = await ethers.getContract('StakerMedalNFT');
   const escrowContract = await ethers.getContract('Escrow');
@@ -47,7 +47,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       .connect(deployerSigner)
       .grantRole(
         ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
-        personalLoanContract.address
+        mockPersonalLoanContract.address
       );
     await fundingNFTContract
       .connect(deployerSigner)
@@ -71,7 +71,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       .connect(deployerSigner)
       .grantRole(
         ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
-        personalLoanContract.address
+        mockPersonalLoanContract.address
       );
   }
 
@@ -105,7 +105,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
 
   // Setup personal loan
-  await personalLoanContract
+  await mockPersonalLoanContract
     .connect(deployerSigner)
     .initializeInvestment(
       rALBTAddress,
@@ -120,7 +120,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     .createProjectType(investmentContract.address);
   await projectManagerContract
     .connect(deployerSigner)
-    .createProjectType(personalLoanContract.address);
+    .createProjectType(mockPersonalLoanContract.address);
 
   return true;
 };

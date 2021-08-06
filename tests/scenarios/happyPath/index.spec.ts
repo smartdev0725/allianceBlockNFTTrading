@@ -50,7 +50,7 @@ describe('Happy Path', function () {
     // Get contracts
     const {
       projectManagerContract,
-      personalLoanContract,
+      mockPersonalLoanContract,
       investmentContract,
       actionVerifierContract,
       governanceContract,
@@ -64,7 +64,7 @@ describe('Happy Path', function () {
       stakerMedalNFTContract,
     } = await getContracts();
     this.projectManagerContract = projectManagerContract;
-    this.personalLoanContract = personalLoanContract;
+    this.mockPersonalLoanContract = mockPersonalLoanContract;
     this.investmentContract = investmentContract;
     this.actionVerifierContract = actionVerifierContract;
     this.registryContract = {};
@@ -84,7 +84,7 @@ describe('Happy Path', function () {
     // Initialize Transfers
     await initializeTransfers(
       {
-        personalLoanContract,
+        mockPersonalLoanContract,
         investmentContract,
         lendingTokenContract,
         investmentTokenContract,
@@ -102,7 +102,7 @@ describe('Happy Path', function () {
     );
 
     await this.projectManagerContract.createProjectType(
-      personalLoanContract.address
+      mockPersonalLoanContract.address
     );
 
     this.approvalRequest = await governanceContract.totalApprovalRequests();
@@ -116,7 +116,7 @@ describe('Happy Path', function () {
     this.totalAmountRequested = ethers.utils.parseEther('200');
     this.ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-    await this.personalLoanContract
+    await this.mockPersonalLoanContract
       .connect(this.seekerSigner)
       .requestInvestment(
         this.investmentTokenContract.address,

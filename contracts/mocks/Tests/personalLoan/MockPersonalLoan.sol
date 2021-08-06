@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "./PersonalLoanDetails.sol";
+import "./MockPersonalLoanDetails.sol";
 import "../../../libs/SafeERC20.sol";
 import "../../../libs/TokenFormat.sol";
 
@@ -13,7 +13,7 @@ import "../../../libs/TokenFormat.sol";
  * @title TEST contract to simulate new type of project.
  * @notice Same contract as investment
  */
-contract PersonalLoan is Initializable, PersonalLoanDetails, ReentrancyGuardUpgradeable {
+contract MockPersonalLoan is Initializable, MockPersonalLoanDetails, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
     using SafeERC20 for IERC20;

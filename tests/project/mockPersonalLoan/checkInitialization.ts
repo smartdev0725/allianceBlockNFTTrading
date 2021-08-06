@@ -12,7 +12,7 @@ export default async function suite() {
       const lotteryNumbersForImmediateTicket = 10;
 
       await expectRevert(
-        this.personalLoanContract.initializeInvestment(
+        this.mockPersonalLoanContract.initializeInvestment(
           reputationalAlbt,
           totalTicketsPerRun,
           rAlbtPerLotteryNumber,
@@ -29,7 +29,7 @@ export default async function suite() {
       const blocksLockedForReputation = 10;
       const lotteryNumbersForImmediateTicket = 10;
       await expectRevert(
-        this.personalLoanContract.initializeInvestment(
+        this.mockPersonalLoanContract.initializeInvestment(
           ethers.constants.AddressZero,
           totalTicketsPerRun,
           rAlbtPerLotteryNumber,
@@ -47,7 +47,7 @@ export default async function suite() {
       const blocksLockedForReputation = 0;
       const lotteryNumbersForImmediateTicket = 0;
       await expectRevert(
-        this.personalLoanContract.initializeInvestment(
+        this.mockPersonalLoanContract.initializeInvestment(
           reputationalAlbt,
           totalTicketsPerRun,
           rAlbtPerLotteryNumber,
@@ -64,7 +64,7 @@ export default async function suite() {
       const blocksLockedForReputation = 0;
       const lotteryNumbersForImmediateTicket = 0;
       await expectRevert(
-        this.personalLoanContract.initializeInvestment(
+        this.mockPersonalLoanContract.initializeInvestment(
           ethers.constants.AddressZero,
           totalTicketsPerRun,
           rAlbtPerLotteryNumber,
@@ -77,18 +77,18 @@ export default async function suite() {
 
     it('When adding as lending token the zero address should revert', async function () {
       await expectRevert(
-        this.personalLoanContract.addLendingToken(ethers.constants.AddressZero),
+        this.mockPersonalLoanContract.addLendingToken(ethers.constants.AddressZero),
         'Cannot provide lendingToken_ with 0 address'
       );
     });
 
     it('When adding second time same lending token should revert', async function () {
-      await this.personalLoanContract.addLendingToken(
+      await this.mockPersonalLoanContract.addLendingToken(
         this.collateralTokenContract.address
       );
 
       await expectRevert(
-        this.personalLoanContract.addLendingToken(
+        this.mockPersonalLoanContract.addLendingToken(
           this.collateralTokenContract.address
         ),
         'Cannot add existing lending token'
@@ -97,7 +97,7 @@ export default async function suite() {
 
     it('When adding escrow address with zero address should revert', async function () {
       await expectRevert(
-        this.personalLoanContract.setEscrowAddress(
+        this.mockPersonalLoanContract.setEscrowAddress(
           ethers.constants.AddressZero
         ),
         'Cannot provide escrowAddress_ with 0 address'
@@ -127,10 +127,10 @@ export default async function suite() {
       this.escrowContract = await ethers.getContract('Escrow2');
 
       // When
-      await this.personalLoanContract
+      await this.mockPersonalLoanContract
         .connect(this.deployerSigner)
         .setEscrowAddress(this.escrowContract.address);
-      const escrowAddress = await this.personalLoanContract.escrow();
+      const escrowAddress = await this.mockPersonalLoanContract.escrow();
 
       // Then
       expect(true).to.be.equal(true);
