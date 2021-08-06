@@ -282,11 +282,9 @@ export default async function suite() {
         this.registryContract
           .connect(this.lender1Signer)
           .convertInvestmentTicketsToNfts(this.investmentId)
-          // .convertInvestmentTicketsToNfts(this.investmentId, 3, 7)
       )
         .to.emit(this.registryContract, 'ConvertInvestmentTickets')
         .withArgs(this.investmentId, this.lender1, lender1ticketsWonPerAddressBefore);
-        // .withArgs(this.investmentId, 3, 7);
 
       await expectRevert(
         this.registryContract
@@ -553,8 +551,6 @@ export default async function suite() {
           .connect(this.lender1Signer)
           .convertInvestmentTicketsToNfts(
             investmentId,
-            // ticketsToLock,
-            // ticketsToWithdraw
           );
 
         const balanceOfNFTTokensAfter = await this.fundingNFTContract.balanceOf(
@@ -584,8 +580,6 @@ export default async function suite() {
           .connect(this.lender1Signer)
           .convertInvestmentTicketsToNfts(
             investmentId,
-            // ticketsToLock,
-            // ticketsToWithdraw
           );
 
         await this.fundingNFTContract
@@ -597,7 +591,6 @@ export default async function suite() {
           .lockInvestmentNfts(
             investmentId,
             ticketsToLock,
-            // ticketsToWithdraw
           );
 
         const balanceOfNFTTokensAfter = await this.fundingNFTContract.balanceOf(
@@ -679,8 +672,6 @@ export default async function suite() {
           .connect(this.lender1Signer)
           .convertInvestmentTicketsToNfts(
             investmentId,
-            // ticketsToLock,
-            // ticketsToWithdraw
           );
 
         const balanceOfNFTTokensAfter = await this.fundingNFTContract.balanceOf(
@@ -725,9 +716,6 @@ export default async function suite() {
       });
 
       it('When withdrawing with 0 ticketsToLock the user will not be able to convert if amount is zero', async function () {
-        const {investmentTokenContract} = await getContracts();
-
-        const ticketsToLock = 0;
         const ticketsToWithdraw = 10;
         const investmentId = this.investmentId.add(1);
 
@@ -741,8 +729,6 @@ export default async function suite() {
           .connect(this.lender1Signer)
           .convertInvestmentTicketsToNfts(
             investmentId,
-            // ticketsToLock,
-            // ticketsToWithdraw
           );
 
         const balanceOfNFTTokensAfter = await this.fundingNFTContract.balanceOf(
@@ -873,14 +859,11 @@ export default async function suite() {
             .executeLotteryRun(this.investmentId.add(1));
 
           const ticketsToLock = 10;
-          const ticketsToWithdraw = 0;
 
           await this.registryContract
             .connect(this.lender1Signer)
             .convertInvestmentTicketsToNfts(
               this.investmentId.add(1),
-              // ticketsToLock,
-              // ticketsToWithdraw
             );
 
           await this.fundingNFTContract
