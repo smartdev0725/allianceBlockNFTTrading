@@ -233,50 +233,6 @@ export default async function suite() {
       expect(lender3ticketsWonPerAddressAfter.toNumber()).to.be.equal(1);
     });
 
-    // it('Try to withdraw tickets and revert', async function () {
-    //   // Given
-    //   await this.stakingContract
-    //     .connect(this.lender1Signer)
-    //     .stake(StakingType.STAKER_LVL_2);
-    //   await this.stakingContract
-    //     .connect(this.lender2Signer)
-    //     .stake(StakingType.STAKER_LVL_2);
-    //   await this.stakingContract
-    //     .connect(this.lender3Signer)
-    //     .stake(StakingType.STAKER_LVL_2);
-
-    //   // When
-    //   await this.registryContract
-    //     .connect(this.lender1Signer)
-    //     .showInterestForInvestment(this.investmentId, BigNumber.from(900));
-    //   await this.registryContract
-    //     .connect(this.lender2Signer)
-    //     .showInterestForInvestment(this.investmentId, BigNumber.from(900));
-    //   await this.registryContract
-    //     .connect(this.lender3Signer)
-    //     .showInterestForInvestment(this.investmentId, BigNumber.from(1200));
-
-    //   // Move time to 2 days
-    //   await increaseTime(this.deployerSigner.provider, 2 * 24 * 60 * 60); // 2 days
-
-    //   await this.governanceContract
-    //     .connect(this.superDelegatorSigner)
-    //     .checkCronjobs();
-
-    //   await this.registryContract
-    //     .connect(this.lender3Signer)
-    //     .executeLotteryRun(this.investmentId);
-
-    //   // Then
-    //   await expectRevert(
-    //     this.registryContract
-    //       .connect(this.lender1Signer)
-    //       .convertInvestmentTicketsToNfts(this.investmentId),
-    //       // .convertInvestmentTicketsToNfts(this.investmentId, 1000, 700),
-    //     'Not enough tickets won'
-    //   );
-    // });
-
     it('Withdraw tickets', async function () {
       // Given
       await this.stakingContract
