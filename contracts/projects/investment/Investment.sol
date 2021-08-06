@@ -455,7 +455,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
         require(projectSeeker[projectId] == msg.sender, "Only seeker can withdraw");
         require(!investmentWithdrawn[projectId], "Already withdrawn");
-        
+
         uint256 amountToWithdraw = investmentDetails[projectId].totalAmountToBeRaised;
         investmentWithdrawn[projectId] = true;
 
@@ -527,7 +527,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
      * @param projectId the projectId
      * @param amountOfNFTToConvert the amount of nft to convert
      */
-    function convertNFTToInvestmentTokens (uint256 projectId, uint256 amountOfNFTToConvert) external {
+    function convertNFTToInvestmentTokens (uint256 projectId, uint256 amountOfNFTToConvert) external nonReentrant() {
         require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
         require(amountOfNFTToConvert != 0, "Amount of nft to convert cannot be 0");
         require(amountOfNFTToConvert <= fundingNFT.balanceOf(msg.sender, projectId), "Not enough NFT to convert");

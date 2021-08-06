@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./BaseProjectStorage.sol";
 import "../../libs/TokenFormat.sol";
+import "../../interfaces/IProjectManager.sol";
 
 /**
  * @title AllianceBlock BaseProject contract
@@ -21,7 +22,7 @@ contract BaseProject is BaseProjectStorage, OwnableUpgradeable {
     event ProjectRejected(uint256 indexed projectId);
     event ProjectRequested(uint256 indexed projectId, address indexed user, uint256 amount);
     event ProjectInterest(uint256 indexed projectId, uint amount);
-    event ProjectSettled(uint256 projectId);
+    event ProjectSettled(uint256 indexed projectId);
 
     modifier onlyGovernance() {
         require(msg.sender == address(governance), "Only Governance");
