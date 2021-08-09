@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155HolderUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 import "./EscrowDetails.sol";
 import "./rALBT.sol";
@@ -14,7 +15,7 @@ import "./rALBT.sol";
  * @notice Responsible for handling the funds in AllianceBlock's ecosystem.
  * @dev Extends Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable
  */
-contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable {
+contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20 for IERC20;
 
     modifier onlyRegistryOrOwner() {
@@ -74,6 +75,21 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         address receiver
     ) external onlyRegistryOrOwner() {
         fundingNFT.safeTransferFrom(address(this), receiver, investmentId, partitionsPurchased, "");
+    }
+
+    /**
+     * @notice Transfer Funding NFT
+     * @dev This function is used to send the ERC1155 tokens from lender to escrow.
+     * @param investmentId The id of the investment.
+     * @param amountOfNfts The amount of ERC1155 tokens that should be locked.
+     * @param sender The address to lock the Nfts from..
+     */
+    function lockFundingNFT(
+        uint256 investmentId,
+        uint256 amountOfNfts,
+        address sender
+    ) external onlyRegistryOrOwner() nonReentrant(){
+        fundingNFT.safeTransferFrom(sender, address(this), investmentId, amountOfNfts, "");
     }
 
     /**
