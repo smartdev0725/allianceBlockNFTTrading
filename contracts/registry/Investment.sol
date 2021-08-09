@@ -372,7 +372,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         escrow.transferLendingToken(investmentDetails[investmentId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
 
         // Add event for withdraw amount provided for non tickets
-        emit lotteryLoserClaimedFunds(investmentId_, amountToReturnForNonWonTickets);
+        emit LotteryLoserClaimedFunds(investmentId_, amountToReturnForNonWonTickets);
     }
 
     /**
