@@ -34,12 +34,12 @@ contract Storage {
     mapping(uint256 => mapping(address => uint256)) public remainingTicketsPerAddress;
     // The amount of tickets that an investor requested that have been won already.
     mapping(uint256 => mapping(address => uint256)) public ticketsWonPerAddress;
-    // The amount of tickets that an investor locked for a specific investment.
-    mapping(uint256 => mapping(address => uint256)) public lockedTicketsForSpecificInvestmentPerAddress;
-    // The amount of tickets that an investor locked from all investments.
-    mapping(address => uint256) public lockedTicketsPerAddress;
-    // The last block checked for rewards for the tickets locked per address.
-    mapping(address => uint256) public lastBlockCheckedForLockedTicketsPerAddress;
+    // The amount of nfts that an investor locked for a specific investment.
+    mapping(uint256 => mapping(address => uint256)) public lockedNftsForSpecificInvestmentPerAddress;
+    // The amount of nfts that an investor locked from all investments.
+    mapping(address => uint256) public lockedNftsPerAddress;
+    // The last block checked for rewards for the nfts locked per address.
+    mapping(address => uint256) public lastBlockCheckedForLockedNftsPerAddress;
     // All supported lending tokens are giving true, while unsupported are giving false.
     mapping(address => bool) public isValidLendingToken;
 
