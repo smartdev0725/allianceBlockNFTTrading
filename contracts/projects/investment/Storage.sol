@@ -28,11 +28,11 @@ contract Storage {
     // The amount of tickets that an investor requested that have been won already.
     mapping(uint256 => mapping(address => uint256)) public ticketsWonPerAddress;
     // The amount of tickets that an investor locked for a specific investment.
-    mapping(uint256 => mapping(address => uint256)) public lockedTicketsForSpecificInvestmentPerAddress;
+    mapping(uint256 => mapping(address => uint256)) public lockedNftsForSpecificInvestmentPerAddress;
     // The amount of tickets that an investor locked from all investments.
-    mapping(address => uint256) public lockedTicketsPerAddress;
+    mapping(address => uint256) public lockedNftsPerAddress;
     // The last block checked for rewards for the tickets locked per address.
-    mapping(address => uint256) public lastBlockCheckedForLockedTicketsPerAddress;
+    mapping(address => uint256) public lastBlockCheckedForLockedNftsPerAddress;
     
     // Mapping from investment id -> details for each and every investment.
     mapping(uint256 => ProjectLibrary.InvestmentDetails) public investmentDetails;

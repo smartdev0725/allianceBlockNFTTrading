@@ -1035,34 +1035,34 @@ export default async function suite() {
       );
 
     const lockedTicketsForSpecificInvestmentBeforeWithdraw1 =
-      await this.investmentContract.lockedTicketsForSpecificInvestmentPerAddress(
+      await this.investmentContract.lockedNftsForSpecificInvestmentPerAddress(
         projectId,
         this.lender1
       );
     const lockedTicketsForSpecificInvestmentBeforeWithdraw2 =
-      await this.investmentContract.lockedTicketsForSpecificInvestmentPerAddress(
+      await this.investmentContract.lockedNftsForSpecificInvestmentPerAddress(
         projectId,
         this.lender2
       );
     const lockedTicketsForSpecificInvestmentBeforeWithdraw3 =
-      await this.investmentContract.lockedTicketsForSpecificInvestmentPerAddress(
+      await this.investmentContract.lockedNftsForSpecificInvestmentPerAddress(
         projectId,
         this.lender3
       );
     const lockedTicketsForSpecificInvestmentBeforeWithdraw4 =
-      await this.investmentContract.lockedTicketsForSpecificInvestmentPerAddress(
+      await this.investmentContract.lockedNftsForSpecificInvestmentPerAddress(
         projectId,
         this.lender4
       );
 
     const lockedTicketsBeforeWithdraw1 =
-      await this.investmentContract.lockedTicketsPerAddress(this.lender1);
+      await this.investmentContract.lockedNftsPerAddress(this.lender1);
     const lockedTicketsBeforeWithdraw2 =
-      await this.investmentContract.lockedTicketsPerAddress(this.lender2);
+      await this.investmentContract.lockedNftsPerAddress(this.lender2);
     const lockedTicketsBeforeWithdraw3 =
-      await this.investmentContract.lockedTicketsPerAddress(this.lender3);
+      await this.investmentContract.lockedNftsPerAddress(this.lender3);
     const lockedTicketsBeforeWithdraw4 =
-      await this.investmentContract.lockedTicketsPerAddress(this.lender4);
+      await this.investmentContract.lockedNftsPerAddress(this.lender4);
 
     const balanceFundingNFTTokenBeforeWithdraw1 =
       await this.fundingNFTContract.balanceOf(
@@ -1117,46 +1117,84 @@ export default async function suite() {
     const balanceLendingTokenBeforeWithdrawEscrow =
       await this.lendingTokenContract.balanceOf(this.escrowContract.address);
 
-    let withdrawInvestmentTickets1,
-      withdrawInvestmentTickets2,
-      withdrawInvestmentTickets3,
-      withdrawInvestmentTickets4;
+    let convertInvestmentTicketsToNfts1,
+      convertInvestmentTicketsToNfts2,
+      convertInvestmentTicketsToNfts3,
+      convertInvestmentTicketsToNfts4;
 
     // When
     if (ticketsWonBeforeWithdraw1.gt(0)) {
-      withdrawInvestmentTickets1 = await this.investmentContract
+
+      convertInvestmentTicketsToNfts1 = await this.investmentContract
+      .connect(this.lender1Signer)
+      .convertInvestmentTicketsToNfts(
+        projectId
+      );
+
+      await this.fundingNFTContract
         .connect(this.lender1Signer)
-        .withdrawInvestmentTickets(
+        .setApprovalForAll(this.escrowContract.address, true);
+
+      await this.investmentContract
+        .connect(this.lender1Signer)
+        .lockInvestmentNfts(
           projectId,
-          1,
-          ticketsWonBeforeWithdraw1.sub(1)
+          1
         );
     }
     if (ticketsWonBeforeWithdraw2.gt(0)) {
-      withdrawInvestmentTickets2 = await this.investmentContract
+
+      convertInvestmentTicketsToNfts2 = await this.investmentContract
         .connect(this.lender2Signer)
-        .withdrawInvestmentTickets(
+        .convertInvestmentTicketsToNfts(
+          projectId
+        );
+
+      await this.fundingNFTContract
+        .connect(this.lender2Signer)
+        .setApprovalForAll(this.escrowContract.address, true);
+
+      await this.investmentContract
+        .connect(this.lender2Signer)
+        .lockInvestmentNfts(
           projectId,
-          1,
-          ticketsWonBeforeWithdraw2.sub(1)
+          1
         );
     }
     if (ticketsWonBeforeWithdraw3.gt(0)) {
-      withdrawInvestmentTickets3 = await this.investmentContract
+      convertInvestmentTicketsToNfts3 = await this.investmentContract
         .connect(this.lender3Signer)
-        .withdrawInvestmentTickets(
+        .convertInvestmentTicketsToNfts(
+          projectId
+        );
+
+      await this.fundingNFTContract
+        .connect(this.lender3Signer)
+        .setApprovalForAll(this.escrowContract.address, true);
+
+      await this.investmentContract
+        .connect(this.lender3Signer)
+        .lockInvestmentNfts(
           projectId,
-          1,
-          ticketsWonBeforeWithdraw3.sub(1)
+          1
         );
     }
     if (ticketsWonBeforeWithdraw4.gt(0)) {
-      withdrawInvestmentTickets4 = await this.investmentContract
+      convertInvestmentTicketsToNfts4 = await this.investmentContract
         .connect(this.lender4Signer)
-        .withdrawInvestmentTickets(
+        .convertInvestmentTicketsToNfts(
+          projectId
+        );
+
+      await this.fundingNFTContract
+        .connect(this.lender4Signer)
+        .setApprovalForAll(this.escrowContract.address, true);
+
+      await this.investmentContract
+        .connect(this.lender4Signer)
+        .lockInvestmentNfts(
           projectId,
-          1,
-          ticketsWonBeforeWithdraw4.sub(1)
+          1
         );
     }
 
@@ -1182,34 +1220,34 @@ export default async function suite() {
       );
 
     const lockedTicketsForSpecificInvestmentAfterWithdraw1 =
-      await this.investmentContract.lockedTicketsForSpecificInvestmentPerAddress(
+      await this.investmentContract.lockedNftsForSpecificInvestmentPerAddress(
         projectId,
         this.lender1
       );
     const lockedTicketsForSpecificInvestmentAfterWithdraw2 =
-      await this.investmentContract.lockedTicketsForSpecificInvestmentPerAddress(
+      await this.investmentContract.lockedNftsForSpecificInvestmentPerAddress(
         projectId,
         this.lender2
       );
     const lockedTicketsForSpecificInvestmentAfterWithdraw3 =
-      await this.investmentContract.lockedTicketsForSpecificInvestmentPerAddress(
+      await this.investmentContract.lockedNftsForSpecificInvestmentPerAddress(
         projectId,
         this.lender3
       );
     const lockedTicketsForSpecificInvestmentAfterWithdraw4 =
-      await this.investmentContract.lockedTicketsForSpecificInvestmentPerAddress(
+      await this.investmentContract.lockedNftsForSpecificInvestmentPerAddress(
         projectId,
         this.lender4
       );
 
     const lockedTicketsAfterWithdraw1 =
-      await this.investmentContract.lockedTicketsPerAddress(this.lender1);
+      await this.investmentContract.lockedNftsPerAddress(this.lender1);
     const lockedTicketsAfterWithdraw2 =
-      await this.investmentContract.lockedTicketsPerAddress(this.lender2);
+      await this.investmentContract.lockedNftsPerAddress(this.lender2);
     const lockedTicketsAfterWithdraw3 =
-      await this.investmentContract.lockedTicketsPerAddress(this.lender3);
+      await this.investmentContract.lockedNftsPerAddress(this.lender3);
     const lockedTicketsAfterWithdraw4 =
-      await this.investmentContract.lockedTicketsPerAddress(this.lender4);
+      await this.investmentContract.lockedNftsPerAddress(this.lender4);
 
     const balanceFundingNFTTokenAfterWithdraw1 =
       await this.fundingNFTContract.balanceOf(this.lender1, projectId);
@@ -1255,21 +1293,21 @@ export default async function suite() {
     // Then
     // Events
     // Withdraw Investment
-    expect(withdrawInvestmentTickets1)
-      .to.emit(this.investmentContract, 'WithdrawProjectTickets')
-      .withArgs(projectId, 1, ticketsWonBeforeWithdraw1.sub(1));
-    expect(withdrawInvestmentTickets2)
-      .to.emit(this.investmentContract, 'WithdrawProjectTickets')
-      .withArgs(projectId, 1, ticketsWonBeforeWithdraw2.sub(1));
-    expect(withdrawInvestmentTickets3)
-      .to.emit(this.investmentContract, 'WithdrawProjectTickets')
-      .withArgs(projectId, 1, ticketsWonBeforeWithdraw3.sub(1));
-    expect(withdrawInvestmentTickets4)
-      .to.emit(this.investmentContract, 'WithdrawProjectTickets')
-      .withArgs(projectId, 1, ticketsWonBeforeWithdraw4.sub(1));
+    expect(convertInvestmentTicketsToNfts1)
+      .to.emit(this.investmentContract, 'ConvertInvestmentTickets')
+      .withArgs(projectId, this.lender1, ticketsWonBeforeWithdraw1);
+    expect(convertInvestmentTicketsToNfts2)
+      .to.emit(this.investmentContract, 'ConvertInvestmentTickets')
+      .withArgs(projectId, this.lender2, ticketsWonBeforeWithdraw2);
+    expect(convertInvestmentTicketsToNfts3)
+      .to.emit(this.investmentContract, 'ConvertInvestmentTickets')
+      .withArgs(projectId, this.lender3, ticketsWonBeforeWithdraw3);
+    expect(convertInvestmentTicketsToNfts4)
+      .to.emit(this.investmentContract, 'ConvertInvestmentTickets')
+      .withArgs(projectId, this.lender4, ticketsWonBeforeWithdraw4);
     // WithdrawAmountForNonTickets
     if (ticketsRemainBeforeWithdraw1.gt(0)) {
-      expect(withdrawInvestmentTickets1)
+      expect(convertInvestmentTicketsToNfts1)
         .to.emit(this.investmentContract, 'WithdrawAmountForNonTickets')
         .withArgs(
           projectId,
@@ -1279,8 +1317,8 @@ export default async function suite() {
         );
     }
     if (ticketsRemainBeforeWithdraw2.gt(0)) {
-      expect(withdrawInvestmentTickets2)
-        .to.emit(this.investmentContract, 'WithdrawAmountForNonTickets')
+      expect(convertInvestmentTicketsToNfts2)
+        .to.emit(this.inestmentContract, 'WithdrawAmountForNonTickets')
         .withArgs(
           projectId,
           ethers.utils
@@ -1289,8 +1327,8 @@ export default async function suite() {
         );
     }
     if (ticketsRemainBeforeWithdraw3.gt(0)) {
-      expect(withdrawInvestmentTickets3)
-        .to.emit(this.investmentContract, 'WithdrawAmountForNonTickets')
+      expect(convertInvestmentTicketsToNfts3)
+        .to.emit(this.inestmentContract, 'WithdrawAmountForNonTickets')
         .withArgs(
           projectId,
           ethers.utils
@@ -1299,7 +1337,7 @@ export default async function suite() {
         );
     }
     if (ticketsRemainBeforeWithdraw4.gt(0)) {
-      expect(withdrawInvestmentTickets4)
+      expect(convertInvestmentTicketsToNfts4)
         .to.emit(this.investmentContract, 'WithdrawAmountForNonTickets')
         .withArgs(
           projectId,
@@ -1462,7 +1500,7 @@ export default async function suite() {
             balanceFundingNFTTokenBeforeExchange1
           )
       )
-        .to.emit(this.investmentContract, 'ConvertNFTToProjectTokens')
+        .to.emit(this.investmentContract, 'ConvertNFTToInvestmentTokens')
         .withArgs(
           projectId,
           balanceFundingNFTTokenBeforeExchange1,
@@ -1478,7 +1516,7 @@ export default async function suite() {
             balanceFundingNFTTokenBeforeExchange2
           )
       )
-        .to.emit(this.investmentContract, 'ConvertNFTToProjectTokens')
+        .to.emit(this.investmentContract, 'ConvertNFTToInvestmentTokens')
         .withArgs(
           projectId,
           balanceFundingNFTTokenBeforeExchange2,
@@ -1494,7 +1532,7 @@ export default async function suite() {
             balanceFundingNFTTokenBeforeExchange3
           )
       )
-        .to.emit(this.investmentContract, 'ConvertNFTToProjectTokens')
+        .to.emit(this.investmentContract, 'ConvertNFTToInvestmentTokens')
         .withArgs(
           projectId,
           balanceFundingNFTTokenBeforeExchange3,
@@ -1510,7 +1548,7 @@ export default async function suite() {
             balanceFundingNFTTokenBeforeExchange4
           )
       )
-        .to.emit(this.investmentContract, 'ConvertNFTToProjectTokens')
+        .to.emit(this.investmentContract, 'ConvertNFTToInvestmentTokens')
         .withArgs(
           projectId,
           balanceFundingNFTTokenBeforeExchange4,

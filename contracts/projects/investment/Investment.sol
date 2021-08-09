@@ -21,11 +21,12 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
 
     // EVENTS
     event LotteryExecuted(uint256 indexed projectId);
-    event WithdrawProjectTickets(uint256 indexed projectId, uint256 ticketsToLock, uint256 ticketsToWithdraw);
+    event ConvertInvestmentTickets(uint256 indexed investmentId, address indexed user, uint256 amount);
+    event LockInvestmentNfts(uint256 indexed investmentId, address indexed user, uint256 amountOfNfts);
     event seekerWithdrawInvestment(uint256 indexed projectId, uint256 amountWithdrawn);
     event WithdrawAmountForNonTickets(uint256 indexed projectId, uint256 amountToReturnForNonWonTickets);
-    event WithdrawLockedProjectTickets(uint256 indexed projectId, uint256 ticketsToWithdraw);
-    event ConvertNFTToProjectTokens(uint256 indexed projectId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
+    event WithdrawLockedInvestmentNfts(uint256 indexed projectId, uint256 ticketsToWithdraw);
+    event ConvertNFTToInvestmentTokens(uint256 indexed projectId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
 
     /**
      * @notice Initialize
@@ -362,49 +363,51 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
     }
 
     /**
-     * @notice Withdraw Investment Tickets
-     * @dev This function is called by an investor to withdraw his tickets.
+     * @notice Convert Investment Tickets to Nfts.
+     * @dev This function is called by an investor to convert his tickets won to NFTs.
      * @dev require Settled state and enough tickets won
      * @param projectId The id of the investment.
-     * @param ticketsToLock The amount of won tickets to be locked, so as to get more rALBT.
-     * @param ticketsToWithdraw The amount of won tickets to be withdrawn instantly.
      */
-    function withdrawInvestmentTickets(
-        uint256 projectId,
-        uint256 ticketsToLock,
-        uint256 ticketsToWithdraw
+    function convertInvestmentTicketsToNfts(
+        uint256 projectId
     ) external  nonReentrant() {
-        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can convert only in Settled state");
         require(
-            ticketsWonPerAddress[projectId][msg.sender] > 0 &&
-                ticketsWonPerAddress[projectId][msg.sender] >= ticketsToLock.add(ticketsToWithdraw),
+            ticketsWonPerAddress[projectId][msg.sender] > 0,
             "Not enough tickets won"
         );
 
-        ticketsWonPerAddress[projectId][msg.sender] = ticketsWonPerAddress[projectId][msg.sender]
-            .sub(ticketsToLock)
-            .sub(ticketsToWithdraw);
+        uint256 ticketsToConvert = ticketsWonPerAddress[projectId][msg.sender];
+        ticketsWonPerAddress[projectId][msg.sender] = 0;
 
-        _updateReputationalBalanceForPreviouslyLockedTokens();
-
-        if (ticketsToLock > 0) {
-            lockedTicketsForSpecificInvestmentPerAddress[projectId][
-                msg.sender
-            ] = lockedTicketsForSpecificInvestmentPerAddress[projectId][msg.sender].add(ticketsToLock);
-
-            lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].add(ticketsToLock);
-        }
-
-        if (ticketsToWithdraw > 0) {
-            escrow.transferFundingNFT(projectId, ticketsToWithdraw, msg.sender);
-        }
+        escrow.transferFundingNFT(projectId, ticketsToConvert, msg.sender);
 
         if (remainingTicketsPerAddress[projectId][msg.sender] > 0) {
             _withdrawAmountProvidedForNonWonTickets(projectId);
         }
 
-        // Add event for withdraw investment
-        emit WithdrawProjectTickets(projectId, ticketsToLock, ticketsToWithdraw);
+        emit ConvertInvestmentTickets(projectId, msg.sender, ticketsToConvert);
+    }
+
+    /**
+     * @dev This function is called by a investment nft holder to lock part of his nfts.
+     * @param projectId The id of the investment.
+     * @param nftsToLock The amount of nfts to lock.
+     */
+    function lockInvestmentNfts(uint256 projectId, uint256 nftsToLock) external nonReentrant() {
+        require(fundingNFT.balanceOf(msg.sender, projectId) >= nftsToLock, "Not enough nfts");
+
+        escrow.lockFundingNFT(projectId, nftsToLock, msg.sender);
+
+        _updateReputationalBalanceForPreviouslyLockedTokens();
+
+        lockedNftsForSpecificInvestmentPerAddress[projectId][
+            msg.sender
+        ] = lockedNftsForSpecificInvestmentPerAddress[projectId][msg.sender].add(nftsToLock);
+
+        lockedNftsPerAddress[msg.sender] = lockedNftsPerAddress[msg.sender].add(nftsToLock);
+
+        emit LockInvestmentNfts(projectId, msg.sender, nftsToLock);
     }
 
     /**
@@ -419,32 +422,32 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
     }
 
     /**
-     * @notice Withdraw locked investment ticket.
+     * @notice Withdraw locked investment nfts.
      * @dev This function is called by an investor to withdraw his locked tickets.
      * @dev requires Settled state and available tickets.
      * @param projectId The id of the investment.
-     * @param ticketsToWithdraw The amount of locked tickets to be withdrawn.
+     * @param nftsToWithdraw The amount of locked nfts to be withdrawn.
      */
-    function withdrawLockedInvestmentTickets(uint256 projectId, uint256 ticketsToWithdraw) external nonReentrant() {
+    function withdrawLockedInvestmentNfts(uint256 projectId, uint256 nftsToWithdraw) external nonReentrant() {
         require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
         require(
-            ticketsToWithdraw > 0 &&
-                lockedTicketsForSpecificInvestmentPerAddress[projectId][msg.sender] >= ticketsToWithdraw,
-            "Not enough tickets to withdraw"
+            nftsToWithdraw > 0 &&
+                lockedNftsForSpecificInvestmentPerAddress[projectId][msg.sender] >= nftsToWithdraw,
+            "Not enough nfts to withdraw"
         );
 
         _updateReputationalBalanceForPreviouslyLockedTokens();
 
-        lockedTicketsForSpecificInvestmentPerAddress[projectId][
+        lockedNftsForSpecificInvestmentPerAddress[projectId][
             msg.sender
-        ] = lockedTicketsForSpecificInvestmentPerAddress[projectId][msg.sender].sub(ticketsToWithdraw);
+        ] = lockedNftsForSpecificInvestmentPerAddress[projectId][msg.sender].sub(nftsToWithdraw);
 
-        lockedTicketsPerAddress[msg.sender] = lockedTicketsPerAddress[msg.sender].sub(ticketsToWithdraw);
+        lockedNftsPerAddress[msg.sender] = lockedNftsPerAddress[msg.sender].sub(nftsToWithdraw);
 
-        escrow.transferFundingNFT(projectId, ticketsToWithdraw, msg.sender);
+        escrow.transferFundingNFT(projectId, nftsToWithdraw, msg.sender);
 
         // Add event for withdraw locked investment tickets
-        emit WithdrawLockedProjectTickets(projectId, ticketsToWithdraw);
+        emit WithdrawLockedInvestmentNfts(projectId, nftsToWithdraw);
     }
 
     /**
@@ -493,19 +496,19 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
      * @return the reputation balance of msg.sender
      */
     function _updateReputationalBalanceForPreviouslyLockedTokens() internal returns (uint256) {
-        if (lockedTicketsPerAddress[msg.sender] > 0) {
+        if (lockedNftsPerAddress[msg.sender] > 0) {
             // Decimals for rALBT => 18
             uint256 amountOfReputationalAlbtPerTicket =
-                (block.number.sub(lastBlockCheckedForLockedTicketsPerAddress[msg.sender])).mul(10**18).div(
+                (block.number.sub(lastBlockCheckedForLockedNftsPerAddress[msg.sender])).mul(10**18).div(
                     blocksLockedForReputation
                 );
 
             uint256 amountOfReputationalAlbtToMint =
-                amountOfReputationalAlbtPerTicket.mul(lockedTicketsPerAddress[msg.sender]);
+                amountOfReputationalAlbtPerTicket.mul(lockedNftsPerAddress[msg.sender]);
 
             escrow.mintReputationalToken(msg.sender, amountOfReputationalAlbtToMint);
 
-            lastBlockCheckedForLockedTicketsPerAddress[msg.sender] = block.number;
+            lastBlockCheckedForLockedNftsPerAddress[msg.sender] = block.number;
         }
 
         return rALBT.balanceOf(msg.sender);
@@ -538,6 +541,6 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         escrow.transferInvestmentToken(investmentDetails[projectId].investmentToken, msg.sender, amountOfInvestmentTokenToTransfer);
 
         // Add event for convert nft to investment tokens
-        emit ConvertNFTToProjectTokens(projectId, amountOfNFTToConvert, amountOfInvestmentTokenToTransfer);
+        emit ConvertNFTToInvestmentTokens(projectId, amountOfNFTToConvert, amountOfInvestmentTokenToTransfer);
     }
 }

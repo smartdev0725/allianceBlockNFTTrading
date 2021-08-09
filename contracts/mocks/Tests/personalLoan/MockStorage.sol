@@ -19,6 +19,8 @@ contract MockStorage {
     mapping(uint256 => uint256) public ticketsRemaining;
     // The number lottery numbers allocated from all investors for a specific investment.
     mapping(uint256 => uint256) public totalLotteryNumbersPerInvestment;
+    // If investment is withdrawn by the seeker then it is true, otherwise it is false.
+    mapping(uint256 => bool) public investmentWithdrawn;
     // The address of the investor that has allocated a specific lottery number on a specific investment.
     mapping(uint256 => mapping(uint256 => address)) public addressOfLotteryNumber;
     // The amount of tickets that an investor requested that are still not allocated.
@@ -26,11 +28,11 @@ contract MockStorage {
     // The amount of tickets that an investor requested that have been won already.
     mapping(uint256 => mapping(address => uint256)) public ticketsWonPerAddress;
     // The amount of tickets that an investor locked for a specific investment.
-    mapping(uint256 => mapping(address => uint256)) public lockedTicketsForSpecificInvestmentPerAddress;
+    mapping(uint256 => mapping(address => uint256)) public lockedNftsForSpecificInvestmentPerAddress;
     // The amount of tickets that an investor locked from all investments.
-    mapping(address => uint256) public lockedTicketsPerAddress;
+    mapping(address => uint256) public lockedNftsPerAddress;
     // The last block checked for rewards for the tickets locked per address.
-    mapping(address => uint256) public lastBlockCheckedForLockedTicketsPerAddress;
+    mapping(address => uint256) public lastBlockCheckedForLockedNftsPerAddress;
     
     // Mapping from investment id -> details for each and every investment.
     mapping(uint256 => ProjectLibrary.InvestmentDetails) public investmentDetails;
