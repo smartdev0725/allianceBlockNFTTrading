@@ -359,7 +359,7 @@ export default async function suite() {
           .connect(this.lender3Signer)
           .withdrawAmountProvidedForNonWonTickets(this.projectId)
       )
-        .to.emit(this.mockPersonalLoanContract, 'WithdrawAmountForNonTickets')
+        .to.emit(this.mockPersonalLoanContract, 'LotteryLoserClaimedFunds')
         .withArgs(this.projectId, amountToReturnForNonWonTickets);
 
       const lendingTokenBalanceAfter =

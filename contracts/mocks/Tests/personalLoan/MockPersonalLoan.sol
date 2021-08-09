@@ -23,7 +23,7 @@ contract MockPersonalLoan is Initializable, MockPersonalLoanDetails, ReentrancyG
     event ConvertInvestmentTickets(uint256 indexed investmentId, address indexed user, uint256 amount);
     event LockInvestmentNfts(uint256 indexed investmentId, address indexed user, uint256 amountOfNfts);
     event seekerWithdrawInvestment(uint256 indexed projectId, uint256 amountWithdrawn);
-    event WithdrawAmountForNonTickets(uint256 indexed projectId, uint256 amountToReturnForNonWonTickets);
+    event LotteryLoserClaimedFunds(uint256 indexed projectId, uint256 amountToReturnForNonWonTickets);
     event WithdrawLockedInvestmentNfts(uint256 indexed projectId, uint256 ticketsToWithdraw);
     event ConvertNFTToInvestmentTokens(uint256 indexed projectId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
 
@@ -521,7 +521,7 @@ contract MockPersonalLoan is Initializable, MockPersonalLoanDetails, ReentrancyG
         escrow.transferLendingToken(investmentDetails[projectId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
 
         // Add event for withdraw amount provided for non tickets
-        emit WithdrawAmountForNonTickets(projectId_, amountToReturnForNonWonTickets);
+        emit LotteryLoserClaimedFunds(projectId_, amountToReturnForNonWonTickets);
     }
 
     /**
