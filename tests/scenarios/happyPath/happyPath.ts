@@ -1308,7 +1308,7 @@ export default async function suite() {
     // WithdrawAmountForNonTickets
     if (ticketsRemainBeforeWithdraw1.gt(0)) {
       expect(convertInvestmentTicketsToNfts1)
-        .to.emit(this.registryContract, 'WithdrawAmountForNonTickets')
+        .to.emit(this.registryContract, 'LotteryLoserClaimedFunds')
         .withArgs(
           investmentId,
           ethers.utils
@@ -1318,7 +1318,7 @@ export default async function suite() {
     }
     if (ticketsRemainBeforeWithdraw2.gt(0)) {
       expect(convertInvestmentTicketsToNfts2)
-        .to.emit(this.registryContract, 'WithdrawAmountForNonTickets')
+        .to.emit(this.registryContract, 'LotteryLoserClaimedFunds')
         .withArgs(
           investmentId,
           ethers.utils
@@ -1328,7 +1328,7 @@ export default async function suite() {
     }
     if (ticketsRemainBeforeWithdraw3.gt(0)) {
       expect(convertInvestmentTicketsToNfts3)
-        .to.emit(this.registryContract, 'WithdrawAmountForNonTickets')
+        .to.emit(this.registryContract, 'LotteryLoserClaimedFunds')
         .withArgs(
           investmentId,
           ethers.utils
@@ -1338,7 +1338,7 @@ export default async function suite() {
     }
     if (ticketsRemainBeforeWithdraw4.gt(0)) {
       expect(convertInvestmentTicketsToNfts4)
-        .to.emit(this.registryContract, 'WithdrawAmountForNonTickets')
+        .to.emit(this.registryContract, 'LotteryLoserClaimedFunds')
         .withArgs(
           investmentId,
           ethers.utils

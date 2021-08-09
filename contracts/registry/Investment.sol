@@ -25,9 +25,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
     event ConvertInvestmentTickets(uint256 indexed investmentId, address indexed user, uint256 amount);
     event LockInvestmentNfts(uint256 indexed investmentId, address indexed user, uint256 amountOfNfts);
     event seekerWithdrawInvestment(uint256 indexed investmentId, uint256 amountWithdrawn);
-    event WithdrawAmountForNonTickets(uint256 indexedinvestmentId, uint256 amountToReturnForNonWonTickets);
-    event WithdrawLockedInvestmentNfts(uint256 indexedinvestmentId, uint256 nftsToWithdraw);
-    event ConvertNFTToInvestmentTokens(uint256 indexedinvestmentId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
+    event LotteryLoserClaimedFunds(uint256 indexed investmentId, uint256 amountToReturnForNonWonTickets);
+    event WithdrawLockedInvestmentNfts(uint256 indexed investmentId, uint256 nftsToWithdraw);
+    event ConvertNFTToInvestmentTokens(uint256 indexed investmentId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
     event InvestmentSettled(uint256 investmentId);
 
     function __Investment_init() public initializer {
@@ -375,7 +375,7 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
         escrow.transferLendingToken(investmentDetails[investmentId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
 
         // Add event for withdraw amount provided for non tickets
-        emit WithdrawAmountForNonTickets(investmentId_, amountToReturnForNonWonTickets);
+        emit LotteryLoserClaimedFunds(investmentId_, amountToReturnForNonWonTickets);
     }
 
     /**
