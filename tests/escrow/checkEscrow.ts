@@ -6,19 +6,25 @@ const {expectRevert} = require('@openzeppelin/test-helpers');
 export default async function suite() {
   describe('FundingNFT', async () => {
     it('When initialize again should revert', async function () {
-      const registryAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
-      const actionVerifierAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
-      const stakingAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
+      const actionVerifierAddress =
+        '0x664f6b4987d9db811867f431911124109ed5a475';
+      const stakingAddress = '0x664f6b4987d9db811867f431911124109ed5a475';
 
       await expectRevert(
-        this.escrowContract.afterInitialize(registryAddress, actionVerifierAddress, stakingAddress),
+        this.escrowContract.afterInitialize(
+          actionVerifierAddress,
+          stakingAddress
+        ),
         'Cannot initialize second time'
       );
     });
 
     it('When initialize with zero address should revert', async function () {
       await expectRevert(
-        this.escrowContract.afterInitialize( ethers.constants.AddressZero,  ethers.constants.AddressZero,  ethers.constants.AddressZero),
+        this.escrowContract.afterInitialize(
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero
+        ),
         'Cannot initialize with 0 addresses'
       );
     });
@@ -105,47 +111,8 @@ export default async function suite() {
         this.escrowContract
           .connect(seekerSigner)
           .transferFundingNFT(investmentId, partitionsToPurchase, seeker),
-        'Only Registry'
+        'Only Project or Owner'
       );
-    });
-  });
-
-  describe('Registry', async () => {
-    it('when change registry from another account not allowed should revert', async function () {
-      // Given
-      const {seekerSigner} = await getSigners();
-
-      // When and Then
-      await expectRevert(
-        this.escrowContract
-          .connect(seekerSigner)
-          .changeRegistry(ethers.constants.AddressZero),
-        'Ownable: caller is not the owner'
-      );
-    });
-
-    it('when change registry with zero address should not revert', async function () {
-      // Given
-      const { deployerSigner } = await getSigners();
-      // When and Then
-      await expectRevert(this.escrowContract
-        .connect(deployerSigner)
-        .changeRegistry(ethers.constants.AddressZero), 'Registry should not be zero address');
-    });
-
-    it('when change registry from owner account should not revert', async function () {
-      // Given
-      const {deployerSigner} = await getSigners();
-      const dummyAddress = "0x664f6b4987d9db811867f431911124109ed5a475";
-
-      // When
-      await this.escrowContract
-        .connect(deployerSigner)
-        .changeRegistry(dummyAddress);
-
-      // Then
-      const registryAddress = await this.escrowContract.registry();
-      expect(registryAddress.toLowerCase()).to.be.equal(dummyAddress.toLowerCase());
     });
   });
 
@@ -217,7 +184,7 @@ export default async function suite() {
             seeker,
             amount
           ),
-        'Only Registry'
+        'Only Project'
       );
     });
   });
@@ -233,7 +200,11 @@ export default async function suite() {
       await this.lendingTokenContract.mint(this.escrowContract.address, amount);
       await this.escrowContract
         .connect(deployerSigner)
-        .transferLendingToken(this.lendingTokenContract.address, seeker, amount);
+        .transferLendingToken(
+          this.lendingTokenContract.address,
+          seeker,
+          amount
+        );
 
       // Then
       const escrowBalance = await this.lendingTokenContract.balanceOf(
@@ -251,7 +222,11 @@ export default async function suite() {
 
       // When and Then
       await expectRevert(
-        this.escrowContract.transferLendingToken(this.lendingTokenContract.address, seeker, amount),
+        this.escrowContract.transferLendingToken(
+          this.lendingTokenContract.address,
+          seeker,
+          amount
+        ),
         'ERC20: transfer amount exceeds balance'
       );
     });
@@ -269,8 +244,12 @@ export default async function suite() {
       await expectRevert(
         this.escrowContract
           .connect(seekerSigner)
-          .transferLendingToken(this.lendingTokenContract.address, seeker, amount),
-        'Only Registry'
+          .transferLendingToken(
+            this.lendingTokenContract.address,
+            seeker,
+            amount
+          ),
+        'Only Project'
       );
     });
   });
@@ -349,7 +328,7 @@ export default async function suite() {
         this.escrowContract
           .connect(seekerSigner)
           .mintReputationalToken(lender1, amount),
-        'Only Registry or Staking'
+        'Only Project or Staking'
       );
     });
 
@@ -423,7 +402,7 @@ export default async function suite() {
         this.escrowContract
           .connect(seekerSigner)
           .burnFundingNFT(lender1, 1, amount),
-        'Only Registry'
+        'Only Project'
       );
     });
 
@@ -448,10 +427,7 @@ export default async function suite() {
       await this.fundingNFTContract
         .connect(lender1Signer)
         .mintGen0(staker1, 20, 1);
-      const balance = await this.fundingNFTContract.balanceOf(
-        staker1,
-        1
-      );
+      const balance = await this.fundingNFTContract.balanceOf(staker1, 1);
 
       expect(balance.toString()).to.be.equal('20');
 
@@ -459,7 +435,10 @@ export default async function suite() {
       await this.escrowContract
         .connect(deployerSigner)
         .burnFundingNFT(staker1, 1, 20);
-      const balanceAfterBurn = await this.fundingNFTContract.balanceOf(staker1, 1);
+      const balanceAfterBurn = await this.fundingNFTContract.balanceOf(
+        staker1,
+        1
+      );
       expect(balanceAfterBurn.toNumber()).to.be.equal(0);
     });
   });

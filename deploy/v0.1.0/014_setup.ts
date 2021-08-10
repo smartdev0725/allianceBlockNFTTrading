@@ -9,47 +9,45 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const deployerSigner = signers[0];
 
   const stakingContract = await ethers.getContract('Staking');
-  const registryContract = await ethers.getContract('Registry');
+  const investmentContract = await ethers.getContract('Investment');
+  const mockPersonalLoanContract = await ethers.getContract('MockPersonalLoan');
   const fundingNFTContract = await ethers.getContract('FundingNFT');
   const stakerMedalNFTContract = await ethers.getContract('StakerMedalNFT');
-  const governanceContract = await ethers.getContract('Governance');
   const escrowContract = await ethers.getContract('Escrow');
   const actionVerifierContract = await ethers.getContract('ActionVerifier');
+  const projectManagerContract = await ethers.getContract('ProjectManager');
   const rALBTAddress = await escrowContract.reputationalALBT();
 
   // Setup escrow
-  const escrowRegistryAddress = await escrowContract.registry();
   const escrowActionVerifierAddress = await escrowContract.actionVerifier();
   const escrowStakingAddress = await escrowContract.staking();
   if (
-    escrowRegistryAddress === ethers.constants.AddressZero &&
     escrowActionVerifierAddress === ethers.constants.AddressZero &&
     escrowStakingAddress === ethers.constants.AddressZero
   ) {
     await escrowContract.afterInitialize(
-      registryContract.address,
       actionVerifierContract.address,
       stakingContract.address
     );
   }
 
-  // Setup governance
-  const governanceAddress = await governanceContract.registry();
-  if (governanceAddress === ethers.constants.AddressZero) {
-    await governanceContract.setRegistry(registryContract.address);
-  }
-
   // Setup FundingNFT
   const hasRoleMinter = await fundingNFTContract.hasRole(
     ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
-    registryContract.address
+    investmentContract.address
   );
   if (!hasRoleMinter) {
     await fundingNFTContract
       .connect(deployerSigner)
       .grantRole(
         ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
-        registryContract.address
+        investmentContract.address
+      );
+    await fundingNFTContract
+      .connect(deployerSigner)
+      .grantRole(
+        ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
+        mockPersonalLoanContract.address
       );
     await fundingNFTContract
       .connect(deployerSigner)
@@ -60,14 +58,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
   const hasRolePauser = await fundingNFTContract.hasRole(
     ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
-    registryContract.address
+    investmentContract.address
   );
   if (!hasRolePauser) {
     await fundingNFTContract
       .connect(deployerSigner)
       .grantRole(
         ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
-        registryContract.address
+        investmentContract.address
+      );
+    await fundingNFTContract
+      .connect(deployerSigner)
+      .grantRole(
+        ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
+        mockPersonalLoanContract.address
       );
   }
 
@@ -85,12 +89,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       );
   }
 
-  // Setup registry
+  // Setup investment
   const totalTicketsPerRun = 20;
   const rAlbtPerLotteryNumber = ethers.utils.parseEther('1000');
   const blocksLockedForReputation = 20;
   const lotteryNumbersForImmediateTicket = 6;
-  await registryContract
+  await investmentContract
     .connect(deployerSigner)
     .initializeInvestment(
       rALBTAddress,
@@ -99,6 +103,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       blocksLockedForReputation,
       lotteryNumbersForImmediateTicket
     );
+
+  // Setup personal loan
+  await mockPersonalLoanContract
+    .connect(deployerSigner)
+    .initializeInvestment(
+      rALBTAddress,
+      totalTicketsPerRun,
+      rAlbtPerLotteryNumber,
+      blocksLockedForReputation,
+      lotteryNumbersForImmediateTicket
+    );
+  // Setupp ProjectManager
+  await projectManagerContract
+    .connect(deployerSigner)
+    .createProjectType(investmentContract.address);
+  await projectManagerContract
+    .connect(deployerSigner)
+    .createProjectType(mockPersonalLoanContract.address);
+
   return true;
 };
 

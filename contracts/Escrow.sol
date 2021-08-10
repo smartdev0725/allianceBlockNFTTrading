@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155HolderUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 import "./EscrowDetails.sol";
 import "./rALBT.sol";
@@ -14,11 +15,11 @@ import "./rALBT.sol";
  * @notice Responsible for handling the funds in AllianceBlock's ecosystem.
  * @dev Extends Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable
  */
-contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable {
+contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155HolderUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20 for IERC20;
 
-    modifier onlyRegistryOrOwner() {
-        require(msg.sender == address(registry) || owner() == msg.sender, "Only Registry or Owner");
+    modifier onlyProjectOrOwner() {
+        require(projectManager.isProject(msg.sender) || owner() == msg.sender, "Only Project or Owner");
         _;
     }
 
@@ -27,16 +28,23 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @dev Initializes the contract.
      * @param lendingToken_ The token that lenders will be able to lend.
      * @param fundingNFT_ The ERC1155 token contract which will represent the lending amounts.
+     * @param projectManager_ The project manager contract.
      */
-    function initialize(address lendingToken_, address fundingNFT_) external initializer {
+    function initialize(
+        address lendingToken_,
+        address fundingNFT_,
+        address projectManager_
+    ) external initializer {
         require(lendingToken_ != address(0), "Cannot initialize lendingToken_ with 0 address");
         require(fundingNFT_ != address(0), "Cannot initialize fundingNFT_ with 0 address");
+        require(projectManager_ != address(0), "Cannot initialize projectManager_ with 0 address");
 
         __Ownable_init();
         __ERC1155Holder_init(); // This internally calls __ERC1155Receiver_init_unchained
 
         lendingToken = IERC20(lendingToken_);
         fundingNFT = IERC1155Mint(fundingNFT_);
+        projectManager = IProjectManager(projectManager_);
         reputationalALBT = new rALBT();
     }
 
@@ -44,19 +52,18 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @notice After Initialize
      * @dev To be executed after Initialize
      * @dev requires not already initialized
-     * @param registryAddress_ The registry address.
      * @param actionVerifierAddress_ The actionVerifier address.
      * @param stakingAddress_ The staking address
      */
-    function afterInitialize(
-        address registryAddress_,
-        address actionVerifierAddress_,
-        address stakingAddress_
-    ) external onlyOwner() {
-        require(registryAddress_ != address(0) && actionVerifierAddress_ != address(0) && stakingAddress_ != address(0)
-            , "Cannot initialize with 0 addresses");
-        require(address(registry) == address(0), "Cannot initialize second time");
-        registry = IRegistry(registryAddress_);
+    function afterInitialize(address actionVerifierAddress_, address stakingAddress_) external onlyOwner() {
+        require(
+            actionVerifierAddress_ != address(0) && stakingAddress_ != address(0),
+            "Cannot initialize with 0 addresses"
+        );
+        require(
+            actionVerifier == address(0) && staking == address(0),
+            "Cannot initialize second time"
+        );
         actionVerifier = actionVerifierAddress_;
         staking = stakingAddress_;
     }
@@ -64,27 +71,46 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
     /**
      * @notice Transfer Funding NFT
      * @dev This function is used to send the ERC1155 tokens from escrow to the lenders.
-     * @param investmentId The id of the investment.
+     * @param projectId The id of the project.
      * @param partitionsPurchased The amount of ERC1155 tokens that should be sent back to the lender.
      * @param receiver Lender's address.
      */
     function transferFundingNFT(
-        uint256 investmentId,
+        uint256 projectId,
         uint256 partitionsPurchased,
         address receiver
-    ) external onlyRegistryOrOwner() {
-        fundingNFT.safeTransferFrom(address(this), receiver, investmentId, partitionsPurchased, "");
+    ) external onlyProjectOrOwner() {
+        fundingNFT.safeTransferFrom(address(this), receiver, projectId, partitionsPurchased, "");
+    }
+
+    /**
+     * @notice Transfer Funding NFT
+     * @dev This function is used to send the ERC1155 tokens from lender to escrow.
+     * @param investmentId The id of the investment.
+     * @param amountOfNfts The amount of ERC1155 tokens that should be locked.
+     * @param sender The address to lock the Nfts from..
+     */
+    function lockFundingNFT(
+        uint256 investmentId,
+        uint256 amountOfNfts,
+        address sender
+    ) external onlyProjectOrOwner() nonReentrant(){
+        fundingNFT.safeTransferFrom(sender, address(this), investmentId, amountOfNfts, "");
     }
 
     /**
      * @notice Burn Funding NFT
      * @dev This function is used to burn NFT
      * @param account The address to burn the funding nft from
-     * @param investmentId The investment id
+     * @param projectId The project id
      * @param amount The amount of funding nft to be burn
      */
-    function burnFundingNFT(address account, uint256 investmentId, uint256 amount) external onlyRegistry() {
-        fundingNFT.burn(account, investmentId, amount);
+    function burnFundingNFT(
+        address account,
+        uint256 projectId,
+        uint256 amount
+    ) external onlyProject() {
+        fundingNFT.burn(account, projectId, amount);
     }
 
     /**
@@ -98,7 +124,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         address lendingToken,
         address seeker,
         uint256 amount
-    ) external onlyRegistry() {
+    ) external onlyProject() {
         IERC20(lendingToken).safeTransfer(seeker, amount);
     }
 
@@ -113,7 +139,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
         address investmentToken,
         address recipient,
         uint256 amount
-    ) external onlyRegistry() {
+    ) external onlyProject() {
         IERC20(investmentToken).safeTransfer(recipient, amount);
     }
 
@@ -136,7 +162,7 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      * @param recipient The address to mint the reputational tokens to.
      * @param amount The amount of reputational tokens to be minted.
      */
-    function mintReputationalToken(address recipient, uint256 amount) external onlyRegistryOrStaking() {
+    function mintReputationalToken(address recipient, uint256 amount) external onlyProjectOrStaking() {
         reputationalALBT.mintTo(recipient, amount);
     }
 
@@ -148,15 +174,5 @@ contract Escrow is Initializable, EscrowDetails, OwnableUpgradeable, ERC1155Hold
      */
     function burnReputationalToken(address from, uint256 amount) external onlyStaking() {
         reputationalALBT.burnFrom(from, amount);
-    }
-
-    /**
-     * @notice Change Registry
-     * @dev This function is used to change the registry address in case of an upgrade.
-     * @param registryAddress The address of the upgraded Registry contract.
-     */
-    function changeRegistry(address registryAddress) external onlyOwner() {
-        require(registryAddress != address(0), "Registry should not be zero address");
-        registry = IRegistry(registryAddress);
     }
 }

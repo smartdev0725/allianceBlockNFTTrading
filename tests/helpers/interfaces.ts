@@ -1,5 +1,5 @@
 import {BigNumber, Contract, Signer} from 'ethers';
-import {StakingType} from './registryEnums';
+import {StakingType} from './ProjectEnums';
 
 export interface Investment {
   investmentTokenContract: Contract;

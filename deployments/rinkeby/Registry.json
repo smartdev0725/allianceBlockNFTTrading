@@ -359,12 +359,12 @@
               "type": "uint256"
             }
           ],
-          "internalType": "struct InvestmentLibrary.InvestmentDetails",
+          "internalType": "struct ProjectLibrary.InvestmentDetails",
           "name": "",
           "type": "tuple"
         },
         {
-          "internalType": "enum InvestmentLibrary.InvestmentStatus",
+          "internalType": "enum ProjectLibrary.ProjectStatus",
           "name": "",
           "type": "uint8"
         },
@@ -561,10 +561,10 @@
           "type": "uint256"
         }
       ],
-      "name": "investmentStatus",
+      "name": "projectStatus",
       "outputs": [
         {
-          "internalType": "enum InvestmentLibrary.InvestmentStatus",
+          "internalType": "enum ProjectLibrary.ProjectStatus",
           "name": "",
           "type": "uint8"
         }

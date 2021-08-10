@@ -22,7 +22,11 @@ export const getSigners = async () => {
 };
 
 export const getContracts = async () => {
-  const registryContract = await ethers.getContract('Registry');
+  const projectManagerContract = await ethers.getContract('ProjectManager');
+
+  const investmentContract = await ethers.getContract('Investment');
+
+  const mockPersonalLoanContract = await ethers.getContract('MockPersonalLoan');
 
   const governanceContract = await ethers.getContract('Governance');
 
@@ -49,7 +53,9 @@ export const getContracts = async () => {
   const rALBTContract = await rALBTFactory.attach(rALBTAddress);
 
   return {
-    registryContract,
+    projectManagerContract,
+    investmentContract,
+    mockPersonalLoanContract,
     governanceContract,
     fundingNFTContract,
     escrowContract,
@@ -70,7 +76,8 @@ export const initializeTransfers = async (
   signers: any
 ) => {
   const {
-    registryContract,
+    investmentContract,
+    mockPersonalLoanContract,
     lendingTokenContract,
     investmentTokenContract,
     collateralTokenContract,
@@ -86,60 +93,62 @@ export const initializeTransfers = async (
     seekerSigner,
   } = signers;
 
-  // Transfer tokens.
-  const amountToTransfer = ethers.utils.parseEther('10000000');
+  for (const projectContract of [investmentContract, mockPersonalLoanContract]) {
+    // Transfer tokens.
+    const amountToTransfer = ethers.utils.parseEther('10000000');
 
-  // Lender 1 minting
-  await lendingTokenContract
-    .connect(deployerSigner)
-    .mint(lender1, amountToTransfer);
-  await lendingTokenContract
-    .connect(lender1Signer)
-    .approve(registryContract.address, amountToTransfer);
+    // Lender 1 minting
+    await lendingTokenContract
+      .connect(deployerSigner)
+      .mint(lender1, amountToTransfer);
+    await lendingTokenContract
+      .connect(lender1Signer)
+      .approve(projectContract.address, amountToTransfer);
 
-  // Lender 2 minting
-  await lendingTokenContract
-    .connect(deployerSigner)
-    .mint(lender2, amountToTransfer);
-  await lendingTokenContract
-    .connect(lender2Signer)
-    .approve(registryContract.address, amountToTransfer);
+    // Lender 2 minting
+    await lendingTokenContract
+      .connect(deployerSigner)
+      .mint(lender2, amountToTransfer);
+    await lendingTokenContract
+      .connect(lender2Signer)
+      .approve(projectContract.address, amountToTransfer);
 
-  // Lender 3 minting
-  await lendingTokenContract
-    .connect(deployerSigner)
-    .mint(lender3, amountToTransfer);
-  await lendingTokenContract
-    .connect(lender3Signer)
-    .approve(registryContract.address, amountToTransfer);
+    // Lender 3 minting
+    await lendingTokenContract
+      .connect(deployerSigner)
+      .mint(lender3, amountToTransfer);
+    await lendingTokenContract
+      .connect(lender3Signer)
+      .approve(projectContract.address, amountToTransfer);
 
-  // Lender 4 minting
-  await lendingTokenContract
-    .connect(deployerSigner)
-    .mint(lender4, amountToTransfer);
-  await lendingTokenContract
-    .connect(lender4Signer)
-    .approve(registryContract.address, amountToTransfer);
+    // Lender 4 minting
+    await lendingTokenContract
+      .connect(deployerSigner)
+      .mint(lender4, amountToTransfer);
+    await lendingTokenContract
+      .connect(lender4Signer)
+      .approve(projectContract.address, amountToTransfer);
 
-  // Seeker minting
-  await lendingTokenContract
-    .connect(deployerSigner)
-    .mint(seeker, amountToTransfer);
-  await lendingTokenContract
-    .connect(seekerSigner)
-    .approve(registryContract.address, amountToTransfer);
-  await collateralTokenContract
-    .connect(deployerSigner)
-    .mint(seeker, amountToTransfer);
-  await collateralTokenContract
-    .connect(seekerSigner)
-    .approve(registryContract.address, amountToTransfer);
-  await investmentTokenContract
-    .connect(deployerSigner)
-    .mint(seeker, amountToTransfer);
-  await investmentTokenContract
-    .connect(seekerSigner)
-    .approve(registryContract.address, amountToTransfer);
+    // Seeker minting
+    await lendingTokenContract
+      .connect(deployerSigner)
+      .mint(seeker, amountToTransfer);
+    await lendingTokenContract
+      .connect(seekerSigner)
+      .approve(projectContract.address, amountToTransfer);
+    await collateralTokenContract
+      .connect(deployerSigner)
+      .mint(seeker, amountToTransfer);
+    await collateralTokenContract
+      .connect(seekerSigner)
+      .approve(projectContract.address, amountToTransfer);
+    await investmentTokenContract
+      .connect(deployerSigner)
+      .mint(seeker, amountToTransfer);
+    await investmentTokenContract
+      .connect(seekerSigner)
+      .approve(projectContract.address, amountToTransfer);
+  }
 };
 
 export const waitFor = (

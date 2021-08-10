@@ -58,8 +58,10 @@ describe('Happy Path', function () {
 
     // Get contracts
     const {
+      projectManagerContract,
+      mockPersonalLoanContract,
+      investmentContract,
       actionVerifierContract,
-      registryContract,
       governanceContract,
       fundingNFTContract,
       escrowContract,
@@ -70,8 +72,11 @@ describe('Happy Path', function () {
       ALBTContract,
       stakerMedalNFTContract,
     } = await getContracts();
+    this.projectManagerContract = projectManagerContract;
+    this.mockPersonalLoanContract = mockPersonalLoanContract;
+    this.investmentContract = investmentContract;
     this.actionVerifierContract = actionVerifierContract;
-    this.registryContract = registryContract;
+    this.registryContract = {};
     this.governanceContract = governanceContract;
     this.fundingNFTContract = fundingNFTContract;
     this.escrowContract = escrowContract;
@@ -88,7 +93,8 @@ describe('Happy Path', function () {
     // Initialize Transfers
     await initializeTransfers(
       {
-        registryContract,
+        mockPersonalLoanContract,
+        investmentContract,
         lendingTokenContract,
         investmentTokenContract,
         collateralTokenContract,
@@ -104,9 +110,14 @@ describe('Happy Path', function () {
       }
     );
 
-    // this.approvalRequest = await governanceContract.totalApprovalRequests();
+    await this.projectManagerContract.createProjectType(
+      mockPersonalLoanContract.address
+    );
 
-    // this.investmentId = await this.registryContract.totalInvestments();
+    this.approvalRequest = await governanceContract.totalApprovalRequests();
+
+    this.projectId = await this.projectManagerContract.totalProjects();
+
     this.startingEscrowInvestmentTokenBalance =
       await investmentTokenContract.balanceOf(escrowContract.address);
 
@@ -114,15 +125,15 @@ describe('Happy Path', function () {
     this.totalAmountRequested = ethers.utils.parseEther('200');
     this.ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-    // await this.registryContract
-    //   .connect(this.seekerSigner)
-    //   .requestInvestment(
-    //     this.investmentTokenContract.address,
-    //     this.amountOfTokensToBePurchased,
-    //     this.lendingTokenContract.address,
-    //     this.totalAmountRequested,
-    //     this.ipfsHash
-    //   );
+    await this.mockPersonalLoanContract
+      .connect(this.seekerSigner)
+      .requestInvestment(
+        this.investmentTokenContract.address,
+        this.amountOfTokensToBePurchased,
+        this.lendingTokenContract.address,
+        this.totalAmountRequested,
+        this.ipfsHash
+      );
 
     // await this.governanceContract
     //   .connect(this.superDelegatorSigner)

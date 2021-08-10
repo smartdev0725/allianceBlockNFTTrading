@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.7.6;
 
 /**
  * @title Interface of the Escrow.
@@ -12,6 +12,12 @@ interface IEscrow {
         uint256 investmentId,
         uint256 partitionsPurchased,
         address receiver
+    ) external;
+
+    function lockFundingNFT(
+        uint256 investmentId,
+        uint256 amountOfNfts,
+        address sender
     ) external;
 
     function transferLendingToken(

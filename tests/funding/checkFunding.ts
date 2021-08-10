@@ -30,12 +30,12 @@ export default async function suite() {
         // Given
         const isMinter = await this.fundingNFTContract.hasRole(
           ethers.utils.solidityKeccak256(['string'], ['MINTER_ROLE']),
-          this.registryContract.address
+          this.investmentContract.address
         );
 
         const isPauser = await this.fundingNFTContract.hasRole(
           ethers.utils.solidityKeccak256(['string'], ['PAUSER_ROLE']),
-          this.registryContract.address
+          this.investmentContract.address
         );
 
         // When and Then

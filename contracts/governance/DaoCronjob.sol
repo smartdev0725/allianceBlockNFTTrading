@@ -4,7 +4,7 @@ pragma solidity 0.7.6;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./GovernanceTypesAndStorage.sol";
-import "../interfaces/IRegistry.sol";
+import "../interfaces/IProject.sol";
 import "../libs/OrderedDoubleLinkedList.sol";
 import "../libs/DoubleLinkedList.sol";
 
@@ -45,7 +45,7 @@ contract DaoCronjob is GovernanceTypesAndStorage {
      * @param timestamp The current block height
      */
     function executeCronjob(uint256 cronjobId, uint256 timestamp) internal {
-        updateInvestment(cronjobs[cronjobId].externalId, timestamp);
+        updateProject(cronjobs[cronjobId].projectId, timestamp);
     }
 
     /**
@@ -53,31 +53,31 @@ contract DaoCronjob is GovernanceTypesAndStorage {
      * @dev Adds a node to the cronjobList (OrderedDoubleLinkedList)
      * @param cronjobType The type of cronJob
      * @param timestamp The current block height
-     * @param externalId Id of the request in case of dao approval, change voting request or investment
+     * @param projectId Id of the request in case of dao approval, change voting request or investment
      */
     function addCronjob(
         CronjobType cronjobType,
         uint256 timestamp,
-        uint256 externalId
+        uint256 projectId
     ) internal {
         totalCronjobs = totalCronjobs.add(1);
-        cronjobs[totalCronjobs] = Cronjob(cronjobType, externalId);
+        cronjobs[totalCronjobs] = Cronjob(cronjobType, projectId);
         cronjobList.addNodeIncrement(timestamp, totalCronjobs);
     }
 
     /**
      * @notice Updates an investment
      * @dev checks if lottery should start or adds cronJob for late application
-     * @param investmentId The id of the investment to update
+     * @param projectId The id of the project to update
      * @param timestamp the current block height
      */
-    function updateInvestment(uint256 investmentId, uint256 timestamp) internal {
-        if (registry.getRequestingInterestStatus(investmentId)) {
-            registry.startLotteryPhase(investmentId);
+    function updateProject(uint256 projectId, uint256 timestamp) internal {
+        if (IProject(projectManager.projectAddressFromProjectId(projectId)).getRequestingInterestStatus(projectId)) {
+            IProject(projectManager.projectAddressFromProjectId(projectId)).startLotteryPhase(projectId);
         } else {
             uint256 nextCronjobTimestamp =
                 timestamp.add(updatableVariables[LATE_APPLICATIONS_FOR_INVESTMENT_DURATION]);
-            addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, investmentId);
+            addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, projectId);
         }
     }
 }

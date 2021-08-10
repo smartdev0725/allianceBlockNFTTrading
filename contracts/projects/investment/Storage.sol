@@ -1,25 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.6;
 
-import "../libs/InvestmentLibrary.sol";
-import "../interfaces/IERC20.sol";
-import "../interfaces/IERC1155Mint.sol";
-import "../interfaces/IGovernance.sol";
-import "../interfaces/IEscrow.sol";
+import "../../libs/ProjectLibrary.sol";
+import "../../interfaces/IERC20.sol";
+import "../../interfaces/IERC1155Mint.sol";
+import "../../interfaces/IGovernance.sol";
+import "../../interfaces/IEscrow.sol";
 
 /**
  * @title AllianceBlock Storage contract
  * @notice Responsible for investment storage
  */
 contract Storage {
-    uint256 public totalInvestments; // The total amount of investment requests.
 
-    // Mapping from investment id -> details for each and every investment.
-    mapping(uint256 => InvestmentLibrary.InvestmentDetails) public investmentDetails;
-    // Mapping from investment id -> investment status.
-    mapping(uint256 => InvestmentLibrary.InvestmentStatus) public investmentStatus;
-    // Mapping from investment id -> investment seeker's address.
-    mapping(uint256 => address) public investmentSeeker;
     // The amount of investment tokens each ticket contains.
     mapping(uint256 => uint256) public investmentTokensPerTicket;
     // The amount of tickets remaining to be allocated to investors.
@@ -35,18 +28,14 @@ contract Storage {
     // The amount of tickets that an investor requested that have been won already.
     mapping(uint256 => mapping(address => uint256)) public ticketsWonPerAddress;
     // The amount of tickets that an investor locked for a specific investment.
-    mapping(uint256 => mapping(address => uint256)) public lockedTicketsForSpecificInvestmentPerAddress;
+    mapping(uint256 => mapping(address => uint256)) public lockedNftsForSpecificInvestmentPerAddress;
     // The amount of tickets that an investor locked from all investments.
-    mapping(address => uint256) public lockedTicketsPerAddress;
+    mapping(address => uint256) public lockedNftsPerAddress;
     // The last block checked for rewards for the tickets locked per address.
-    mapping(address => uint256) public lastBlockCheckedForLockedTicketsPerAddress;
-    // All supported lending tokens are giving true, while unsupported are giving false.
-    mapping(address => bool) public isValidLendingToken;
-
-    IGovernance public governance; // Governance's contract address.
-    IERC1155Mint public fundingNFT; // Funding nft's contract address.
-    IEscrow public escrow; // Escrow's contract address.
-    IERC20 public rALBT; // rALBT's contract address.
+    mapping(address => uint256) public lastBlockCheckedForLockedNftsPerAddress;
+    
+    // Mapping from investment id -> details for each and every investment.
+    mapping(uint256 => ProjectLibrary.InvestmentDetails) public investmentDetails;
 
     // This variable represents the base amount in which every investment amount is divided to. (also the starting value for each ERC1155)
     uint256 public baseAmountForEachPartition;

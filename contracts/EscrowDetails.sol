@@ -4,7 +4,7 @@ pragma solidity 0.7.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IERC1155Mint.sol";
 import "./interfaces/IERC721Mint.sol";
-import "./interfaces/IRegistry.sol";
+import "./interfaces/IProjectManager.sol";
 import "./rALBT.sol";
 
 /**
@@ -12,18 +12,17 @@ import "./rALBT.sol";
  * @notice Functionality, storage and modifiers for Escrow
  */
 contract EscrowDetails {
-    IRegistry public registry;
 
+    IProjectManager public projectManager;
     IERC20 public lendingToken;
     IERC1155Mint public fundingNFT;
     address public actionVerifier;
     address public staking;
 
-    mapping(uint256 => address) public investmentSeeker;
     rALBT public reputationalALBT;
 
-    modifier onlyRegistry() {
-        require(msg.sender == address(registry), "Only Registry");
+    modifier onlyProject() {
+        require(projectManager.isProject(msg.sender), "Only Project");
         _;
     }
 
@@ -37,8 +36,8 @@ contract EscrowDetails {
         _;
     }
 
-    modifier onlyRegistryOrStaking() {
-        require(msg.sender == staking || msg.sender == address(registry), "Only Registry or Staking");
+    modifier onlyProjectOrStaking() {
+        require(msg.sender == staking || projectManager.isProject(msg.sender), "Only Project or Staking");
         _;
     }
 }
