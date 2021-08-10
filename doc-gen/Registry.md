@@ -75,7 +75,7 @@ Start Investment
 
 
 
-### `getInvestmentMetadata(uint256 investmentId) → struct InvestmentLibrary.InvestmentDetails, enum InvestmentLibrary.InvestmentStatus, address` (public)
+### `getInvestmentMetadata(uint256 investmentId) → struct ProjectLibrary.InvestmentDetails, enum ProjectLibrary.ProjectStatus, address` (public)
 
 Get Investment Metadata
 

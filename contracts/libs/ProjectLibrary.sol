@@ -4,8 +4,8 @@ pragma solidity 0.7.6;
 /**
  * @title Investment Library
  */
-library InvestmentLibrary {
-    enum InvestmentStatus {
+library ProjectLibrary {
+    enum ProjectStatus {
         REQUESTED, // Status when investment has been requested, but not approved yet.
         APPROVED, // Status when investment has been approved from governors.
         STARTED, // Status when investment has been fully funded.

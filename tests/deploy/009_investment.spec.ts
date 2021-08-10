@@ -1,21 +1,21 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {expect} from 'chai';
-import {BASE_AMOUNT} from "../helpers/constants";
+import {BASE_AMOUNT} from '../helpers/constants';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
-describe('Contract Registry', () => {
+describe('Contract Investment', () => {
   beforeEach(async () => {
     await deployments.fixture();
   });
 
   it('should be deployed', async function () {
     // Given
-    const registryContract = await ethers.getContract('Registry');
+    const investmentContract = await ethers.getContract('Investment');
 
     const fundingNFTProxyContract = await deployments.get('FundingNFT_Proxy');
 
     // When
-    const fundingNFT = await registryContract.fundingNFT();
+    const fundingNFT = await investmentContract.fundingNFT();
 
     // Then
     expect(fundingNFT).to.equal(fundingNFTProxyContract.address);
@@ -30,11 +30,12 @@ describe('Contract Registry', () => {
     const governanceAddress = (await get('Governance')).address;
     const lendingTokenAddress = (await get('LendingToken')).address;
     const fundingNFTAddress = (await get('FundingNFT')).address;
-    const amount = ethers.utils.parseEther(BASE_AMOUNT + '').toString()
+    const projectManagerAddress = (await get('ProjectManager')).address;
+    const amount = ethers.utils.parseEther(BASE_AMOUNT + '').toString();
 
     await expectRevert.unspecified(
-      deploy('RegistryTest', {
-        contract: 'Registry',
+      deploy('InvestmentTest', {
+        contract: 'Investment',
         from: deployer,
         proxy: {
           owner: proxyOwner,
@@ -46,6 +47,7 @@ describe('Contract Registry', () => {
           governanceAddress,
           [lendingTokenAddress],
           fundingNFTAddress,
+          projectManagerAddress,
           amount,
         ],
         log: true,
@@ -53,8 +55,8 @@ describe('Contract Registry', () => {
     );
 
     await expectRevert.unspecified(
-      deploy('RegistryTest', {
-        contract: 'Registry',
+      deploy('InvestmentTest', {
+        contract: 'Investment',
         from: deployer,
         proxy: {
           owner: proxyOwner,
@@ -66,6 +68,7 @@ describe('Contract Registry', () => {
           ethers.constants.AddressZero,
           [lendingTokenAddress],
           fundingNFTAddress,
+          projectManagerAddress,
           amount,
         ],
         log: true,
@@ -73,8 +76,8 @@ describe('Contract Registry', () => {
     );
 
     await expectRevert.unspecified(
-      deploy('RegistryTest', {
-        contract: 'Registry',
+      deploy('InvestmentTest', {
+        contract: 'Investment',
         from: deployer,
         proxy: {
           owner: proxyOwner,
@@ -86,6 +89,7 @@ describe('Contract Registry', () => {
           governanceAddress,
           [ethers.constants.AddressZero],
           fundingNFTAddress,
+          projectManagerAddress,
           amount,
         ],
         log: true,
@@ -93,8 +97,8 @@ describe('Contract Registry', () => {
     );
 
     await expectRevert.unspecified(
-      deploy('RegistryTest', {
-        contract: 'Registry',
+      deploy('InvestmentTest', {
+        contract: 'Investment',
         from: deployer,
         proxy: {
           owner: proxyOwner,
@@ -106,6 +110,7 @@ describe('Contract Registry', () => {
           governanceAddress,
           [lendingTokenAddress],
           ethers.constants.AddressZero,
+          projectManagerAddress,
           amount,
         ],
         log: true,
@@ -113,8 +118,8 @@ describe('Contract Registry', () => {
     );
 
     await expectRevert.unspecified(
-      deploy('RegistryTest', {
-        contract: 'Registry',
+      deploy('InvestmentTest', {
+        contract: 'Investment',
         from: deployer,
         proxy: {
           owner: proxyOwner,
@@ -126,12 +131,31 @@ describe('Contract Registry', () => {
           governanceAddress,
           [lendingTokenAddress],
           fundingNFTAddress,
+          ethers.constants.AddressZero,
+          amount,
+        ],
+        log: true,
+      })
+    );
+    await expectRevert.unspecified(
+      deploy('InvestmentTest', {
+        contract: 'Investment',
+        from: deployer,
+        proxy: {
+          owner: proxyOwner,
+          methodName: 'initialize',
+          proxyContract: 'OpenZeppelinTransparentProxy',
+        },
+        args: [
+          escrowAddress,
+          governanceAddress,
+          [lendingTokenAddress],
+          fundingNFTAddress,
+          projectManagerAddress,
           0,
         ],
         log: true,
       })
     );
-
   });
-
 });

@@ -1,6 +1,6 @@
-// Investment
-import checkInvestmentRequest from './checkInvestmentRequest';
-import checkInterestForInvestment from './checkInterestForInvestment';
+// Project Loan
+import checkPersonalLoanRequest from './checkPersonalLoanRequest';
+import checkInterestForPersonalLoan from './checkInterestForPersonalLoan';
 import checkExecuteLotteryRun from './checkExecuteLotteryRun';
 import checkInitialization from './checkInitialization';
 
@@ -11,7 +11,7 @@ import {
 } from '../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
-describe('Registry Investments', function () {
+describe('Personal Loans', function () {
   beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();
@@ -52,7 +52,9 @@ describe('Registry Investments', function () {
 
     // Get contracts
     const {
-      registryContract,
+      projectManagerContract,
+      mockPersonalLoanContract,
+      investmentContract,
       governanceContract,
       fundingNFTContract,
       escrowContract,
@@ -61,8 +63,11 @@ describe('Registry Investments', function () {
       collateralTokenContract,
       stakingContract,
       ALBTContract,
+      stakerMedalNFTContract,
     } = await getContracts();
-    this.registryContract = registryContract;
+    this.projectManagerContract = projectManagerContract;
+    this.mockPersonalLoanContract = mockPersonalLoanContract;
+    this.investmentContract = investmentContract;
     this.governanceContract = governanceContract;
     this.fundingNFTContract = fundingNFTContract;
     this.escrowContract = escrowContract;
@@ -71,6 +76,7 @@ describe('Registry Investments', function () {
     this.collateralTokenContract = collateralTokenContract;
     this.stakingContract = stakingContract;
     this.ALBTContract = ALBTContract;
+    this.stakerMedalNFTContract = stakerMedalNFTContract;
     const rALBTFactory = await ethers.getContractFactory('rALBT');
     const rALBTAddress = await this.escrowContract.reputationalALBT();
     this.rALBTContract = await rALBTFactory.attach(rALBTAddress);
@@ -78,7 +84,8 @@ describe('Registry Investments', function () {
     // Initialize Transfers
     await initializeTransfers(
       {
-        registryContract,
+        mockPersonalLoanContract,
+        investmentContract,
         lendingTokenContract,
         investmentTokenContract,
         collateralTokenContract,
@@ -94,9 +101,14 @@ describe('Registry Investments', function () {
       }
     );
 
+    await this.projectManagerContract.createProjectType(
+      mockPersonalLoanContract.address
+    );
+
     this.approvalRequest = await governanceContract.totalApprovalRequests();
 
-    this.investmentId = await this.registryContract.totalInvestments();
+    this.projectId = await this.projectManagerContract.totalProjects();
+
     this.startingEscrowInvestmentTokenBalance =
       await investmentTokenContract.balanceOf(escrowContract.address);
 
@@ -104,7 +116,7 @@ describe('Registry Investments', function () {
     this.totalAmountRequested = ethers.utils.parseEther('200');
     this.ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-    await this.registryContract
+    await this.mockPersonalLoanContract
       .connect(this.seekerSigner)
       .requestInvestment(
         this.investmentTokenContract.address,
@@ -146,22 +158,30 @@ describe('Registry Investments', function () {
       this.stakingContract.address,
       amountToTransfer
     );
+
+    await this.ALBTContract.connect(this.deployerSigner).mint(
+      this.lender4,
+      amountToTransfer
+    );
+
+    await this.ALBTContract.connect(this.lender4Signer).approve(
+      this.stakingContract.address,
+      amountToTransfer
+    );
+
   });
 
   describe(
-    'When checking investment requests',
-    checkInvestmentRequest.bind(this)
+    'When checking personal loan requests',
+    checkPersonalLoanRequest.bind(this)
   );
   describe(
-    'When checking interest for investment',
-    checkInterestForInvestment.bind(this)
+    'When checking interest for PersonalLoan',
+    checkInterestForPersonalLoan.bind(this)
   );
   describe(
     'When checking execute lottery run',
     checkExecuteLotteryRun.bind(this)
   );
-  describe(
-    'When checking initialization',
-    checkInitialization.bind(this)
-  );
+  describe('When checking initialization', checkInitialization.bind(this));
 });

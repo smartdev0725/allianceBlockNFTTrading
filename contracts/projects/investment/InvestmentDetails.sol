@@ -3,21 +3,17 @@ pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Storage.sol";
-import "../libs/TokenFormat.sol";
+import "../../libs/TokenFormat.sol";
+import "../BaseProject/BaseProject.sol";
 
 /**
  * @title AllianceBlock InvestmentDetails contract
  * @notice Functionality for storing investment details and modifiers.
  * @dev Extends Storage
  */
-contract InvestmentDetails is Storage {
+contract InvestmentDetails is Storage, BaseProject {
     using SafeMath for uint256;
     using TokenFormat for uint256;
-
-    modifier onlyGovernance() {
-        require(msg.sender == address(governance), "Only Governance");
-        _;
-    }
 
     /**
      * @notice Stores Investment Details
@@ -34,8 +30,10 @@ contract InvestmentDetails is Storage {
         uint256 investmentTokensAmount_,
         string memory extraInfo_
     ) internal returns (uint256) {
-        InvestmentLibrary.InvestmentDetails memory investment;
-        investment.investmentId = totalInvestments;
+        uint256 projectId = projectManager.createProject();
+        
+        ProjectLibrary.InvestmentDetails memory investment;
+        investment.investmentId = projectId;
         investment.investmentToken = investmentToken_;
         investment.investmentTokensAmount = investmentTokensAmount_;
         investment.totalAmountToBeRaised = amountRequestedToBeRaised_;
@@ -43,11 +41,9 @@ contract InvestmentDetails is Storage {
         investment.totalPartitionsToBePurchased = amountRequestedToBeRaised_.div(baseAmountForEachPartition);
         investment.lendingToken = lendingToken_;
 
-        investmentDetails[totalInvestments] = investment;
+        investmentDetails[projectId] = investment;
 
-        investmentSeeker[totalInvestments] = msg.sender;
-
-        totalInvestments = totalInvestments.add(1);
+        projectSeeker[projectId] = msg.sender;
 
         return investment.investmentId;
 

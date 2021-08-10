@@ -1,5 +1,8 @@
 // Investment
-import happyPath from './happyPath';
+import checkInvestmentRequest from './checkInvestmentRequest';
+import checkInterestForInvestment from './checkInterestForInvestment';
+import checkExecuteLotteryRun from './checkExecuteLotteryRun';
+import checkInitialization from './checkInitialization';
 
 import {
   getContracts,
@@ -8,7 +11,7 @@ import {
 } from '../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
-describe('Happy Path', function () {
+describe('Investments', function () {
   beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();
@@ -50,9 +53,8 @@ describe('Happy Path', function () {
     // Get contracts
     const {
       projectManagerContract,
-      mockPersonalLoanContract,
       investmentContract,
-      actionVerifierContract,
+      mockPersonalLoanContract,
       governanceContract,
       fundingNFTContract,
       escrowContract,
@@ -61,13 +63,10 @@ describe('Happy Path', function () {
       collateralTokenContract,
       stakingContract,
       ALBTContract,
-      stakerMedalNFTContract,
     } = await getContracts();
     this.projectManagerContract = projectManagerContract;
-    this.mockPersonalLoanContract = mockPersonalLoanContract;
     this.investmentContract = investmentContract;
-    this.actionVerifierContract = actionVerifierContract;
-    this.registryContract = {};
+    this.mockPersonalLoanContract = mockPersonalLoanContract;
     this.governanceContract = governanceContract;
     this.fundingNFTContract = fundingNFTContract;
     this.escrowContract = escrowContract;
@@ -76,7 +75,6 @@ describe('Happy Path', function () {
     this.collateralTokenContract = collateralTokenContract;
     this.stakingContract = stakingContract;
     this.ALBTContract = ALBTContract;
-    this.stakerMedalNFTContract = stakerMedalNFTContract;
     const rALBTFactory = await ethers.getContractFactory('rALBT');
     const rALBTAddress = await this.escrowContract.reputationalALBT();
     this.rALBTContract = await rALBTFactory.attach(rALBTAddress);
@@ -84,8 +82,8 @@ describe('Happy Path', function () {
     // Initialize Transfers
     await initializeTransfers(
       {
-        mockPersonalLoanContract,
         investmentContract,
+        mockPersonalLoanContract,
         lendingTokenContract,
         investmentTokenContract,
         collateralTokenContract,
@@ -101,10 +99,6 @@ describe('Happy Path', function () {
       }
     );
 
-    await this.projectManagerContract.createProjectType(
-      mockPersonalLoanContract.address
-    );
-
     this.approvalRequest = await governanceContract.totalApprovalRequests();
 
     this.projectId = await this.projectManagerContract.totalProjects();
@@ -116,7 +110,7 @@ describe('Happy Path', function () {
     this.totalAmountRequested = ethers.utils.parseEther('200');
     this.ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-    await this.mockPersonalLoanContract
+    await this.investmentContract
       .connect(this.seekerSigner)
       .requestInvestment(
         this.investmentTokenContract.address,
@@ -158,21 +152,19 @@ describe('Happy Path', function () {
       this.stakingContract.address,
       amountToTransfer
     );
-
-    await this.ALBTContract.connect(this.deployerSigner).mint(
-      this.lender4,
-      amountToTransfer
-    );
-
-    await this.ALBTContract.connect(this.lender4Signer).approve(
-      this.stakingContract.address,
-      amountToTransfer
-    );
-
   });
 
   describe(
-    'Happy Path process',
-    happyPath.bind(this)
+    'When checking investment requests',
+    checkInvestmentRequest.bind(this)
   );
+  describe(
+    'When checking interest for investment',
+    checkInterestForInvestment.bind(this)
+  );
+  describe(
+    'When checking execute lottery run',
+    checkExecuteLotteryRun.bind(this)
+  );
+  describe('When checking initialization', checkInitialization.bind(this));
 });

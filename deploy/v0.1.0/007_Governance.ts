@@ -1,24 +1,23 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import '@nomiclabs/hardhat-ethers';
+import {ethers} from 'hardhat';
+
+import {
+  APPLICATION_FOR_INVESTMENT_DURATION,
+  LATE_APPLICATION_FOR_INVESTMENT_DURATION,
+} from '../../utils/constants';
 
 const version = 'v0.1.0';
-const contractName = 'Escrow';
+const contractName = 'Governance';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-  const {deployments, getNamedAccounts, getChainId} = hre;
+  const {deployments, getNamedAccounts} = hre;
   const {deploy, get} = deployments;
 
-  const {deployer, proxyOwner} = await getNamedAccounts();
+  const {deployer, proxyOwner, superDelegator} = await getNamedAccounts();
 
-  const chainId = await getChainId();
-  if (+chainId === 1 && !process.env.LENDING_TOKEN_ADDRESS) {
-    throw new Error("LENDING_TOKEN_ADDRESS env var should not be empty");
-  }
-
-  const lendingTokenAddress = (+chainId === 1) ? process.env.LENDING_TOKEN_ADDRESS
-    : (await get('LendingToken')).address;
-  const fundingNFTAddress = (await get('FundingNFT')).address;
+  const projectManagerAddress = (await get('ProjectManager')).address;
 
   await deploy(contractName, {
     contract: contractName,
@@ -28,7 +27,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       methodName: 'initialize',
       proxyContract: 'OpenZeppelinTransparentProxy',
     },
-    args: [lendingTokenAddress, fundingNFTAddress],
+    args: [
+      superDelegator,
+      APPLICATION_FOR_INVESTMENT_DURATION,
+      LATE_APPLICATION_FOR_INVESTMENT_DURATION,
+      projectManagerAddress,
+    ],
     log: true,
   });
   return true;
@@ -38,5 +42,5 @@ const id = contractName + version;
 
 export default func;
 func.tags = [id, version];
-func.dependencies = ['FundingNFTv0.1.0', 'LendingTokenv0.1.0'];
+func.dependencies = ['ProjectManagerv0.1.0'];
 func.id = id;

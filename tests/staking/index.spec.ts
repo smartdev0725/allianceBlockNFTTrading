@@ -50,7 +50,7 @@ describe('Staking', function () {
 
     // Get contracts
     const {
-      registryContract,
+      investmentContract,
       governanceContract,
       fundingNFTContract,
       escrowContract,
@@ -61,7 +61,7 @@ describe('Staking', function () {
       stakingContract,
       stakerMedalNFTContract,
     } = await getContracts();
-    this.registryContract = registryContract;
+    this.investmentContract = investmentContract;
     this.governanceContract = governanceContract;
     this.fundingNFTContract = fundingNFTContract;
     this.escrowContract = escrowContract;

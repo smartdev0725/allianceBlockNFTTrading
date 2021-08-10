@@ -20,20 +20,6 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
     }
 
     /**
-     * @notice Sets Registry contract
-     * @dev used to initialize SuperGovernance
-     * @dev requires not already initialized
-     * @param registryAddress_ the Registry address
-     */
-    function setRegistry(address registryAddress_) external onlyOwner() {
-        require(registryAddress_ != address(0), "Cannot initialize with 0 addresses");
-        require(address(registry) == address(0), "Cannot initialize second time");
-        registry = IRegistry(registryAddress_);
-
-        emit InitGovernance(registryAddress_, msg.sender);
-    }
-
-    /**
      * @notice Votes for Request
      * @dev Executes cronJob
      * @dev requires msg.sender to be Super Delegator
@@ -45,7 +31,7 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
         require(msg.sender == superDelegator, "Only super delegator can call this function");
         require(!approvalRequests[requestId].isProcessed, "Cannot process again same investment");
 
-        registry.decideForInvestment(approvalRequests[requestId].investmentId, decision);
+        IProject(projectManager.projectAddressFromProjectId(approvalRequests[requestId].projectId)).decideForProject(approvalRequests[requestId].projectId, decision);
 
         if (decision) {
             approvalRequests[requestId].approvalsProvided = 1;
@@ -54,6 +40,6 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
 
         approvalRequests[requestId].isProcessed = true;
 
-        emit VotedForRequest(approvalRequests[requestId].investmentId, requestId, decision, msg.sender);
+        emit VotedForRequest(approvalRequests[requestId].projectId, decision, msg.sender);
     }
 }

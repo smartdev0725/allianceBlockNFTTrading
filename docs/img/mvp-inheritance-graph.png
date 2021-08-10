@@ -1427,7 +1427,7 @@
 <text text-anchor="start" x="295" y="-647.3" font-family="Times,serif" font-style="italic" font-size="14.00">Public Variables:</text>
 <text text-anchor="start" x="295" y="-625.3" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;totalInvestments</text>
 <text text-anchor="start" x="295" y="-604.3" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;investmentDetails</text>
-<text text-anchor="start" x="295" y="-583.3" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;investmentStatus</text>
+<text text-anchor="start" x="295" y="-583.3" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;projectStatus</text>
 <text text-anchor="start" x="295" y="-562.3" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;investmentSeeker</text>
 <text text-anchor="start" x="295" y="-541.3" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;investmentTokensPerTicket</text>
 <text text-anchor="start" x="295" y="-520.3" font-family="Times,serif" font-size="14.00"> &#160;&#160;&#160;ticketsRemaining</text>

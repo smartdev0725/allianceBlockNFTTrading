@@ -1,11 +1,7 @@
 // Investment
 import checkGovernance from './checkGovernance';
 
-import {
-  getContracts,
-  getSigners,
-  initializeTransfers,
-} from '../helpers/utils';
+import {getContracts, getSigners, initializeTransfers} from '../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
 describe('Governance', function () {
@@ -48,21 +44,25 @@ describe('Governance', function () {
 
     // Get contracts
     const {
-      registryContract,
+      projectManagerContract,
+      investmentContract,
+      mockPersonalLoanContract,
       governanceContract,
       lendingTokenContract,
       investmentTokenContract,
       collateralTokenContract,
     } = await getContracts();
+    this.projectManagerContract = projectManagerContract;
     this.governanceContract = governanceContract;
     this.investmentTokenContract = investmentTokenContract;
-    this.registryContract = registryContract;
+    this.investmentContract = investmentContract;
     this.lendingTokenContract = lendingTokenContract;
 
     // Initialize Transfers
     await initializeTransfers(
       {
-        registryContract,
+        investmentContract,
+        mockPersonalLoanContract,
         lendingTokenContract,
         investmentTokenContract,
         collateralTokenContract,
@@ -79,8 +79,5 @@ describe('Governance', function () {
     );
   });
 
-  describe(
-    'When checking governance',
-    checkGovernance.bind(this)
-  );
+  describe('When checking governance', checkGovernance.bind(this));
 });
