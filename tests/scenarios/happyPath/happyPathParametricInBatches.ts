@@ -79,9 +79,30 @@ export default async function suite() {
       answer: 'Yes',
       referralId: 0,
     };
+    const actionData1 = {
+      account: this.lender4,
+      actionName: 'Comment',
+      answer: 'Yes',
+      referralId: 1,
+    };
     const addNewActionData = [
       {
         action: actionData,
+        reputationalAlbtRewardsPerLevel: [
+          ethers.utils.parseEther('500'),
+          ethers.utils.parseEther('500'),
+          ethers.utils.parseEther('500'),
+          ethers.utils.parseEther('500'),
+        ],
+        reputationalAlbtRewardsPerLevelAfterFirstTime: [
+          ethers.utils.parseEther('10'),
+          ethers.utils.parseEther('10'),
+          ethers.utils.parseEther('10'),
+          ethers.utils.parseEther('10'),
+        ],
+      },
+      {
+        action: actionData1,
         reputationalAlbtRewardsPerLevel: [
           ethers.utils.parseEther('500'),
           ethers.utils.parseEther('500'),
@@ -102,7 +123,15 @@ export default async function suite() {
     const getRALBTFromActionsData = {
       lenderSigner: this.lender4Signer,
       actionCallerSigner: this.lender3Signer,
-      actions: [actionData],
+      actions: [
+        actionData,
+        {...actionData, account: this.lender1},
+        {...actionData, account: this.lender2},
+        {...actionData, account: this.lender3},
+        {...actionData1, account: this.lender2},
+        {...actionData1, account: this.lender3},
+        actionData1,
+      ],
     };
 
     const getRALBTFromActionsDataArray = [];

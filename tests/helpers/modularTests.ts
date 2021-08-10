@@ -516,6 +516,64 @@ export const batchAddNewAction = async (
   }
 };
 
+const actionsArray = (actions: Action[]) => {
+  interface ActionPerLender {
+    name: String;
+    lastEpoch: BigNumber;
+    amountOfTimes: BigNumber;
+    rewardPerActionLevel: BigNumber;
+    rewardPerActionPerLevelAfterFirstTime: BigNumber;
+  }
+  interface LenderInfo {
+    account: string;
+    balanceBefore: BigNumber;
+    stakingLevel: StakingType;
+    actions: ActionPerLender[];
+  }
+
+  const lendersInfo: LenderInfo[] = [];
+
+  for (let index = 0; index < actions.length; index++) {
+    const action = actions[index];
+    const lenderIndex = lendersInfo.findIndex(
+      (lender) => lender.account === action.account
+    );
+    if (lenderIndex >= 0) {
+      const lenderInfo = lendersInfo[lenderIndex];
+      const actionIndex = lenderInfo.actions.findIndex(
+        (act) => act.name === action.actionName
+      );
+      if (actionIndex >= 0) {
+        lendersInfo[lenderIndex].actions[actionIndex].amountOfTimes.add(1);
+      } else {
+        lendersInfo[lenderIndex].actions.push({
+          name: action.account,
+          lastEpoch: BigNumber.from(0),
+          amountOfTimes: BigNumber.from(1),
+          rewardPerActionLevel: BigNumber.from(0),
+          rewardPerActionPerLevelAfterFirstTime: BigNumber.from(0),
+        });
+      }
+    } else {
+      lendersInfo.push({
+        account: action.account,
+        balanceBefore: BigNumber.from(0),
+        stakingLevel: StakingType.STAKER_LVL_0,
+        actions: [
+          {
+            name: action.account,
+            lastEpoch: BigNumber.from(0),
+            amountOfTimes: BigNumber.from(1),
+            rewardPerActionLevel: BigNumber.from(0),
+            rewardPerActionPerLevelAfterFirstTime: BigNumber.from(0),
+          },
+        ],
+      });
+    }
+  }
+  return lendersInfo;
+};
+
 export const getRALBTWithActions = async (
   lenderSigner: Signer,
   actionCallerSigner: Signer,
@@ -524,60 +582,114 @@ export const getRALBTWithActions = async (
   // Given
   const {actionVerifierContract, rALBTContract, stakerMedalNFTContract} =
     await getContracts();
-  const lenderAddress = await lenderSigner.getAddress();
+
+  const lendersArray = actionsArray(actions);
+
+  for (let index = 0; index < lendersArray.length; index++) {
+    const lenderInfo = lendersArray[index];
+    const lenderAddress = lenderInfo.account;
+
+    lenderInfo.stakingLevel = await stakerMedalNFTContract.getLevelOfStaker(
+      lenderAddress
+    );
+
+    lenderInfo.balanceBefore = await rALBTContract.balanceOf(lenderAddress);
+
+    for (let index = 0; index < lenderInfo.actions.length; index++) {
+      lenderInfo.actions[index].lastEpoch =
+        await actionVerifierContract.lastEpochActionDonePerAccount(
+          lenderAddress,
+          web3.utils.keccak256(actions[0].actionName)
+        );
+      lenderInfo.actions[index].rewardPerActionLevel =
+        await actionVerifierContract.rewardPerActionPerLevel(
+          web3.utils.keccak256(actions[0].actionName),
+          lenderInfo.stakingLevel
+        );
+      lenderInfo.actions[index].rewardPerActionPerLevelAfterFirstTime =
+        await actionVerifierContract.rewardPerActionPerLevelAfterFirstTime(
+          web3.utils.keccak256(actions[0].actionName),
+          lenderInfo.stakingLevel
+        );
+    }
+    lendersArray[index] = lenderInfo;
+  }
+
+  // Action Caller info
   const actionCallerAddress = await actionCallerSigner.getAddress();
-  const stakingLevelLender = await stakerMedalNFTContract.getLevelOfStaker(
-    lenderAddress
-  );
   const stakingLevelActionCaller =
     await stakerMedalNFTContract.getLevelOfStaker(actionCallerAddress);
-
-  const balanceRALBTBeforeActions = await rALBTContract.balanceOf(
-    lenderAddress
-  );
   const balanceRALBTBeforeActionsActionCaller = await rALBTContract.balanceOf(
     actionCallerAddress
   );
-
-  const lastEpochActionDonePerAccountBefore =
-    await actionVerifierContract.lastEpochActionDonePerAccount(
-      lenderAddress,
-      web3.utils.keccak256(actions[0].actionName)
-    );
-
   const rewardPerActionProvisionPerLevel =
     await actionVerifierContract.rewardPerActionProvisionPerLevel(
       stakingLevelActionCaller
     );
-  const rewardPerActionLevel =
-    await actionVerifierContract.rewardPerActionPerLevel(
-      web3.utils.keccak256(actions[0].actionName),
-      stakingLevelLender
-    );
-  const rewardPerActionPerLevelAfterFirstTime =
-    await actionVerifierContract.rewardPerActionPerLevelAfterFirstTime(
-      web3.utils.keccak256(actions[0].actionName),
-      stakingLevelLender
-    );
 
-  const signature = await getSignature(
-    actions[0].actionName,
-    actions[0].answer,
-    actions[0].account,
-    actions[0].referralId,
-    actionVerifierContract.address,
-    web3
-  );
+  const getNewSignature = async (action: Action) => {
+    const newSignature = await getSignature(
+      action.actionName,
+      action.answer,
+      action.account,
+      action.referralId,
+      actionVerifierContract.address,
+      web3
+    );
+    return newSignature;
+  };
 
-  const signatures = [signature];
+  const signatures = [];
+  for (let index = 0; index < actions.length; index++) {
+    await increaseTime(lenderSigner.provider, 1 * 24 * 60 * 60); // 1 day
+    const action = actions[index];
+    signatures.push(await getNewSignature(action));
+  }
 
   // When
-  await increaseTime(lenderSigner.provider, 1 * 24 * 60 * 60); // 1 day
-
   const provideRewardsForActions = await actionVerifierContract
     .connect(actionCallerSigner)
     .provideRewardsForActions(actions, signatures);
 
+  const balanceRALBTAfterActionsActionCaller = await rALBTContract.balanceOf(
+    actionCallerAddress
+  );
+
+  for (let index = 0; index < lendersArray.length; index++) {
+    const lenderInfo = lendersArray[index];
+    const balanceRALBTAfterActions = await rALBTContract.balanceOf(
+      lenderInfo.account
+    );
+    let rewards = lenderInfo.actions
+      .map((act) => {
+        const reward = act.lastEpoch.eq(0)
+          ? act.rewardPerActionLevel
+          : act.rewardPerActionPerLevelAfterFirstTime;
+        return reward;
+      })
+      .reduce((reward1, reward2) => reward1.add(reward2));
+    if (lenderInfo.account === actionCallerAddress) {
+      rewards = rewards.add(
+        rewardPerActionProvisionPerLevel.mul(actions.length)
+      );
+    }
+
+    expect(balanceRALBTAfterActions).to.be.equal(
+      lenderInfo.balanceBefore.add(rewards)
+    );
+  }
+  // const balanceRALBTAfterActions = await rALBTContract.balanceOf(lenderAddress);
+  // const lenderReward = () => {
+  //   if (lastEpochActionDonePerAccountBefore.eq(0)) {
+  //     return balanceRALBTBeforeActions.add(rewardPerActionLevel);
+  //   } else {
+  //     return balanceRALBTBeforeActions.add(
+  //       rewardPerActionPerLevelAfterFirstTime
+  //     );
+  //   }
+  // };
+  // Then
+  // Events
   expect(provideRewardsForActions).to.emit(
     actionVerifierContract,
     'ActionsProvided'
@@ -586,26 +698,19 @@ export const getRALBTWithActions = async (
     actionVerifierContract,
     'EpochChanged'
   );
-
-  const balanceRALBTAfterActionsActionCaller = await rALBTContract.balanceOf(
-    actionCallerAddress
-  );
-  const balanceRALBTAfterActions = await rALBTContract.balanceOf(lenderAddress);
-  const lenderReward = () => {
-    if (lastEpochActionDonePerAccountBefore.eq(0)) {
-      return balanceRALBTBeforeActions.add(rewardPerActionLevel);
-    } else {
-      return balanceRALBTBeforeActions.add(
-        rewardPerActionPerLevelAfterFirstTime
-      );
-    }
-  };
-  // Then
   // Correct balance of rALBT
-  expect(balanceRALBTAfterActionsActionCaller).to.be.equal(
-    balanceRALBTBeforeActionsActionCaller.add(rewardPerActionProvisionPerLevel)
-  );
-  expect(balanceRALBTAfterActions).to.be.equal(lenderReward());
+  if (
+    lendersArray.findIndex((act) => act.account === actionCallerAddress) < 0
+  ) {
+    // Only if action caller dont send any action
+    expect(balanceRALBTAfterActionsActionCaller).to.be.equal(
+      balanceRALBTBeforeActionsActionCaller.add(
+        rewardPerActionProvisionPerLevel.mul(actions.length)
+      )
+    );
+  }
+
+  // expect(balanceRALBTAfterActions).to.be.equal(lenderReward());
 };
 export const batchGetRALBTWithActions = async (
   getRALBTData: GetRALBTData[],
