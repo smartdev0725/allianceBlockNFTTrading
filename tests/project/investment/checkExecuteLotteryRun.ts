@@ -3,7 +3,7 @@ import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
 import {StakingType, ProjectStatusTypes} from '../../helpers/ProjectEnums';
 import {BigNumber} from 'ethers';
-import {increaseTime} from '../../helpers/time';
+import {getTransactionTimestamp, increaseTime} from '../../helpers/time';
 import {getContracts} from "../../helpers/utils";
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
@@ -299,7 +299,7 @@ export default async function suite() {
       expect(lender1ticketsWonPerAddressAfter.toNumber()).to.be.equal(0);
     });
 
-    it('Start the lottery with a trigger, then execute the lottery', async function () {
+    it.only('Start the lottery with a trigger, then execute the lottery', async function () {
       // Given
       await this.stakingContract
         .connect(this.lender1Signer)
@@ -322,7 +322,23 @@ export default async function suite() {
         .connect(this.lender3Signer)
         .showInterestForInvestment(this.projectId, BigNumber.from(1));
 
-      await this.governanceContract.connect(this.superDelegatorSigner).startLotteryPhase(this.projectId);
+      const lotteryStarted = await this.governanceContract.connect(this.superDelegatorSigner).startLotteryPhase(this.projectId)
+
+      // Check for the event being emitted
+      expect(lotteryStarted)
+        .to.emit(this.investmentContract, 'ProjectStarted')
+        .withArgs(this.projectId);
+
+      // Check status being updated
+      const status = await this.investmentContract.projectStatus(this.projectId);
+      expect(status.toString()).to.be.equal(ProjectStatusTypes.STARTED);
+
+      // Check startingDate being set
+      const investmentDetailsLotteryStarted =
+        await this.investmentContract.investmentDetails(this.projectId);
+      expect(investmentDetailsLotteryStarted.startingDate).to.be.equal(
+        await getTransactionTimestamp(lotteryStarted.hash)
+      );
 
       await this.investmentContract
         .connect(this.lender3Signer)
