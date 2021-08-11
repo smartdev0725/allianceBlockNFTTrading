@@ -144,6 +144,9 @@ contract Investment is Initializable, InvestmentDetails, ReentrancyGuardUpgradea
      * @param projectId_ The id of the investment.
      */
     function _startInvestment(uint256 projectId_) internal {
+        // In order to start a project, it has to be in approved status
+        require(projectStatus[projectId_] == ProjectLibrary.ProjectStatus.APPROVED, "Can start a project only if is approved");
+
         projectStatus[projectId_] = ProjectLibrary.ProjectStatus.STARTED;
         investmentDetails[projectId_].startingDate = block.timestamp;
 
