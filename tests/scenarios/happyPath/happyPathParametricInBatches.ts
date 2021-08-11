@@ -2,7 +2,7 @@ import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {StakingType} from '../../helpers/registryEnums';
+import {StakingType} from '../../helpers/ProjectEnums';
 
 import {
   batchRequestInvestment,

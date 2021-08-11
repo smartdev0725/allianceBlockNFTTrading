@@ -3,7 +3,7 @@ import {ethers, web3} from 'hardhat';
 import {BigNumber} from 'ethers';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {StakingType, InvestmentStatus} from '../../helpers/registryEnums';
+import {StakingType} from '../../helpers/ProjectEnums';
 import {getSignature} from '../../helpers/utils';
 import {increaseTime} from '../../helpers/time';
 import {
