@@ -48,4 +48,14 @@ contract InvestmentDetails is Storage, BaseProject {
         return investment.investmentId;
 
     }
+
+    function _storeMilestoneDetailsAndGetTotalAmount(
+        uint256[] memory amountPerMilestone,
+        uint256[] memory milestoneDurations
+    ) internal pure returns (uint256 totalAmountRequested) {
+        for (uint256 i = 0; i < amountPerMilestone.length; i++) {
+            // Milestone store
+            totalAmountRequested = totalAmountRequested.add(amountPerMilestone[i]);
+        }
+    }
 }
