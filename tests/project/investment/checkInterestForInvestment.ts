@@ -32,6 +32,11 @@ export default async function suite() {
           .showInterestForInvestment(projectId, 2),
         'Can show interest only in Approved state'
       );
+
+      await expectRevert(
+        this.governanceContract.connect(this.superDelegatorSigner).startLotteryPhase(projectId),
+        'The project must be in approved status'
+      );
     });
 
     it('reverts when showing interest for 0 partitions', async function () {

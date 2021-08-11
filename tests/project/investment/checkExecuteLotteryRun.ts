@@ -299,6 +299,72 @@ export default async function suite() {
       expect(lender1ticketsWonPerAddressAfter.toNumber()).to.be.equal(0);
     });
 
+    it('Start the lottery with a trigger, then execute the lottery', async function () {
+      // Given
+      await this.stakingContract
+        .connect(this.lender1Signer)
+        .stake(StakingType.STAKER_LVL_2);
+      await this.stakingContract
+        .connect(this.lender2Signer)
+        .stake(StakingType.STAKER_LVL_2);
+      await this.stakingContract
+        .connect(this.lender3Signer)
+        .stake(StakingType.STAKER_LVL_2);
+
+      // When
+      await this.investmentContract
+        .connect(this.lender1Signer)
+        .showInterestForInvestment(this.projectId, BigNumber.from(10));
+      await this.investmentContract
+        .connect(this.lender2Signer)
+        .showInterestForInvestment(this.projectId, BigNumber.from(9));
+      await this.investmentContract
+        .connect(this.lender3Signer)
+        .showInterestForInvestment(this.projectId, BigNumber.from(1));
+
+      await this.governanceContract.connect(this.superDelegatorSigner).startLotteryPhase(this.projectId);
+
+      await this.investmentContract
+        .connect(this.lender3Signer)
+        .executeLotteryRun(this.projectId);
+
+      const balanceFundingNFTTokenBefore =
+        await this.fundingNFTContract.balanceOf(this.lender1, this.projectId.toNumber());
+
+      const lender1ticketsWonPerAddressBefore =
+      await this.investmentContract.ticketsWonPerAddress(
+        this.projectId,
+        this.lender1
+      );
+
+      await expect(
+        this.investmentContract
+          .connect(this.lender1Signer)
+          .convertInvestmentTicketsToNfts(this.projectId)
+      )
+        .to.emit(this.investmentContract, 'ConvertInvestmentTickets')
+        .withArgs(this.projectId, this.lender1, lender1ticketsWonPerAddressBefore);
+
+      await expectRevert(
+        this.investmentContract
+          .connect(this.lender1Signer)
+          .withdrawAmountProvidedForNonWonTickets(this.projectId),
+        'No non-won tickets to withdraw'
+      );
+
+      const balanceFundingNFTTokenAfter =
+        await this.fundingNFTContract.balanceOf(this.lender1, this.projectId.toNumber());
+      expect(+balanceFundingNFTTokenAfter.toString()).to.be.greaterThan(
+        +balanceFundingNFTTokenBefore.toString()
+      );
+      const lender1ticketsWonPerAddressAfter =
+        await this.investmentContract.ticketsWonPerAddress(
+          this.projectId,
+          this.lender1
+        );
+      expect(lender1ticketsWonPerAddressAfter.toNumber()).to.be.equal(0);
+    });
+
     it('Withdraw amount provided for non won tickets', async function () {
       // Given
       await this.stakingContract
