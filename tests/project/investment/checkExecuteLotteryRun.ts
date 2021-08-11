@@ -299,7 +299,7 @@ export default async function suite() {
       expect(lender1ticketsWonPerAddressAfter.toNumber()).to.be.equal(0);
     });
 
-    it.only('Start the lottery with a trigger, then execute the lottery', async function () {
+    it('Start the lottery with a trigger, then execute the lottery', async function () {
       // Given
       await this.stakingContract
         .connect(this.lender1Signer)
