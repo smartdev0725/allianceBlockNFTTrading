@@ -11,6 +11,19 @@ chai.use(solidity);
 
 export default async function suite() {
   describe('Investment request', async () => {
+    it('when trying to start lottery phase should revert', async function () {
+      await expectRevert(
+        this.governanceContract.connect(this.deployerSigner).startLotteryPhase(this.projectId),
+        'Only super delegator can call this function'
+      );
+
+      // When && Then
+      await expectRevert(
+        this.governanceContract.connect(this.superDelegatorSigner).startLotteryPhase(this.projectId),
+        'Interest must have been shown'
+      );
+    })
+
     it('when all details are stored correctly', async function () {
       const projectId = await this.projectManagerContract.totalProjects();
       const approvalRequest =

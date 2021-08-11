@@ -61,4 +61,9 @@ contract GovernanceTypesAndStorage {
         require(projectManager.isProject(msg.sender), "Only Project contract");
         _;
     }
+
+    modifier onlySuperDelegator() {
+        require(msg.sender == superDelegator, "Only super delegator can call this function");
+        _;
+    }
 }
