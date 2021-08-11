@@ -7,6 +7,7 @@ import "./GovernanceTypesAndStorage.sol";
 import "../interfaces/IProject.sol";
 import "../libs/OrderedDoubleLinkedList.sol";
 import "../libs/DoubleLinkedList.sol";
+import "../libs/ProjectLibrary.sol";
 
 /**
  * @title AllianceBlock Governance contract
@@ -79,5 +80,20 @@ contract DaoCronjob is GovernanceTypesAndStorage {
                 timestamp.add(updatableVariables[LATE_APPLICATIONS_FOR_INVESTMENT_DURATION]);
             addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, projectId);
         }
+    }
+
+    /**
+     * @notice Start lottery phase
+     * @dev First check if the lottery should start
+     * @param projectId The id of the project to update
+     */
+    function startLotteryPhase(uint256 projectId) external  onlySuperDelegator() {
+        address projectAddress = projectManager.projectAddressFromProjectId(projectId);
+
+        require(IProject(projectAddress).projectStatus(projectId) == ProjectLibrary.ProjectStatus.APPROVED
+        , 'The project must be in approved status');
+        require(IProject(projectAddress).getRequestingInterestStatus(projectId), 'Interest must have been shown');
+
+        IProject(projectAddress).startLotteryPhase(projectId);
     }
 }
