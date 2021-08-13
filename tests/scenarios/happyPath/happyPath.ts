@@ -1,3 +1,19 @@
+/** Happy Path
+ * The objective of this test is to simulate a scenario where every action taken
+ * by the users is "positive".
+ * Here's a list of "steps"
+ * 1) Seeker publishes Investment (56 - 67)
+ * 2) SuperGovernance approves Investment (69 - 74)
+ * 3) 4 Funders stake, one for each tier (76 - 98)
+ * 4) Funders declare their intention to buy a partition
+ *    (effectively depositing their funds) (100 - 111)
+ * 5) The lottery is run when all the partitions have been covered (113 - 118)
+ * 6) FundingNFTs are minted and each Funder either receives their (121 - 131)
+ *    NFT or their funds back in case they did not win the lottery
+ * 7) Funders with a FundingNFT exchange it for their Investment tokens (134 - 146)
+ * 8) Seeker claims the funding, when all investment tokens have been exchanged. (149)
+ */
+
 import {
   RALBT_REWARDS_PER_LEVEL,
   RALBT_REWARDS_PER_LEVEL_AFTER_FIRST_TIME,
@@ -33,10 +49,10 @@ export default async function suite() {
       this.lender3Signer,
       this.lender4Signer,
     ];
-
     const amountOfPartitionsToShowInterest = BigNumber.from(6);
     const amountOfTicketsToLock = BigNumber.from(2);
-    // Allows Seeker publishes Investment
+
+    // 1) Seeker publishes Investment
     const amountOfTokensToBePurchased = ethers.utils.parseEther('1000');
     const totalAmountRequested = ethers.utils.parseEther('200');
     const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
@@ -50,14 +66,14 @@ export default async function suite() {
       this.seekerSigner
     );
 
-    // SuperGovernance approves Investment
+    // 2) SuperGovernance approves Investment
     await handleInvestmentRequest(
       investmentId,
       this.superDelegatorSigner,
       true
     );
 
-    // Lender 1,2 and 3 stake
+    //3) 4 Funders stake, one for each tier
     await fundersStake(this.lender1Signer, StakingType.STAKER_LVL_1);
     await fundersStake(this.lender2Signer, StakingType.STAKER_LVL_2);
     await fundersStake(this.lender3Signer, StakingType.STAKER_LVL_3);
@@ -80,7 +96,7 @@ export default async function suite() {
       await getRALBTWithActions(this.lender3Signer, [action]);
     }
 
-    // Lenders declare their intention to buy a partition (effectively depositing their funds)
+    // 4) Funders declare their intention to buy a partition
     const declareIntentionForBuyData = [];
     for (let index = 0; index < lenders.length; index++) {
       const lender = lenders[index];
@@ -93,7 +109,7 @@ export default async function suite() {
     }
     await batchDeclareIntentionForBuy(declareIntentionForBuyData);
 
-    //5) The lottery is run when all the partitions have been covered
+    // 5) The lottery is run when all the partitions have been covered
     await increaseTime(this.deployerSigner.provider, 5 * 24 * 60 * 60); // 5 day
     await runLottery(
       investmentId,
@@ -113,6 +129,7 @@ export default async function suite() {
       });
     }
     await batchFunderClaimLotteryReward(claimRewardData);
+
     //7) Funders with a FundingNFT exchange it for their Investment tokens.
     const batchExchangeNFTForInvestmentTokenData: any[] = [];
     for (let index = 0; index < lenders.length; index++) {
@@ -127,6 +144,7 @@ export default async function suite() {
     await batchExchangeNFTForInvestmentToken(
       batchExchangeNFTForInvestmentTokenData
     );
+
     //8) Seeker claims the funding, when all investment tokens have been exchanged.
     await seekerClaimsFunding(investmentId, this.seekerSigner);
   });
