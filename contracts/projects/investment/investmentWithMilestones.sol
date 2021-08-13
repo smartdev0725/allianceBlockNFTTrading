@@ -54,7 +54,16 @@ contract InvestmentWithMilestones is Initializable, InvestmentDetails, Reentranc
         require(isValidLendingToken[lendingToken], "Lending token not supported");
         require(amountPerMilestone.length == milestoneDurations.length, "Should be the same milestone length");
 
-        uint256 totalAmountOfInvestmentTokens = _storeMilestoneDetailsAndGetTotalAmount(amountPerMilestone, milestoneDurations);
+        // uint256 totalAmountOfInvestmentTokens = _storeMilestoneDetailsAndGetTotalAmount(amountPerMilestone, milestoneDurations);
+
+        (uint256 totalAmountOfInvestmentTokens, uint256 projectId) = _storeMilestoneDetailsAndGetTotalAmount(
+            lendingToken,
+            totalAmountRequested_,
+            investmentToken,
+            amountPerMilestone,
+            milestoneDurations,
+            extraInfo
+        );
 
         require(
             totalAmountRequested_.mod(baseAmountForEachPartition) == 0 &&
@@ -62,17 +71,40 @@ contract InvestmentWithMilestones is Initializable, InvestmentDetails, Reentranc
             "Token amount and price should result in integer amount of tickets"
         );
 
-        uint256 projectId = _storeInvestmentDetails(
-            lendingToken,
-            totalAmountRequested_,
-            investmentToken,
-            totalAmountOfInvestmentTokens,
-            extraInfo
-        );
-
         IERC20(investmentToken).safeTransferFrom(msg.sender, address(escrow), amountPerMilestone[0]);
 
-        fundingNFT.mintGen0(address(escrow), investmentDetails[projectId].totalPartitionsToBePurchased, projectId);
+        fundingNFT.mintGen0(address(escrow), investmentMilestoneDetails[projectId].totalPartitionsToBePurchased, projectId);
 
+        investmentTokensPerTicket[projectId] = totalAmountOfInvestmentTokens.div(investmentMilestoneDetails[projectId].totalPartitionsToBePurchased);
+
+        fundingNFT.pauseTokenTransfer(projectId); //Pause trades for ERC1155s with the specific investment ID.
+
+        governance.requestApproval(projectId);
+
+        // Add event for investment request
+        emit ProjectRequested(projectId, msg.sender, totalAmountRequested_);
+
+    }
+
+    function _approveInvestment(uint256 projectId_) internal {
+        projectStatus[projectId_] = ProjectLibrary.ProjectStatus.APPROVED;
+        investmentMilestoneDetails[projectId_].approvalDate = block.timestamp;
+        ticketsRemaining[projectId_] = investmentMilestoneDetails[projectId_].totalPartitionsToBePurchased;
+        // governance.storeInvestmentTriggering(projectId_);
+        // emit ProjectApproved(projectId_);
+    }
+
+    /**
+     * @notice Reject Investment
+     * @param projectId_ The id of the investment.
+     */
+    function _rejectInvestment(uint256 projectId_) internal {
+        projectStatus[projectId_] = ProjectLibrary.ProjectStatus.REJECTED;
+        escrow.transferInvestmentToken(
+            investmentMilestoneDetails[projectId_].investmentToken,
+            projectSeeker[projectId_],
+            investmentMilestoneDetails[projectId_].investmentTokensAmountPerMilestone[0]
+        );
+        emit ProjectRejected(projectId_);
     }
 }

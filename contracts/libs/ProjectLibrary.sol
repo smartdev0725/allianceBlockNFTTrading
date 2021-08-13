@@ -26,4 +26,18 @@ library ProjectLibrary {
         string extraInfo; // The ipfs hash, where all extra info about the investment are stored.
         uint256 partitionsRequested; // The total partitions or ERC1155 tokens that are requested for purchase.
     }
+
+    struct InvestmentMilestoneDetails {
+        uint256 investmentId; // The Id of the investment.
+        uint256 approvalDate; // The timestamp in which investment was approved.
+        uint256 startingDate; // The timestamp in which investment was funded.
+        address investmentToken; // The address of the token that will be sold to investors.
+        uint256[] investmentTokensAmountPerMilestone;
+        uint256[] durationPerMilestone;
+        address lendingToken; // The address of the token that investors should pay with.
+        uint256 totalAmountToBeRaised; // The amount of lending tokens that seeker of investment will raise after all tickets are purchased.
+        uint256 totalPartitionsToBePurchased; // The total partitions or ERC1155 tokens, in which investment is splitted.
+        string extraInfo; // The ipfs hash, where all extra info about the investment are stored.
+        uint256 partitionsRequested; // The total partitions or ERC1155 tokens that are requested for purchase.
+    }
 }

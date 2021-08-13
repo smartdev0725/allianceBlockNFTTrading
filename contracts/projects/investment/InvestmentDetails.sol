@@ -50,12 +50,29 @@ contract InvestmentDetails is Storage, BaseProject {
     }
 
     function _storeMilestoneDetailsAndGetTotalAmount(
+        address lendingToken_,
+        uint256 amountRequestedToBeRaised_,
+        address investmentToken_,
         uint256[] memory amountPerMilestone,
-        uint256[] memory milestoneDurations
-    ) internal pure returns (uint256 totalAmountRequested) {
+        uint256[] memory milestoneDurations,
+        string memory extraInfo_
+    ) internal returns (uint256 totalAmountRequested, uint256 projectId) {
+        projectId = projectManager.createProject();
+
+        ProjectLibrary.InvestmentMilestoneDetails memory investmentWithMilestones;
+
         for (uint256 i = 0; i < amountPerMilestone.length; i++) {
             // Milestone store
             totalAmountRequested = totalAmountRequested.add(amountPerMilestone[i]);
         }
+
+        investmentWithMilestones.investmentId = projectId;
+        investmentWithMilestones.investmentToken = investmentToken_;
+        investmentWithMilestones.investmentTokensAmountPerMilestone = amountPerMilestone;
+        investmentWithMilestones.lendingToken = lendingToken_;
+        investmentWithMilestones. durationPerMilestone = milestoneDurations;
+        investmentWithMilestones.extraInfo = extraInfo_;
+        investmentWithMilestones.totalAmountToBeRaised = amountRequestedToBeRaised_;
+        investmentWithMilestones.totalPartitionsToBePurchased = totalAmountRequested.div(baseAmountForEachPartition);
     }
 }
