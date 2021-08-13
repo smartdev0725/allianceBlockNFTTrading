@@ -68,9 +68,7 @@ export const requestInvestment = async (
   const investmentDetails = await investmentContract.investmentDetails(
     investmentId
   );
-  const projectSeeker = await investmentContract.projectSeeker(
-    investmentId
-  );
+  const projectSeeker = await investmentContract.projectSeeker(investmentId);
   const totalProjectsAfter = await projectManagerContract.totalProjects();
   const balanceInvestmentTokenSeekerAfter =
     await investmentTokenContract.balanceOf(seekerAddress);
@@ -90,9 +88,7 @@ export const requestInvestment = async (
   const approvalRequest = await governanceContract.approvalRequests(
     totalApprovalRequestsBefore
   );
-  const projectStatus = await investmentContract.projectStatus(
-    investmentId
-  );
+  const projectStatus = await investmentContract.projectStatus(investmentId);
   // Then
   // Events
   expect(requestInvestment)
@@ -154,7 +150,7 @@ export const requestInvestment = async (
   expect(String(projectStatus)).to.be.equal(
     String(ProjectStatusTypes.REQUESTED)
   );
-  
+
   return investmentId;
 };
 export const batchRequestInvestment = async (
@@ -185,7 +181,8 @@ export const handleInvestmentRequest = async (
   approve: boolean
 ) => {
   // Given
-  const {projectManagerContract, governanceContract, investmentContract} = await getContracts();
+  const {projectManagerContract, governanceContract, investmentContract} =
+    await getContracts();
   const superDelegatorAddress = await superDelegatorSigner.getAddress();
 
   const investmentDetailsBeforeApprove =
@@ -203,9 +200,8 @@ export const handleInvestmentRequest = async (
   );
   const investmentDetailsAfterApprove =
     await investmentContract.investmentDetails(investmentId);
-  const ticketsRemainingAfterApprove = await investmentContract.ticketsRemaining(
-    investmentId
-  );
+  const ticketsRemainingAfterApprove =
+    await investmentContract.ticketsRemaining(investmentId);
   const totalCronjobsAfterApprove = await governanceContract.totalCronjobs();
   const cronjobsAfterApprove = await governanceContract.cronjobs(
     totalCronjobsAfterApprove
@@ -264,7 +260,6 @@ export const handleInvestmentRequest = async (
   expect(cronjobsListAfterApprove.size).to.be.equal(
     cronjobsListBeforeApprove.size.add(1)
   );
-
   // Correct approval request
   expect(approvalRequestAfterApprove.approvalsProvided).to.be.equal('1');
   expect(approvalRequestAfterApprove.isApproved).to.be.true;
@@ -518,9 +513,9 @@ export const batchAddNewAction = async (
   }
 };
 
-const actionsArray = (actions: Action[]) => {
+export const actionsPerLender = (actions: Action[]) => {
   interface ActionPerLender {
-    name: String;
+    name: string;
     lastEpoch: BigNumber;
     amountOfTimes: BigNumber;
     rewardPerActionLevel: BigNumber;
@@ -541,15 +536,19 @@ const actionsArray = (actions: Action[]) => {
       (lender) => lender.account === action.account
     );
     if (lenderIndex >= 0) {
+      // Lender already has an action
       const lenderInfo = lendersInfo[lenderIndex];
       const actionIndex = lenderInfo.actions.findIndex(
         (act) => act.name === action.actionName
       );
       if (actionIndex >= 0) {
-        lendersInfo[lenderIndex].actions[actionIndex].amountOfTimes.add(1);
+        // Already excute an action
+        lendersInfo[lenderIndex].actions[actionIndex].amountOfTimes =
+          lendersInfo[lenderIndex].actions[actionIndex].amountOfTimes.add(1);
       } else {
+        // First time that excute an action
         lendersInfo[lenderIndex].actions.push({
-          name: action.account,
+          name: action.actionName,
           lastEpoch: BigNumber.from(0),
           amountOfTimes: BigNumber.from(1),
           rewardPerActionLevel: BigNumber.from(0),
@@ -557,13 +556,14 @@ const actionsArray = (actions: Action[]) => {
         });
       }
     } else {
+      // Lender has no actions
       lendersInfo.push({
         account: action.account,
         balanceBefore: BigNumber.from(0),
         stakingLevel: StakingType.STAKER_LVL_0,
         actions: [
           {
-            name: action.account,
+            name: action.actionName,
             lastEpoch: BigNumber.from(0),
             amountOfTimes: BigNumber.from(1),
             rewardPerActionLevel: BigNumber.from(0),
@@ -577,7 +577,6 @@ const actionsArray = (actions: Action[]) => {
 };
 
 export const getRALBTWithActions = async (
-  lenderSigner: Signer,
   actionCallerSigner: Signer,
   actions: Action[]
 ) => {
@@ -585,10 +584,10 @@ export const getRALBTWithActions = async (
   const {actionVerifierContract, rALBTContract, stakerMedalNFTContract} =
     await getContracts();
 
-  const lendersArray = actionsArray(actions);
+  const lendersDetails = actionsPerLender(actions);
 
-  for (let index = 0; index < lendersArray.length; index++) {
-    const lenderInfo = lendersArray[index];
+  for (let index = 0; index < lendersDetails.length; index++) {
+    const lenderInfo = lendersDetails[index];
     const lenderAddress = lenderInfo.account;
 
     lenderInfo.stakingLevel = await stakerMedalNFTContract.getLevelOfStaker(
@@ -601,22 +600,21 @@ export const getRALBTWithActions = async (
       lenderInfo.actions[index].lastEpoch =
         await actionVerifierContract.lastEpochActionDonePerAccount(
           lenderAddress,
-          web3.utils.keccak256(actions[0].actionName)
+          web3.utils.keccak256(lenderInfo.actions[index].name)
         );
       lenderInfo.actions[index].rewardPerActionLevel =
         await actionVerifierContract.rewardPerActionPerLevel(
-          web3.utils.keccak256(actions[0].actionName),
+          web3.utils.keccak256(lenderInfo.actions[index].name),
           lenderInfo.stakingLevel
         );
       lenderInfo.actions[index].rewardPerActionPerLevelAfterFirstTime =
         await actionVerifierContract.rewardPerActionPerLevelAfterFirstTime(
-          web3.utils.keccak256(actions[0].actionName),
+          web3.utils.keccak256(lenderInfo.actions[index].name),
           lenderInfo.stakingLevel
         );
     }
-    lendersArray[index] = lenderInfo;
+    lendersDetails[index] = lenderInfo;
   }
-
   // Action Caller info
   const actionCallerAddress = await actionCallerSigner.getAddress();
   const stakingLevelActionCaller =
@@ -643,7 +641,7 @@ export const getRALBTWithActions = async (
 
   const signatures = [];
   for (let index = 0; index < actions.length; index++) {
-    await increaseTime(lenderSigner.provider, 1 * 24 * 60 * 60); // 1 day
+    await increaseTime(actionCallerSigner.provider, 1 * 24 * 60 * 60); // 1 day
     const action = actions[index];
     signatures.push(await getNewSignature(action));
   }
@@ -657,19 +655,27 @@ export const getRALBTWithActions = async (
     actionCallerAddress
   );
 
-  for (let index = 0; index < lendersArray.length; index++) {
-    const lenderInfo = lendersArray[index];
+  // Get new balances of lenders
+  for (let index = 0; index < lendersDetails.length; index++) {
+    const lenderInfo = lendersDetails[index];
     const balanceRALBTAfterActions = await rALBTContract.balanceOf(
       lenderInfo.account
     );
     let rewards = lenderInfo.actions
       .map((act) => {
-        const reward = act.lastEpoch.eq(0)
+        let reward = act.lastEpoch.eq(0)
           ? act.rewardPerActionLevel
           : act.rewardPerActionPerLevelAfterFirstTime;
+        // If more than one action add rewardPerActionPerLevelAfterFirstTime
+        reward = reward.add(
+          act.rewardPerActionPerLevelAfterFirstTime.mul(
+            act.amountOfTimes.sub(1)
+          )
+        );
         return reward;
       })
       .reduce((reward1, reward2) => reward1.add(reward2));
+
     if (lenderInfo.account === actionCallerAddress) {
       rewards = rewards.add(
         rewardPerActionProvisionPerLevel.mul(actions.length)
@@ -680,18 +686,9 @@ export const getRALBTWithActions = async (
       lenderInfo.balanceBefore.add(rewards)
     );
   }
-  // const balanceRALBTAfterActions = await rALBTContract.balanceOf(lenderAddress);
-  // const lenderReward = () => {
-  //   if (lastEpochActionDonePerAccountBefore.eq(0)) {
-  //     return balanceRALBTBeforeActions.add(rewardPerActionLevel);
-  //   } else {
-  //     return balanceRALBTBeforeActions.add(
-  //       rewardPerActionPerLevelAfterFirstTime
-  //     );
-  //   }
-  // };
   // Then
   // Events
+  await provideRewardsForActions.wait();
   expect(provideRewardsForActions).to.emit(
     actionVerifierContract,
     'ActionsProvided'
@@ -702,7 +699,7 @@ export const getRALBTWithActions = async (
   );
   // Correct balance of rALBT
   if (
-    lendersArray.findIndex((act) => act.account === actionCallerAddress) < 0
+    lendersDetails.findIndex((act) => act.account === actionCallerAddress) < 0
   ) {
     // Only if action caller dont send any action
     expect(balanceRALBTAfterActionsActionCaller).to.be.equal(
@@ -722,7 +719,6 @@ export const batchGetRALBTWithActions = async (
   for (let i = 0; i < getRALBTData.length; i++) {
     await increaseTime(deployerSigner.provider, 1 * 24 * 60 * 60); // 1 day
     await getRALBTWithActions(
-      getRALBTData[i].lenderSigner,
       getRALBTData[i].actionCallerSigner,
       getRALBTData[i].actions
     );
@@ -738,12 +734,17 @@ export const declareIntentionForBuy = async (
   lendingTokenContract: Contract
 ) => {
   // When
-  const {escrowContract, projectManagerContract, rALBTContract, investmentContract} =
-    await getContracts();
+  const {
+    escrowContract,
+    projectManagerContract,
+    rALBTContract,
+    investmentContract,
+  } = await getContracts();
 
   const lenderAddress = await lenderSigner.getAddress();
 
-  const rAlbtPerLotteryNumber = await investmentContract.rAlbtPerLotteryNumber();
+  const rAlbtPerLotteryNumber =
+    await investmentContract.rAlbtPerLotteryNumber();
   const rALBTBalanceBefore = await rALBTContract.balanceOf(lenderAddress);
 
   if (rALBTBalanceBefore.gte(rAlbtPerLotteryNumber)) {
@@ -805,7 +806,9 @@ export const declareIntentionForBuy = async (
             )
           ).eq(immediateTicketsLender)
         ).to.be.true;
-        const remaining = await investmentContract.ticketsRemaining(investmentId);
+        const remaining = await investmentContract.ticketsRemaining(
+          investmentId
+        );
         expect(remaining.eq(ticketsRemaining.sub(immediateTicketsLender))).to.be
           .true;
         ticketsRemaining = remaining.sub(immediateTicketsLender);
@@ -852,6 +855,8 @@ export const declareIntentionForBuy = async (
         .showInterestForInvestment(investmentId, numberOfPartitions),
       'Not eligible for lottery numbers'
     );
+
+    throw new Error('A lender has enough rALBT to declareIntentionForBuy');
   }
 };
 export const batchDeclareIntentionForBuy = async (data: ShowInterestData[]) => {
@@ -871,8 +876,12 @@ export const runLottery = async (
   lotteryRunnerSigner: Signer,
   superDelegatorSigner: Signer
 ) => {
-  const {projectManagerContract, governanceContract, fundingNFTContract, investmentContract} =
-    await getContracts();
+  const {
+    projectManagerContract,
+    governanceContract,
+    fundingNFTContract,
+    investmentContract,
+  } = await getContracts();
 
   // When
   const lotteryStarted = await governanceContract
@@ -892,11 +901,8 @@ export const runLottery = async (
     .to.emit(investmentContract, 'ProjectStarted')
     .withArgs(investmentId);
 
-  // Verify the node
   // Correct lottery status
-  expect(projectStatusAfter.toString()).to.be.equal(
-    ProjectStatusTypes.STARTED
-  );
+  expect(projectStatusAfter.toString()).to.be.equal(ProjectStatusTypes.STARTED);
   // Correct investment details
   expect(investmentDetailsLotteryStarted.startingDate).to.be.equal(
     await getTransactionTimestamp(lotteryStarted.hash)
@@ -937,7 +943,6 @@ export const runLottery = async (
   // Unpause token
   expect(isPauseFundingNFTTransferAfterRunLottey).to.be.false;
 };
-
 export const batchRunLottery = async (
   data: RunLotteryData[],
   superDelegatorSigner: Signer
@@ -958,8 +963,12 @@ export const funderClaimLotteryReward = async (
   amountTicketsToBlock: BigNumber,
   lendingTokenContract: Contract
 ) => {
-  const {projectManagerContract, fundingNFTContract, escrowContract, investmentContract} =
-    await getContracts();
+  const {
+    projectManagerContract,
+    fundingNFTContract,
+    escrowContract,
+    investmentContract,
+  } = await getContracts();
 
   const lenderAddress = await lenderSigner.getAddress();
 
@@ -970,7 +979,10 @@ export const funderClaimLotteryReward = async (
   if (ticketsRemaining.eq(0)) {
     // Given
     const ticketsWonBeforeWithdraw =
-      await investmentContract.ticketsWonPerAddress(investmentId, lenderAddress);
+      await investmentContract.ticketsWonPerAddress(
+        investmentId,
+        lenderAddress
+      );
     const lockedTicketsForSpecificInvestmentBeforeWithdraw =
       await investmentContract.lockedNftsForSpecificInvestmentPerAddress(
         investmentId,
@@ -1001,24 +1013,20 @@ export const funderClaimLotteryReward = async (
         : amountTicketsToBlock;
       withdrawInvestmentTickets = await investmentContract
         .connect(lenderSigner)
-        .convertInvestmentTicketsToNfts(
-          investmentId
-        );
-        await fundingNFTContract
+        .convertInvestmentTicketsToNfts(investmentId);
+      await fundingNFTContract
         .connect(lenderSigner)
         .setApprovalForAll(escrowContract.address, true);
 
       await investmentContract
         .connect(lenderSigner)
-        .lockInvestmentNfts(
-          investmentId,
-          amountTicketsToBlock
-        );
+        .lockInvestmentNfts(investmentId, amountTicketsToBlock);
     }
-    const ticketsWonAfterWithdraw = await investmentContract.ticketsWonPerAddress(
-      investmentId,
-      lenderAddress
-    );
+    const ticketsWonAfterWithdraw =
+      await investmentContract.ticketsWonPerAddress(
+        investmentId,
+        lenderAddress
+      );
     const lockedTicketsForSpecificInvestmentAfterWithdraw =
       await investmentContract.lockedNftsForSpecificInvestmentPerAddress(
         investmentId,
@@ -1041,7 +1049,7 @@ export const funderClaimLotteryReward = async (
     // Then
     // Events
     // Withdraw Investment
-    
+
     expect(withdrawInvestmentTickets)
       .to.emit(investmentContract, 'ConvertInvestmentTickets')
       .withArgs(
@@ -1123,8 +1131,12 @@ export const exchangeNFTForInvestmentToken = async (
   investmentTokenContract: Contract
 ) => {
   // Given
-  const {projectManagerContract, fundingNFTContract, escrowContract, investmentContract} =
-    await getContracts();
+  const {
+    projectManagerContract,
+    fundingNFTContract,
+    escrowContract,
+    investmentContract,
+  } = await getContracts();
   const lenderAddress = await lenderSigner.getAddress();
   const investmentTokensPerTicket =
     await investmentContract.investmentTokensPerTicket(investmentId);
@@ -1196,7 +1208,8 @@ export const seekerClaimsFunding = async (
   investmentId: BigNumber,
   seekerSigner: Signer
 ): Promise<void> => {
-  const {projectManagerContract, lendingTokenContract, investmentContract} = await getContracts();
+  const {projectManagerContract, lendingTokenContract, investmentContract} =
+    await getContracts();
   // given
   const seekerInitialLendingBalance = await lendingTokenContract.balanceOf(
     await seekerSigner.getAddress()
