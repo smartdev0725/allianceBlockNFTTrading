@@ -1004,6 +1004,16 @@ export const funderClaimLotteryReward = async (
         .convertInvestmentTicketsToNfts(
           investmentId
         );
+        await fundingNFTContract
+        .connect(lenderSigner)
+        .setApprovalForAll(escrowContract.address, true);
+
+      await investmentContract
+        .connect(lenderSigner)
+        .lockInvestmentNfts(
+          investmentId,
+          amountTicketsToBlock
+        );
     }
     const ticketsWonAfterWithdraw = await investmentContract.ticketsWonPerAddress(
       investmentId,
@@ -1031,12 +1041,13 @@ export const funderClaimLotteryReward = async (
     // Then
     // Events
     // Withdraw Investment
+    
     expect(withdrawInvestmentTickets)
       .to.emit(investmentContract, 'ConvertInvestmentTickets')
       .withArgs(
         investmentId,
-        amountTicketsToBlock,
-        ticketsWonBeforeWithdraw.sub(amountTicketsToBlock)
+        await lenderSigner.getAddress(),
+        ticketsWonBeforeWithdraw
       );
     // LotteryLoserClaimedFunds
     if (ticketsRemainBeforeWithdraw.gt(0)) {
@@ -1055,11 +1066,11 @@ export const funderClaimLotteryReward = async (
     expect(lockedTicketsForSpecificInvestmentAfterWithdraw).to.be.equal(
       lockedTicketsForSpecificInvestmentBeforeWithdraw.add(amountTicketsToBlock)
     );
+
     // Correct amount of tickets locked
     expect(lockedTicketsAfterWithdraw).to.be.equal(
       lockedTicketsBeforeWithdraw.add(amountTicketsToBlock)
     );
-
     // Correct balance of funding nft
     if (ticketsWonBeforeWithdraw.gt(0)) {
       expect(balanceFundingNFTTokenAfterWithdraw).to.be.equal(
@@ -1112,11 +1123,11 @@ export const exchangeNFTForInvestmentToken = async (
   investmentTokenContract: Contract
 ) => {
   // Given
-  const {projectManagerContract, fundingNFTContract, escrowContract} =
+  const {projectManagerContract, fundingNFTContract, escrowContract, investmentContract} =
     await getContracts();
   const lenderAddress = await lenderSigner.getAddress();
   const investmentTokensPerTicket =
-    await projectManagerContract.investmentTokensPerTicket(investmentId);
+    await investmentContract.investmentTokensPerTicket(investmentId);
   const balanceFundingNFTTokenBeforeExchange =
     await fundingNFTContract.balanceOf(lenderAddress, investmentId.toNumber());
   const balanceOfInvestmentTokenBeforeExchange =
@@ -1128,14 +1139,14 @@ export const exchangeNFTForInvestmentToken = async (
   // When
   if (balanceFundingNFTTokenBeforeExchange.toNumber() > 0) {
     await expect(
-      projectManagerContract
+      investmentContract
         .connect(lenderSigner)
         .convertNFTToInvestmentTokens(
           investmentId,
           balanceFundingNFTTokenBeforeExchange
         )
     )
-      .to.emit(projectManagerContract, 'ConvertNFTToInvestmentTokens')
+      .to.emit(investmentContract, 'ConvertNFTToInvestmentTokens')
       .withArgs(
         investmentId,
         balanceFundingNFTTokenBeforeExchange,
@@ -1196,15 +1207,15 @@ export const seekerClaimsFunding = async (
 
   // when
   await expect(
-    projectManagerContract.connect(seekerSigner).withdrawInvestment(investmentId)
+    investmentContract.connect(seekerSigner).withdrawInvestment(investmentId)
   )
-    .to.emit(projectManagerContract, 'seekerWithdrawInvestment')
+    .to.emit(investmentContract, 'seekerWithdrawInvestment')
     .withArgs(investmentId, expectedAmount);
 
   const seekerFinalLendingBalance = await lendingTokenContract.balanceOf(
     await seekerSigner.getAddress()
   );
-  const investmentWithdrawn = await projectManagerContract.investmentWithdrawn(
+  const investmentWithdrawn = await investmentContract.investmentWithdrawn(
     investmentId
   );
   const seekerGotLendingTokens = seekerFinalLendingBalance.eq(
