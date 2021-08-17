@@ -5,11 +5,11 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "./InvestmentDetails.sol";
+import "./InvestmentWithMilestoneDetails.sol";
 import "../../libs/SafeERC20.sol";
 import "../../libs/TokenFormat.sol";
 
-contract InvestmentWithMilestones is Initializable, InvestmentDetails, ReentrancyGuardUpgradeable {
+contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetails, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
     using TokenFormat for uint256;
     using SafeERC20 for IERC20;
