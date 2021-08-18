@@ -181,7 +181,7 @@ export const batchRequestInvestment = async (
 export const handleInvestmentRequest = async (
   investmentId: BigNumber,
   superDelegatorSigner: Signer,
-  approve: boolean
+  shouldApprove: boolean
 ): Promise<void> => {
   // Given
   const {governanceContract, investmentContract} = await getContracts();
@@ -195,7 +195,7 @@ export const handleInvestmentRequest = async (
   // When
   const approveInvestment = await governanceContract
     .connect(superDelegatorSigner)
-    .superVoteForRequest(investmentId, approve);
+    .superVoteForRequest(investmentId, shouldApprove);
 
   const projectStatusTypesAfterApprove = await investmentContract.projectStatus(
     investmentId
@@ -276,7 +276,7 @@ export const batchHandleInvestmentRequest = async (
     await handleInvestmentRequest(
       investment.investmentId,
       superDelegatorSigner,
-      investment.approve
+      investment.shouldApprove
     );
   }
 };

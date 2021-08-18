@@ -13,7 +13,7 @@ export interface IInvestment {
 export interface IInvestmentForApproval {
   investmentId: BigNumber;
   superDelegatorSigner: Signer;
-  approve: boolean;
+  shouldApprove: boolean;
 }
 
 export interface IStake {

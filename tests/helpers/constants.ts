@@ -20,12 +20,26 @@ export const LATE_APPLICATION_FOR_INVESTMENT_DURATION = 24 * 60 * 60; // ONE DAY
 
 // Actions
 export const RALBT_REWARDS_PER_LEVEL = [
-  ethers.utils.parseEther('500'),
+  ethers.utils.parseEther('0'),
   ethers.utils.parseEther('500'),
   ethers.utils.parseEther('500'),
   ethers.utils.parseEther('500'),
 ];
 export const RALBT_REWARDS_PER_LEVEL_AFTER_FIRST_TIME = [
+  ethers.utils.parseEther('0'),
+  ethers.utils.parseEther('10'),
+  ethers.utils.parseEther('10'),
+  ethers.utils.parseEther('10'),
+];
+
+// These 2 are used to give non stakers some RALBT for testing purposes, hence the reward values
+export const TEST_RALBT_REWARDS_PER_LEVEL = [
+  ethers.utils.parseEther('500'),
+  ethers.utils.parseEther('500'),
+  ethers.utils.parseEther('500'),
+  ethers.utils.parseEther('500'),
+];
+export const TEST_RALBT_REWARDS_PER_LEVEL_AFTER_FIRST_TIME = [
   ethers.utils.parseEther('10'),
   ethers.utils.parseEther('10'),
   ethers.utils.parseEther('10'),

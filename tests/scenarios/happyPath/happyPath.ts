@@ -15,8 +15,8 @@
  */
 
 import {
-  RALBT_REWARDS_PER_LEVEL,
-  RALBT_REWARDS_PER_LEVEL_AFTER_FIRST_TIME,
+  TEST_RALBT_REWARDS_PER_LEVEL,
+  TEST_RALBT_REWARDS_PER_LEVEL_AFTER_FIRST_TIME,
 } from '../../helpers/constants';
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
@@ -87,8 +87,8 @@ export default async function suite(): Promise<void> {
     await addNewAction(
       this.deployerSigner,
       action,
-      RALBT_REWARDS_PER_LEVEL,
-      RALBT_REWARDS_PER_LEVEL_AFTER_FIRST_TIME
+      TEST_RALBT_REWARDS_PER_LEVEL,
+      TEST_RALBT_REWARDS_PER_LEVEL_AFTER_FIRST_TIME
     );
     for (let i = 0; i < 60; i++) {
       await getRALBTWithActions(this.lender3Signer, [action]);
