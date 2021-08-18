@@ -23,7 +23,6 @@ import {BigNumber} from 'ethers';
 import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
 import {StakingType} from '../../helpers/ProjectEnums';
-import {getSignature} from '../../helpers/utils';
 import {increaseTime} from '../../helpers/time';
 import {
   fundersStake,
@@ -37,11 +36,10 @@ import {
   batchFunderClaimLotteryReward,
   batchExchangeNFTForInvestmentToken,
 } from '../../helpers/modularTests';
-const {expectRevert} = require('@openzeppelin/test-helpers');
 
 chai.use(solidity);
 
-export default async function suite() {
+export default async function suite(): Promise<void> {
   it('should do a full flow', async function () {
     const lenders = [
       this.lender1Signer,

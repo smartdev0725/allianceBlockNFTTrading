@@ -134,10 +134,6 @@ describe('Happy Path', function () {
         this.ipfsHash
       );
 
-    // await this.governanceContract
-    //   .connect(this.superDelegatorSigner)
-    //   .superVoteForRequest(this.approvalRequest, true);
-
     // Transfer albt tokens to stakers.
     const amountToTransfer = ethers.utils.parseEther('1000000');
     await this.ALBTContract.connect(this.deployerSigner).mint(

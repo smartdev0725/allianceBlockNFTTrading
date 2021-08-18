@@ -1,7 +1,7 @@
 import {BigNumber, Contract, Signer} from 'ethers';
 import {StakingType} from './ProjectEnums';
 
-export interface Investment {
+export interface IInvestment {
   investmentTokenContract: Contract;
   amountOfTokensToBePurchased: BigNumber;
   lendingTokenContract: Contract;
@@ -10,62 +10,76 @@ export interface Investment {
   seekerSigner: Signer;
 }
 
-export interface InvestmentForApproval {
+export interface IInvestmentForApproval {
   investmentId: BigNumber;
   superDelegatorSigner: Signer;
   approve: boolean;
 }
 
-export interface Stake {
+export interface IStake {
   lenderSigner: Signer;
   stakingLevel: StakingType;
 }
 
-export interface Action {
+export interface IAction {
   account: string;
   actionName: string;
   answer: string;
   referralId: number;
 }
 
-export interface AddNewAction {
-  action: Action;
+export interface IAddNewAction {
+  action: IAction;
   reputationalAlbtRewardsPerLevel: BigNumber[];
   reputationalAlbtRewardsPerLevelAfterFirstTime: BigNumber[];
 }
 
-export interface GetRALBTData {
+export interface IGetRALBTData {
   lenderSigner: Signer;
   actionCallerSigner: Signer;
-  actions: Action[];
+  actions: IAction[];
 }
 
-export interface ShowInterestData {
+export interface IShowInterestData {
   investmentId: BigNumber;
   lenderSigner: Signer;
   numberOfPartitions: BigNumber;
   lendingTokenContract: Contract;
 }
 
-export interface RunLotteryData {
+export interface IRunLotteryData {
   investmentId: BigNumber;
   lotteryRunnerSigner: Signer;
 }
 
-export interface FunderClaimRewardData {
+export interface IFunderClaimRewardData {
   investmentId: BigNumber;
   lenderSigner: Signer;
   amountTicketsToBlock: BigNumber;
   lendingTokenContract: Contract;
 }
 
-export interface ExchangeNFTForInvestmentTokenData {
+export interface IExchangeNFTForInvestmentTokenData {
   investmentId: BigNumber;
   lenderSigner: Signer;
   investmentTokenContract: Contract;
 }
 
-export interface SeekerClaimsFunding {
+export interface ISeekerClaimsFunding {
   investmentId: BigNumber;
   seekerSigner: Signer;
+}
+
+export interface IActionPerLender {
+  name: string;
+  lastEpoch: BigNumber;
+  amountOfTimes: BigNumber;
+  rewardPerActionLevel: BigNumber;
+  rewardPerActionPerLevelAfterFirstTime: BigNumber;
+}
+export interface ILenderInfo {
+  account: string;
+  balanceBefore: BigNumber;
+  stakingLevel: StakingType;
+  actions: IActionPerLender[];
 }

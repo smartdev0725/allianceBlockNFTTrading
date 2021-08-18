@@ -1,19 +1,21 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import {getContracts, getSignature} from './utils';
 import {StakingType, ProjectStatusTypes} from './ProjectEnums';
 import {BASE_AMOUNT} from './constants';
 import {Signer, Contract} from 'ethers';
 import {
-  Investment,
-  InvestmentForApproval,
-  Stake,
-  GetRALBTData,
-  ShowInterestData,
-  RunLotteryData,
-  FunderClaimRewardData,
-  ExchangeNFTForInvestmentTokenData,
-  Action,
-  AddNewAction,
-  SeekerClaimsFunding,
+  IInvestment,
+  IInvestmentForApproval,
+  IStake,
+  IGetRALBTData,
+  IShowInterestData,
+  IRunLotteryData,
+  IFunderClaimRewardData,
+  IExchangeNFTForInvestmentTokenData,
+  IAction,
+  IAddNewAction,
+  ISeekerClaimsFunding,
+  ILenderInfo,
 } from './interfaces';
 
 import {ethers, web3} from 'hardhat';
@@ -29,9 +31,10 @@ export const requestInvestment = async (
   amountOfTokensToBePurchased: BigNumber,
   lendingTokenContract: Contract,
   totalAmountRequested: BigNumber,
-  ipfsHash: any,
+  ipfsHash: string,
   seekerSigner: Signer
 ): Promise<BigNumber> => {
+  /// Given
   const {
     projectManagerContract,
     investmentContract,
@@ -154,9 +157,9 @@ export const requestInvestment = async (
   return investmentId;
 };
 export const batchRequestInvestment = async (
-  investments: Investment[]
+  investments: IInvestment[]
 ): Promise<BigNumber[]> => {
-  const investmetsId: BigNumber[] = [];
+  const investmentIds: BigNumber[] = [];
 
   for (let index = 0; index < investments.length; index++) {
     const investment = investments[index];
@@ -168,10 +171,10 @@ export const batchRequestInvestment = async (
       investment.ipfsHash,
       investment.seekerSigner
     );
-    investmetsId.push(investmentId);
+    investmentIds.push(investmentId);
   }
-  expect(investmetsId.length).to.be.equal(investments.length);
-  return investmetsId;
+  expect(investmentIds.length).to.be.equal(investments.length);
+  return investmentIds;
 };
 
 //2) SuperGovernance decides if apporve Investment
@@ -179,10 +182,9 @@ export const handleInvestmentRequest = async (
   investmentId: BigNumber,
   superDelegatorSigner: Signer,
   approve: boolean
-) => {
+): Promise<void> => {
   // Given
-  const {projectManagerContract, governanceContract, investmentContract} =
-    await getContracts();
+  const {governanceContract, investmentContract} = await getContracts();
   const superDelegatorAddress = await superDelegatorSigner.getAddress();
 
   const investmentDetailsBeforeApprove =
@@ -266,11 +268,9 @@ export const handleInvestmentRequest = async (
   expect(approvalRequestAfterApprove.isProcessed).to.be.true;
 };
 export const batchHandleInvestmentRequest = async (
-  investmentsForApprove: InvestmentForApproval[],
+  investmentsForApprove: IInvestmentForApproval[],
   superDelegatorSigner: Signer
-) => {
-  const results = [];
-  // investmentForApprove = {investmentId: BigNumber, approve: Bool}
+): Promise<void> => {
   for (let index = 0; index < investmentsForApprove.length; index++) {
     const investment = investmentsForApprove[index];
     await handleInvestmentRequest(
@@ -285,7 +285,7 @@ export const batchHandleInvestmentRequest = async (
 export const fundersStake = async (
   lenderSigner: Signer,
   stakingLevel: StakingType
-) => {
+): Promise<void> => {
   const {stakingContract, ALBTContract, rALBTContract, stakerMedalNFTContract} =
     await getContracts();
 
@@ -389,8 +389,7 @@ export const fundersStake = async (
     );
   }
 };
-export const batchFundersStake = async (data: Stake[]) => {
-  //  data = {lenderSigner: any, stakingLevel: StakingType}
+export const batchFundersStake = async (data: IStake[]): Promise<void> => {
   for (let i = 0; i < data.length; i++) {
     await fundersStake(data[i].lenderSigner, data[i].stakingLevel);
   }
@@ -399,10 +398,10 @@ export const batchFundersStake = async (data: Stake[]) => {
 // Add New Actions
 export const addNewAction = async (
   deployerSigner: Signer,
-  action: Action,
+  action: IAction,
   reputationalAlbtRewardsPerLevel: BigNumber[],
   reputationalAlbtRewardsPerLevelAfterFirstTime: BigNumber[]
-) => {
+): Promise<void> => {
   // Given
   const {actionVerifierContract} = await getContracts();
 
@@ -501,8 +500,8 @@ export const addNewAction = async (
 };
 export const batchAddNewAction = async (
   deployerSigner: Signer,
-  actions: AddNewAction[]
-) => {
+  actions: IAddNewAction[]
+): Promise<void> => {
   for (let i = 0; i < actions.length; i++) {
     await addNewAction(
       deployerSigner,
@@ -512,23 +511,8 @@ export const batchAddNewAction = async (
     );
   }
 };
-
-export const actionsPerLender = (actions: Action[]) => {
-  interface ActionPerLender {
-    name: string;
-    lastEpoch: BigNumber;
-    amountOfTimes: BigNumber;
-    rewardPerActionLevel: BigNumber;
-    rewardPerActionPerLevelAfterFirstTime: BigNumber;
-  }
-  interface LenderInfo {
-    account: string;
-    balanceBefore: BigNumber;
-    stakingLevel: StakingType;
-    actions: ActionPerLender[];
-  }
-
-  const lendersInfo: LenderInfo[] = [];
+export const actionsPerLender = (actions: IAction[]): ILenderInfo[] => {
+  const lendersInfo: ILenderInfo[] = [];
 
   for (let index = 0; index < actions.length; index++) {
     const action = actions[index];
@@ -578,8 +562,8 @@ export const actionsPerLender = (actions: Action[]) => {
 
 export const getRALBTWithActions = async (
   actionCallerSigner: Signer,
-  actions: Action[]
-) => {
+  actions: IAction[]
+): Promise<void> => {
   // Given
   const {actionVerifierContract, rALBTContract, stakerMedalNFTContract} =
     await getContracts();
@@ -627,7 +611,7 @@ export const getRALBTWithActions = async (
       stakingLevelActionCaller
     );
 
-  const getNewSignature = async (action: Action) => {
+  const getNewSignature = async (action: IAction) => {
     const newSignature = await getSignature(
       action.actionName,
       action.answer,
@@ -712,9 +696,9 @@ export const getRALBTWithActions = async (
   // expect(balanceRALBTAfterActions).to.be.equal(lenderReward());
 };
 export const batchGetRALBTWithActions = async (
-  getRALBTData: GetRALBTData[],
+  getRALBTData: IGetRALBTData[],
   deployerSigner: Signer
-) => {
+): Promise<void> => {
   //  data = {lenderSigner: any, actionCallerSigner: any}
   for (let i = 0; i < getRALBTData.length; i++) {
     await increaseTime(deployerSigner.provider, 1 * 24 * 60 * 60); // 1 day
@@ -732,11 +716,10 @@ export const declareIntentionForBuy = async (
   lenderSigner: Signer,
   numberOfPartitions: BigNumber,
   lendingTokenContract: Contract
-) => {
+): Promise<void> => {
   // When
   const {
     escrowContract,
-    projectManagerContract,
     rALBTContract,
     investmentContract,
   } = await getContracts();
@@ -859,7 +842,7 @@ export const declareIntentionForBuy = async (
     throw new Error('A lender has enough rALBT to declareIntentionForBuy');
   }
 };
-export const batchDeclareIntentionForBuy = async (data: ShowInterestData[]) => {
+export const batchDeclareIntentionForBuy = async (data: IShowInterestData[]): Promise<void> => {
   for (let i = 0; i < data.length; i++) {
     await declareIntentionForBuy(
       data[i].investmentId,
@@ -875,9 +858,8 @@ export const runLottery = async (
   investmentId: BigNumber,
   lotteryRunnerSigner: Signer,
   superDelegatorSigner: Signer
-) => {
+): Promise<void> => {
   const {
-    projectManagerContract,
     governanceContract,
     fundingNFTContract,
     investmentContract,
@@ -944,9 +926,9 @@ export const runLottery = async (
   expect(isPauseFundingNFTTransferAfterRunLottey).to.be.false;
 };
 export const batchRunLottery = async (
-  data: RunLotteryData[],
+  data: IRunLotteryData[],
   superDelegatorSigner: Signer
-) => {
+): Promise<void> => {
   for (let i = 0; i < data.length; i++) {
     await runLottery(
       data[i].investmentId,
@@ -962,9 +944,8 @@ export const funderClaimLotteryReward = async (
   lenderSigner: Signer,
   amountTicketsToBlock: BigNumber,
   lendingTokenContract: Contract
-) => {
+): Promise<void> => {
   const {
-    projectManagerContract,
     fundingNFTContract,
     escrowContract,
     investmentContract,
@@ -1112,8 +1093,8 @@ export const funderClaimLotteryReward = async (
   }
 };
 export const batchFunderClaimLotteryReward = async (
-  data: FunderClaimRewardData[]
-) => {
+  data: IFunderClaimRewardData[]
+): Promise<void> => {
   for (let i = 0; i < data.length; i++) {
     await funderClaimLotteryReward(
       data[i].investmentId,
@@ -1129,10 +1110,9 @@ export const exchangeNFTForInvestmentToken = async (
   investmentId: BigNumber,
   lenderSigner: Signer,
   investmentTokenContract: Contract
-) => {
+): Promise<void> => {
   // Given
   const {
-    projectManagerContract,
     fundingNFTContract,
     escrowContract,
     investmentContract,
@@ -1192,8 +1172,8 @@ export const exchangeNFTForInvestmentToken = async (
   );
 };
 export const batchExchangeNFTForInvestmentToken = async (
-  data: ExchangeNFTForInvestmentTokenData[]
-) => {
+  data: IExchangeNFTForInvestmentTokenData[]
+): Promise<void> => {
   for (let i = 0; i < data.length; i++) {
     await exchangeNFTForInvestmentToken(
       data[i].investmentId,
@@ -1208,7 +1188,7 @@ export const seekerClaimsFunding = async (
   investmentId: BigNumber,
   seekerSigner: Signer
 ): Promise<void> => {
-  const {projectManagerContract, lendingTokenContract, investmentContract} =
+  const {lendingTokenContract, investmentContract} =
     await getContracts();
   // given
   const seekerInitialLendingBalance = await lendingTokenContract.balanceOf(
@@ -1239,8 +1219,8 @@ export const seekerClaimsFunding = async (
   expect(seekerGotLendingTokens).to.be.equal(true);
 };
 export const batchSeekerClaimsFunding = async (
-  seekerClaimsFundingData: SeekerClaimsFunding[]
-) => {
+  seekerClaimsFundingData: ISeekerClaimsFunding[]
+): Promise<void> => {
   for (let i = 0; i < seekerClaimsFundingData.length; i++) {
     await seekerClaimsFunding(
       seekerClaimsFundingData[i].investmentId,
