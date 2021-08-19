@@ -177,7 +177,7 @@ export const batchRequestInvestment = async (
   return investmentIds;
 };
 
-//2) SuperGovernance decides if apporve Investment
+//2) SuperGovernance decides if Investment gets approved
 export const handleInvestmentRequest = async (
   investmentId: BigNumber,
   superDelegatorSigner: Signer,
