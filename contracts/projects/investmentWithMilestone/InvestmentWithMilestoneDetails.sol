@@ -36,7 +36,7 @@ contract InvestmentWithMilestoneDetails is Storage, BaseProject {
         investmentWithMilestones.investmentToken = investmentToken_;
         investmentWithMilestones.investmentTokensAmountPerMilestone = amountPerMilestone;
         investmentWithMilestones.lendingToken = lendingToken_;
-        investmentWithMilestones. durationPerMilestone = milestoneDurations;
+        investmentWithMilestones.durationPerMilestone = milestoneDurations;
         investmentWithMilestones.extraInfo = extraInfo_;
         investmentWithMilestones.totalAmountToBeRaised = amountRequestedToBeRaised_;
         investmentWithMilestones.totalPartitionsToBePurchased = totalAmountRequested.div(baseAmountForEachPartition);

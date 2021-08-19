@@ -36,9 +36,6 @@ contract Storage {
 
     mapping(uint256 => uint256) public currentMilestonePerProject;
     
-    // Mapping from investment id -> details for each and every investment.
-    mapping(uint256 => ProjectLibrary.InvestmentDetails) public investmentDetails;
-
     mapping(uint256 => ProjectLibrary.InvestmentMilestoneDetails) public investmentMilestoneDetails;
 
     // This variable represents the base amount in which every investment amount is divided to. (also the starting value for each ERC1155)

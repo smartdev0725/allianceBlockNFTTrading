@@ -33,13 +33,9 @@ contract Storage {
     mapping(address => uint256) public lockedNftsPerAddress;
     // The last block checked for rewards for the tickets locked per address.
     mapping(address => uint256) public lastBlockCheckedForLockedNftsPerAddress;
-
-    mapping(uint256 => uint256) public currentMilestonePerProject;
     
     // Mapping from investment id -> details for each and every investment.
     mapping(uint256 => ProjectLibrary.InvestmentDetails) public investmentDetails;
-
-    mapping(uint256 => ProjectLibrary.InvestmentMilestoneDetails) public investmentMilestoneDetails;
 
     // This variable represents the base amount in which every investment amount is divided to. (also the starting value for each ERC1155)
     uint256 public baseAmountForEachPartition;

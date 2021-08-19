@@ -81,9 +81,41 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
 
         governance.requestApproval(projectId);
 
+        currentMilestonePerProject[projectId] += 1;
+
         // Add event for investment request
         emit ProjectRequested(projectId, msg.sender, totalAmountRequested_);
 
+    }
+
+    function decideForProject(uint256 projectId, bool decision) external onlyGovernance() {
+        if (decision) _approveInvestment(projectId);
+        else _rejectInvestment(projectId);
+    }
+
+    function startLotteryPhase(uint256 projectId) external onlyGovernance() {
+        _startInvestment(projectId);
+    }
+
+    function requestNextMilestoneStep(uint256 projectId) external {
+        uint currentStep = currentMilestonePerProject[projectId];
+        IERC20(investmentMilestoneDetails[projectId].investmentToken).safeTransferFrom(msg.sender, address(escrow), investmentMilestoneDetails[projectId].investmentTokensAmountPerMilestone[currentStep]);
+        currentMilestonePerProject[projectId] += 1;
+    }
+
+    function decideForNextMilestone(uint256 projectId, bool decision) external onlyGovernance() {
+        if (decision) _approveInvestment(projectId);
+        else _rejectInvestment(projectId);
+    }
+
+    function _startInvestment(uint256 projectId_) internal {
+        // In order to start a project, it has to be in approved status
+        require(projectStatus[projectId_] == ProjectLibrary.ProjectStatus.APPROVED, "Can start a project only if is approved");
+
+        projectStatus[projectId_] = ProjectLibrary.ProjectStatus.STARTED;
+        investmentMilestoneDetails[projectId_].startingDate = block.timestamp;
+
+        emit ProjectStarted(projectId_);
     }
 
     function _approveInvestment(uint256 projectId_) internal {
@@ -92,6 +124,10 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
         ticketsRemaining[projectId_] = investmentMilestoneDetails[projectId_].totalPartitionsToBePurchased;
         // governance.storeInvestmentTriggering(projectId_);
         // emit ProjectApproved(projectId_);
+    }
+
+    function _checkCurrentMilestone(uint256 currentStep) internal returns (bool) {
+
     }
 
     /**
