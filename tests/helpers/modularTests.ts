@@ -864,6 +864,7 @@ export const runLottery = async (
   const investmentDetailsBeforeLotteryStarted =
     await investmentContract.investmentDetails(investmentId);
 
+  // note: if this fails, it means not enough interest has been shown for this investment
   expect(
     investmentDetailsBeforeLotteryStarted.totalPartitionsToBePurchased
   ).to.be.lte(investmentDetailsBeforeLotteryStarted.partitionsRequested);
@@ -904,12 +905,19 @@ export const runLottery = async (
 
   // Run Lottery
   // When
-  const runLottery = await investmentContract
-    .connect(lotteryRunnerSigner)
-    .executeLotteryRun(investmentId);
-
-  const ticketsRemainingAfterRunLottery =
+  let runLottery;
+  let ticketsRemainingAfterRunLottery: BigNumber =
     await investmentContract.ticketsRemaining(investmentId);
+
+  while (ticketsRemainingAfterRunLottery.gt(0)) {
+    runLottery = await investmentContract
+      .connect(lotteryRunnerSigner)
+      .executeLotteryRun(investmentId);
+
+    ticketsRemainingAfterRunLottery = await investmentContract.ticketsRemaining(
+      investmentId
+    );
+  }
 
   const projectStatusTypesAfterRunLottery =
     await investmentContract.projectStatus(investmentId);
