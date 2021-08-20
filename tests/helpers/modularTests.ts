@@ -956,14 +956,12 @@ export const funderClaimLotteryReward = async (
   const ticketsRemaining = await investmentContract.ticketsRemaining(
     investmentId
   );
+  const ticketsWonBeforeWithdraw =
+    await investmentContract.ticketsWonPerAddress(investmentId, lenderAddress);
 
-  if (ticketsRemaining.eq(0)) {
+  if (ticketsRemaining.eq(0) && ticketsWonBeforeWithdraw.gt(0)) {
     // Given
-    const ticketsWonBeforeWithdraw =
-      await investmentContract.ticketsWonPerAddress(
-        investmentId,
-        lenderAddress
-      );
+
     const lockedTicketsForSpecificInvestmentBeforeWithdraw =
       await investmentContract.lockedNftsForSpecificInvestmentPerAddress(
         investmentId,
@@ -1087,7 +1085,7 @@ export const funderClaimLotteryReward = async (
           .mul(ticketsRemainBeforeWithdraw)
       )
     );
-  } else {
+  } else if (ticketsRemaining.gt(0)) {
     console.log('There are tickets remaining', ticketsRemaining.toNumber());
     throw new Error('There are tickets reamining');
   }
