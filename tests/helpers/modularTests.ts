@@ -861,29 +861,45 @@ export const runLottery = async (
   const {governanceContract, fundingNFTContract, investmentContract} =
     await getContracts();
 
-  // When
-  const lotteryStarted = await governanceContract
-    .connect(superDelegatorSigner)
-    .checkCronjobs();
+  const investmentDetailsBeforeLotteryStarted =
+    await investmentContract.investmentDetails(investmentId);
 
-  const projectStatusAfter = await investmentContract.projectStatus(
+  expect(
+    investmentDetailsBeforeLotteryStarted.totalPartitionsToBePurchased
+  ).to.be.lte(investmentDetailsBeforeLotteryStarted.partitionsRequested);
+
+  let projectStatusAfterLotteryStarted = await investmentContract.projectStatus(
     investmentId
   );
+  let startLottery;
+  // When
+  while (
+    projectStatusAfterLotteryStarted.toString() === ProjectStatusTypes.APPROVED
+  ) {
+    startLottery = await governanceContract
+      .connect(superDelegatorSigner)
+      .checkCronjobs();
+    projectStatusAfterLotteryStarted = await investmentContract.projectStatus(
+      investmentId
+    );
+  }
 
-  const investmentDetailsLotteryStarted =
+  const investmentDetailsAfterLotteryStarted =
     await investmentContract.investmentDetails(investmentId);
 
   // Then
   // Events
-  expect(lotteryStarted)
+  expect(startLottery)
     .to.emit(investmentContract, 'ProjectStarted')
     .withArgs(investmentId);
 
   // Correct lottery status
-  expect(projectStatusAfter.toString()).to.be.equal(ProjectStatusTypes.STARTED);
+  expect(projectStatusAfterLotteryStarted.toString()).to.be.equal(
+    ProjectStatusTypes.STARTED
+  );
   // Correct investment details
-  expect(investmentDetailsLotteryStarted.startingDate).to.be.equal(
-    await getTransactionTimestamp(lotteryStarted.hash)
+  expect(investmentDetailsAfterLotteryStarted.startingDate).to.be.equal(
+    await getTransactionTimestamp(startLottery.hash)
   );
 
   // Run Lottery
