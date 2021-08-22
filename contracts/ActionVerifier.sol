@@ -110,20 +110,6 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
             maxActionsPerDayPerLevel[i] = maxActionsPerDayPerLevel_[i];
         }
 
-        uint256 id;
-        assembly {
-            id := chainid()
-        }
-
-        DOMAIN_SEPARATOR = hash(
-            EIP712Domain({
-                name: "AllianceBlock Verifier",
-                version: "1.0",
-                chainId: id,
-                verifyingContract: address(this)
-            })
-        );
-
         currentEpoch = 1;
         endingTimestampForCurrentEpoch = block.timestamp.add(ONE_DAY);
     }
@@ -231,6 +217,20 @@ contract ActionVerifier is Initializable, OwnableUpgradeable, ReentrancyGuardUpg
         uint256[] memory rewards = new uint256[](actions.length.add(1));
 
         uint256 rewardForCaller = 0;
+
+        uint256 id;
+        assembly {
+            id := chainid()
+        }
+
+        DOMAIN_SEPARATOR = hash(
+            EIP712Domain({
+                name: "AllianceBlock Verifier",
+                version: "1.0",
+                chainId: id,
+                verifyingContract: address(this)
+            })
+        );
 
         for (uint256 i = 0; i < actions.length; i++) {
             (bool isValid, uint256 reward) = _checkValidActionProvision(actions[i], signatures[i], stakingLevel);
