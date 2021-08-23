@@ -718,11 +718,8 @@ export const declareIntentionForBuy = async (
   lendingTokenContract: Contract
 ): Promise<void> => {
   // When
-  const {
-    escrowContract,
-    rALBTContract,
-    investmentContract,
-  } = await getContracts();
+  const {escrowContract, rALBTContract, investmentContract} =
+    await getContracts();
 
   const lenderAddress = await lenderSigner.getAddress();
 
@@ -842,7 +839,9 @@ export const declareIntentionForBuy = async (
     throw new Error('A lender has enough rALBT to declareIntentionForBuy');
   }
 };
-export const batchDeclareIntentionForBuy = async (data: IShowInterestData[]): Promise<void> => {
+export const batchDeclareIntentionForBuy = async (
+  data: IShowInterestData[]
+): Promise<void> => {
   for (let i = 0; i < data.length; i++) {
     await declareIntentionForBuy(
       data[i].investmentId,
@@ -859,45 +858,66 @@ export const runLottery = async (
   lotteryRunnerSigner: Signer,
   superDelegatorSigner: Signer
 ): Promise<void> => {
-  const {
-    governanceContract,
-    fundingNFTContract,
-    investmentContract,
-  } = await getContracts();
+  const {governanceContract, fundingNFTContract, investmentContract} =
+    await getContracts();
 
-  // When
-  const lotteryStarted = await governanceContract
-    .connect(superDelegatorSigner)
-    .checkCronjobs();
+  const investmentDetailsBeforeLotteryStarted =
+    await investmentContract.investmentDetails(investmentId);
 
-  const projectStatusAfter = await investmentContract.projectStatus(
+  // note: if this fails, it means not enough interest has been shown for this investment
+  expect(
+    investmentDetailsBeforeLotteryStarted.totalPartitionsToBePurchased
+  ).to.be.lte(investmentDetailsBeforeLotteryStarted.partitionsRequested);
+
+  let projectStatusAfterLotteryStarted = await investmentContract.projectStatus(
     investmentId
   );
+  let startLottery;
+  // When
+  while (
+    projectStatusAfterLotteryStarted.toString() === ProjectStatusTypes.APPROVED
+  ) {
+    startLottery = await governanceContract
+      .connect(superDelegatorSigner)
+      .checkCronjobs();
+    projectStatusAfterLotteryStarted = await investmentContract.projectStatus(
+      investmentId
+    );
+  }
 
-  const investmentDetailsLotteryStarted =
+  const investmentDetailsAfterLotteryStarted =
     await investmentContract.investmentDetails(investmentId);
 
   // Then
   // Events
-  expect(lotteryStarted)
+  expect(startLottery)
     .to.emit(investmentContract, 'ProjectStarted')
     .withArgs(investmentId);
 
   // Correct lottery status
-  expect(projectStatusAfter.toString()).to.be.equal(ProjectStatusTypes.STARTED);
+  expect(projectStatusAfterLotteryStarted.toString()).to.be.equal(
+    ProjectStatusTypes.STARTED
+  );
   // Correct investment details
-  expect(investmentDetailsLotteryStarted.startingDate).to.be.equal(
-    await getTransactionTimestamp(lotteryStarted.hash)
+  expect(investmentDetailsAfterLotteryStarted.startingDate).to.be.equal(
+    await getTransactionTimestamp(startLottery.hash)
   );
 
   // Run Lottery
   // When
-  const runLottery = await investmentContract
-    .connect(lotteryRunnerSigner)
-    .executeLotteryRun(investmentId);
-
-  const ticketsRemainingAfterRunLottery =
+  let runLottery;
+  let ticketsRemainingAfterRunLottery: BigNumber =
     await investmentContract.ticketsRemaining(investmentId);
+
+  while (ticketsRemainingAfterRunLottery.gt(0)) {
+    runLottery = await investmentContract
+      .connect(lotteryRunnerSigner)
+      .executeLotteryRun(investmentId);
+
+    ticketsRemainingAfterRunLottery = await investmentContract.ticketsRemaining(
+      investmentId
+    );
+  }
 
   const projectStatusTypesAfterRunLottery =
     await investmentContract.projectStatus(investmentId);
@@ -945,25 +965,19 @@ export const funderClaimLotteryReward = async (
   amountTicketsToBlock: BigNumber,
   lendingTokenContract: Contract
 ): Promise<void> => {
-  const {
-    fundingNFTContract,
-    escrowContract,
-    investmentContract,
-  } = await getContracts();
+  const {fundingNFTContract, escrowContract, investmentContract} =
+    await getContracts();
 
   const lenderAddress = await lenderSigner.getAddress();
 
   const ticketsRemaining = await investmentContract.ticketsRemaining(
     investmentId
   );
+  const ticketsWonBeforeWithdraw =
+    await investmentContract.ticketsWonPerAddress(investmentId, lenderAddress);
 
-  if (ticketsRemaining.eq(0)) {
+  if (ticketsRemaining.eq(0) && ticketsWonBeforeWithdraw.gt(0)) {
     // Given
-    const ticketsWonBeforeWithdraw =
-      await investmentContract.ticketsWonPerAddress(
-        investmentId,
-        lenderAddress
-      );
     const lockedTicketsForSpecificInvestmentBeforeWithdraw =
       await investmentContract.lockedNftsForSpecificInvestmentPerAddress(
         investmentId,
@@ -1087,6 +1101,80 @@ export const funderClaimLotteryReward = async (
           .mul(ticketsRemainBeforeWithdraw)
       )
     );
+  } else if (ticketsWonBeforeWithdraw.eq(0)) {
+    // Given
+    const lockedTicketsForSpecificInvestmentBeforeWithdraw =
+      await investmentContract.lockedNftsForSpecificInvestmentPerAddress(
+        investmentId,
+        lenderAddress
+      );
+    const lockedTicketsBeforeWithdraw =
+      await investmentContract.lockedNftsPerAddress(lenderAddress);
+    const ticketsRemainBeforeWithdraw =
+      await investmentContract.remainingTicketsPerAddress(
+        investmentId,
+        lenderAddress
+      );
+    const balanceLendingTokenBeforeWithdraw =
+      await lendingTokenContract.balanceOf(lenderAddress);
+    const balanceLendingTokenBeforeWithdrawEscrow =
+      await lendingTokenContract.balanceOf(escrowContract.address);
+    // When
+    amountTicketsToBlock = amountTicketsToBlock.gt(ticketsWonBeforeWithdraw)
+      ? ticketsWonBeforeWithdraw
+      : amountTicketsToBlock;
+    await expectRevert(
+      investmentContract
+        .connect(lenderSigner)
+        .convertInvestmentTicketsToNfts(investmentId),
+      'Not enough tickets won'
+    );
+
+    const ticketsWonAfterWithdraw =
+      await investmentContract.ticketsWonPerAddress(
+        investmentId,
+        lenderAddress
+      );
+    const lockedTicketsForSpecificInvestmentAfterWithdraw =
+      await investmentContract.lockedNftsForSpecificInvestmentPerAddress(
+        investmentId,
+        lenderAddress
+      );
+    const lockedTicketsAfterWithdraw =
+      await investmentContract.lockedNftsPerAddress(lenderAddress);
+    const ticketsRemainAfterWithdraw =
+      await investmentContract.remainingTicketsPerAddress(
+        investmentId,
+        lenderAddress
+      );
+    const balanceLendingTokenAfterWithdraw =
+      await lendingTokenContract.balanceOf(lenderAddress);
+    const balanceLendingTokenAfterWithdrawEscrow =
+      await lendingTokenContract.balanceOf(escrowContract.address);
+
+    // Then
+    // Correct amount of won tickets
+    expect(ticketsWonAfterWithdraw).to.be.equal(0);
+    // Correct amount of tickets locked for specific investment
+    expect(lockedTicketsForSpecificInvestmentAfterWithdraw).to.be.equal(
+      lockedTicketsForSpecificInvestmentBeforeWithdraw.add(amountTicketsToBlock)
+    );
+
+    // Correct amount of tickets locked
+    expect(lockedTicketsAfterWithdraw).to.be.equal(
+      lockedTicketsBeforeWithdraw.add(amountTicketsToBlock)
+    );
+
+    // Correct amount of tickets remaining
+    expect(ticketsRemainAfterWithdraw).to.be.equal(ticketsRemainBeforeWithdraw);
+
+    // Correct balance of lending token
+    expect(balanceLendingTokenAfterWithdraw).to.be.equal(
+      balanceLendingTokenBeforeWithdraw
+    );
+    expect(balanceLendingTokenAfterWithdrawEscrow).to.be.equal(
+      balanceLendingTokenBeforeWithdrawEscrow
+    );
   } else {
     console.log('There are tickets remaining', ticketsRemaining.toNumber());
     throw new Error('There are tickets reamining');
@@ -1112,11 +1200,8 @@ export const exchangeNFTForInvestmentToken = async (
   investmentTokenContract: Contract
 ): Promise<void> => {
   // Given
-  const {
-    fundingNFTContract,
-    escrowContract,
-    investmentContract,
-  } = await getContracts();
+  const {fundingNFTContract, escrowContract, investmentContract} =
+    await getContracts();
   const lenderAddress = await lenderSigner.getAddress();
   const investmentTokensPerTicket =
     await investmentContract.investmentTokensPerTicket(investmentId);
@@ -1188,8 +1273,7 @@ export const seekerClaimsFunding = async (
   investmentId: BigNumber,
   seekerSigner: Signer
 ): Promise<void> => {
-  const {lendingTokenContract, investmentContract} =
-    await getContracts();
+  const {lendingTokenContract, investmentContract} = await getContracts();
   // given
   const seekerInitialLendingBalance = await lendingTokenContract.balanceOf(
     await seekerSigner.getAddress()
