@@ -88,6 +88,70 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
 
     }
 
+    /**
+     * @notice user show interest for investment
+     * @dev This function is called by the investors who are interested to invest in a specific investment token.
+     * @dev require Approval state and valid partition
+     * @param projectId The id of the investment.
+     * @param amountOfPartitions The amount of partitions this specific investor wanna invest in.
+     */
+    function showInterestForInvestment(uint256 projectId, uint256 amountOfPartitions) external  nonReentrant() {
+        require(
+            projectStatus[projectId] == ProjectLibrary.ProjectStatus.APPROVED,
+            "Can show interest only in Approved state"
+        );
+        require(amountOfPartitions > 0, "Cannot show interest for 0 partitions");
+
+        IERC20(investmentMilestoneDetails[projectId].lendingToken).safeTransferFrom(
+            msg.sender, address(escrow), amountOfPartitions.mul(baseAmountForEachPartition)
+        );
+
+        investmentMilestoneDetails[projectId].partitionsRequested = investmentMilestoneDetails[projectId].partitionsRequested.add(
+            amountOfPartitions
+        );
+
+        // if it's not the first time calling the function lucky numbers are not provided again.
+        if (remainingTicketsPerAddress[projectId][msg.sender] > 0 || ticketsWonPerAddress[projectId][msg.sender] > 0) {
+            remainingTicketsPerAddress[projectId][msg.sender] =
+                remainingTicketsPerAddress[projectId][msg.sender].add(amountOfPartitions);
+        }
+        else {
+            // _applyImmediateTicketsAndProvideLuckyNumbers(projectId, amountOfPartitions);
+        }
+
+        // Add event for investment interest
+        emit ProjectInterest(projectId, amountOfPartitions);
+
+    }
+
+
+    /**
+     * @notice Convert Investment Tickets to Nfts.
+     * @dev This function is called by an investor to convert his tickets won to NFTs.
+     * @dev require Settled state and enough tickets won
+     * @param projectId The id of the investment.
+     */
+    function convertInvestmentTicketsToNfts(
+        uint256 projectId
+    ) external  nonReentrant() {
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can convert only in Settled state");
+        require(
+            ticketsWonPerAddress[projectId][msg.sender] > 0,
+            "Not enough tickets won"
+        );
+
+        uint256 ticketsToConvert = ticketsWonPerAddress[projectId][msg.sender];
+        ticketsWonPerAddress[projectId][msg.sender] = 0;
+
+        escrow.transferFundingNFT(projectId, ticketsToConvert, msg.sender);
+
+        if (remainingTicketsPerAddress[projectId][msg.sender] > 0) {
+            _withdrawAmountProvidedForNonWonTickets(projectId);
+        }
+
+        // emit ConvertInvestmentTickets(projectId, msg.sender, ticketsToConvert);
+    }
+
     function decideForProject(uint256 projectId, bool decision) external onlyGovernance() {
         if (decision) _approveInvestment(projectId);
         else _rejectInvestment(projectId);
@@ -97,15 +161,43 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
         _startInvestment(projectId);
     }
 
+    // This is called by seeker
     function requestNextMilestoneStep(uint256 projectId) external {
         uint currentStep = currentMilestonePerProject[projectId];
         IERC20(investmentMilestoneDetails[projectId].investmentToken).safeTransferFrom(msg.sender, address(escrow), investmentMilestoneDetails[projectId].investmentTokensAmountPerMilestone[currentStep]);
         currentMilestonePerProject[projectId] += 1;
     }
 
+    /**
+     * @dev This function is called by the seeker to withdraw the lending tokens provided by investors after lottery ends.
+     * @param projectId The id of the investment.
+     */
+    function withdrawInvestment(uint256 projectId, uint256 step) external nonReentrant() {
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
+        require(projectSeeker[projectId] == msg.sender, "Only seeker can withdraw");
+        require(currentMilestonePerProject[projectId] > step, "Insufficient withdraw");
+        require(!investmentWithdrawnPerMilestone[projectId][step], "Already withdrawn");
+        uint256 amountToWithdraw = investmentMilestoneDetails[projectId].eachAmountToBeRaisedPerMilestone[step];
+        investmentWithdrawnPerMilestone[projectId][step] = true;
+
+        escrow.transferLendingToken(investmentMilestoneDetails[projectId].lendingToken, msg.sender, amountToWithdraw);
+        // TODO : emit seekerWithdrawInvestment(projectId, amountToWithdraw);
+    }
+
     function decideForNextMilestone(uint256 projectId, bool decision) external onlyGovernance() {
         if (decision) _approveInvestment(projectId);
         else _rejectInvestment(projectId);
+    }
+
+    function _withdrawAmountProvidedForNonWonTickets(uint256 projectId_) internal {
+        uint256 amountToReturnForNonWonTickets =
+            remainingTicketsPerAddress[projectId_][msg.sender].mul(baseAmountForEachPartition);
+        remainingTicketsPerAddress[projectId_][msg.sender] = 0;
+
+        escrow.transferLendingToken(investmentMilestoneDetails[projectId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
+
+        // Add event for withdraw amount provided for non tickets
+        // emit LotteryLoserClaimedFunds(projectId_, amountToReturnForNonWonTickets);
     }
 
     function _startInvestment(uint256 projectId_) internal {
@@ -127,7 +219,7 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
     }
 
     function _checkCurrentMilestone(uint256 currentStep) internal returns (bool) {
-
+        
     }
 
     /**

@@ -20,7 +20,7 @@ contract Storage {
     // The number lottery numbers allocated from all investors for a specific investment.
     mapping(uint256 => uint256) public totalLotteryNumbersPerInvestment;
     // If investment is withdrawn by the seeker then it is true, otherwise it is false.
-    mapping(uint256 => bool) public investmentWithdrawn;
+    mapping(uint256 => mapping(uint256 => bool)) public investmentWithdrawnPerMilestone;
     // The address of the investor that has allocated a specific lottery number on a specific investment.
     mapping(uint256 => mapping(uint256 => address)) public addressOfLotteryNumber;
     // The amount of tickets that an investor requested that are still not allocated.
