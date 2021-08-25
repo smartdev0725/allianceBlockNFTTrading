@@ -5,6 +5,7 @@ import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
+import {getTransactionTimestamp} from '../../helpers/time';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 chai.use(solidity);
@@ -32,19 +33,15 @@ export default async function suite() {
       const totalAmountRequested = ethers.utils.parseEther('10000');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-      await expect(
-        this.mockPersonalLoanContract
-          .connect(this.seekerSigner)
-          .requestInvestment(
-            this.investmentTokenContract.address,
-            amountOfTokensToBePurchased,
-            this.lendingTokenContract.address,
-            totalAmountRequested,
-            ipfsHash
-          )
-      )
-        .to.emit(this.mockPersonalLoanContract, 'ProjectRequested')
-        .withArgs(projectId, this.seeker, totalAmountRequested);
+      const requestInvestment = await this.mockPersonalLoanContract
+        .connect(this.seekerSigner)
+        .requestInvestment(
+          this.investmentTokenContract.address,
+          amountOfTokensToBePurchased,
+          this.lendingTokenContract.address,
+          totalAmountRequested,
+          ipfsHash
+        );
 
       const newSeekerInvestmentTokenBalance =
         await this.investmentTokenContract.balanceOf(this.seeker);
@@ -68,11 +65,12 @@ export default async function suite() {
       );
       const investmentDetails =
         await this.mockPersonalLoanContract.investmentDetails(projectId);
-      const investmentSeeker = await this.mockPersonalLoanContract.projectSeeker(
-        projectId
-      );
+      const investmentSeeker =
+        await this.mockPersonalLoanContract.projectSeeker(projectId);
       const investmentTokensPerTicket =
-        await this.mockPersonalLoanContract.investmentTokensPerTicket(projectId);
+        await this.mockPersonalLoanContract.investmentTokensPerTicket(
+          projectId
+        );
       const daoApprovalRequest = await this.governanceContract.approvalRequests(
         approvalRequest
       );
@@ -80,6 +78,10 @@ export default async function suite() {
         ethers.utils.parseEther(BASE_AMOUNT + '')
       );
 
+      // Events
+      expect(requestInvestment)
+        .to.emit(this.mockPersonalLoanContract, 'ProjectRequested')
+        .withArgs(projectId, this.seeker, totalAmountRequested);
       // Correct Details.
       expect(investmentDetails.investmentId.toString()).to.be.equal(
         projectId.toString()
@@ -134,6 +136,9 @@ export default async function suite() {
       );
       expect(daoApprovalRequest.approvalsProvided.toNumber()).equal(0);
       expect(daoApprovalRequest.isApproved).to.be.equal(false);
+      expect(daoApprovalRequest.createdDate).to.be.equal(
+        await getTransactionTimestamp(requestInvestment.hash)
+      );
     });
 
     it('when the requested amount is not a multiple of the base amount', async function () {
