@@ -17,19 +17,22 @@ contract InvestmentWithMilestoneDetails is Storage, BaseProject {
 
     function _storeMilestoneDetailsAndGetTotalAmount(
         address lendingToken_,
-        uint256 amountRequestedToBeRaised_,
+        uint256[] memory amountRequestedToBeRaised_,
         address investmentToken_,
         uint256[] memory amountPerMilestone,
         uint256[] memory milestoneDurations,
         string memory extraInfo_
-    ) internal returns (uint256 totalAmountRequested, uint256 projectId) {
+    ) internal returns (uint256 totalAmount, uint256 projectId, uint256 totalAmountRequested) {
         projectId = projectManager.createProject();
 
         ProjectLibrary.InvestmentMilestoneDetails memory investmentWithMilestones;
+        uint[] memory partitionsToBePurchased = new uint[](amountPerMilestone.length);
 
         for (uint256 i = 0; i < amountPerMilestone.length; i++) {
             // Milestone store
-            totalAmountRequested = totalAmountRequested.add(amountPerMilestone[i]);
+            totalAmount = totalAmount.add(amountPerMilestone[i]);
+            partitionsToBePurchased[i] = amountPerMilestone[i].div(baseAmountForEachPartition);
+            totalAmountRequested += partitionsToBePurchased[i];
         }
 
         investmentWithMilestones.investmentId = projectId;
@@ -38,7 +41,11 @@ contract InvestmentWithMilestoneDetails is Storage, BaseProject {
         investmentWithMilestones.lendingToken = lendingToken_;
         investmentWithMilestones.durationPerMilestone = milestoneDurations;
         investmentWithMilestones.extraInfo = extraInfo_;
-        investmentWithMilestones.totalAmountToBeRaised = amountRequestedToBeRaised_;
-        investmentWithMilestones.totalPartitionsToBePurchased = totalAmountRequested.div(baseAmountForEachPartition);
+        investmentWithMilestones.eachAmountToBeRaisedPerMilestone = amountRequestedToBeRaised_;
+        investmentWithMilestones.eachPartitionsToBePurchasedPerMilestone = partitionsToBePurchased;
+
+        investmentMilestoneDetails[projectId] = investmentWithMilestones;
+
+        projectSeeker[projectId] = msg.sender;
     }
 }

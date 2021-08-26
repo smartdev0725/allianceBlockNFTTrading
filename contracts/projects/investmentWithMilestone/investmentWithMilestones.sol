@@ -14,6 +14,14 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
     using TokenFormat for uint256;
     using SafeERC20 for IERC20;
 
+    // EVENTS
+    event LotteryExecuted(uint256 indexed projectId);
+    event ConvertInvestmentTickets(uint256 indexed investmentId, address indexed user, uint256 amount);
+
+    event NextMilestoneRequested(uint256 indexed projectId);
+    event NextMilestoneApproved(uint256 indexed projectId);
+    event NextMilestoneRejected(uint256 indexed projectId);
+
     function initialize(
         address escrowAddress,
         address governanceAddress_,
@@ -43,12 +51,126 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
         }
     }
 
+    /**
+     * @notice Initialize Investment
+     * @dev This function is called by the owner to initialize the investment type.
+     * @param reputationalAlbt The address of the rALBT contract.
+     * @param totalTicketsPerRun_ The amount of tickets that will be provided from each run of the lottery.
+     * @param rAlbtPerLotteryNumber_ The amount of rALBT needed to allocate one lucky number.
+     * @param blocksLockedForReputation_ The amount of blocks needed for a ticket to be locked,
+     *        so as investor to get 1 rALBT for locking it.
+     */
+    function initializeInvestment(
+        address reputationalAlbt,
+        uint256 totalTicketsPerRun_,
+        uint256 rAlbtPerLotteryNumber_,
+        uint256 blocksLockedForReputation_,
+        uint256 lotteryNumbersForImmediateTicket_
+    ) external onlyOwner() {
+        require(reputationalAlbt != address(0), "Cannot initialize with 0 addresses");
+        require(totalTicketsPerRun_ != 0 && rAlbtPerLotteryNumber_ != 0 && blocksLockedForReputation_ != 0 && lotteryNumbersForImmediateTicket_ != 0, "Cannot initialize with 0 values");
+        require(address(rALBT) == address(0), "Cannot initialize second time");
+
+        rALBT = IERC20(reputationalAlbt);
+        totalTicketsPerRun = totalTicketsPerRun_;
+        rAlbtPerLotteryNumber = rAlbtPerLotteryNumber_;
+        blocksLockedForReputation = blocksLockedForReputation_;
+        lotteryNumbersForImmediateTicket = lotteryNumbersForImmediateTicket_;
+    }
+
+    /**
+     * @notice Decide For Investment
+     * @dev This function is called by governance to approve or reject a investment request.
+     * @param projectId The id of the investment.
+     * @param decision The decision of the governance. [true -> approved] [false -> rejected]
+     */
+    function decideForProject(uint256 projectId, bool decision) external onlyGovernance() {
+        if (decision) _approveInvestment(projectId);
+        else _rejectInvestment(projectId);
+    }
+
+    /**
+     * @notice Start Lottery Phase
+     * @dev This function is called by governance to start the lottery phase for an investment.
+     * @param projectId The id of the investment.
+     */
+    function startLotteryPhase(uint256 projectId) external onlyGovernance() {
+        _startInvestment(projectId);
+    }
+
+    function _approveInvestment(uint256 projectId_) internal {
+        projectStatus[projectId_] = ProjectLibrary.ProjectStatus.APPROVED;
+        investmentMilestoneDetails[projectId_].approvalDate = block.timestamp;
+        ticketsRemaining[projectId_] = investmentMilestoneDetails[projectId_].eachPartitionsToBePurchasedPerMilestone[0];
+        governance.storeInvestmentTriggering(projectId_);
+        emit ProjectApproved(projectId_);
+    }
+
+    /**
+     * @notice Reject Investment
+     * @param projectId_ The id of the investment.
+     */
+    function _rejectInvestment(uint256 projectId_) internal {
+        projectStatus[projectId_] = ProjectLibrary.ProjectStatus.REJECTED;
+        escrow.transferInvestmentToken(
+            investmentMilestoneDetails[projectId_].investmentToken,
+            projectSeeker[projectId_],
+            investmentMilestoneDetails[projectId_].investmentTokensAmountPerMilestone[0]
+        );
+        emit ProjectRejected(projectId_);
+    }
+
+    /**
+     * @notice Start Investment
+     * @param projectId_ The id of the investment.
+     */
+    function _startInvestment(uint256 projectId_) internal {
+        // In order to start a project, it has to be in approved status
+        require(projectStatus[projectId_] == ProjectLibrary.ProjectStatus.APPROVED, "Can start a project only if is approved");
+
+        projectStatus[projectId_] = ProjectLibrary.ProjectStatus.STARTED;
+        investmentMilestoneDetails[projectId_].startingDate = block.timestamp;
+
+        emit ProjectStarted(projectId_);
+    }
+
+    /**
+     * @notice Get Investment Metadata
+     * @dev This helper function provides a single point for querying the Investment metadata
+     * @param projectId The id of the investment.
+     * @dev returns Investment Details, Investment Status, Investment Seeker Address and Repayment Batch Type
+     */
+    function getInvestmentMetadata(uint256 projectId)
+        public
+        view
+        returns (
+            ProjectLibrary.InvestmentMilestoneDetails memory, // the investmentDetails
+            ProjectLibrary.ProjectStatus, // the projectStatus
+            address // the projectSeeker
+        )
+    {
+        return (
+            investmentMilestoneDetails[projectId],
+            projectStatus[projectId],
+            projectSeeker[projectId]
+        );
+    }
+
+    /**
+     * @notice IsValidReferralId
+     * @param projectId The id of the investment.
+     * @dev returns true if investment id exists (so also seeker exists), otherwise returns false
+     */
+    function isValidReferralId(uint256 projectId) external view returns (bool) {
+        return projectSeeker[projectId] != address(0);
+    }
+
     function requestInvestmentWithMilestones(
         address investmentToken,
         uint256[] memory amountPerMilestone,
         uint256[] memory milestoneDurations,
         address lendingToken,
-        uint256 totalAmountRequested_,
+        uint256[] memory eachAmountRequested_,
         string calldata extraInfo
     ) external nonReentrant() {
         require(isValidLendingToken[lendingToken], "Lending token not supported");
@@ -56,9 +178,9 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
 
         // uint256 totalAmountOfInvestmentTokens = _storeMilestoneDetailsAndGetTotalAmount(amountPerMilestone, milestoneDurations);
 
-        (uint256 totalAmountOfInvestmentTokens, uint256 projectId) = _storeMilestoneDetailsAndGetTotalAmount(
+        (uint256 totalAmountOfInvestmentTokens, uint256 projectId, uint256 totalAmountRequest) = _storeMilestoneDetailsAndGetTotalAmount(
             lendingToken,
-            totalAmountRequested_,
+            eachAmountRequested_,
             investmentToken,
             amountPerMilestone,
             milestoneDurations,
@@ -66,16 +188,16 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
         );
 
         require(
-            totalAmountRequested_.mod(baseAmountForEachPartition) == 0 &&
-                totalAmountOfInvestmentTokens.mod(totalAmountRequested_.div(baseAmountForEachPartition)) == 0,
+            totalAmountRequest.mod(baseAmountForEachPartition) == 0 &&
+                totalAmountOfInvestmentTokens.mod(totalAmountRequest.div(baseAmountForEachPartition)) == 0,
             "Token amount and price should result in integer amount of tickets"
         );
 
         IERC20(investmentToken).safeTransferFrom(msg.sender, address(escrow), amountPerMilestone[0]);
 
-        fundingNFT.mintGen0(address(escrow), investmentMilestoneDetails[projectId].totalPartitionsToBePurchased, projectId);
+        fundingNFT.mintGen0(address(escrow), investmentMilestoneDetails[projectId].eachPartitionsToBePurchasedPerMilestone[0], projectId);
 
-        investmentTokensPerTicket[projectId] = totalAmountOfInvestmentTokens.div(investmentMilestoneDetails[projectId].totalPartitionsToBePurchased);
+        investmentTokensPerTicket[projectId] += amountPerMilestone[0].div(investmentMilestoneDetails[projectId].eachPartitionsToBePurchasedPerMilestone[0]);
 
         fundingNFT.pauseTokenTransfer(projectId); //Pause trades for ERC1155s with the specific investment ID.
 
@@ -84,7 +206,7 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
         currentMilestonePerProject[projectId] += 1;
 
         // Add event for investment request
-        emit ProjectRequested(projectId, msg.sender, totalAmountRequested_);
+        emit ProjectRequested(projectId, msg.sender, totalAmountRequest);
 
     }
 
@@ -116,14 +238,109 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
                 remainingTicketsPerAddress[projectId][msg.sender].add(amountOfPartitions);
         }
         else {
-            // _applyImmediateTicketsAndProvideLuckyNumbers(projectId, amountOfPartitions);
+            _applyImmediateTicketsAndProvideLuckyNumbers(projectId, amountOfPartitions);
         }
 
         // Add event for investment interest
         emit ProjectInterest(projectId, amountOfPartitions);
-
     }
 
+    function _applyImmediateTicketsAndProvideLuckyNumbers(uint256 projectId_, uint256 amountOfPartitions_) internal {
+        uint256 reputationalBalance = _updateReputationalBalanceForPreviouslyLockedTokens();
+        uint256 totalLotteryNumbers = reputationalBalance.div(rAlbtPerLotteryNumber);
+
+        if (totalLotteryNumbers == 0) revert("Not eligible for lottery numbers");
+
+        uint256 immediateTickets = 0;
+
+        if (totalLotteryNumbers > lotteryNumbersForImmediateTicket) {
+            // Calculated this way so as to avoid users from taking immediateTickets without lottery numbers in case
+            // totalLotteryNumbers.mod(lotteryNumbersForImmediateTicket) == 0
+            uint256 rest = (totalLotteryNumbers.sub(1)).mod(lotteryNumbersForImmediateTicket).add(1);
+            immediateTickets = totalLotteryNumbers.sub(rest).div(lotteryNumbersForImmediateTicket);
+            totalLotteryNumbers = rest;
+        }
+
+        if (immediateTickets > amountOfPartitions_) immediateTickets = amountOfPartitions_;
+
+        if (immediateTickets > 0) {
+            // Just in case we provided immediate tickets and tickets finished, so there is no lottery in this case.
+            if (immediateTickets >= ticketsRemaining[projectId_]) {
+                immediateTickets = ticketsRemaining[projectId_];
+                projectStatus[projectId_] = ProjectLibrary.ProjectStatus.SETTLED;
+                fundingNFT.unpauseTokenTransfer(projectId_); // UnPause trades for ERC1155s with the specific investment ID.
+                emit ProjectSettled(projectId_);
+            }
+
+            ticketsWonPerAddress[projectId_][msg.sender] = immediateTickets;
+            ticketsRemaining[projectId_] = ticketsRemaining[projectId_].sub(immediateTickets);
+        }
+
+        remainingTicketsPerAddress[projectId_][msg.sender] = amountOfPartitions_.sub(immediateTickets);
+
+        uint256 maxLotteryNumber = totalLotteryNumbersPerInvestment[projectId_].add(totalLotteryNumbers);
+
+        for (uint256 i = totalLotteryNumbersPerInvestment[projectId_].add(1); i <= maxLotteryNumber; i++) {
+            addressOfLotteryNumber[projectId_][i] = msg.sender;
+        }
+
+        totalLotteryNumbersPerInvestment[projectId_] = maxLotteryNumber;
+    }
+
+    /**
+     * @notice Executes lottery run
+     * @dev This function is called by any investor interested in an Investment Token to run part of the lottery.
+     * @dev requires Started state and available tickets
+     * @param projectId The id of the investment.
+     */
+    function executeLotteryRun(uint256 projectId) external {
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.STARTED, "Can run lottery only in Started state");
+        require(
+            remainingTicketsPerAddress[projectId][msg.sender] > 0,
+            "Can run lottery only if has remaining ticket"
+        );
+
+        ticketsWonPerAddress[projectId][msg.sender] = ticketsWonPerAddress[projectId][msg.sender].add(1);
+        remainingTicketsPerAddress[projectId][msg.sender] = remainingTicketsPerAddress[projectId][msg.sender].sub(
+            1
+        );
+        ticketsRemaining[projectId] = ticketsRemaining[projectId].sub(1);
+
+        uint256 counter = totalTicketsPerRun;
+        uint256 maxNumber = totalLotteryNumbersPerInvestment[projectId];
+
+        if (ticketsRemaining[projectId] <= counter) {
+            projectStatus[projectId] = ProjectLibrary.ProjectStatus.SETTLED;
+            counter = ticketsRemaining[projectId];
+            ticketsRemaining[projectId] = 0;
+            fundingNFT.unpauseTokenTransfer(projectId); // UnPause trades for ERC1155s with the specific investment ID.
+            emit ProjectSettled(projectId);
+        } else {
+            ticketsRemaining[projectId] = ticketsRemaining[projectId].sub(counter);
+        }
+
+        while (counter > 0) {
+            uint256 randomNumber = _getRandomNumber(maxNumber);
+            lotteryNonce = lotteryNonce.add(1);
+
+            address randomAddress = addressOfLotteryNumber[projectId][randomNumber.add(1)];
+
+            if (remainingTicketsPerAddress[projectId][randomAddress] > 0) {
+                remainingTicketsPerAddress[projectId][randomAddress] = remainingTicketsPerAddress[projectId][
+                    randomAddress
+                ]
+                    .sub(1);
+
+                ticketsWonPerAddress[projectId][randomAddress] = ticketsWonPerAddress[projectId][randomAddress]
+                    .add(1);
+
+                counter--;
+            }
+        }
+
+        // Add event for lottery executed
+        emit LotteryExecuted(projectId);
+    }
 
     /**
      * @notice Convert Investment Tickets to Nfts.
@@ -149,23 +366,59 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
             _withdrawAmountProvidedForNonWonTickets(projectId);
         }
 
-        // emit ConvertInvestmentTickets(projectId, msg.sender, ticketsToConvert);
-    }
-
-    function decideForProject(uint256 projectId, bool decision) external onlyGovernance() {
-        if (decision) _approveInvestment(projectId);
-        else _rejectInvestment(projectId);
-    }
-
-    function startLotteryPhase(uint256 projectId) external onlyGovernance() {
-        _startInvestment(projectId);
+        emit ConvertInvestmentTickets(projectId, msg.sender, ticketsToConvert);
     }
 
     // This is called by seeker
     function requestNextMilestoneStep(uint256 projectId) external {
         uint currentStep = currentMilestonePerProject[projectId];
         IERC20(investmentMilestoneDetails[projectId].investmentToken).safeTransferFrom(msg.sender, address(escrow), investmentMilestoneDetails[projectId].investmentTokensAmountPerMilestone[currentStep]);
-        currentMilestonePerProject[projectId] += 1;
+        // currentMilestonePerProject[projectId] += 1;
+
+        fundingNFT.mintGen0(address(escrow), investmentMilestoneDetails[projectId].eachPartitionsToBePurchasedPerMilestone[currentMilestonePerProject[projectId]], projectId);
+
+        investmentTokensPerTicket[projectId] += investmentMilestoneDetails[projectId].investmentTokensAmountPerMilestone.div(investmentMilestoneDetails[projectId].eachPartitionsToBePurchasedPerMilestone[0]);
+
+        governance.requestApproval(projectId);
+
+        // currentMilestonePerProject[projectId] += 1;
+
+        // Add event for investment request
+        emit NextMilestoneRequested(projectId, msg.sender, currentMilestonePerProject[projectId]);
+    }
+
+    /**
+     * @notice Decide For Milestone
+     * @dev This function is called by governance to approve or reject a milestone request.
+     * @param projectId The id of the investment.
+     * @param decision The decision of the governance. [true -> approved] [false -> rejected]
+     */
+    function decideForNextMilestone(uint256 projectId, bool decision) external onlyGovernance() {
+        if (decision) _approveNextMilestone(projectId);
+        else _rejectNextMilestone(projectId);
+    }
+
+    function _approveNextMilestone(uint256 projectId_) internal {
+        // projectStatus[projectId_] = ProjectLibrary.ProjectStatus.APPROVED;
+        // investmentMilestoneDetails[projectId_].approvalDate = block.timestamp;
+        // ticketsRemaining[projectId_] = investmentMilestoneDetails[projectId_].eachPartitionsToBePurchasedPerMilestone[0];
+        // governance.storeInvestmentTriggering(projectId_);
+        currentMilestonePerProject[projectId_] += 1;
+        emit NextMilestoneApproved(projectId_);
+    }
+
+    /**
+     * @notice Reject Next Milestone
+     * @param projectId_ The id of the investment.
+     */
+    function _rejectNextMilestone(uint256 projectId_) internal {
+        // projectStatus[projectId_] = ProjectLibrary.ProjectStatus.REJECTED;
+        escrow.transferInvestmentToken(
+            investmentMilestoneDetails[projectId_].investmentToken,
+            projectSeeker[projectId_],
+            investmentMilestoneDetails[projectId_].investmentTokensAmountPerMilestone[currentMilestonePerProject[projectId]]
+        );
+        emit NextMilestoneRejected(projectId_);
     }
 
     /**
@@ -184,11 +437,6 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
         // TODO : emit seekerWithdrawInvestment(projectId, amountToWithdraw);
     }
 
-    function decideForNextMilestone(uint256 projectId, bool decision) external onlyGovernance() {
-        if (decision) _approveInvestment(projectId);
-        else _rejectInvestment(projectId);
-    }
-
     function _withdrawAmountProvidedForNonWonTickets(uint256 projectId_) internal {
         uint256 amountToReturnForNonWonTickets =
             remainingTicketsPerAddress[projectId_][msg.sender].mul(baseAmountForEachPartition);
@@ -200,39 +448,48 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
         // emit LotteryLoserClaimedFunds(projectId_, amountToReturnForNonWonTickets);
     }
 
-    function _startInvestment(uint256 projectId_) internal {
-        // In order to start a project, it has to be in approved status
-        require(projectStatus[projectId_] == ProjectLibrary.ProjectStatus.APPROVED, "Can start a project only if is approved");
-
-        projectStatus[projectId_] = ProjectLibrary.ProjectStatus.STARTED;
-        investmentMilestoneDetails[projectId_].startingDate = block.timestamp;
-
-        emit ProjectStarted(projectId_);
-    }
-
-    function _approveInvestment(uint256 projectId_) internal {
-        projectStatus[projectId_] = ProjectLibrary.ProjectStatus.APPROVED;
-        investmentMilestoneDetails[projectId_].approvalDate = block.timestamp;
-        ticketsRemaining[projectId_] = investmentMilestoneDetails[projectId_].totalPartitionsToBePurchased;
-        // governance.storeInvestmentTriggering(projectId_);
-        // emit ProjectApproved(projectId_);
-    }
+    
 
     function _checkCurrentMilestone(uint256 currentStep) internal returns (bool) {
         
     }
 
     /**
-     * @notice Reject Investment
-     * @param projectId_ The id of the investment.
+     * @notice Generates Random Number
+     * @dev This function generates a random number
+     * @param maxNumber the max number possible
+     * @return randomNumber the random number generated
      */
-    function _rejectInvestment(uint256 projectId_) internal {
-        projectStatus[projectId_] = ProjectLibrary.ProjectStatus.REJECTED;
-        escrow.transferInvestmentToken(
-            investmentMilestoneDetails[projectId_].investmentToken,
-            projectSeeker[projectId_],
-            investmentMilestoneDetails[projectId_].investmentTokensAmountPerMilestone[0]
-        );
-        emit ProjectRejected(projectId_);
+    function _getRandomNumber(uint256 maxNumber) internal view returns (uint256 randomNumber) {
+        randomNumber = uint256(
+            keccak256(
+                abi.encodePacked(block.difficulty, block.timestamp, lotteryNonce, blockhash(block.number), msg.sender)
+            )
+        )
+            .mod(maxNumber);
+    }
+
+    /**
+     * @notice Updates reputation balance
+     * @dev updates balance of reputation for locked tokens
+     * @return the reputation balance of msg.sender
+     */
+    function _updateReputationalBalanceForPreviouslyLockedTokens() internal returns (uint256) {
+        if (lockedNftsPerAddress[msg.sender] > 0) {
+            // Decimals for rALBT => 18
+            uint256 amountOfReputationalAlbtPerTicket =
+                (block.number.sub(lastBlockCheckedForLockedNftsPerAddress[msg.sender])).mul(10**18).div(
+                    blocksLockedForReputation
+                );
+
+            uint256 amountOfReputationalAlbtToMint =
+                amountOfReputationalAlbtPerTicket.mul(lockedNftsPerAddress[msg.sender]);
+
+            escrow.mintReputationalToken(msg.sender, amountOfReputationalAlbtToMint);
+
+            lastBlockCheckedForLockedNftsPerAddress[msg.sender] = block.number;
+        }
+
+        return rALBT.balanceOf(msg.sender);
     }
 }

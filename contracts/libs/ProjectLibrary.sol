@@ -36,7 +36,7 @@ library ProjectLibrary {
         uint256[] durationPerMilestone;
         address lendingToken; // The address of the token that investors should pay with.
         uint256[] eachAmountToBeRaisedPerMilestone; // The amount of lending tokens that seeker of investment will raise after all tickets are purchased per milestone.
-        uint256 totalPartitionsToBePurchased; // The total partitions or ERC1155 tokens, in which investment is splitted.
+        uint256[] eachPartitionsToBePurchasedPerMilestone; // The each milestone's partitions or ERC1155 tokens, in which investment is splitted.
         string extraInfo; // The ipfs hash, where all extra info about the investment are stored.
         uint256 partitionsRequested; // The total partitions or ERC1155 tokens that are requested for purchase.
     }
