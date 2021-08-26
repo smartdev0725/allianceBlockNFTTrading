@@ -17,7 +17,7 @@ if (!folder) {
 
 let commandString = `yarn test ./tests/scenarios/${folder}/${file}`;
 
-if (folder.toLowerCase() === 'all' || folder === '*') {
+if (folder.toLowerCase() === 'all') {
   const dirs =  readdirSync(require('path').resolve(__dirname, 'tests', 'scenarios'), { withFileTypes: true })
   .filter(dirent => dirent.isDirectory())
   .map(dirent => dirent.name)
