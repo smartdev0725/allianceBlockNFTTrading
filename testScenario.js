@@ -12,16 +12,15 @@ const tests = ['investment'];
 
 // warn about errors
 if (!folder || (folder && subfolder && !tests.includes(folder))) {
-  console.error('Invalid arguments.');
   console.error(
-    'Input the name of the folder you want to run, and optionally subfolder and the entry point'
-  );
-  console.error(
-    'Example input\n yarn test:scenario investment [happyPath] [index.spec.ts]'
+    `Invalid arguments.\n
+    Input the name of the folder you want to run, and optionally subfolder and the entry point\n
+    Example input\n 
+    yarn test:scenario investment [happyPath] [index.spec.ts]`
   );
   process.exit();
 }
-// final commnd string to run
+// final command string to run
 let commandString = `yarn test ./tests/scenarios/${folder}/${subfolder}/${entryPoint}`;
 
 // if folder == all, run all test scenarios
