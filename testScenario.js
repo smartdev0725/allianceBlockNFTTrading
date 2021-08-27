@@ -4,7 +4,7 @@
 const {execSync} = require('child_process');
 const {readdirSync} = require('fs');
 const folder = process.argv[2];
-let subfolder = process.argv[3];
+const subfolder = process.argv[3];
 const entryPoint = process.argv[4] || 'index.spec.ts';
 
 // add more folders here when we create test cases for more project types
