@@ -1,4 +1,4 @@
-/** Happy Path
+/** Update super delegator
  * The objective of this test is to simulate a scenario where update the super delegator after create a project
  * Should do a full flow
  * Here's a list of "steps"
@@ -18,13 +18,13 @@
 import {
   RALBT_REWARDS_PER_LEVEL,
   RALBT_REWARDS_PER_LEVEL_AFTER_FIRST_TIME,
-} from '../../helpers/constants';
+} from '../../../helpers/constants';
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {StakingType} from '../../helpers/ProjectEnums';
-import {increaseTime} from '../../helpers/time';
+import {StakingType} from '../../../helpers/ProjectEnums';
+import {increaseTime} from '../../../helpers/time';
 import {
   fundersStake,
   getRALBTWithActions,
@@ -36,7 +36,7 @@ import {
   batchDeclareIntentionForBuy,
   batchFunderClaimLotteryReward,
   batchExchangeNFTForInvestmentToken,
-} from '../../helpers/modularTests';
+} from '../../../helpers/modularTests';
 
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
