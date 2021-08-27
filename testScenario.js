@@ -6,7 +6,9 @@ const {readdirSync} = require('fs');
 const folder = process.argv[2];
 let subfolder = process.argv[3];
 const entryPoint = process.argv[4] || 'index.spec.ts';
-const tests = ['investment', 'investmentWithMilestone'];
+
+// add more folders here when we create test cases for more project types
+const tests = ['investment'];
 
 
 // warn about errors
