@@ -1,4 +1,5 @@
-/** Approve projects
+/**
+ * superVoteRequestMultipleProjects
  * The objective of this test is to simulate what happens with the gas when a lot of projects
  * are accepted or rejected
  * Here's a list of "test"
@@ -7,20 +8,21 @@
  * 3) Create and approve one by one (124 - 162)
  * 4) Create,approve, show interest and run lottery one by one (164 - 237)
  * The conclusions were that when approve and there are cronJobs waiting to be excuted the gasUsed increment
+ *
  */
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {StakingType} from '../../helpers/ProjectEnums';
-import {increaseTime} from '../../helpers/time';
+import {StakingType} from '../../../helpers/ProjectEnums';
+import {increaseTime} from '../../../helpers/time';
 import {
   batchDeclareIntentionForBuy,
   batchRequestInvestment,
   fundersStake,
   requestInvestment,
   runLottery,
-} from '../../helpers/modularTests';
+} from '../../../helpers/modularTests';
 
 chai.use(solidity);
 
@@ -49,22 +51,24 @@ export default async function suite() {
     );
 
     // Allow to approve investment
-    let lastGasUsed = 0;
+    let lastGasUsed = BigNumber.from(0);
     for (let index = 0; index < investmentsId.length; index++) {
-      // const isApprove = Math.random() > 0.5 ? true : false;
-      const isApprove = true;
-      let superVoteForRequest = await this.governanceContract
+      // const isApproved  = Math.random() > 0.5 ? true : false;
+      const isApproved = true;
+      const superVoteForRequest = await this.governanceContract
         .connect(this.superDelegatorSigner)
-        .superVoteForRequest(investmentsId[index], isApprove);
+        .superVoteForRequest(investmentsId[index], isApproved);
 
-      superVoteForRequest = await ethers.provider.getTransactionReceipt(
-        superVoteForRequest.hash
-      );
+      const superVoteForRequestTransactionReceipt =
+        await ethers.provider.getTransactionReceipt(superVoteForRequest.hash);
 
       // Verify that after second time the gas increase
-      if (lastGasUsed !== 0 && index > 1) {
-        expect(superVoteForRequest.gasUsed).to.be.gt(lastGasUsed);
+      if (!lastGasUsed.isZero && index > 1) {
+        expect(superVoteForRequestTransactionReceipt.gasUsed).to.be.gt(
+          lastGasUsed
+        );
       }
+      lastGasUsed = superVoteForRequestTransactionReceipt.gasUsed;
     }
   });
 
@@ -92,22 +96,23 @@ export default async function suite() {
     );
 
     // Allow to reject investment
-    let lastGasUsed = 0;
+    let lastGasUsed = BigNumber.from(0);
     for (let index = 0; index < investmentsId.length; index++) {
-      const isApprove = false;
-      let superVoteForRequest = await this.governanceContract
+      const isApproved = false;
+      const superVoteForRequest = await this.governanceContract
         .connect(this.superDelegatorSigner)
-        .superVoteForRequest(investmentsId[index], isApprove);
+        .superVoteForRequest(investmentsId[index], isApproved);
 
-      superVoteForRequest = await ethers.provider.getTransactionReceipt(
-        superVoteForRequest.hash
-      );
+      const superVoteForRequestTransactionReceipt =
+        await ethers.provider.getTransactionReceipt(superVoteForRequest.hash);
 
       // Verify that after second time the gas don't increase
-      if (lastGasUsed !== 0 && index > 1) {
-        expect(superVoteForRequest.gasUsed).to.be.lte(lastGasUsed);
+      if (!lastGasUsed.isZero() && index > 1) {
+        expect(superVoteForRequestTransactionReceipt.gasUsed).to.be.lte(
+          lastGasUsed
+        );
       }
-      lastGasUsed = superVoteForRequest.gasUsed;
+      lastGasUsed = superVoteForRequestTransactionReceipt.gasUsed;
     }
   });
 
@@ -118,7 +123,7 @@ export default async function suite() {
     const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
     // Create 50 invvestment and rejected all
-    let lastGasUsed = 0;
+    let lastGasUsed = BigNumber.from(0);
 
     for (let index = 0; index <= 20; index++) {
       const investmentId = await requestInvestment(
@@ -130,20 +135,21 @@ export default async function suite() {
         this.seekerSigner
       );
 
-      const isApprove = true;
-      let superVoteForRequest = await this.governanceContract
+      const isApproved = true;
+      const superVoteForRequest = await this.governanceContract
         .connect(this.superDelegatorSigner)
-        .superVoteForRequest(investmentId, isApprove);
+        .superVoteForRequest(investmentId, isApproved);
 
-      superVoteForRequest = await ethers.provider.getTransactionReceipt(
-        superVoteForRequest.hash
-      );
+      const superVoteForRequestTransactionReceipt =
+        await ethers.provider.getTransactionReceipt(superVoteForRequest.hash);
 
       // Verify that after second time the gas increase
-      if (lastGasUsed !== 0 && index > 1) {
-        expect(superVoteForRequest.gasUsed).to.be.gt(lastGasUsed);
+      if (!lastGasUsed.isZero() && index > 1) {
+        expect(superVoteForRequestTransactionReceipt.gasUsed).to.be.gt(
+          lastGasUsed
+        );
       }
-      lastGasUsed = superVoteForRequest.gasUsed;
+      lastGasUsed = superVoteForRequestTransactionReceipt.gasUsed;
     }
   });
 
@@ -167,9 +173,9 @@ export default async function suite() {
     const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
     // Create 50 invvestment and rejected all
-    let lastGasUsed = 0;
+    let lastGasUsed = BigNumber.from(0);
 
-    for (let index = 0; index <= 20; index++) {
+    for (let index = 0; index < 20; index++) {
       const investmentId = await requestInvestment(
         this.investmentTokenContract,
         amountOfTokensToBePurchased,
@@ -180,20 +186,21 @@ export default async function suite() {
       );
 
       // Allow to approve investment
-      const isApprove = true;
-      let superVoteForRequest = await this.governanceContract
+      const isApproved = true;
+      const superVoteForRequest = await this.governanceContract
         .connect(this.superDelegatorSigner)
-        .superVoteForRequest(investmentId, isApprove);
+        .superVoteForRequest(investmentId, isApproved);
 
-      superVoteForRequest = await ethers.provider.getTransactionReceipt(
-        superVoteForRequest.hash
-      );
+      const superVoteForRequestTransactionReceipt =
+        await ethers.provider.getTransactionReceipt(superVoteForRequest.hash);
 
       // Verify that after second time the gas don't increase
-      if (lastGasUsed !== 0 && index > 1) {
-        expect(superVoteForRequest.gasUsed).to.be.lte(lastGasUsed);
+      if (!lastGasUsed.isZero() && index > 1) {
+        expect(superVoteForRequestTransactionReceipt.gasUsed).to.be.lte(
+          lastGasUsed
+        );
       }
-      lastGasUsed = superVoteForRequest.gasUsed;
+      lastGasUsed = superVoteForRequestTransactionReceipt.gasUsed;
 
       // Lenders declare their intention to buy a partition (effectively depositing their funds)
       const declareIntentionForBuyData = [];

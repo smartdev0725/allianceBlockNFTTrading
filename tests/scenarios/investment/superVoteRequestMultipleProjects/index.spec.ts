@@ -1,11 +1,11 @@
 // Investment
-import approveProject from './approveProject';
+import superVoteRequestMultipleProjects from './superVoteRequestMultipleProjects';
 
 import {
   getContracts,
   getSigners,
   initializeTransfers,
-} from '../../helpers/utils';
+} from '../../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
 describe('Test scenario', function () {
@@ -160,5 +160,8 @@ describe('Test scenario', function () {
     );
   });
 
-  describe('Approve a lot of projects', approveProject.bind(this));
+  describe(
+    'Approve a lot of projects',
+    superVoteRequestMultipleProjects.bind(this)
+  );
 });
