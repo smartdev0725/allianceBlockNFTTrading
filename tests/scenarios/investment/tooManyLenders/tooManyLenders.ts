@@ -1,16 +1,14 @@
-/** Much lenders
- * The objective of this test is to simulate a scenario where there is more than 50, 100 and 200 lenders,
+/** Too many lenders
+ * The objective of this test is to simulate a scenario where there is more than 50, 100 and 200 lenders
  * showing interest in a project.
- *
- *
  */
 
 import {ethers, web3} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
 import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {ProjectStatusTypes, StakingType} from '../../helpers/ProjectEnums';
-import {increaseTime} from '../../helpers/time';
+import {ProjectStatusTypes, StakingType} from '../../../helpers/ProjectEnums';
+import {increaseTime} from '../../../helpers/time';
 import {
   fundersStake,
   requestInvestment,
@@ -19,13 +17,13 @@ import {
   batchDeclareIntentionForBuy,
   batchFunderClaimLotteryReward,
   batchExchangeNFTForInvestmentToken,
-} from '../../helpers/modularTests';
-import {getContracts, getSigners} from '../../helpers/utils';
+} from '../../../helpers/modularTests';
+import {getContracts, getSigners} from '../../../helpers/utils';
 
 chai.use(solidity);
 
 export default async function suite() {
-  const happyPathMuchLenders = async (
+  const executeHappyPathWithMultipleLenders = async (
     amountOfLenders: number,
     amountOfPartitionsToShowInterest: BigNumber,
     amountOfTicketsToLock: BigNumber,
@@ -156,7 +154,7 @@ export default async function suite() {
   };
 
   it('Should do a full flow with more than 50 lenders', async function () {
-    await happyPathMuchLenders(
+    await executeHappyPathWithMultipleLenders(
       51,
       BigNumber.from(200000),
       BigNumber.from(2),
@@ -164,7 +162,7 @@ export default async function suite() {
     );
   });
   it('Should do a full flow with more than 100 lenders', async function () {
-    await happyPathMuchLenders(
+    await executeHappyPathWithMultipleLenders(
       102,
       BigNumber.from(200000),
       BigNumber.from(2),
@@ -172,7 +170,7 @@ export default async function suite() {
     );
   });
   it('Should do a full flow with more than 200 lenders', async function () {
-    await happyPathMuchLenders(
+    await executeHappyPathWithMultipleLenders(
       300,
       BigNumber.from(200000),
       BigNumber.from(2),

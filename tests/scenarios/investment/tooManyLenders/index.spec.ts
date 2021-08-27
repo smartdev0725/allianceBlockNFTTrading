@@ -1,11 +1,11 @@
 // Investment
-import muchLenders from './muchLenders';
+import tooManyLenders from './tooManyLenders';
 
 import {
   getContracts,
   getSigners,
   initializeTransfers,
-} from '../../helpers/utils';
+} from '../../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
 describe('Test scenarios', function () {
@@ -160,5 +160,5 @@ describe('Test scenarios', function () {
     );
   });
 
-  describe('Too many lenders', muchLenders.bind(this));
+  describe('Too many lenders', tooManyLenders.bind(this));
 });
