@@ -10,6 +10,22 @@ const entryPoint = process.argv[4] || 'index.spec.ts';
 // add more folders here when we create test cases for more project types
 const tests = ['investment'];
 
+const getTestsToRun = (tests) => {
+  commandString = `yarn test `;
+  tests.forEach((test) => {
+    const subdirs = readdirSync(
+      require('path').resolve(__dirname, 'tests', 'scenarios', test),
+      {withFileTypes: true}
+    )
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name);
+
+    subdirs.forEach((subdir) => {
+      commandString += `./tests/scenarios/${test}/${subdir}/index.spec.ts `;
+    });
+  });
+};
+
 // warn about errors
 if (!folder || (folder && subfolder && !tests.includes(folder))) {
   console.error(
@@ -25,34 +41,12 @@ let commandString = `yarn test ./tests/scenarios/${folder}/${subfolder}/${entryP
 
 // if folder == all, run all test scenarios
 if (folder.toLowerCase() === 'all') {
-  commandString = `yarn test `;
-  tests.forEach((test) => {
-    const subdirs = readdirSync(
-      require('path').resolve(__dirname, 'tests', 'scenarios', test),
-      {withFileTypes: true}
-    )
-      .filter((dirent) => dirent.isDirectory())
-      .map((dirent) => dirent.name);
-
-    subdirs.forEach((subdir) => {
-      commandString += `./tests/scenarios/${test}/${subdir}/index.spec.ts `;
-    });
-  });
+  getTestsToRun(tests);
 }
 
 // if folder == one of the tests, run only those
 if (tests.includes(folder) && !subfolder) {
-  commandString = `yarn test `;
-  const subdirs = readdirSync(
-    require('path').resolve(__dirname, 'tests', 'scenarios', folder),
-    {withFileTypes: true}
-  )
-    .filter((dirent) => dirent.isDirectory())
-    .map((dirent) => dirent.name);
-
-  subdirs.forEach((subdir) => {
-    commandString += `./tests/scenarios/${folder}/${subdir}/index.spec.ts `;
-  });
+  getTestsToRun([folder]);
 }
 
 execSync(commandString, {
