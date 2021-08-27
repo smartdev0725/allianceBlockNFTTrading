@@ -31,10 +31,13 @@ contract Governance is Initializable, SuperGovernance {
     ) external initializer {
         require(superDelegator_ != address(0), "Cannot initialize with 0 addresses");
         require(applicationsForInvestmentDuration_ != 0, "Cannot initialize applicationsForInvestmentDuration_ with 0");
-        require(lateApplicationsForInvestmentDuration_ != 0, "Cannot initialize lateApplicationsForInvestmentDuration_ with 0");
+        require(
+            lateApplicationsForInvestmentDuration_ != 0,
+            "Cannot initialize lateApplicationsForInvestmentDuration_ with 0"
+        );
 
         __SuperGovernance_init();
-        
+
         projectManager = IProjectManager(projectManager_);
         superDelegator = superDelegator_;
 
@@ -47,7 +50,7 @@ contract Governance is Initializable, SuperGovernance {
      * @dev This function is used to update the superDelegator address.
      * @param superDelegator_ The address of the upgraded super delegator.
      */
-    function updateSuperDelegator(address superDelegator_) external onlyOwner() {
+    function updateSuperDelegator(address superDelegator_) external onlyOwner {
         require(superDelegator_ != address(0), "Cannot initialize with 0 addresses");
         superDelegator = superDelegator_;
     }
@@ -57,15 +60,11 @@ contract Governance is Initializable, SuperGovernance {
      * @dev Executes cronJob()
      * @param projectId The id of the investment or investment to approve
      */
-    function requestApproval(
-        uint256 projectId
-    ) external onlyProject() checkCronjob() nonReentrant() {
+    function requestApproval(uint256 projectId) external onlyProject checkCronjob nonReentrant {
         approvalRequests[totalApprovalRequests].projectId = projectId;
+        approvalRequests[totalApprovalRequests].createdDate = block.timestamp;
 
-        emit ApprovalRequested(
-            approvalRequests[totalApprovalRequests].projectId,
-            msg.sender
-        );
+        emit ApprovalRequested(approvalRequests[totalApprovalRequests].projectId, msg.sender);
 
         totalApprovalRequests = totalApprovalRequests.add(1);
     }
@@ -75,9 +74,8 @@ contract Governance is Initializable, SuperGovernance {
      * @dev Adds cronJob
      * @param projectId The id of the investment to store
      */
-    function storeInvestmentTriggering(uint256 projectId) external onlyProject() {
-        uint256 nextCronjobTimestamp =
-            block.timestamp.add(updatableVariables[APPLICATIONS_FOR_INVESTMENT_DURATION]);
+    function storeInvestmentTriggering(uint256 projectId) external onlyProject {
+        uint256 nextCronjobTimestamp = block.timestamp.add(updatableVariables[APPLICATIONS_FOR_INVESTMENT_DURATION]);
         addCronjob(CronjobType.INVESTMENT, nextCronjobTimestamp, projectId);
     }
 }
