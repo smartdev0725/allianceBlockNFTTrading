@@ -1,14 +1,14 @@
 // Investment
-import multiplesActionsRALBT from './multiplesActionsRALBT';
+import happyPath from './happyPath';
 
 import {
   getContracts,
   getSigners,
   initializeTransfers,
-} from '../../helpers/utils';
+} from '../../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
-describe('Test Scenario', function () {
+describe('Investment Happy Path', function () {
   beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();
@@ -134,10 +134,6 @@ describe('Test Scenario', function () {
         this.ipfsHash
       );
 
-    // await this.governanceContract
-    //   .connect(this.superDelegatorSigner)
-    //   .superVoteForRequest(this.approvalRequest, true);
-
     // Transfer albt tokens to stakers.
     const amountToTransfer = ethers.utils.parseEther('1000000');
     await this.ALBTContract.connect(this.deployerSigner).mint(
@@ -178,5 +174,5 @@ describe('Test Scenario', function () {
     );
   });
 
-  describe('Get rALBT with actions', multiplesActionsRALBT.bind(this));
+  describe('Happy Path process', happyPath.bind(this));
 });

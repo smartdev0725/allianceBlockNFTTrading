@@ -9,17 +9,17 @@
 import {ethers, web3} from 'hardhat';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {StakingType} from '../../helpers/ProjectEnums';
+import {StakingType} from '../../../helpers/ProjectEnums';
 
 import {
   batchAddNewAction,
   fundersStake,
   actionsPerLender,
-} from '../../helpers/modularTests';
-import {increaseTime} from '../../helpers/time';
-import {getSignature} from '../../helpers/utils';
-import {IAction} from '../../helpers/interfaces';
-import {ONE_DAY} from '../../helpers/constants';
+} from '../../../helpers/modularTests';
+import {increaseTime} from '../../../helpers/time';
+import {getSignature} from '../../../helpers/utils';
+import {IAction} from '../../../helpers/interfaces';
+import {ONE_DAY} from '../../../helpers/constants';
 chai.use(solidity);
 
 export default async function suite() {
