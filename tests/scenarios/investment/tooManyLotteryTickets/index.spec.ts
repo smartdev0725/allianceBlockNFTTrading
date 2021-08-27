@@ -1,11 +1,11 @@
 // Investment
-import muchLotteryTickets from './muchLotteryTickets';
+import tooManyLotteryTickets from './tooManyLotteryTickets';
 
 import {
   getContracts,
   getSigners,
   initializeTransfers,
-} from '../../helpers/utils';
+} from '../../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
 describe('Test scenarios', function () {
@@ -174,5 +174,5 @@ describe('Test scenarios', function () {
     );
   });
 
-  describe('Too many lottery tickets', muchLotteryTickets.bind(this));
+  describe('Too many lottery tickets', tooManyLotteryTickets.bind(this));
 });

@@ -1,18 +1,18 @@
-/** Much lottery tickets
+/** Too many lottery tickets
  * The objective of this test is to simulate a scenario where there is too many lottery tickets, and how does affect in the gas used
  */
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {StakingType, ProjectStatusTypes} from '../../helpers/ProjectEnums';
-import {increaseTime} from '../../helpers/time';
+import {StakingType, ProjectStatusTypes} from '../../../helpers/ProjectEnums';
+import {increaseTime} from '../../../helpers/time';
 import {
   declareIntentionForBuy,
   fundersStake,
   requestInvestment,
   handleInvestmentRequest,
-} from '../../helpers/modularTests';
+} from '../../../helpers/modularTests';
 chai.use(solidity);
 
 export default async function suite() {
