@@ -146,6 +146,9 @@ export const requestInvestment = async (
   expect(approvalRequest.approvalsProvided.toString()).to.be.equal('0');
   expect(approvalRequest.isApproved).to.be.false;
   expect(approvalRequest.isProcessed).to.be.false;
+  expect(approvalRequest.createdDate).to.be.equal(
+    await getTransactionTimestamp(requestInvestment.hash)
+  );
   expect(totalApprovalRequestsAfter.toNumber()).to.be.equal(
     totalApprovalRequestsBefore.toNumber() + 1
   );
