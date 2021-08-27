@@ -27,10 +27,19 @@ contract SuperGovernance is Initializable, OwnableUpgradeable, DaoCronjob, Reent
      * @param requestId the Request ID
      * @param decision the decision (Approve / Deny)
      */
-    function superVoteForRequest(uint256 requestId, bool decision) external checkCronjob() nonReentrant() onlySuperDelegator() {
+    function superVoteForRequest(uint256 requestId, bool decision)
+        external
+        checkCronjob
+        nonReentrant
+        onlySuperDelegator
+    {
         require(!approvalRequests[requestId].isProcessed, "Cannot process again same investment");
+        require(approvalRequests[requestId].createdDate > 0, "Cannot process a not created request");
 
-        IProject(projectManager.projectAddressFromProjectId(approvalRequests[requestId].projectId)).decideForProject(approvalRequests[requestId].projectId, decision);
+        IProject(projectManager.projectAddressFromProjectId(approvalRequests[requestId].projectId)).decideForProject(
+            approvalRequests[requestId].projectId,
+            decision
+        );
 
         if (decision) {
             approvalRequests[requestId].approvalsProvided = 1;

@@ -5,6 +5,7 @@ import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import chai, {expect} from 'chai';
 import {solidity} from 'ethereum-waffle';
+import {getTransactionTimestamp} from '../../helpers/time';
 const {expectRevert} = require('@openzeppelin/test-helpers');
 
 chai.use(solidity);
@@ -13,16 +14,20 @@ export default async function suite() {
   describe('Investment request', async () => {
     it('when trying to start lottery phase should revert', async function () {
       await expectRevert(
-        this.governanceContract.connect(this.deployerSigner).startLotteryPhase(this.projectId),
+        this.governanceContract
+          .connect(this.deployerSigner)
+          .startLotteryPhase(this.projectId),
         'Only super delegator can call this function'
       );
 
       // When && Then
       await expectRevert(
-        this.governanceContract.connect(this.superDelegatorSigner).startLotteryPhase(this.projectId),
+        this.governanceContract
+          .connect(this.superDelegatorSigner)
+          .startLotteryPhase(this.projectId),
         'Interest must have been shown'
       );
-    })
+    });
 
     it('when all details are stored correctly', async function () {
       const projectId = await this.projectManagerContract.totalProjects();
@@ -32,7 +37,9 @@ export default async function suite() {
         await this.investmentTokenContract.balanceOf(this.seeker);
 
       const initEscrowInvestmentTokenBalance =
-        await this.investmentTokenContract.balanceOf(this.escrowContract.address);
+        await this.investmentTokenContract.balanceOf(
+          this.escrowContract.address
+        );
       const initEscrowFundingNftBalance =
         await this.fundingNFTContract.balanceOf(
           this.escrowContract.address,
@@ -43,24 +50,22 @@ export default async function suite() {
       const totalAmountRequested = ethers.utils.parseEther('10000');
       const ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-      await expect(
-        this.investmentContract
-          .connect(this.seekerSigner)
-          .requestInvestment(
-            this.investmentTokenContract.address,
-            amountOfTokensToBePurchased,
-            this.lendingTokenContract.address,
-            totalAmountRequested,
-            ipfsHash
-          )
-      )
-        .to.emit(this.investmentContract, 'ProjectRequested')
-        .withArgs(projectId, this.seeker, totalAmountRequested);
+      const requestInvestment = await this.investmentContract
+        .connect(this.seekerSigner)
+        .requestInvestment(
+          this.investmentTokenContract.address,
+          amountOfTokensToBePurchased,
+          this.lendingTokenContract.address,
+          totalAmountRequested,
+          ipfsHash
+        );
 
       const newSeekerInvestmentTokenBalance =
         await this.investmentTokenContract.balanceOf(this.seeker);
       const newEscrowInvestmentTokenBalance =
-        await this.investmentTokenContract.balanceOf(this.escrowContract.address);
+        await this.investmentTokenContract.balanceOf(
+          this.escrowContract.address
+        );
       const tokenId = BigNumber.from(
         new BN(0).ishln(128).or(new BN(projectId.toNumber())).toString()
       );
@@ -72,9 +77,15 @@ export default async function suite() {
 
       const isPaused = await this.fundingNFTContract.transfersPaused(projectId);
 
-      const projectStatus = await this.investmentContract.projectStatus(projectId);
-      const investmentDetails = await this.investmentContract.investmentDetails(projectId);
-      const investmentSeeker = await this.investmentContract.projectSeeker(projectId);
+      const projectStatus = await this.investmentContract.projectStatus(
+        projectId
+      );
+      const investmentDetails = await this.investmentContract.investmentDetails(
+        projectId
+      );
+      const investmentSeeker = await this.investmentContract.projectSeeker(
+        projectId
+      );
       const investmentTokensPerTicket =
         await this.investmentContract.investmentTokensPerTicket(projectId);
       const daoApprovalRequest = await this.governanceContract.approvalRequests(
@@ -84,8 +95,14 @@ export default async function suite() {
         ethers.utils.parseEther(BASE_AMOUNT + '')
       );
 
+      // Events
+      expect(requestInvestment)
+        .to.emit(this.investmentContract, 'ProjectRequested')
+        .withArgs(projectId, this.seeker, totalAmountRequested);
       // Correct Details.
-      expect(investmentDetails.investmentId.toString()).to.be.equal(projectId.toString());
+      expect(investmentDetails.investmentId.toString()).to.be.equal(
+        projectId.toString()
+      );
       expect(investmentDetails.investmentToken).to.be.equal(
         this.investmentTokenContract.address
       );
@@ -93,12 +110,14 @@ export default async function suite() {
         amountOfTokensToBePurchased
       );
       expect(investmentDetails.extraInfo).to.be.equal(ipfsHash);
-      expect(investmentDetails.totalPartitionsToBePurchased.toString()).to.be.equal(
-        totalPartitions.toString()
-      );
+      expect(
+        investmentDetails.totalPartitionsToBePurchased.toString()
+      ).to.be.equal(totalPartitions.toString());
 
       // Correct Status.
-      expect(projectStatus.toString()).to.be.equal(ProjectStatusTypes.REQUESTED);
+      expect(projectStatus.toString()).to.be.equal(
+        ProjectStatusTypes.REQUESTED
+      );
       // Correct Seeker.
       expect(investmentSeeker.toString()).to.be.equal(this.seeker);
       // Correct investmentTokensPerTicket.
@@ -134,6 +153,9 @@ export default async function suite() {
       );
       expect(daoApprovalRequest.approvalsProvided.toNumber()).equal(0);
       expect(daoApprovalRequest.isApproved).to.be.equal(false);
+      expect(daoApprovalRequest.createdDate).to.be.equal(
+        await getTransactionTimestamp(requestInvestment.hash)
+      );
     });
 
     it('when the requested amount is not a multiple of the base amount', async function () {
@@ -214,8 +236,9 @@ export default async function suite() {
         .connect(this.superDelegatorSigner)
         .superVoteForRequest(this.approvalRequest.add(1), false);
 
-
-      const projectStatus = (await this.investmentContract.getInvestmentMetadata(projectId))[1];
+      const projectStatus = (
+        await this.investmentContract.getInvestmentMetadata(projectId)
+      )[1];
       // Correct Status.
       expect(projectStatus.toString()).to.be.equal(ProjectStatusTypes.REJECTED);
     });
