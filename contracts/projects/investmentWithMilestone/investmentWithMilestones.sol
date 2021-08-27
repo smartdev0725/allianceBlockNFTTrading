@@ -17,6 +17,10 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
     // EVENTS
     event LotteryExecuted(uint256 indexed projectId);
     event ConvertInvestmentTickets(uint256 indexed investmentId, address indexed user, uint256 amount);
+    event LockInvestmentNfts(uint256 indexed investmentId, address indexed user, uint256 amountOfNfts);
+    event WithdrawLockedInvestmentNfts(uint256 indexed projectId, uint256 ticketsToWithdraw);
+    event LotteryLoserClaimedFunds(uint256 indexed projectId, uint256 amountToReturnForNonWonTickets);
+    event ConvertNFTToInvestmentTokens(uint256 indexed projectId, uint256 amountOfNFTToConvert, uint256 amountOfInvestmentTokenToTransfer);
 
     event NextMilestoneRequested(uint256 indexed projectId);
     event NextMilestoneApproved(uint256 indexed projectId);
@@ -377,14 +381,14 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
 
         fundingNFT.mintGen0(address(escrow), investmentMilestoneDetails[projectId].eachPartitionsToBePurchasedPerMilestone[currentMilestonePerProject[projectId]], projectId);
 
-        investmentTokensPerTicket[projectId] += investmentMilestoneDetails[projectId].investmentTokensAmountPerMilestone.div(investmentMilestoneDetails[projectId].eachPartitionsToBePurchasedPerMilestone[0]);
+        investmentTokensPerTicket[projectId] += investmentMilestoneDetails[projectId].investmentTokensAmountPerMilestone[currentStep].div(investmentMilestoneDetails[projectId].eachPartitionsToBePurchasedPerMilestone[0]);
 
         governance.requestApproval(projectId);
 
         // currentMilestonePerProject[projectId] += 1;
 
         // Add event for investment request
-        emit NextMilestoneRequested(projectId, msg.sender, currentMilestonePerProject[projectId]);
+        emit NextMilestoneRequested(projectId);
     }
 
     /**
@@ -416,9 +420,70 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
         escrow.transferInvestmentToken(
             investmentMilestoneDetails[projectId_].investmentToken,
             projectSeeker[projectId_],
-            investmentMilestoneDetails[projectId_].investmentTokensAmountPerMilestone[currentMilestonePerProject[projectId]]
+            investmentMilestoneDetails[projectId_].investmentTokensAmountPerMilestone[currentMilestonePerProject[projectId_]]
         );
         emit NextMilestoneRejected(projectId_);
+    }
+
+    /**
+     * @dev This function is called by a investment nft holder to lock part of his nfts.
+     * @param projectId The id of the investment.
+     * @param nftsToLock The amount of nfts to lock.
+     */
+    function lockInvestmentNfts(uint256 projectId, uint256 nftsToLock) external nonReentrant() {
+        require(fundingNFT.balanceOf(msg.sender, projectId) >= nftsToLock, "Not enough nfts");
+
+        escrow.lockFundingNFT(projectId, nftsToLock, msg.sender);
+
+        _updateReputationalBalanceForPreviouslyLockedTokens();
+
+        lockedNftsForSpecificInvestmentPerAddress[projectId][
+            msg.sender
+        ] = lockedNftsForSpecificInvestmentPerAddress[projectId][msg.sender].add(nftsToLock);
+
+        lockedNftsPerAddress[msg.sender] = lockedNftsPerAddress[msg.sender].add(nftsToLock);
+
+        emit LockInvestmentNfts(projectId, msg.sender, nftsToLock);
+    }
+
+    /**
+     * @dev This function is called by an investor to withdraw lending tokens provided for non-won tickets.
+     * @param projectId The id of the investment.
+     */
+    function withdrawAmountProvidedForNonWonTickets(uint256 projectId) external nonReentrant() {
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
+        require(remainingTicketsPerAddress[projectId][msg.sender] > 0, "No non-won tickets to withdraw");
+
+        _withdrawAmountProvidedForNonWonTickets(projectId);
+    }
+
+    /**
+     * @notice Withdraw locked investment nfts.
+     * @dev This function is called by an investor to withdraw his locked tickets.
+     * @dev requires Settled state and available tickets.
+     * @param projectId The id of the investment.
+     * @param nftsToWithdraw The amount of locked nfts to be withdrawn.
+     */
+    function withdrawLockedInvestmentNfts(uint256 projectId, uint256 nftsToWithdraw) external nonReentrant() {
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
+        require(
+            nftsToWithdraw > 0 &&
+                lockedNftsForSpecificInvestmentPerAddress[projectId][msg.sender] >= nftsToWithdraw,
+            "Not enough nfts to withdraw"
+        );
+
+        _updateReputationalBalanceForPreviouslyLockedTokens();
+
+        lockedNftsForSpecificInvestmentPerAddress[projectId][
+            msg.sender
+        ] = lockedNftsForSpecificInvestmentPerAddress[projectId][msg.sender].sub(nftsToWithdraw);
+
+        lockedNftsPerAddress[msg.sender] = lockedNftsPerAddress[msg.sender].sub(nftsToWithdraw);
+
+        escrow.transferFundingNFT(projectId, nftsToWithdraw, msg.sender);
+
+        // Add event for withdraw locked investment tickets
+        emit WithdrawLockedInvestmentNfts(projectId, nftsToWithdraw);
     }
 
     /**
@@ -437,21 +502,13 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
         // TODO : emit seekerWithdrawInvestment(projectId, amountToWithdraw);
     }
 
-    function _withdrawAmountProvidedForNonWonTickets(uint256 projectId_) internal {
-        uint256 amountToReturnForNonWonTickets =
-            remainingTicketsPerAddress[projectId_][msg.sender].mul(baseAmountForEachPartition);
-        remainingTicketsPerAddress[projectId_][msg.sender] = 0;
-
-        escrow.transferLendingToken(investmentMilestoneDetails[projectId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
-
-        // Add event for withdraw amount provided for non tickets
-        // emit LotteryLoserClaimedFunds(projectId_, amountToReturnForNonWonTickets);
-    }
-
-    
-
-    function _checkCurrentMilestone(uint256 currentStep) internal returns (bool) {
-        
+    /**
+     * @notice Gets Requesting status
+     * @dev Returns true if investors have shown interest for equal or more than the total tickets.
+     * @param projectId The id of the investment type to be checked.
+     */
+    function getRequestingInterestStatus(uint256 projectId) external view returns (bool) {
+        // return investmentMilestoneDetails[projectId].totalPartitionsToBePurchased <= investmentMilestoneDetails[projectId].partitionsRequested;
     }
 
     /**
@@ -491,5 +548,35 @@ contract InvestmentWithMilestones is Initializable, InvestmentWithMilestoneDetai
         }
 
         return rALBT.balanceOf(msg.sender);
+    }
+
+    function _withdrawAmountProvidedForNonWonTickets(uint256 projectId_) internal {
+        uint256 amountToReturnForNonWonTickets =
+            remainingTicketsPerAddress[projectId_][msg.sender].mul(baseAmountForEachPartition);
+        remainingTicketsPerAddress[projectId_][msg.sender] = 0;
+
+        escrow.transferLendingToken(investmentMilestoneDetails[projectId_].lendingToken, msg.sender, amountToReturnForNonWonTickets);
+
+        // Add event for withdraw amount provided for non tickets
+        emit LotteryLoserClaimedFunds(projectId_, amountToReturnForNonWonTickets);
+    }
+
+    /**
+     * @notice Convert NFT to investment tokens
+     * @param projectId the projectId
+     * @param amountOfNFTToConvert the amount of nft to convert
+     */
+    function convertNFTToInvestmentTokens(uint256 projectId, uint256 amountOfNFTToConvert) external nonReentrant() {
+        require(projectStatus[projectId] == ProjectLibrary.ProjectStatus.SETTLED, "Can withdraw only in Settled state");
+        require(amountOfNFTToConvert != 0, "Amount of nft to convert cannot be 0");
+        require(amountOfNFTToConvert <= fundingNFT.balanceOf(msg.sender, projectId), "Not enough NFT to convert");
+
+        uint256 amountOfInvestmentTokenToTransfer = investmentTokensPerTicket[projectId].mul(amountOfNFTToConvert);
+
+        escrow.burnFundingNFT(msg.sender, projectId, amountOfNFTToConvert);
+        escrow.transferInvestmentToken(investmentMilestoneDetails[projectId].investmentToken, msg.sender, amountOfInvestmentTokenToTransfer);
+
+        // Add event for convert nft to investment tokens
+        emit ConvertNFTToInvestmentTokens(projectId, amountOfNFTToConvert, amountOfInvestmentTokenToTransfer);
     }
 }
