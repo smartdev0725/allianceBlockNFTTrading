@@ -10,23 +10,21 @@ import "../libs/OrderedDoubleLinkedList.sol";
  * @notice Responsible for governance storage
  */
 contract GovernanceTypesAndStorage {
-
     bytes32 public constant APPLICATIONS_FOR_INVESTMENT_DURATION = keccak256("applicationsForInvestmentDuration");
-    bytes32 public constant LATE_APPLICATIONS_FOR_INVESTMENT_DURATION = keccak256("lateApplicationsForInvestmentDuration");
+    bytes32 public constant LATE_APPLICATIONS_FOR_INVESTMENT_DURATION =
+        keccak256("lateApplicationsForInvestmentDuration");
 
     struct ApprovalRequest {
         uint256 projectId; // The investment id for which approcal is requested.
         uint256 approvalsProvided; // The number of approvals that this request has gathered.
         bool isApproved; // True if request was approved, false if not.
         bool isProcessed; // True if request was processed, false if not.
+        uint256 createdDate; // The timestamp when the project was created
     }
 
     // EVENTS
     event VotedForRequest(uint256 indexed projectId, bool decision, address indexed user);
-    event ApprovalRequested(
-        uint256 indexed projectId,
-        address indexed user
-    );
+    event ApprovalRequested(uint256 indexed projectId, address indexed user);
     event InitGovernance(address indexed projectAddress_, address indexed user);
 
     uint256 public totalApprovalRequests; // The total amount of approvals requested.

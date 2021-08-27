@@ -5,10 +5,10 @@ import {
   getContracts,
   getSigners,
   initializeTransfers,
-} from '../../helpers/utils';
+} from '../../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
-describe('Happy Path', function () {
+describe('Investment Happy Path', function () {
   beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();

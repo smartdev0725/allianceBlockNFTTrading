@@ -17,13 +17,13 @@
 import {
   TEST_RALBT_REWARDS_PER_LEVEL,
   TEST_RALBT_REWARDS_PER_LEVEL_AFTER_FIRST_TIME,
-} from '../../helpers/constants';
+} from '../../../helpers/constants';
 import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {StakingType} from '../../helpers/ProjectEnums';
-import {increaseTime} from '../../helpers/time';
+import {StakingType} from '../../../helpers/ProjectEnums';
+import {increaseTime} from '../../../helpers/time';
 import {
   fundersStake,
   getRALBTWithActions,
@@ -35,7 +35,7 @@ import {
   batchDeclareIntentionForBuy,
   batchFunderClaimLotteryReward,
   batchExchangeNFTForInvestmentToken,
-} from '../../helpers/modularTests';
+} from '../../../helpers/modularTests';
 
 chai.use(solidity);
 
