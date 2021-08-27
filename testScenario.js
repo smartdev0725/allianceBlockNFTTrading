@@ -10,7 +10,6 @@ const entryPoint = process.argv[4] || 'index.spec.ts';
 // add more folders here when we create test cases for more project types
 const tests = ['investment'];
 
-
 // warn about errors
 if (!folder || (folder && subfolder && !tests.includes(folder))) {
   console.error('Invalid arguments.');
@@ -43,7 +42,7 @@ if (folder.toLowerCase() === 'all') {
 }
 
 // if folder == one of the tests, run only those
-if( tests.includes(folder) && !subfolder) {
+if (tests.includes(folder) && !subfolder) {
   commandString = `yarn test `;
   const subdirs = readdirSync(
     require('path').resolve(__dirname, 'tests', 'scenarios', folder),
