@@ -26,6 +26,8 @@ export const getContracts = async () => {
 
   const investmentContract = await ethers.getContract('Investment');
 
+  const investmentWithMilestoneContract = await ethers.getContract('InvestmentWithMilestones');
+
   const mockPersonalLoanContract = await ethers.getContract('MockPersonalLoan');
 
   const governanceContract = await ethers.getContract('Governance');
@@ -55,6 +57,7 @@ export const getContracts = async () => {
   return {
     projectManagerContract,
     investmentContract,
+    investmentWithMilestoneContract,
     mockPersonalLoanContract,
     governanceContract,
     fundingNFTContract,

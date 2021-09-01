@@ -1,7 +1,6 @@
 // Investment
 import checkInvestmentRequest from './checkInvestmentRequest';
 import checkInterestForInvestment from './checkInterestForInvestment';
-import checkExecuteLotteryRun from './checkExecuteLotteryRun';
 import checkInitialization from './checkInitialization';
 
 import {
@@ -11,7 +10,7 @@ import {
 } from '../../helpers/utils';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
-describe('Investments', function () {
+describe('Investments with milestones', function () {
   beforeEach(async function () {
     // Deploy fixtures
     await deployments.fixture();
@@ -84,7 +83,7 @@ describe('Investments', function () {
     // Initialize Transfers
     await initializeTransfers(
       {
-        investmentContract,
+        investmentWithMilestoneContract,
         mockPersonalLoanContract,
         lendingTokenContract,
         investmentTokenContract,
@@ -112,13 +111,14 @@ describe('Investments', function () {
     this.totalAmountRequested = ethers.utils.parseEther('200');
     this.ipfsHash = 'QmURkM5z9TQCy4tR9NB9mGSQ8198ZBP352rwQodyU8zftQ';
 
-    await this.investmentContract
+    await this.investmentWithMilestoneContract
       .connect(this.seekerSigner)
-      .requestInvestment(
+      .requestInvestmentWithMilestones(
         this.investmentTokenContract.address,
-        this.amountOfTokensToBePurchased,
+        [this.amountOfTokensToBePurchased/2, this.amountOfTokensToBePurchased/2],
+        [1630458579, 1630558579],
         this.lendingTokenContract.address,
-        this.totalAmountRequested,
+        [this.totalAmountRequested/2, this.totalAmountRequested/2],
         this.ipfsHash
       );
 
@@ -163,10 +163,6 @@ describe('Investments', function () {
   describe(
     'When checking interest for investment',
     checkInterestForInvestment.bind(this)
-  );
-  describe(
-    'When checking execute lottery run',
-    checkExecuteLotteryRun.bind(this)
   );
   describe('When checking initialization', checkInitialization.bind(this));
 });
